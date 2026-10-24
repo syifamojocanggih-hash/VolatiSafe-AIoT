@@ -480,10 +480,34 @@ Dashboard **bukan inti inovasi** — ini lapisan visualisasi & integrasi. Nilai 
 - Klik poligon → popup detail node (kode node, sensor live, riwayat 7 hari).
 - Layer toggle: status baterai node, status koneksi terakhir.
 
-#### Halaman 3 — **Preskripsi & Log Pemupukan**
-- Kalkulator dosis Urea: input DAT + luas bedeng + target yield → output kg Urea + jadwal.
-- Form log pemupukan (tanggal, dosis, jenis) → muncul di view digital twin.
-- Riwayat: tabel kapan pupuk ditabur + skor AVRI saat itu + catatan hasil.
+#### Halaman 3 — **Preskripsi, Kalender Tanam & Kalkulator Pupuk**
+
+Halaman ini menjadi pusat perencanaan agronomi petani dengan dua fitur utama:
+
+##### A. Kalender Siklus Tanam Otomatis (*Dynamic DAT Tracker*)
+* **Input Sederhana:** Petani cukup memilih **Tanggal Tanam** (misal: 1 November 2026), Varietas Benih (Hibrida Bisi-18 / NK-212 / Pioneer P27), dan Luas Lahan (ha atau m²).
+* **Otomasi Fase Pertumbuhan (Fenologi Jagung):**
+  * `0–7 HST` : Fase Perkecambahan & Pertumbuhan Awal.
+  * `10–14 HST` (Fase V3) : **Jadwal Pemupukan Dasar / Pertama** (Aplikasi NPK + Urea awal).
+  * `30–35 HST` (Fase V8) : **Jadwal Pemupukan Susulan I / Kritis** (Aplikasi puncak Urea vegetatif cepat).
+  * `45–50 HST` (Fase V12/Tasseling) : **Jadwal Pemupukan Susulan II** (Aplikasi pembentukan malai/biji).
+  * `95–105 HST` : Estimasi Jendela Panen Optimal.
+* **Fitur Early-Warning Logistik (Pengingat H-3):**
+  * Sistem otomatis menjadwalkan notifikasi WhatsApp **3 hari sebelum tanggal pemupukan tiba**:
+    > *"Halo Pak Suparman, 3 hari lagi (Jumat, 14 Nov) tanaman jagung Anda memasuki fase V8 (30 HST). Segera siapkan/tebus 2 karung Urea dan 1 karung NPK di Kios Pupuk Desa. VolatiSafe akan memantau cuaca dan jam terbaik untuk hari aplikasi."*
+* **Sinkronisasi Otomatis:** Nilai `DAT` (Days After Transplanting / Hari Setelah Tanam) dihitung dinamis setiap hari (`epoch_today - planting_date`) dan langsung diumpankan ke model AI dan Digital Twin tanpa perlu diinput manual ulang.
+
+##### B. Kalkulator Campuran Pupuk Majemuk (*Multi-Fertilizer Blender*)
+Petani di lapangan jarang menabur Urea murni; mereka mencampur Urea dengan NPK Phonska (15-15-15), SP-36, atau ZA sesuai Permentan No. 40/2007 untuk mencegah ketimpangan hara.
+* **Input Petani:** Luas Lahan (misal: 0,75 ha), Jenis Komoditas Jagung, dan Target Tonase Panen (misal: 8 ton/ha pipilan kering).
+* **Kalkulasi Kebutuhan Hara Bersih (Permentan No. 40/2007 & Balitbangtan):**
+  * Kebutuhan Standar Jagung Lahan Kering per Hektar: ± 135 kg N, 54 kg P₂O₅, 60 kg K₂O.
+  * Menggunakan kombinasi majemuk: NPK Phonska 15-15-15 + Urea (46% N) + ZA (21% N, 24% S).
+* **Output Preskriptif Praktis Lapangan (Konversi Ember & Karung):**
+  * Menghindari kebingungan angka desimal laboratorium, software langsung mengonversi kilogram ke takaran fisik yang dipakai petani di ladang:
+    * **Rekomendasi Pemupukan I (12 HST):** *Total Campuran: 75 kg NPK Phonska + 25 kg Urea. Setara dengan **2 karung Phonska (isi 50 kg) + ½ karung Urea**, atau **12 ember takar (isi 8 kg/ember)**.*
+    * **Rekomendasi Pemupukan II (32 HST):** *Fokus Nitrogen: 100 kg Urea + 25 kg NPK. Setara dengan **2 karung Urea + ½ karung Phonska**, atau **15 ember takar**.*
+* **Form Log Aplikasi Aktual:** Tombol *"Catat Pemupukan Selesai"* yang menyimpan tanggal eksekusi nyata, takaran campuran yang dipakai, dan skor risiko AVRI saat penaburan.
 
 #### Halaman 4 — **Admin / Manajemen Node**
 - Onboarding node baru via QR code (scan di node → node ID terdaftar).
@@ -558,6 +582,8 @@ Besok, 06:00–09:00 (Risiko 18%)
 | `/api/fields/{id}/forecast?hours=72` | GET | Proyeksi AVRI + jendela aman |
 | `/api/fields/{id}/prescription` | GET | Rekomendasi dosis & waktu |
 | `/api/fields/{id}/fertilization-log` | POST | Catat aplikasi pupuk aktual |
+| `/api/crop-cycles` | POST/GET | Inisiasi tanggal tanam, varietas, & jadwal fase fenologi (DAT Tracker) |
+| `/api/fertilizer/blend-calculator` | POST | Hitung takaran majemuk (Urea + Phonska + ZA) & konversi ember/karung |
 | `/api/simulate` | POST | Mode what-if (hujan/dosis/pH) |
 | `/api/health` | GET | Status gateway & uptime |
 
