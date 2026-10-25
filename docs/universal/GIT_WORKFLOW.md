@@ -1,95 +1,228 @@
-# GIT_WORKFLOW.md — Alur Kolaborasi Multi-AI & Pengendalian Versi Kontrak
+# GIT_WORKFLOW.md — Alur Kolaborasi Role-Based & Struktur Repositori
 
-> **STATUS:** STANDAR PENGEMBANGAN MULTI-CABANG  
-> Dokumen ini mengatur tata kelola Git branching, perlindungan file kontrak global, dan prosedur integrasi agar kontribusi dari AI Agent yang berbeda tidak saling merusak.
+> **STATUS:** STANDAR TATA KELOLA KODE & REPOSITORI RESMI  
+> Dokumen ini adalah acuan mutlak untuk arsitektur repositori Git, pembagian kepemilikan folder, dan strategi pencabangan **Role-Based Branching (1 Role = 1 Branch)** agar kolaborasi 4 pengembang berjalan cepat, bebas overhead, dan bebas konflik (*zero-collision Development*).
 
 ---
 
-## 1. Konvensi Cabang Git (Branching Strategy)
+## 1. Peta Struktur Direktori Fisik Repositori
 
-Setiap anggota tim pengembang wajib bekerja pada branch spesifik sesuai domain tanggung jawabnya:
+Untuk menjamin prinsip **Multi-Domain Isolation Architecture**, setiap modul kode dan dokumentasi memiliki pemilik (*code owner*) tunggal:
 
 ```
-main (Production / Stable TKT 3 Demo)
+VolatiSafe-AIoT/
+│
+├── PRD_VolatiSafe_AIoT_v1.md          # Dokumen PRD Utama (Master Spec 15 Seksi)
+├── README.md                          # Dokumentasi Root & Panduan Memulai Cepat
+│
+├── docs/                              # DOKUMENTASI TEKNIS BERSIFAT MODULAR
+│   ├── README.md                      # Master Index, Arsitektur 5 Domain & Matriks Wewenang
+│   │
+│   ├── universal/                     # [KONTRAK GLOBAL — LEAD: ARIS]
+│   │   ├── ARCHITECTURE.md            # Arsitektur sistem 4 lapis & aliran data tertutup
+│   │   ├── BOUNDARIES_AND_CONTRACTS.md# Matriks wewenang R/W 4 anggota tim & anti-tabrakan
+│   │   ├── INTERFACES.md              # SUMBER KEBENARAN TUNGGAL skema data (LoRa, REST, DTO)
+│   │   ├── PROJECT_CONTEXT.md         # Problem statement, research gap, & lokus Lampung/Lamongan
+│   │   ├── PRD.md                     # Ringkasan spesifikasi kebutuhan produk
+│   │   ├── DECISIONS.md               # Architecture Decision Records (ADR 001 s.d ADR 008)
+│   │   ├── GIT_WORKFLOW.md            # Dokumen ini (Alur Git Role-Based & struktur direktori)
+│   │   └── ROADMAP.md                 # Jadwal kerja TKT 3 (7 hari software) ke TKT 6 (12 bulan)
+│   │
+│   ├── hardware/                      # [DOMAIN 1: HARDWARE & EDGE — PIC: HAFIIZ]
+│   │   ├── README.md                  # Mandat peran, batasan, & zona terlarang Hafiiz
+│   │   ├── TASK_GUIDE.md                  # Panduan tugas langkah demi langkah HW-1.1 s.d HW-1.5
+│   │   ├── PINOUT_AND_SCHEMATICS.md   # Skema rangkaian ESP32, sensor probe, & power gate
+│   │   ├── FIRMWARE_SPEC.md           # Algoritma burst sampling median filter, kalibrasi, & sleep
+│   │   ├── TELEMETRY_PAYLOAD.md       # Spesifikasi bit-packing LoRa 52-byte & unpacking
+│   │   └── WOKWI_SIMULATION.md        # Panduan virtual testbed Wokwi & 3 skenario demo juri
+│   │
+│   ├── digital_twin/                  # [DOMAIN 2: AGRO-CLIMATIC DIGITAL TWIN — PIC: ANDHARU]
+│   │   ├── README.md                  # Mandat peran, batasan, & zona terlarang Andharu
+│   │   ├── TASK_GUIDE.md              # Panduan tugas langkah demi langkah DT-1.1 s.d DT-1.5
+│   │   ├── FAO56_WATER_BALANCE.md     # Formulasi neraca air perakaran FAO-56 Penman-Monteith & Kc
+│   │   ├── THERMAL_DIFFUSION.md       # Model konduksi panas tanah teredam 1D Fourier & inersia
+│   │   ├── FAILOVER_IMPUTATION.md     # Mesin imputasi state saat sensor offline / dropout (>30 mnt)
+│   │   └── WEATHER_REPLAY.md          # Protokol replay cuaca BMKG Lampung & tabel data_provenance
+│   │
+│   ├── ai/                            # [DOMAIN 3: AI ENGINE & PIML — PIC: ARIS]
+│   │   ├── README.md                  # Mandat peran, batasan, & zona terlarang Aris
+│   │   ├── TASK_GUIDE.md              # Panduan tugas langkah demi langkah AI-1.1 s.d AI-1.6
+│   │   ├── MODEL_SPEC.md              # Physics-Informed ML (PIML), kinetika urease, & AVRI
+│   │   ├── EXPLAINABILITY_SHAP.md     # Perhitungan TreeSHAP & pemetaan narasi edukasi petani
+│   │   └── MOCK_PREDICTOR.md          # Skrip mock predictor terisolasi untuk tes backend
+│   │
+│   ├── backend/                       # [DOMAIN 4: BACKEND SERVICES & DB — PIC: SYIFA]
+│   │   ├── README.md                  # Mandat peran, batasan, & zona terlarang Syifa (Backend)
+│   │   ├── TASK_GUIDE.md              # Panduan tugas langkah demi langkah BE-1.1 s.d BE-1.8
+│   │   ├── DATABASE_SCHEMA.md         # Skema PostgreSQL & TimescaleDB hypertable
+│   │   ├── INGESTION_PIPELINE.md      # MQTT subscriber worker, LoRa adapter, & deduplication
+│   │   ├── API_SPECIFICATION.md       # Spesifikasi REST API FastAPI (Request/Response DTO)
+│   │   ├── WEBSOCKET_AND_ALERTS.md    # Streaming live telemetri & gateway bot WhatsApp/Telegram
+│   │   └── SETUP.md                   # Panduan setup Docker Compose (Postgres, Mosquitto)
+│   │
+│   └── frontend/                      # [DOMAIN 5: PRESENTATION LAYER & PWA — PIC: SYIFA]
+│       ├── README.md                  # Mandat peran, batasan, & zona terlarang Syifa (Frontend)
+│       ├── TASK_GUIDE.md              # Panduan tugas langkah demi langkah FE-1.1 s.d FE-1.8
+│       ├── DESIGN_SYSTEM.md           # Tokens palet status AVRI (4 warna), tipografi, & aksesibilitas
+│       ├── PAGE_STATES.md             # Spesifikasi UI state 5 layar utama & what-if simulator
+│       ├── UI_COMPONENTS.md           # Katalog komponen reusable (Card, Chart, Map, Banner)
+│       ├── MOCK_DATA.md               # Fixture JSON offline untuk dev frontend independen
+│       └── SETUP.md                   # Panduan setup Next.js 14, Tailwind CSS, & PWA
+│
+├── firmware/                          # [KODE EDGE ESP32 & LORA — PIC: HAFIIZ]
+├── simulation/wokwi/                  # [VIRTUAL TESTBED HARDWARE — PIC: HAFIIZ]
+├── digital_twin/                      # [KODE BIOFISIKA TANAH KONTINU — PIC: ANDHARU]
+├── simulations/data_replay/           # [SIMULASI REPLAY ATMOSFER BMKG — PIC: ANDHARU]
+├── ai_engine/                         # [KODE PIML & INFERENSI ML — PIC: ARIS]
+├── models/                            # [FILE ARTIFAK MODEL TERKOMPILASI — PIC: ARIS]
+├── backend/                           # [KODE SERVER REST, WS & INGESTION — PIC: SYIFA]
+├── docker/                            # [KONFIGURASI KONTAINER LOKAL — PIC: SYIFA]
+├── migrations/                        # [ALEMBIC DATABASE MIGRATIONS — PIC: SYIFA]
+├── frontend/                          # [KODE APLIKASI WEB PWA — PIC: SYIFA]
+└── public/                            # [ASET STATIS GLOBAL REPOSITORI]
+```
+
+---
+
+## 2. Strategi Pencabangan Sederhana (Role-Based Branching)
+
+Untuk efisiensi kerja tim 4 orang dengan batas waktu kompetisi yang ketat, repositori **TIDAK MENGGUNAKAN** puluhan branch mikro. Sistem menggunakan model **1 Role = 1 Dedicated Branch**:
+
+```
+main (Production / Stable TKT 3 Demo / Final Submission)
+  ▲
+  │ (Merge resmi setelah lolos integrasi sistem)
   │
-  ├── feat/iot-firmware-sampling     <-- Dikerjakan Hafiiz (IoT)
-  ├── feat/dt-fao56-water-balance    <-- Dikerjakan Andharu (Digital Twin)
-  ├── feat/fullstack-dashboard-pwa   <-- Dikerjakan Syifa (Fullstack: BE + FE)
-  └── feat/ai-piml-avri-engine       <-- Dikerjakan Aris (AI Engine / Lead)
+Development (Staging / Integrasi Seluruh Modul Tim)
+  ▲
+  ├── iot            <-- Dikelola Hafiiz (Hardware, ESP32, Wokwi, Sensor, LoRa)
+  ├── digittal-twin   <-- Dikelola Andharu (FAO-56, Neraca Air, Difusi Termal, Replay BMKG)
+  ├── full-stack      <-- Dikelola Syifa (FastAPI Backend + Next.js PWA Frontend + DB)
+  └── ai             <-- Dikelola Aris (Physics-Informed ML, LightGBM, AVRI, TreeSHAP)
 ```
 
-### 1.1 Pola Penamaan Branch per Anggota Tim
+---
 
-| Awalan Branch | Penanggung Jawab | Domain Kerja | Contoh Nama Branch |
+## 3. Matriks Kepemilikan Cabang Resmi
+
+Hanya ada **6 cabang aktif** di seluruh repositori:
+
+| Nama Branch | Penanggung Jawab | Wewenang Folder Kerja (R/W) | Konten Pekerjaan |
 |---|---|---|---|
-| `feat/iot-*` | **Hafiiz** | Sensor, firmware ESP32, LoRa, Wokwi | `feat/iot-burst-sampling`, `feat/iot-wokwi-mqtt-bridge` |
-| `feat/dt-*` | **Andharu** | Digital Twin, FAO-56, BMKG replay, imputasi | `feat/dt-fao56-water-balance`, `feat/dt-failover-imputation` |
-| `feat/fullstack-*` / `feat/be-*` / `feat/fe-*` | **Syifa** | Backend, TimescaleDB, REST, WebSocket, PWA UI | `feat/be-timescale-hypertable`, `feat/fe-leaflet-risk-map` |
-| `feat/ai-*` | **Aris** (Lead) | PIML LightGBM, AVRI formula, TreeSHAP | `feat/ai-piml-residual-model`, `feat/ai-shap-explainer` |
-| `contract/rfc-*`| **Aris** (Lead) / Tim | Usulan perubahan skema `INTERFACES.md` | `contract/rfc-add-wind-speed-metric` |
-| `fix/*` | Seluruh Tim | Hotfix bug terisolasi sesuai wewenang | `fix/fe-chart-legend-wrap`, `fix/be-mqtt-reconnect` |
+| **`main`** | **Aris** (Lead) | Seluruh Repositori (Protected) | Kode final stabil yang siap didemonstrasikan ke juri dan disubmit ke portal lomba. |
+| **`Development`** | **Seluruh Tim** | Seluruh Repositori (Integration) | Cabang staging tempat bertemunya integrasi 4 cabang role sebelum rilis ke `main`. |
+| **`iot`** | **Hadi M. Hafiiz Hilmi (Hafiiz)** | `firmware/`, `simulation/wokwi/`, `docs/hardware/` | Seluruh kode C++ PlatformIO, driver sensor tanah, bit-packing LoRa 52-byte, dan simulasi Wokwi. |
+| **`digittal-twin`**| **Andharu Raffi (Andharu)** | `digital_twin/`, `simulations/data_replay/`, `docs/digital_twin/` | Model neraca air FAO-56 Penman-Monteith, model difusi termal damped, engine failover imputasi, dan replay data BMKG. |
+| **`full-stack`** | **Syifa (Syifa)** | `backend/`, `frontend/`, `docker/`, `migrations/`, `docs/backend/`, `docs/frontend/` | Server FastAPI, koneksi TimescaleDB, MQTT ingestion worker, WebSocket live, PWA Next.js 14, peta Leaflet, UI DAT tracker, dan What-If slider. |
+| **`ai`** | **Aris Kurniawan (Aris / Lead)**| `ai_engine/`, `models/`, `docs/ai/`, `docs/universal/` | Model Physics-Informed ML (PIML), residual LightGBM, formulasi AVRI (0–100%), TreeSHAP, dan penjaga kontrak `INTERFACES.md`. |
 
 ---
 
-## 2. Aturan Perlindungan File Kontrak (`docs/universal/INTERFACES.md`)
+## 4. Alur Kerja Harian Pengembang (Daily Workflow)
 
-File [`docs/universal/INTERFACES.md`](INTERFACES.md) adalah **Protected Asset**.
+Dengan sistem 1 branch per role, setiap anggota tim bekerja sangat sederhana tanpa pusing memikirkan nama branch baru setiap hari:
 
-### 2.1 Aturan Ketat:
-1. **Dilarang Direct Edit di Feature Branch:** Developer yang bekerja di branch fitur (`feat/iot-*`, `feat/dt-*`, atau `feat/fullstack-*`) **DILARANG SEPIHAK** mengedit `INTERFACES.md`.
-2. **Prosedur RFC (Request for Comments):** Jika suatu fitur baru membutuhkan perubahan struktur data kontrak:
-   - Buat branch khusus `contract/rfc-<nama-perubahan>`.
-   - Diskusikan dan setujui bersama Aris (Lead Architect).
-   - Perbarui `INTERFACES.md`, `MOCK_DATA.md`, dan `MOCK_PREDICTOR.md`.
-   - Lakukan merge ke `main` terlebih dahulu sebelum branch implementasi kode dimulai.
-3. **Kompatibilitas Mundur:** Field baru wajib bersifat opsional (`optional / default None`) agar subsistem lain yang belum diperbarui tidak mengalami crash.
+### Langkah 1: Memulai Pekerjaan Harian
+Di terminal lokal masing-masing, masuk ke cabang role-nya dan sinkronkan perubahan terbaru dari `Development`:
+```bash
+# Contoh untuk Hafiiz (IoT):
+git checkout iot
+git pull origin Development
 
----
+# Contoh untuk Syifa (Fullstack):
+git checkout full-stack
+git pull origin Development
 
-## 3. Checklist Pull Request (PR) per Anggota Tim
+# Contoh untuk Andharu (Digital Twin):
+git checkout digittal-twin
+git pull origin Development
 
-Sebelum kode dari branch digabungkan ke `main`, lakukan verifikasi checklist:
-
-### 3.1 Checklist PR IoT & Hardware (`feat/iot-*` — Hafiiz)
-- [ ] Kode C++ lolos kompilasi tanpa warning di PlatformIO / Arduino IDE.
-- [ ] Verifikasi ukuran payload LoRa tidak melebihi 52 byte.
-- [ ] Simulasi Wokwi berjalan normal dan data terkirim ke MQTT `localhost:1883`.
-- [ ] Tidak ada modifikasi file di luar `firmware/`, `simulation/wokwi/`, dan `docs/hardware/`.
-
-### 3.2 Checklist PR Digital Twin (`feat/dt-*` — Andharu)
-- [ ] Model neraca air tanah FAO-56 ($ET_0$) teruji matematis pada rentang kelembaban wajar (10–50% VWC).
-- [ ] Modul failover sukses mengisi celah data (*imputation*) saat sensor offline dan menandai `is_predicted: true`.
-- [ ] Skrip replay data BMKG Lampung berjalan mulus tanpa memory leak.
-- [ ] Tidak ada modifikasi file di luar `digital_twin/`, `simulations/data_replay/`, dan `docs/ai/DIGITAL_TWIN.md`.
-
-### 3.3 Checklist PR Fullstack (`feat/fullstack-*` / `feat/be-*` / `feat/fe-*` — Syifa)
-- [ ] Backend: Migrasi database Alembic berjalan sukses (*up* dan *down*).
-- [ ] Backend: Ingestion adapter berhasil memproses paket LoRa dari Wokwi dan menyimpan ke hypertable TimescaleDB.
-- [ ] Backend: Endpoint REST mematuhi amplop `{"data": ..., "meta": ...}` sesuai `INTERFACES.md`.
-- [ ] Frontend: Halaman web berjalan mulus pada mode offline menggunakan `MOCK_DATA.md`.
-- [ ] Frontend: Peta Leaflet merender poligon petak tanpa error lisensi map tile.
-- [ ] Frontend: Responsive test rapi pada resolusi mobile (375px) dan desktop (1440px).
-- [ ] Tidak ada modifikasi file di luar `backend/`, `frontend/`, `docs/backend/`, dan `docs/frontend/`.
-
-### 3.4 Checklist PR AI Engine & Architecture (`feat/ai-*` — Aris)
-- [ ] Unit test validasi fisika urease lulus (hasil AVRI selalu di rentang 0–100%).
-- [ ] Model LightGBM menghasilkan latensi inferensi < 50 ms.
-- [ ] TreeSHAP menghasilkan atribusi valid untuk semua fitur input.
-- [ ] Skrip mock `MOCK_PREDICTOR.md` teruji independen tanpa koneksi database.
-- [ ] Tidak ada modifikasi file di luar `ai_engine/`, `models/`, `docs/ai/`, dan `docs/universal/`.
-
----
-
-## 4. Struktur Commit Message
-
-Gunakan format konvensional terstandar:
+# Contoh untuk Aris (AI):
+git checkout ai
+git pull origin Development
 ```
-<type>(<scope>): <deskripsi singkat imperative>
 
-Contoh:
-feat(hw): implement 5x burst sampling with median filter in esp32
-feat(ai): integrate fao-56 et0 calculation into digital twin state
-feat(be): add timescale hypertable migration for telemetry table
-feat(fe): build interactive what-if risk slider component
-docs(universal): update AVRI classification thresholds in INTERFACES.md
+### Langkah 2: Menulis Kode & Commit Rutin
+Kerjakan task sesuai folder wewenang masing-masing. Lakukan commit berkala menggunakan format pesan standar:
+```bash
+git add firmware/
+git commit -m "feat(iot): implement 5x burst sampling with median filter"
+git push origin iot
+```
+
+### Langkah 3: Integrasi ke Cabang `Development`
+Ketika satu tonggak fitur selesai (misal: simulasi Wokwi selesai atau REST API selesai), buat Pull Request dari cabang role ke `Development`:
+* `iot` $\rightarrow$ `Development`
+* `digittal-twin` $\rightarrow$ `Development`
+* `full-stack` $\rightarrow$ `Development`
+* `ai` $\rightarrow$ `Development`
+
+### Langkah 4: Uji Integrasi Sistemik & Rilis ke `main`
+Di cabang `Development`, seluruh modul (Wokwi $\rightarrow$ Ingestion $\rightarrow$ Digital Twin $\rightarrow$ AI Engine $\rightarrow$ PWA Dashboard) diuji bersama. Jika 3 skenario demo juri berjalan mulus, **Aris (Lead)** melakukan merge dari `Development` ke `main`.
+
+---
+
+## 5. Checklist Verifikasi Pull Request per Cabang Role
+
+Sebelum sebuah cabang role di-merge ke `Development`, pastikan checklist berikut terpenuhi:
+
+### 5.1 Checklist Cabang `iot` (Hafiiz)
+- [ ] Kode C++ lulus kompilasi tanpa error di PlatformIO / Arduino IDE.
+- [ ] Ukuran payload LoRa terverifikasi $\le 52$ byte sesuai `INTERFACES.md` §1.
+- [ ] Sirkuit virtual Wokwi berhasil memancarkan telemetri ke MQTT broker `localhost:1883`.
+- [ ] Tidak ada modifikasi file di luar folder `firmware/`, `simulation/wokwi/`, dan `docs/hardware/`.
+
+### 5.2 Checklist Cabang `digittal-twin` (Andharu)
+- [ ] Persamaan FAO-56 Penman-Monteith teruji matematis (kadar air $\theta$ berada di rentang wajar $10\% - 45\%$).
+- [ ] Modul failover sukses mengisi celah data saat sensor putus dan menandai `is_predicted = true`.
+- [ ] Generator streaming replay BMKG Lampung berjalan mulus tanpa memory leak.
+- [ ] Tidak ada modifikasi file di luar folder `digital_twin/`, `simulations/data_replay/`, dan `docs/digital_twin/`.
+
+### 5.3 Checklist Cabang `full-stack` (Syifa)
+- [ ] Migrasi database Alembic berjalan sukses (*up* dan *down*).
+- [ ] Ingestion adapter berhasil memproses paket LoRa Wokwi dan menyimpan ke hypertable TimescaleDB.
+- [ ] REST API mematuhi amplop respons baku `{ "data": ..., "meta": ... }`.
+- [ ] Frontend Next.js 14 lolos `npm run build` tanpa error linting.
+- [ ] Peta Leaflet dan panel What-If simulator responsif di layar HP.
+- [ ] Tidak ada modifikasi file di luar folder `backend/`, `frontend/`, `docker/`, `migrations/`, `docs/backend/`, dan `docs/frontend/`.
+
+### 5.4 Checklist Cabang `ai` (Aris)
+- [ ] Formulasi kinetika Arrhenius urease dibatasi batas fisika (AVRI selalu di rentang $[0.0, 100.0]$).
+- [ ] Model LightGBM menghasilkan latensi inferensi $\le 20$ ms.
+- [ ] TreeSHAP menghasilkan arah tanda dampak yang logis (Suhu +, Lembap -, pH +).
+- [ ] Skrip dataset builder terbukti bebas kebocoran waktu (*zero time-series leakage*).
+- [ ] Tidak ada modifikasi file di luar folder `ai_engine/`, `models/`, `docs/ai/`, dan `docs/universal/`.
+
+---
+
+## 6. Aturan Perlindungan File Kontrak (`docs/universal/INTERFACES.md`)
+
+File [`docs/universal/INTERFACES.md`](INTERFACES.md) adalah **Single Source of Truth Mutlak**.
+
+1. **Dilarang Direct Edit di Cabang Role:** Anggota tim dilarang mengubah file ini secara sepihak di cabang `iot`, `digittal-twin`, atau `full-stack`.
+2. **Prosedur Usulan Perubahan:** Jika membutuhkan atribut baru (misal: penambahan metrik sensor baru), usulan dibahas bersama Aris (Lead Architect). Aris yang akan memperbarui `INTERFACES.md` di cabang `ai` atau `Development` agar subsistem lain bersiap secara sinkron.
+3. **Kompatibilitas Mundur:** Setiap field baru wajib bersifat opsional (`Optional / default None`).
+
+---
+
+## 7. Format Pesan Commit Konvensional (Conventional Commits)
+
+```
+<tipe>(<lingkup>): <deskripsi singkat dalam bentuk imperatif>
+
+[Daftar Tipe Resmi]:
+feat     : Penambahan fitur baru
+fix      : Perbaikan bug atau galat logika
+docs     : Perubahan atau pembaruan dokumentasi
+refactor : Restrukturisasi kode tanpa mengubah fungsionalitas
+test     : Penambahan unit test atau simulasi
+chore    : Pembaruan dependensi atau konfigurasi build
+
+[Contoh Commit yang Benar]:
+feat(iot): implement 5x burst sampling with median filter
+feat(dt): integrate fao-56 et0 calculation into digital twin state
+feat(full-stack): add timescale hypertable migration and rest router
+feat(full-stack): build what-if interactive slider component
+feat(ai): train residual lightgbm model with monotone constraints
+docs(universal): update branch strategy to role-based model
 ```

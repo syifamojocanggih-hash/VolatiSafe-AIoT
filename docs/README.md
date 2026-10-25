@@ -22,30 +22,41 @@ docs/
 │   ├── GIT_WORKFLOW.md                <-- Aturan branch multi-AI & protokol RFC breaking changes
 │   └── ROADMAP.md                     <-- Roadmap TKT 3 (7 hari software) ke TKT 6 (lapangan)
 │
-├── hardware/                          <-- DOMAIN 1: HARDWARE & EDGE FIRMWARE
-│   ├── README.md                      <-- Lingkup, wewenang & zona terlarang Hardware AI
+├── hardware/                          <-- DOMAIN 1: HARDWARE & EDGE FIRMWARE (Hafiiz)
+│   ├── README.md                      <-- Lingkup, wewenang & zona terlarang Hafiiz
+│   ├── TASK_GUIDE.md                  <-- Panduan tugas teknis langkah demi langkah
 │   ├── PINOUT_AND_SCHEMATICS.md       <-- Skema rangkaian ESP32, sensor probe, & power gate
 │   ├── FIRMWARE_SPEC.md               <-- Algoritma burst sampling, kalibrasi, & deep sleep
 │   ├── TELEMETRY_PAYLOAD.md           <-- Spesifikasi bit-packing LoRa & gateway unpacking
 │   └── WOKWI_SIMULATION.md            <-- Panduan virtual testbed Wokwi & 3 skenario demo juri
 │
-├── ai/                                <-- DOMAIN 2: AGRO-CLIMATIC DIGITAL TWIN & AI ENGINE
-│   ├── README.md                      <-- Lingkup, wewenang & zona terlarang AI/ML Agent
-│   ├── DIGITAL_TWIN.md                <-- Neraca air tanah FAO-56 & difusi panas kontinyu
+├── digital_twin/                      <-- DOMAIN 2: AGRO-CLIMATIC DIGITAL TWIN (Andharu)
+│   ├── README.md                      <-- Lingkup, wewenang & zona terlarang Andharu
+│   ├── TASK_GUIDE.md                  <-- Panduan tugas teknis langkah demi langkah
+│   ├── FAO56_WATER_BALANCE.md         <-- Neraca air tanah FAO-56 Penman-Monteith & Kc jagung
+│   ├── THERMAL_DIFFUSION.md           <-- Model difusi termal tanah teredam (inersia panas)
+│   ├── FAILOVER_IMPUTATION.md         <-- Mesin imputasi state saat sensor offline / dropout
+│   └── WEATHER_REPLAY.md              <-- Protokol replay cuaca BMKG & tabel audit data provenance
+│
+├── ai/                                <-- DOMAIN 3: AI ENGINE & MACHINE LEARNING (Aris)
+│   ├── README.md                      <-- Lingkup, wewenang & zona terlarang Aris
+│   ├── TASK_GUIDE.md                  <-- Panduan tugas teknis langkah demi langkah
 │   ├── MODEL_SPEC.md                  <-- Physics-Informed ML (PIML) LightGBM & AVRI formula
 │   ├── EXPLAINABILITY_SHAP.md         <-- TreeSHAP computation & mapping narasi petani
 │   └── MOCK_PREDICTOR.md              <-- Script mock predictor untuk isolasi backend/frontend
 │
-├── backend/                           <-- DOMAIN 3: BACKEND SERVICES, INGESTION & DB
-│   ├── README.md                      <-- Lingkup, wewenang & zona terlarang Backend AI
+├── backend/                           <-- DOMAIN 4: BACKEND SERVICES, INGESTION & DB (Syifa)
+│   ├── README.md                      <-- Lingkup, wewenang & zona terlarang Syifa (Backend)
+│   ├── TASK_GUIDE.md                  <-- Panduan tugas teknis langkah demi langkah
 │   ├── DATABASE_SCHEMA.md             <-- PostgreSQL & TimescaleDB hypertable schema
 │   ├── INGESTION_PIPELINE.md          <-- MQTT broker, LoRa adapter, & deduplication queue
 │   ├── API_SPECIFICATION.md           <-- Kontrak REST API FastAPI (Request/Response DTO)
 │   ├── WEBSOCKET_AND_ALERTS.md        <-- Streaming live telemetri & gateway bot WhatsApp/Telegram
 │   └── SETUP.md                       <-- Panduan setup Docker (Postgres, Timescale, Mosquitto)
 │
-└── frontend/                          <-- DOMAIN 4: PRESENTATION LAYER & DASHBOARD
-    ├── README.md                      <-- Lingkup, wewenang & zona terlarang Frontend AI
+└── frontend/                          <-- DOMAIN 5: PRESENTATION LAYER & DASHBOARD (Syifa)
+    ├── README.md                      <-- Lingkup, wewenang & zona terlarang Syifa (Frontend)
+    ├── TASK_GUIDE.md                  <-- Panduan tugas teknis langkah demi langkah
     ├── DESIGN_SYSTEM.md               <-- Design tokens, palet status AVRI, & tipografi
     ├── PAGE_STATES.md                 <-- Spesifikasi UI State 5 layar utama & what-if simulator
     ├── UI_COMPONENTS.md               <-- Katalog komponen reusable (Card, Chart, Map, Banner)
@@ -62,7 +73,7 @@ Untuk menghindari kerusakan silang (*cross-domain regression*), setiap anggota t
 | Peran & Developer | Fokus Tugas Utama | Folder Boleh Ditulis (R/W) | Zona Terlarang (DILARANG KERAS) | Titik Kontak Resmi |
 |---|---|---|---|---|
 | **IoT & Hardware**<br>*(Hafiiz)* | Firmware ESP32 C++, sensor tanah (Moisture & pH), LoRa SX1278 433 MHz, Wokwi virtual node, deep sleep | `firmware/`, `simulation/wokwi/`, `docs/hardware/` | Dilarang menyentuh kode database, API backend, model AI, atau UI frontend | Mengirim payload 52-byte ke topik MQTT Gateway via `docs/universal/INTERFACES.md` §1 |
-| **Digital Twin**<br>*(Andharu)* | Model biofisika tanah FAO-56 ($ET_0$), difusi termal tanah damped, imputasi failover dropout, BMKG weather replay | `digital_twin/`, `simulations/data_replay/`, `docs/ai/DIGITAL_TWIN.md` | Dilarang mengutak-atik model LightGBM, firmware ESP32, atau membuat UI web | Menghasilkan `FieldStateDTO` standar melalui interface di `docs/universal/INTERFACES.md` §2 |
+| **Digital Twin**<br>*(Andharu)* | Model biofisika tanah FAO-56 ($ET_0$), difusi termal tanah damped, imputasi failover dropout, BMKG weather replay | `digital_twin/`, `simulations/data_replay/`, `docs/digital_twin/` | Dilarang mengutak-atik model LightGBM, firmware ESP32, atau membuat UI web | Menghasilkan `FieldStateDTO` standar melalui interface di `docs/universal/INTERFACES.md` §2 |
 | **Fullstack (BE + FE)**<br>*(Syifa)* | Ingestion MQTT, TimescaleDB, REST API FastAPI, WebSocket, bot WhatsApp/Telegram, Next.js 14 PWA, Leaflet, Recharts, What-If UI | `backend/`, `frontend/`, `migrations/`, `docker/`, `docs/backend/`, `docs/frontend/` | Dilarang mengubah formula kinetika urease PIML atau mendikte pinout mikrokontroler hardware | Mengekspos REST DTO & WebSocket stream sesuai `docs/universal/INTERFACES.md` §3 |
 | **AI Engineer & Lead**<br>*(Aris)* | Arsitek sistem, penjamin kontrak data, Physics-Informed ML (PIML), LightGBM Regressor, AVRI formula, TreeSHAP | `ai_engine/`, `models/`, `docs/ai/` (MODEL_SPEC, SHAP), `docs/universal/` | Dilarang mengubah implementasi internal firmware atau styling CSS sepihak di luar kontrak | Menghasilkan model PIML terlatih dan mengelola *Single Source of Truth* universal |
 

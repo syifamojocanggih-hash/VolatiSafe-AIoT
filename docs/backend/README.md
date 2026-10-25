@@ -2,7 +2,7 @@
 
 > **PENANGGUNG JAWAB TEKNIS:** Syifa (Syifa) — *Fullstack Developer (Backend Services, Ingestion & DB)*  
 > **AREA AKSES PENUH (R/W):** `backend/`, `migrations/`, `docker/`, `docs/backend/`  
-> **CABANG GIT RESMI:** `feat/be-*` atau `feat/fullstack-*` (misal: `feat/be-timescaledb-hypertable`)
+> **CABANG GIT RESMI:** `full-stack`
 
 ---
 

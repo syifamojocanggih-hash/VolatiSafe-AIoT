@@ -2,7 +2,7 @@
 
 > **PENANGGUNG JAWAB TEKNIS:** Syifa (Syifa) — *Fullstack Developer (Presentation Layer, PWA & Dashboard)*  
 > **AREA AKSES PENUH (R/W):** `frontend/`, `public/`, `docs/frontend/`  
-> **CABANG GIT RESMI:** `feat/fe-*` atau `feat/fullstack-*` (misal: `feat/fe-leaflet-risk-map`)
+> **CABANG GIT RESMI:** `full-stack`
 
 ---
 

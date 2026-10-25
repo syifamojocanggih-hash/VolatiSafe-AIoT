@@ -2,7 +2,7 @@
 
 > **PENANGGUNG JAWAB TEKNIS:** Hadi M. Hafiiz Hilmi (Hafiiz) — *IoT & Embedded Hardware Engineer*  
 > **AREA AKSES PENUH (R/W):** `firmware/`, `simulation/wokwi/`, `docs/hardware/`  
-> **CABANG GIT RESMI:** `feat/iot-*` (misal: `feat/iot-burst-sampling`)
+> **CABANG GIT RESMI:** `iot`
 
 ---
 

@@ -58,7 +58,7 @@ Setiap anggota tim memiliki zona kerja (*Read/Write Zone*), zona terlarang (*For
 | Atribut | Ketetapan |
 |---|---|
 | **Penanggung Jawab** | **Andharu Raffi (Andharu)** |
-| **Area Akses R/W** | `digital_twin/`, `simulations/data_replay/`, `docs/ai/DIGITAL_TWIN.md` |
+| **Area Akses R/W** | `digital_twin/`, `simulations/data_replay/`, `docs/digital_twin/` |
 | **Tanggung Jawab** | Implementasi neraca air tanah perakaran FAO-56 ($ET_0$ Penman-Monteith), model perambatan termal tanah teredam (*damped*), modul imputasi failover saat sensor *offline* (`[Est-Simulated]`), dan pemutaran ulang (*replay*) data klimatologi historis BMKG Lampung. |
 | **Output Resmi** | Vektor state tanah virtual kontinu (`FieldStateDTO`) yang disuplai ke backend database dan AI Engine. |
 | **Zona Terlarang** | ❌ DILARANG membongkar algoritma machine learning LightGBM atau merombak formula AVRI.<br>❌ DILARANG membuka koneksi langsung ke hardware ESP32 atau menulis komponen UI dashboard.<br>❌ DILARANG mengubah format output DTO di luar ketentuan `INTERFACES.md` §3. |
