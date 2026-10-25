@@ -11,12 +11,7 @@
   ```
   <type>(<scope>): <short imperative description>
   ```
-  Examples:
-  - `feat(ai): train residual lightgbm model with monotone constraints`
-  - `fix(dt): resolve thermal lag calculation edge case`
-  - `docs(universal): update API response envelope in INTERFACES.md`
-  - `refactor(be): simplify ingestion message queue handler`
-  - `test(ai): add unit test for zero time-series leakage`
+- **Strict Branch Isolation:** Commit strictly to the active task branch (e.g. `ai`). **NEVER auto-merge, fast-forward, or sync changes across other branches** (`Development`, `digittal-twin`, `full-stack`, `iot`, `main`) unless explicitly instructed by the user.
 - **Granularity:** One task = one logical commit. Do not bundle unrelated changes together.
 - **Commit Trigger:** Commit only when the user explicitly requests or confirms a task is done.
 
