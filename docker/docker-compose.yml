@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  timescaledb:
+    image: timescale/timescaledb:latest-pg16
+    container_name: volatisafe_timescaledb
+    restart: always
+    environment:
+      POSTGRES_USER: volatisafe
+      POSTGRES_PASSWORD: volatisafe_secret
+      POSTGRES_DB: volatisafe_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - timescaledb_data:/var/lib/postgresql/data
+
+  mosquitto:
+    image: eclipse-mosquitto:2
+    container_name: volatisafe_mosquitto
+    restart: always
+    ports:
+      - "1883:1883"
+    volumes:
+      - ./mosquitto.conf:/mosquitto/config/mosquitto.conf
+      - mosquitto_data:/mosquitto/data
+
+volumes:
+  timescaledb_data:
+  mosquitto_data:
