@@ -9,7 +9,7 @@
 ---
 
 ## 🎯 Target Utama Domain Frontend
-Membangun antarmuka web modern, responsif, dan ringan berbasis **Next.js 14 (App Router)** dan **Tailwind CSS** dengan kapabilitas **Progressive Web App (PWA)** yang dapat diinstal langsung di ponsel petani. Menampilkan status risiko volatilisasi amonia secara visual, peta poligon petak ladang jagung, timeline fenologi tanaman, kalkulator pupuk praktis (karung & ember), serta panel interaktif *"What-If Simulator"* untuk pengujian langsung oleh dewan juri.
+Membangun antarmuka web modern, responsif, dan ringan berbasis **Next.js 14 (App Router)** dan **Tailwind CSS** dengan kapabilitas **Progressive Web App (PWA)** yang dapat diinstal langsung di ponsel petani. Menampilkan status risiko volatilisasi amonia secara visual, peta poligon petak ladang jagung, timeline fenologi tanaman, kalkulator pupuk praktis (karung & ember), serta panel interaktif *""* untuk pengujian langsung oleh dewan juri.
 
 ---
 
@@ -105,27 +105,7 @@ Membangun antarmuka web modern, responsif, dan ringan berbasis **Next.js 14 (App
 
 ---
 
-### TAHAP 5: Panel Interaktif "What-If Simulator" (Fitur Juara Juri)
-
-#### 🟢 FE-1.7: What-If Risk Simulator untuk Demonstrasi Juri
-- **Deskripsi:** Komponen khusus di dashboard untuk dewan juri menguji responsivitas AI secara langsung saat sesi presentasi/pitching.
-- **Target File:** `frontend/src/components/simulator/WhatIfPanel.tsx`
-- **Elemen Kontrol Interaktif:**
-  - Slider 1: **Suhu Tanah** ($15^\circ\text{C}$ s.d. $45^\circ\text{C}$) — Default: $34^\circ\text{C}$.
-  - Slider 2: **Kelembaban Tanah** ($5\%$ s.d. $80\%$) — Default: $20\%$.
-  - Slider 3: **Derajat Keasaman pH** ($4.0$ s.d. $9.5$) — Default: $7.8$.
-  - Slider 4: **Curah Hujan 6 Jam** ($0\text{ mm}$ s.d. $50\text{ mm}$) — Default: $0\text{ mm}$.
-- **Respon Visual Instan:**
-  - Mengirim request ke endpoint `POST /api/v1/simulation/what-if` (atau mock lokal) dengan *debounce* 100 ms.
-  - Gauge meter skor AVRI berputar secara *real-time* mengikuti tarikan slider.
-  - Kartu preskripsi berubah seketika: saat slider digeser ke tanah dingin dan lembap, banner seketika berubah dari merah menjadi hijau.
-- **Checklist:**
-  - [ ] Respons animasi slider mulus (60 fps) tanpa *lag*.
-  - [ ] Menampilkan bar TreeSHAP mini yang menunjukkan faktor mana yang paling berkontribusi saat slider digeser.
-
----
-
-### TAHAP 6: Integrasi WebSocket & Uji Offline PWA
+### TAHAP 5: Panel Interaktif "" (Fitur Juara Juri)
 
 #### 🟢 FE-1.8: Live Streaming & Service Worker Cache
 - **Deskripsi:** Menghubungkan client web ke WebSocket backend untuk update live dan menguji ketahanan offline.

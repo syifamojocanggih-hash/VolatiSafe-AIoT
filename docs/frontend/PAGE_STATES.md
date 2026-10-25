@@ -54,7 +54,7 @@ Peta interaktif berbasis **Leaflet + OpenStreetMap** untuk kelompok tani atau pe
 
 ---
 
-## 5. Layar 5: What-If Risk Simulator (Demo Juri)
+## 5. Layar 5:  Risk Simulator (Demo Juri)
 
 Panel pengujian khusus untuk dewan juri hackathon saat presentasi purwarupa:
 - **Slider Kontrol Interaktif:**

@@ -27,7 +27,7 @@ Setiap anggota tim memiliki zona kerja (*Read/Write Zone*), zona terlarang (*For
 │  ┌───────────────────────────────────────────────────────────────────────┐  │
 │  │                        [ Fullstack: Syifa ]                           │  │
 │  │   • Backend: FastAPI, Ingestion Adapter, TimescaleDB & Bot            │  │
-│  │   • Frontend: Next.js PWA, Leaflet Map, Recharts & What-If UI         │  │
+│  │   • Frontend: Next.js PWA, Leaflet Map, Recharts &          │  │
 │  └───────────────────────────────────────────────────────────────────────┘  │
 │                                            ▲                                │
 │                                            │ Feature Vector DTO             │
@@ -69,7 +69,7 @@ Setiap anggota tim memiliki zona kerja (*Read/Write Zone*), zona terlarang (*For
 |---|---|
 | **Penanggung Jawab** | **Syifa (Syifa)** |
 | **Area Akses R/W** | `backend/`, `frontend/`, `migrations/`, `docker/`, `docs/backend/`, `docs/frontend/` |
-| **Tanggung Jawab** | <br>• **Backend:** Ingestion MQTT bridge, pemetaan paket LoRa (Anti-Corruption Adapter), persistensi PostgreSQL & TimescaleDB hypertable, integrasi service AI Engine, penyedia REST API (`/api/v1/...`) & WebSocket, serta webhook notifikasi WhatsApp (Wablas/Fonnte) dan Telegram Bot.<br>• **Frontend:** Next.js 14 App Router, PWA installable, visualisasi peta petak Leaflet, grafik tren Recharts, UI Dynamic DAT Tracker, UI Multi-Fertilizer Blender (konversi karung & ember), dan panel simulasi What-If. |
+| **Tanggung Jawab** | <br>• **Backend:** Ingestion MQTT bridge, pemetaan paket LoRa (Anti-Corruption Adapter), persistensi PostgreSQL & TimescaleDB hypertable, integrasi service AI Engine, penyedia REST API (`/api/v1/...`) & WebSocket, serta webhook notifikasi WhatsApp (Wablas/Fonnte) dan Telegram Bot.<br>• **Frontend:** Next.js 14 App Router, PWA installable, visualisasi peta petak Leaflet, grafik tren Recharts, UI Dynamic DAT Tracker, UI Multi-Fertilizer Blender (konversi karung & ember), . |
 | **Output Resmi** | Layanan Backend REST/WebSocket yang stabil dan Aplikasi Web PWA yang responsif dan ramah sinyal lambat desa. |
 | **Zona Terlarang** | ❌ DILARANG mengubah formula kinetika kimia enzim urease atau merusak pipeline pelatihan model AI.<br>❌ DILARANG mengubah skema payload sensor hardware tanpa adapter penerjemah.<br>❌ DILARANG melanggar amplop response `{ "data": ..., "meta": ... }` di REST API. |
 

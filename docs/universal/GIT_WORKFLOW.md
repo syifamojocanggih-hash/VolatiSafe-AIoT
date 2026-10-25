@@ -64,7 +64,7 @@ VolatiSafe-AIoT/
 │       ├── README.md                  # Mandat peran, batasan, & zona terlarang Syifa (Frontend)
 │       ├── TASK_GUIDE.md              # Panduan tugas langkah demi langkah FE-1.1 s.d FE-1.8
 │       ├── DESIGN_SYSTEM.md           # Tokens palet status AVRI (4 warna), tipografi, & aksesibilitas
-│       ├── PAGE_STATES.md             # Spesifikasi UI state 5 layar utama & what-if simulator
+│       ├── PAGE_STATES.md             # Spesifikasi UI state 5 layar utama 
 │       ├── UI_COMPONENTS.md           # Katalog komponen reusable (Card, Chart, Map, Banner)
 │       ├── MOCK_DATA.md               # Fixture JSON offline untuk dev frontend independen
 │       └── SETUP.md                   # Panduan setup Next.js 14, Tailwind CSS, & PWA
@@ -113,7 +113,7 @@ Hanya ada **6 cabang aktif** di seluruh repositori:
 | **`Development`** | **Seluruh Tim** | Seluruh Repositori (Integration) | Cabang staging tempat bertemunya integrasi 4 cabang role sebelum rilis ke `main`. |
 | **`iot`** | **Hadi M. Hafiiz Hilmi (Hafiiz)** | `firmware/`, `simulation/wokwi/`, `docs/hardware/` | Seluruh kode C++ PlatformIO, driver sensor tanah, bit-packing LoRa 52-byte, dan simulasi Wokwi. |
 | **`digittal-twin`**| **Andharu Raffi (Andharu)** | `digital_twin/`, `simulations/data_replay/`, `docs/digital_twin/` | Model neraca air FAO-56 Penman-Monteith, model difusi termal damped, engine failover imputasi, dan replay data BMKG. |
-| **`full-stack`** | **Syifa (Syifa)** | `backend/`, `frontend/`, `docker/`, `migrations/`, `docs/backend/`, `docs/frontend/` | Server FastAPI, koneksi TimescaleDB, MQTT ingestion worker, WebSocket live, PWA Next.js 14, peta Leaflet, UI DAT tracker, dan What-If slider. |
+| **`full-stack`** | **Syifa (Syifa)** | `backend/`, `frontend/`, `docker/`, `migrations/`, `docs/backend/`, `docs/frontend/` | Server FastAPI, koneksi TimescaleDB, MQTT ingestion worker, WebSocket live, PWA Next.js 14, peta Leaflet, UI DAT tracker, . |
 | **`ai`** | **Aris Kurniawan (Aris / Lead)**| `ai_engine/`, `models/`, `docs/ai/`, `docs/universal/` | Model Physics-Informed ML (PIML), residual LightGBM, formulasi AVRI (0–100%), TreeSHAP, dan penjaga kontrak `INTERFACES.md`. |
 
 ---
@@ -183,7 +183,7 @@ Sebelum sebuah cabang role di-merge ke `Development`, pastikan checklist berikut
 - [ ] Ingestion adapter berhasil memproses paket LoRa Wokwi dan menyimpan ke hypertable TimescaleDB.
 - [ ] REST API mematuhi amplop respons baku `{ "data": ..., "meta": ... }`.
 - [ ] Frontend Next.js 14 lolos `npm run build` tanpa error linting.
-- [ ] Peta Leaflet dan panel What-If simulator responsif di layar HP.
+- [ ] Peta Leaflet  responsif di layar HP.
 - [ ] Tidak ada modifikasi file di luar folder `backend/`, `frontend/`, `docker/`, `migrations/`, `docs/backend/`, dan `docs/frontend/`.
 
 ### 5.4 Checklist Cabang `ai` (Aris)
@@ -222,7 +222,7 @@ chore    : Pembaruan dependensi atau konfigurasi build
 feat(iot): implement 5x burst sampling with median filter
 feat(dt): integrate fao-56 et0 calculation into digital twin state
 feat(full-stack): add timescale hypertable migration and rest router
-feat(full-stack): build what-if interactive slider component
+feat(full-stack): build  interactive slider component
 feat(ai): train residual lightgbm model with monotone constraints
 docs(universal): update branch strategy to role-based model
 ```

@@ -11,7 +11,7 @@ Sistem memadukan:
 1. **IoT Node Berdaya Mandiri (< Rp250.000/node):** ESP32 + sensor fisik terverifikasi (Kelembaban Kapasitif, Suhu Probe DS18B20, pH Tanah) + transmisi radio LoRa 433 MHz mesh (zero-internet di lahan).
 2. **Agro-Climatic Digital Twin:** Model virtual neraca air tanah FAO-56 ($ET_0$) dan difusi termal kontinu untuk imputasi data saat terjadi *sensor dropout*.
 3. **Physics-Informed Machine Learning (PIML):** Model LightGBM Regressor yang memprediksi *residual variance* di atas kinetika reaksi kimia enzim urease (Arrhenius Decay) untuk menghasilkan skor *Ammonia Volatilization Risk Index* (AVRI 0–100%).
-4. **PWA Dashboard & Bot Alert WhatsApp:** Preskripsi waktu jam-ke-jam, instruksi mitigasi fisik lapangan (tugal/benam vs siram), serta fitur *Dynamic DAT Tracker* dan *Multi-Fertilizer Blender* (konversi praktis karung & ember).
+4. **PWA Dashboard & Bot Alert WhatsApp:** Preskripsi waktu jam-ke-jam, instruksi mitigasi fisik lapangan (tugal/benam vs siram), serta fitur *Dynamic DAT Tracker* dan *Multi-Fertilizer Blender*.
 
 ---
 
@@ -38,7 +38,7 @@ Seluruh dokumentasi dirancang menggunakan arsitektur modular **Multi-Domain Isol
 │   ├── hardware/                      # Domain 1: Hardware, Schematics & Firmware Wokwi
 │   ├── ai/                            # Domain 2: Digital Twin FAO-56, PIML & TreeSHAP
 │   ├── backend/                       # Domain 3: FastAPI, TimescaleDB, Ingestion & Bot
-│   └── frontend/                      # Domain 4: Next.js 14, PWA, Tailwind & What-If Simulator
+│   └── frontend/                      # Domain 4: Next.js 14, PWA, Tailwind & 
 ```
 
 ---

@@ -59,7 +59,7 @@ Alur saat petani baru menanam benih jagung:
 Alur cepat 2 menit yang disimulasikan saat sesi penjurian Hackathon DeepTech for FoodTech 2026:
 
 ```
-[ Juri Membuka Layar 5 — What-If Risk Simulator ]
+[ Juri Membuka Layar 5 —  Risk Simulator ]
                   │
                   ▼
 [ Demonstrasi Skenario A — Terik Ekstrem ]

@@ -12,7 +12,6 @@ Target utama: Menghasilkan bukti purwarupa perangkat lunak tertutup (*closed-loo
 | **H-2** | Bangun **Agro-Climatic Digital Twin** (persamaan neraca air FAO-56 & difusi panas tanah) tervalidasi dataset BMKG. | Python, NumPy, SimPy | AI Engine |
 | **H-3** | Kembangkan **Firmware Wokwi ESP32** (sensor virtual kapasitif, suhu DS18B20, pH probe, LoRa bridge ke MQTT). | Wokwi, PlatformIO, Mosquitto | Hardware |
 | **H-4** | Latih model **Physics-Informed ML (PIML)** LightGBM + modul TreeSHAP; evaluasi metrik MAE/AUC. | LightGBM, scikit-learn, shap | AI Engine |
-| **H-5** | Bangun **Dashboard Next.js 14** (Dashboard Petak, Peta Risiko Leaflet, Kalkulator Pupuk, What-If Slider). | Next.js, Tailwind, Recharts | Frontend |
 | **H-6** | Integrasi end-to-end Wokwi → MQTT → Digital Twin → AI → Dashboard. Eksekusi 3 skenario demo juri. | Seluruh Tim | All Agents |
 | **H-7** | Rekam video demo 2 menit, tangkapan layar purwarupa, skema sirkuit 3D casing, finalisasi proposal 3 halaman. | Proposal & Media Pack | Tim Inti |
 

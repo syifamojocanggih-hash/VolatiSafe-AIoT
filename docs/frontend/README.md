@@ -12,7 +12,7 @@ Syifa bertanggung jawab atas seluruh antarmuka pengguna (UI/UX) dan pengalaman v
 - Web Application modern berbasis **Next.js 14 (App Router)** dan **Tailwind CSS**.
 - Visualisasi peta interaktif petak ladang jagung menggunakan **Leaflet + OpenStreetMap**.
 - Grafik deret waktu telemetri 24 jam dan bar proyeksi jendela aman 72 jam menggunakan **Recharts**.
-- Fitur interaktif: *Dynamic DAT Tracker* (siklus tanam), *Multi-Fertilizer Blender* (kalkulator ember/karung), dan *What-If Risk Simulator* untuk dewan juri.
+- Fitur interaktif: *Dynamic DAT Tracker* (siklus tanam), *Multi-Fertilizer Blender* (kalkulator ember/karung), dan * Risk Simulator* untuk dewan juri.
 - Implementasi **Progressive Web App (PWA)** dengan service worker agar petani dapat mengakses data penting saat offline di tengah kebun.
 
 ### File & Direktori yang Dimiliki (Boleh Ditulis):

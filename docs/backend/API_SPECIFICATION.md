@@ -192,15 +192,3 @@ Inisiasi atau pembaruan siklus tanam aktif untuk menghitung umur tanaman (*Days 
 
 ---
 
-### 2.6 `POST /simulation/what-if`
-Mode simulasi langsung tanpa database untuk demonstrasi juri.
-- **Request Body:**
-```json
-{
-  "soil_temp_c": 34.5,
-  "moisture_pct": 21.0,
-  "ph": 7.85,
-  "rain_mm": 0.0
-}
-```
-- **Contoh Respons (HTTP 200):** Mengembalikan objek `PredictRiskResponseDTO` lengkap dengan nilai TreeSHAP instan.

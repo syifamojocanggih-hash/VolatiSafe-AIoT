@@ -139,7 +139,6 @@ Pada fase seleksi proposal (batas 31 Okt 2026), sistem **100% dijalankan dalam l
 │ [ PRESENTATION LAYER ] (Live Next.js / Streamlit Dashboard + Telegram Bot)  │
 │   • Visualisasi real-time pergerakan grafik telemetri virtual               │
 │   • Peta petak sawah/ladang dengan perubahan warna zonasi risiko dinamis    │
-│   • Panel Interaktif "What-If Simulator" untuk pengujian langsung oleh juri │
 │   • Pengiriman pesan bot alert instan ke smartphone penguji                 │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
@@ -262,7 +261,6 @@ Penambahan panel surya 1W (≈ 150 mAh/hari saat cerah) membuat node berpotensi 
 
 Digital twin di sini **bukan visualisasi 3D**. Ini adalah **model state virtual** yang mereplikasi kondisi biofisik tanah secara kontinu, dipakai untuk:
 1. Mengisi celah data saat sensor gagal/offline (imputasi).
-2. Menjalankan simulasi *what-if* (misal: "jika hujan turun 20 mm dalam 3 jam, bagaimana risiko volatilisasi?").
 3. Menjadi jembatan antara data telemetri mentah dan model AI.
 
 ### 5.2 State Vector Digital Twin
@@ -315,7 +313,6 @@ pH(t+1) = pH(t) + 0.05 · (lime_applied) // efek dolomit
 | **Live** | Sensor mengirim data normal (< 30 menit) | Digital twin pakai nilai sensor langsung |
 | **Interpolasi** | Sensor hilang 30 menit – 6 jam | Model transisi memprediksi nilai (timestamps ditandai `predicted`) |
 | **Forecast** | Selalu aktif | Proyeksi 12 jam ke depan untuk jendela pemupukan |
-| **What-if** | Dipicu user dari dashboard | Simulasi skenario hujan/pemupukan tanpa mengubah state live |
 
 ### 5.5 Stack Teknologi Digital Twin
 
@@ -588,7 +585,6 @@ Besok, 06:00–09:00 (Risiko 18%)
 | `/api/fields/{id}/fertilization-log` | POST | Catat aplikasi pupuk aktual |
 | `/api/crop-cycles` | POST/GET | Inisiasi tanggal tanam, varietas, & jadwal fase fenologi (DAT Tracker) |
 | `/api/fertilizer/blend-calculator` | POST | Hitung takaran majemuk (Urea + Phonska + ZA) & konversi ember/karung |
-| `/api/simulate` | POST | Mode what-if (hujan/dosis/pH) |
 | `/api/health` | GET | Status gateway & uptime |
 
 ### 8.3 Skema Database (PostgreSQL / TimescaleDB)
@@ -727,7 +723,7 @@ Struktur tim pengembang VolatiSafe AIoT dibagi menjadi 4 peran teknis utama deng
 | **AI Engineer & System Architect (Lead)** | **Aris Kurniawan (Aris)** | Koordinator teknis menyeluruh, penjamin kontrak data (`INTERFACES.md`), implementasi Physics-Informed ML (PIML) LightGBM Regressor, formulasi skor AVRI, explainability TreeSHAP, dan pengujian akurasi prediksi. | `ai_engine/`, `models/`, `docs/ai/` (MODEL_SPEC, EXPLAINABILITY_SHAP, MOCK_PREDICTOR), `docs/universal/` |
 | **IoT & Embedded Hardware Engineer** | **Hadi M. Hafiiz Hilmi (Hafiiz)** | Desain skematik sirkuit ESP32, pemilihan komponen low-cost, kalibrasi sensor analog-ke-fisik (Moisture & pH), algoritma burst sampling, manajemen daya deep-sleep 15 menit, transmisi LoRa 433 MHz, dan simulasi Wokwi virtual testbed. | `firmware/`, `simulation/wokwi/`, `docs/hardware/` |
 | **Digital Twin Engineer** | **Andharu Raffi (Andharu)** | Pemodelan biofisika tanah kontinu, neraca air perakaran FAO-56 ($ET_0$ Penman-Monteith), model difusi termal tanah teredam (*damped*), modul imputasi failover saat sensor *offline* (`[Est-Simulated]`), dan pemutaran ulang (*replay*) data klimatologi historis BMKG Lampung. | `digital_twin/`, `simulations/data_replay/`, `docs/digital_twin/` |
-| **Fullstack Developer (Backend + Frontend)** | **Syifa (Syifa)** | <br>• **Backend:** FastAPI REST API, WebSocket live stream, TimescaleDB hypertable & PostgreSQL, Ingestion MQTT broker bridge, bot alert WhatsApp (Wablas/Fonnte) & Telegram.<br>• **Frontend:** Next.js 14 App Router, PWA installable, visualisasi peta petak Leaflet, grafik tren Recharts, UI Dynamic DAT Tracker, UI Multi-Fertilizer Blender (konversi karung & ember), dan panel What-If simulator. | `backend/`, `frontend/`, `migrations/`, `docker/`, `docs/backend/`, `docs/frontend/` |
+| **Fullstack Developer (Backend + Frontend)** | **Syifa (Syifa)** | <br>• **Backend:** FastAPI REST API, WebSocket live stream, TimescaleDB hypertable & PostgreSQL, Ingestion MQTT broker bridge, bot alert WhatsApp (Wablas/Fonnte) & Telegram.<br>• **Frontend:** Next.js 14 App Router, PWA installable, visualisasi peta petak Leaflet, grafik tren Recharts, UI Dynamic DAT Tracker, UI Multi-Fertilizer Blender (konversi karung & ember). | `backend/`, `frontend/`, `migrations/`, `docker/`, `docs/backend/`, `docs/frontend/` |
 
 ---
 

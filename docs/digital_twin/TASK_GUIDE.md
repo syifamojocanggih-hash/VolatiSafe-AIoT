@@ -74,15 +74,14 @@ Membangun mesin biofisika tanah virtual kontinu yang mampu memutakhirkan state t
 
 ---
 
-### TAHAP 5: Proyeksi 72 Jam & Sandbox What-If
+### TAHAP 5: Proyeksi 72 Jam & Sandbox 
 
-#### 🟢 DT-1.5: 72-Hour Forecaster & What-If Sandbox
-- **Deskripsi:** Membangun generator kurva 72 jam untuk penentuan jendela aman pemupukan serta sandbox simulasi interaktif untuk pengujian dewan juri.
-- **Target File:** `digital_twin/forecaster.py`, `digital_twin/what_if_sandbox.py`
+#### 🟢 DT-1.5: 72-Hour Forecaster (Jendela Aman)
+- **Deskripsi:** Membangun generator kurva 72 jam untuk penentuan jendela aman pemupukan.
+- **Target File:** `digital_twin/forecaster.py`
 - **Checklist:**
   - [ ] Menerima array 72 jam ramalan cuaca BMKG dan mengembalikan array 72 jam proyeksi $\theta$ dan $T_{soil}$.
-  - [ ] Sandbox What-If mengeksekusi perhitungan dalam memori dalam waktu $\le 15$ milidetik tanpa menulis ke database produksi.
-
+  
 ---
 
 ## 🚫 Zona Terlarang Andharu (DILARANG KERAS)

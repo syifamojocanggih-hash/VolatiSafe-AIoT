@@ -64,8 +64,4 @@ Menampilkan hasil racikan pupuk majemuk dalam representasi objek nyata:
 - **Lapisan Poligon GeoJSON:** Poligon bedeng diwarnai otomatis sesuai status skor AVRI petak.
 - **Interaksi:** Klik bedeng untuk berganti fokus petak di dashboard utama.
 
----
 
-## 8. `WhatIfSliderPanel.tsx` (Panel Simulator Juri)
-- **Kontrol:** 4 slider input (Suhu, Kelembaban, pH, Curah Hujan) dengan debounce 100 ms.
-- **Koneksi:** Mengirim request ke endpoint `/api/v1/simulation/what-if` dan memperbarui visualisasi gauge meter secara instan.

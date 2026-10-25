@@ -113,10 +113,10 @@ Membangun orkestrator sentral berbasis **FastAPI** dan **TimescaleDB** yang mamp
 - **Daftar Endpoint:**
   - `POST /api/v1/crop-cycles`: Inisiasi tanggal tanam, perhitungan otomatis umur `DAT`, dan jadwal fase fenologi jagung (V3, V8, V12, Panen).
   - `POST /api/v1/fertilizer/blend-calculator`: Menghitung racikan pupuk majemuk (Urea + Phonska + ZA) dan mengonversinya ke satuan praktis: **jumlah karung 50 kg dan ember takar 8 kg**.
-  - `POST /api/v1/simulation/what-if`: Endpoint simulasi langsung untuk juri tanpa mengubah data database produksi.
+  - `POST /api/v1/simulation/`: Endpoint simulasi langsung untuk juri tanpa mengubah data database produksi.
 - **Checklist:**
   - [ ] Logika kalkulator pupuk sesuai standar Permentan No. 40/2007 & Balitbangtan.
-  - [ ] Endpoint What-If mengembalikan skor AVRI dan TreeSHAP instan dalam waktu $< 50$ ms.
+  - [ ] Endpoint  mengembalikan skor AVRI dan TreeSHAP instan dalam waktu $< 50$ ms.
 
 #### 🟢 BE-1.8: WebSocket Live Stream & Bot Alert Dispatcher
 - **Deskripsi:** Streaming data real-time ke web dan pengiriman pesan otomatis ke petani.

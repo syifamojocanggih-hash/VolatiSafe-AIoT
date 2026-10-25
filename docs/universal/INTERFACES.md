@@ -195,7 +195,6 @@ AI Engine diisolasi sebagai callable service / module. Backend mengemas fitur me
 | `GET` | `/api/v1/fields/{id}/forecast-window` | Proyeksi 72 jam jendela pemupukan aman | `?hours=72` |
 | `POST` | `/api/v1/fertilizer/blend-calculator` | Hitung dosis pupuk majemuk & konversi ember | Request Body: Luas lahan, target tonase |
 | `POST` | `/api/v1/crop-cycles` | Simpan/ubah tanggal tanam & varietas benih | Request Body: Tanggal tanam, varietas |
-| `POST` | `/api/v1/simulation/what-if` | Mode simulator interaktif untuk juri | Request Body: Suhu, kelembaban, pH, hujan |
 | `GET` | `/api/v1/health` | Status gateway, uptime, & sensor status | — |
 
 ---
@@ -297,7 +296,7 @@ Menyediakan data bar 72 jam (dibagi per blok 3 jam) untuk visualisasi bar strip 
 }
 ```
 
-#### D. `POST /api/v1/simulation/what-if`
+#### D. `POST /api/v1/simulation/`
 Endpoint pengujian langsung juri untuk mengubah slider parameter cuaca/tanah secara interaktif.
 **Request:**
 ```json

@@ -68,7 +68,7 @@ Untuk tahap seleksi proposal dan demonstrasi purwarupa *low-fidelity* (TKT 3), s
 │                               ▼                                             │
 │ [ LIVE DASHBOARD & INTERACTIVE SIMULATOR ] (Next.js 14)                     │
 │   • Grafik telemetri dinamis & peta petak interaktif                        │
-│   • Panel "What-If Slider" untuk pengujian langsung oleh dewan juri         │
+│   • Panel "" untuk pengujian langsung oleh dewan juri         │
 │   • Notifikasi instan via Telegram Bot ke smartphone penguji                │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
