@@ -8,6 +8,7 @@ import { RiskStatusBanner } from '@/components/dashboard/RiskStatusBanner';
 import { MetricCardsGrid } from '@/components/dashboard/MetricCardsGrid';
 import { Trend24hChart } from '@/components/dashboard/Trend24hChart';
 import { SafeWindowForecast } from '@/components/dashboard/SafeWindowForecast';
+import { ParcelRiskMap } from '@/components/map/ParcelRiskMap';
 import { PredictionDetailModal } from '@/components/modals/PredictionDetailModal';
 import { SettingsModal } from '@/components/modals/SettingsModal';
 import { initialDashboardData, criticalDashboardData } from '@/mocks/dashboardMock';
@@ -50,8 +51,8 @@ export default function DashboardPage() {
         activeTab={activeTab}
         onTabChange={(tab) => {
           setActiveTab(tab);
-          if (tab !== 'dashboard') {
-            setToastMessage(`Navigasi ke modul "${tab}" dibuka.`);
+          if (tab !== 'dashboard' && tab !== 'map') {
+            setToastMessage(`Modul "${tab}" sedang disiapkan untuk tahap selanjutnya.`);
             setTimeout(() => setToastMessage(null), 2500);
           }
         }}
@@ -70,24 +71,32 @@ export default function DashboardPage() {
           onOpenSettings={() => setIsSettingsModalOpen(true)}
         />
 
-        {/* Dashboard Main Canvas */}
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-6xl w-full mx-auto space-y-4 sm:space-y-5">
-          {/* Status Banner */}
-          <RiskStatusBanner
-            banner={currentData.statusBanner}
-            onOpenDetails={() => setIsDetailModalOpen(true)}
-            onPostponeAction={handlePostpone}
-            isPostponed={isPostponed}
-          />
+        {/* Main Canvas View Switcher */}
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-6xl w-full mx-auto">
+          {activeTab === 'map' ? (
+            /* Layar 2: Peta Zonasi Risiko Volatilisasi Lahan */
+            <ParcelRiskMap onBackToDashboard={() => setActiveTab('dashboard')} />
+          ) : (
+            /* Layar 1: Dashboard Utama Petak */
+            <div className="space-y-4 sm:space-y-5">
+              {/* Status Banner */}
+              <RiskStatusBanner
+                banner={currentData.statusBanner}
+                onOpenDetails={() => setIsDetailModalOpen(true)}
+                onPostponeAction={handlePostpone}
+                isPostponed={isPostponed}
+              />
 
-          {/* 4 Metric Telemetry Cards */}
-          <MetricCardsGrid metrics={currentData.metrics} />
+              {/* 4 Metric Telemetry Cards */}
+              <MetricCardsGrid metrics={currentData.metrics} />
 
-          {/* 24-Hour Forecast Trend Chart */}
-          <Trend24hChart data={currentData.trend24h} />
+              {/* 24-Hour Forecast Trend Chart */}
+              <Trend24hChart data={currentData.trend24h} />
 
-          {/* 72-Hour Safe Window Bar Strip */}
-          <SafeWindowForecast days={currentData.forecast72h} />
+              {/* 72-Hour Safe Window Bar Strip */}
+              <SafeWindowForecast days={currentData.forecast72h} />
+            </div>
+          )}
         </main>
       </div>
 
