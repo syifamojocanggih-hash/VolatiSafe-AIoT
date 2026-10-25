@@ -4,6 +4,34 @@ Seluruh catatan kemajuan, keputusan teknis, dan implementasi antarmuka frontend 
 
 ---
 
+## [2026-10-25] — Penghapusan Sub-Keterangan Durasi Jendela Rekomendasi
+
+### 🧹 Penyederhanaan Teks Kartu Skor (`PredictionDetailModal.tsx` & `dashboardMock.ts`)
+- **Penghapusan Kalimat *"Jendela terbuka sekitar 4 jam ke depan."*:**
+  - Menghapus elemen baris keterangan durasi `{statusBanner.openDurationText}` di bawah waktu jendela rekomendasi pada kartu skor modal detail prediksi.
+  - Menyelaraskan teks pada mock data (`dashboardMock.ts`) agar tajuk jendela rekomendasi tetap bersih, simetris, dan langsung menampilkan waktu operasional tanpa teks berulang: **`Sekarang (06:00 – 10:00 WIB)`**.
+- **Kepatuhan Batasan Dokumentasi Proyek (.md):**
+  - Memeriksa seluruh acuan spesifikasi antarmuka pada `docs/frontend/TASK_GUIDE.md`, `docs/frontend/DESIGN_SYSTEM.md`, dan `docs/frontend/MOCK_DATA.md` untuk memastikan integritas batasan desain tetap terjaga.
+- **Validasi Build & Visual Browser:**
+  - `npm run build` sukses 100% tanpa error TypeScript/ESLint.
+  - Verifikasi browser subagent mengonfirmasi kartu skor atas kini sangat rapi, seimbang, dan bebas dari kalimat repetitif.
+
+---
+
+## [2026-10-25] — Penghapusan Bagian Protokol Rekomendasi Preskripsi Lapangan pada Modal Prediksi
+
+### 🧹 Pemadatan Modal Analisis (`PredictionDetailModal.tsx`)
+- **Penghapusan Blok Protokol Rekomendasi Preskripsi Lapangan:**
+  - Menghapus seluruh kontainer *"Protokol Rekomendasi Preskripsi Lapangan"* (termasuk kartu *Metode Aplikasi*, *Batas Waktu Aman*, *Estimasi Finansial*, dan teks petunjuk agronomi) sesuai instruksi pengguna.
+  - Alur modal kini lebih padat, ringkas, dan fokus langsung pada analisis model (PIML, TreeSHAP, dan Proyeksi Traktori 12 Jam) sebelum tombol navigasi aksi (*What-If Simulator* & *Mengerti & Tutup*).
+- **Pembersihan Dependensi Unused Icons:**
+  - Membersihkan impor ikon `CheckCircle2` dan `AlertTriangle` dari `lucide-react`.
+- **Validasi Build:**
+  - `npm run build` sukses 100% tanpa peringatan ESLint atau TypeScript error.
+  - Verifikasi browser subagent mengonfirmasi modal lebih proporsional dan tidak memerlukan scroll vertikal berlebih.
+
+---
+
 ## [2026-10-25] — Pembersihan Visual Modal Detail Prediksi AVRI (Format Sebaris, Hapus Ikon, Badge PIML & Teks SHAP Values)
 
 ### 🧹 Penyederhanaan Visual & Tata Letak Sebaris (`PredictionDetailModal.tsx`)
@@ -19,6 +47,9 @@ Seluruh catatan kemajuan, keputusan teknis, dan implementasi antarmuka frontend 
 - **Penyajian Nilai Dampak SHAP Secara Langsung (Tanpa Kotak/Kapsul/Square):**
   - Menghapus latar belakang kapsul abu-abu/hijau/merah (`px-2 py-0.5 rounded-full border bg-...`) pada label dampak (seperti `+4% Netral Stabil`, `-32% Menekan Risiko`, dll.).
   - Menampilkannya secara langsung (*direct text*) dengan tipografi tebal berwarna semantik (`text-emerald-700`, `text-red-700`, atau `text-slate-600`) berdampingan dengan ikon panah tren tanpa kotak pembungkus.
+- **Narasi Deskripsi Faktor TreeSHAP Satu Baris Kalimat (*Single-Line Sentence*):**
+  - Mengubah narasi panjang dua kalimat pada setiap faktor mikroklimat menjadi satu kalimat ringkas dan padat (misal: *"Kadar air optimal (>25%) melarutkan urea langsung ke zona perakaran tanpa kristalisasi"*).
+  - Menambahkan styling `truncate` agar seluruh penjelasan faktor mikroklimat konsisten berada dalam tepat satu baris kalimat tanpa terpotong ke bawah (*no wrapping*).
 - **Validasi Build:**
   - `npm run build` sukses 100% tanpa error TypeScript/ESLint.
   - Verifikasi browser subagent mengonfirmasi tampilan modal yang bersih, minimalis, dan elegan.

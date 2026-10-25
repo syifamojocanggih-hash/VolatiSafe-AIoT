@@ -20,9 +20,9 @@ export const initialDashboardData: DashboardState = {
     tag: 'STATUS HARI INI - RISIKO AMAN AVRI 4%',
     title: 'Aman, waktu optimal pemupukan',
     description:
-      'Suhu tanah 26,0°C, kelembapan 42,0%, pH 7,10. Tanah cukup untuk mengikat nitrogen ke zona perakaran. Jendela aman terdekat : Sekarang, Jendela terbuka sekitar 4 jam ke depan.',
+      'Suhu tanah 26,0°C, kelembapan 42,0%, pH 7,10. Tanah cukup untuk mengikat nitrogen ke zona perakaran. Jendela aman terdekat: Sekarang (06:00 – 10:00 WIB).',
     bestWindow: 'Sekarang (06:00 – 10:00 WIB)',
-    openDurationText: 'Jendela terbuka sekitar 4 jam ke depan.',
+    openDurationText: '',
   },
   metrics: [
     {

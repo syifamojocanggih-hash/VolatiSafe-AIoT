@@ -4,8 +4,6 @@ import React from 'react';
 import Image from 'next/image';
 import {
   X,
-  CheckCircle2,
-  AlertTriangle,
   Layers,
   Sparkles,
   Clock,
@@ -244,9 +242,6 @@ export const PredictionDetailModal: React.FC<PredictionDetailModalProps> = ({
               <span className="text-xs sm:text-sm font-bold text-slate-900 block mt-0.5 whitespace-nowrap">
                 {statusBanner.bestWindow}
               </span>
-              <span className="text-[11px] text-slate-600 block whitespace-nowrap">
-                {statusBanner.openDurationText}
-              </span>
             </div>
           </div>
 
@@ -325,7 +320,7 @@ export const PredictionDetailModal: React.FC<PredictionDetailModalProps> = ({
                     </span>
                   </div>
 
-                  <p className="text-[11.5px] text-slate-600 leading-relaxed">
+                  <p className="text-[11.5px] text-slate-600 leading-relaxed truncate">
                     {f.narrative}
                   </p>
                 </div>
@@ -372,49 +367,6 @@ export const PredictionDetailModal: React.FC<PredictionDetailModalProps> = ({
           </div>
         </div>
 
-        {/* 4. Rekomendasi Preskripsi Agronomi Lapangan Terperinci */}
-        <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
-          <div className="flex items-center justify-between">
-            <h3 className="text-xs font-bold text-slate-900 flex items-center gap-1.5 uppercase tracking-wider">
-              {isAman ? (
-                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-              ) : (
-                <AlertTriangle className="w-4 h-4 text-red-600" />
-              )}
-              Protokol Rekomendasi Preskripsi Lapangan
-            </h3>
-            <span className="text-[11px] font-bold text-[#236B32]">
-              {isAman ? 'Target Serapan N ≥ 88–92%' : 'Pencegahan Kehilangan N > 60%'}
-            </span>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-1 text-xs">
-            <div className="p-2.5 rounded-xl bg-white border border-slate-200">
-              <span className="text-[10px] font-bold text-slate-400 uppercase block">Metode Aplikasi</span>
-              <span className="font-bold text-slate-800 block mt-0.5">
-                {isAman ? 'Tugal Benam Samping 5–7 cm' : 'TUNDA / Irigasi Pra-Tebar'}
-              </span>
-            </div>
-            <div className="p-2.5 rounded-xl bg-white border border-slate-200">
-              <span className="text-[10px] font-bold text-slate-400 uppercase block">Batas Waktu Aman</span>
-              <span className="font-bold text-slate-800 block mt-0.5">
-                {isAman ? 'Sebelum 10:30 WIB (< 30°C)' : 'Tunggu Besok 06:00 WIB'}
-              </span>
-            </div>
-            <div className="p-2.5 rounded-xl bg-white border border-slate-200">
-              <span className="text-[10px] font-bold text-slate-400 uppercase block">Estimasi Finansial</span>
-              <span className="font-bold text-emerald-700 block mt-0.5">
-                {isAman ? 'Hemat ~Rp750.000/ha' : 'Cegah Rugi ~Rp1.200.000/ha'}
-              </span>
-            </div>
-          </div>
-
-          <p className="text-[11.5px] text-slate-600 leading-relaxed pt-1">
-            {isAman
-              ? 'Tanah berada dalam kelembaban optimal (>40%). Butiran urea akan segera terikat ke larutan tanah dalam 30 menit. Aplikasikan dengan teknik tugal di samping rumpun jagung lalu tutup tanah tipis.'
-              : 'Tanah sedang sangat kering dan terik di atas 30°C. Jangan menabur urea sekarang karena penguapan gas amonia akan langsung terjadi. Lakukan penyiraman ringan atau tunggu jendela aman besok pagi.'}
-          </p>
-        </div>
 
         {/* Modal Actions */}
         <div className="flex flex-col sm:flex-row items-center gap-3 pt-1">
