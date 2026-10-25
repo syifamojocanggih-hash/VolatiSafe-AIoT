@@ -1,7 +1,23 @@
 'use client';
 
 import React from 'react';
-import { X, CheckCircle2, AlertTriangle, ShieldCheck, Thermometer, Droplet, Activity } from 'lucide-react';
+import Image from 'next/image';
+import {
+  X,
+  CheckCircle2,
+  AlertTriangle,
+  Thermometer,
+  Droplets,
+  TestTube2,
+  Wind,
+  Layers,
+  Sparkles,
+  Clock,
+  TrendingDown,
+  TrendingUp,
+  SlidersHorizontal,
+  ChevronRight,
+} from 'lucide-react';
 import { StatusBannerData, MetricItem } from '@/types/dashboard';
 
 interface PredictionDetailModalProps {
@@ -9,6 +25,7 @@ interface PredictionDetailModalProps {
   onClose: () => void;
   statusBanner: StatusBannerData;
   metrics: MetricItem[];
+  onOpenSimulator?: () => void;
 }
 
 export const PredictionDetailModal: React.FC<PredictionDetailModalProps> = ({
@@ -16,113 +33,436 @@ export const PredictionDetailModal: React.FC<PredictionDetailModalProps> = ({
   onClose,
   statusBanner,
   metrics,
+  onOpenSimulator,
 }) => {
   if (!isOpen) return null;
 
   const isAman = statusBanner.category === 'aman';
+  const score = statusBanner.avriScore;
+
+  // Baca nilai aktual dari metrik sensor jika tersedia
+  const currentTemp = metrics.find((m) => m.id === 'temp')?.value || '26,0°C';
+  const currentMoisture = metrics.find((m) => m.id === 'moisture')?.value || '42,0%';
+  const currentPh = metrics.find((m) => m.id === 'ph')?.value || '7,10';
+
+  // Nilai Komposit Physics-Informed ML (PIML)
+  const basePhysics = isAman ? 2.8 : 61.4;
+  const residualAI = isAman ? 1.2 : 12.6;
+  const confidenceMargin = isAman ? '±1,2%' : '±2,4%';
+
+  // Data atribusi TreeSHAP Explainable AI sesuai docs/ai/EXPLAINABILITY_SHAP.md
+  const shapFactors = isAman
+    ? [
+        {
+          id: 'moisture',
+          name: 'Kelembaban Tanah (VWC 42,0%)',
+          valueText: '42,0% VWC',
+          shapValue: -32,
+          impactType: 'damping', // menekan risiko
+          impactLabel: '-32% Menekan Risiko',
+          badge: 'Optimal (Difusi Cepat)',
+          narrative:
+            'Kadar air tanah berada di atas kapasitas layu (>25%). Urea terlarut langsung ke zona perakaran dalam 30 menit tanpa kristalisasi di permukaan.',
+          icon: Droplets,
+        },
+        {
+          id: 'temp',
+          name: 'Suhu Tanah Permukaan (26,0°C)',
+          valueText: '26,0°C',
+          shapValue: -18,
+          impactType: 'damping',
+          impactLabel: '-18% Menekan Risiko',
+          badge: 'Sejuk (Enzim Tertekan)',
+          narrative:
+            'Suhu tanah berada jauh di bawah ambang aktivasi termal enzim urease (30,0°C). Laju hidrolisis Arrhenius tertekan hingga 70%.',
+          icon: Thermometer,
+        },
+        {
+          id: 'ph',
+          name: 'Derajat Keasaman pH Tanah (7,10)',
+          valueText: 'pH 7,10',
+          shapValue: 4,
+          impactType: 'neutral',
+          impactLabel: '+4% Netral Stabil',
+          badge: 'Netral (Kesetimbangan Stabil)',
+          narrative:
+            'pH tanah mendekati netral. Kesetimbangan ionik NH4+ stabil, pembentukan gas amonia bebas (NH3) sangat minim.',
+          icon: TestTube2,
+        },
+        {
+          id: 'wind_weather',
+          name: 'Prakiraan Curah Hujan & Angin',
+          valueText: 'Angin 1,2 m/s · Hujan 2 mm',
+          shapValue: -8,
+          impactType: 'damping',
+          impactLabel: '-8% Meredam Pelepasan',
+          badge: 'Tenang & Lembap',
+          narrative:
+            'Angin tenang tidak meniup lapisan batas gas, kelembaban atmosfer mikro membantu infiltrasi pupuk ke pori tanah.',
+          icon: Wind,
+        },
+      ]
+    : [
+        {
+          id: 'temp',
+          name: 'Suhu Tanah Permukaan (34,2°C)',
+          valueText: '34,2°C',
+          shapValue: 45,
+          impactType: 'increasing', // menaikkan risiko
+          impactLabel: '+45% Memicu Penguapan',
+          badge: 'Kritis (Aktivasi Termal)',
+          narrative:
+            'Suhu tanah sangat terik melampaui 30°C. Enzim urease terakselerasi secara eksponensial sesuai hukum Arrhenius, menguraikan urea sebelum meresap.',
+          icon: Thermometer,
+        },
+        {
+          id: 'moisture',
+          name: 'Kelembaban Tanah Kering (22,4%)',
+          valueText: '22,4% VWC',
+          shapValue: 26,
+          impactType: 'increasing',
+          impactLabel: '+26% Kering Kerontang',
+          badge: 'Defisit Air Kritis',
+          narrative:
+            'Kadar air di bawah ambang difusi 25%. Butiran urea mengkristal di permukaan dan 60-80% nitrogen menguap bebas ke udara.',
+          icon: Droplets,
+        },
+        {
+          id: 'ph',
+          name: 'Alkalinitas Tanah Basa (pH 7,80)',
+          valueText: 'pH 7,80',
+          shapValue: 18,
+          impactType: 'increasing',
+          impactLabel: '+18% Tanah Berkapur',
+          badge: 'Alkalin Tinggi',
+          narrative:
+            'Kondisi basa Solokuro menggeser kesetimbangan ionik secara sigmoidal ke arah gas amonia bebas (NH3) yang langsung hilang ke atmosfer.',
+          icon: TestTube2,
+        },
+        {
+          id: 'wind_weather',
+          name: 'Radiasi Matahari & Turbulensi Angin',
+          valueText: 'Angin 2,8 m/s · Terik',
+          shapValue: 11,
+          impactType: 'increasing',
+          impactLabel: '+11% Sapuan Angin',
+          badge: 'Turbulensi Kuat',
+          narrative:
+            'Hembusan angin konveksi menyapu lapisan batas gas di permukaan bedeng, mempercepat pelepasan amonia.',
+          icon: Wind,
+        },
+      ];
+
+  // Proyeksi kinetika volatilisasi 12 jam ke depan
+  const trajectorySlots = isAman
+    ? [
+        { time: '06:00 - 09:00', score: '4%', label: 'Jendela Emas Penaburan', status: 'optimal' },
+        { time: '09:00 - 12:00', score: '12%', label: 'Penyerapan Berjalan Aman', status: 'optimal' },
+        { time: '12:00 - 15:00', score: '32%', label: 'Waspada Suhu Naik', status: 'warning' },
+        { time: '15:00 - 18:00', score: '16%', label: 'Kembali Sejuk', status: 'optimal' },
+      ]
+    : [
+        { time: '06:00 - 09:00', score: '48%', label: 'Mulai Hangat', status: 'warning' },
+        { time: '09:00 - 12:00', score: '74%', label: 'Puncak Kritis Penguapan', status: 'danger' },
+        { time: '12:00 - 15:00', score: '82%', label: 'Bahaya Ekstrem Terik', status: 'danger' },
+        { time: '15:00 - 18:00', score: '56%', label: 'Mulai Menurun', status: 'warning' },
+      ];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200">
-      <div className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 overflow-hidden relative">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200">
+      <div className="bg-white rounded-3xl max-w-2xl w-full p-5 sm:p-7 shadow-2xl border border-slate-200 max-h-[92vh] overflow-y-auto relative space-y-5">
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-5 right-5 p-2 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
-          aria-label="Tutup modal"
+          className="absolute top-4 right-4 p-2 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors z-10"
+          aria-label="Tutup modal analisis"
         >
           <X className="w-5 h-5" />
         </button>
 
-        {/* Modal Header */}
-        <div className="flex items-center gap-3 mb-4">
-          <div
-            className={`w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 ${
-              isAman ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'
-            }`}
-          >
-            {isAman ? <ShieldCheck className="w-6 h-6" /> : <AlertTriangle className="w-6 h-6" />}
+        {/* Modal Header: Logo + Judul + AI Tag */}
+        <div className="flex items-start gap-3 pt-1">
+          <div className="w-9 h-9 flex items-center justify-center shrink-0">
+            <Image
+              src="/logo.png"
+              alt="VolatiSafe AIoT"
+              width={36}
+              height={36}
+              className="w-full h-full object-contain filter drop-shadow-sm"
+            />
           </div>
           <div>
-            <h3 className="text-lg font-bold text-slate-900 leading-tight">
-              Detail Prediksi Risiko AVRI
-            </h3>
-            <p className="text-xs text-slate-500 font-medium">
-              Analisis Model Physics-Informed ML & Arrhenius Kinetics
+            <div className="flex items-center gap-2">
+              <h2 className="text-lg sm:text-xl font-extrabold text-slate-900 tracking-tight leading-tight">
+                Detail Analisis Prediksi AVRI
+              </h2>
+              <span className="hidden sm:inline-flex px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
+                PIML Hybrid Engine
+              </span>
+            </div>
+            <p className="text-xs text-slate-500 font-medium mt-0.5">
+              Dekomposisi Lapisan Fisika Arrhenius, Koreksi Residual LightGBM & TreeSHAP
             </p>
+            <div className="flex flex-wrap items-center gap-1.5 mt-2 text-[10.5px]">
+              <span className="font-semibold text-slate-500">Input Telemetri:</span>
+              <span className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-800 font-bold border border-slate-200">
+                Kelembaban {currentMoisture}
+              </span>
+              <span className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-800 font-bold border border-slate-200">
+                Suhu {currentTemp}
+              </span>
+              <span className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-800 font-bold border border-slate-200">
+                pH {currentPh}
+              </span>
+            </div>
           </div>
         </div>
 
-        {/* Status Score Card */}
+        {/* 1. Composite PIML Score Card (Physics vs Machine Learning Breakdown) */}
         <div
-          className={`rounded-2xl p-4 mb-4 border ${
-            isAman ? 'bg-emerald-50 border-emerald-200 text-emerald-900' : 'bg-red-50 border-red-200 text-red-900'
+          className={`rounded-2xl p-4 sm:p-5 border ${
+            isAman
+              ? 'bg-gradient-to-br from-emerald-50 to-emerald-100/40 border-emerald-200'
+              : 'bg-gradient-to-br from-red-50 to-orange-100/40 border-red-200'
           }`}
         >
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wide">
-              Indeks Volatilisasi (AVRI)
-            </span>
-            <span className="text-2xl font-extrabold">{statusBanner.avriScore}%</span>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">
+                Skor Prediksi AVRI (Ammonia Volatilization Risk Index)
+              </span>
+              <div className="flex items-baseline gap-2 mt-0.5">
+                <span
+                  className={`text-3xl sm:text-4xl font-black tracking-tight ${
+                    isAman ? 'text-emerald-700' : 'text-red-700'
+                  }`}
+                >
+                  {score}%
+                </span>
+                <span
+                  className={`text-xs font-bold uppercase px-2.5 py-0.5 rounded-full border ${
+                    isAman
+                      ? 'bg-emerald-100 text-emerald-800 border-emerald-300'
+                      : 'bg-red-100 text-red-800 border-red-300'
+                  }`}
+                >
+                  {statusBanner.category}
+                </span>
+                <span className="text-xs text-slate-500 font-semibold">
+                  (Keyakinan {confidenceMargin})
+                </span>
+              </div>
+            </div>
+
+            <div className="text-left sm:text-right">
+              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">
+                Jendela Rekomendasi
+              </span>
+              <span className="text-xs sm:text-sm font-bold text-slate-900 block mt-0.5">
+                {statusBanner.bestWindow}
+              </span>
+              <span className="text-[11px] text-slate-600 block">
+                {statusBanner.openDurationText}
+              </span>
+            </div>
           </div>
-          <p className="text-xs mt-1 text-slate-600 font-medium leading-relaxed">
-            {statusBanner.title}. {statusBanner.openDurationText}
-          </p>
+
+          {/* Physics vs ML Sub-Components */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4 pt-3.5 border-t border-slate-200/60">
+            <div className="p-3 rounded-xl bg-white/80 border border-slate-200/70">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                  <Layers className="w-3.5 h-3.5 text-[#5E9E49]" />
+                  Base Physics (Kinetika Urease)
+                </span>
+                <span className="text-sm font-extrabold text-slate-900">{basePhysics}%</span>
+              </div>
+              <p className="text-[11px] text-slate-600 mt-1">
+                {isAman
+                  ? 'Persamaan Arrhenius tertekan suhu sejuk (26°C) + difusi pori tanah lancar (VWC 42%).'
+                  : 'Suhu tanah 34,2°C mengaktifkan eksponensial hidrolisis enzimatik urease tanah.'}
+              </p>
+            </div>
+
+            <div className="p-3 rounded-xl bg-white/80 border border-slate-200/70">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-amber-600" />
+                  Koreksi Residual LightGBM
+                </span>
+                <span className="text-sm font-extrabold text-slate-900">+{residualAI}%</span>
+              </div>
+              <p className="text-[11px] text-slate-600 mt-1">
+                {isAman
+                  ? 'Penyesuaian fluks angin tenang (1,2 m/s) dan kelembaban udara ambien BMKG.'
+                  : 'Koreksi interaksi turbulensi angin konveksi dan selisih suhu permukaan-udara.'}
+              </p>
+            </div>
+          </div>
         </div>
 
-        {/* Breakdown Factors (SHAP TreeSHAP Attribution) */}
-        <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider mb-2.5">
-          Faktor Penentu Kondisi Tanah
-        </h4>
-        <div className="space-y-2.5 mb-5">
-          {metrics
-            .filter((m) => !m.isAvriCard)
-            .map((m) => {
-              let Icon = Droplet;
-              if (m.id === 'temp') Icon = Thermometer;
-              if (m.id === 'ph') Icon = Activity;
+        {/* 2. TreeSHAP Feature Attribution (Explainable AI Waterfall) */}
+        <div>
+          <div className="flex items-center justify-between mb-2.5">
+            <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
+              Dekomposisi TreeSHAP (Faktor Penentu Penguapan)
+            </h3>
+            <span className="text-[11px] font-semibold text-slate-500">
+              Explainable AI · SHAP Values
+            </span>
+          </div>
+
+          <div className="space-y-2.5">
+            {shapFactors.map((f) => {
+              const Icon = f.icon;
+              const isDamping = f.impactType === 'damping';
+              const isIncreasing = f.impactType === 'increasing';
 
               return (
                 <div
-                  key={m.id}
-                  className="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100"
+                  key={f.id}
+                  className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 hover:bg-slate-50/80 transition-colors"
                 >
-                  <div className="flex items-center gap-2.5">
-                    <Icon className="w-4 h-4 text-slate-500" />
-                    <span className="text-xs font-semibold text-slate-700">
-                      {m.label}
-                    </span>
+                  <div className="flex items-center justify-between gap-2 mb-1.5">
+                    <div className="flex items-center gap-2">
+                      <div className="w-6 h-6 rounded-lg bg-white border border-slate-200 flex items-center justify-center shrink-0">
+                        <Icon className="w-3.5 h-3.5 text-slate-600" />
+                      </div>
+                      <span className="text-xs font-bold text-slate-900">{f.name}</span>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <span
+                        className={`text-[11px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 ${
+                          isDamping
+                            ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
+                            : isIncreasing
+                            ? 'bg-red-100 text-red-800 border border-red-200'
+                            : 'bg-slate-200 text-slate-700 border border-slate-300'
+                        }`}
+                      >
+                        {isDamping ? (
+                          <TrendingDown className="w-3 h-3 text-emerald-600" />
+                        ) : isIncreasing ? (
+                          <TrendingUp className="w-3 h-3 text-red-600" />
+                        ) : null}
+                        {f.impactLabel}
+                      </span>
+                    </div>
                   </div>
-                  <div className="text-right">
-                    <span className="text-sm font-bold text-slate-900">
-                      {m.value}
-                    </span>
-                    <span className="text-2xs text-emerald-600 font-medium ml-2">
-                      (Optimal)
-                    </span>
-                  </div>
+
+                  <p className="text-[11.5px] text-slate-600 leading-relaxed pl-8">
+                    {f.narrative}
+                  </p>
                 </div>
               );
             })}
+          </div>
         </div>
 
-        {/* Agronomy Field Action Recommendation */}
-        <div className="p-4 rounded-2xl bg-slate-100 text-xs text-slate-700 space-y-1.5">
-          <p className="font-bold text-slate-900 flex items-center gap-1.5">
-            <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-            Rekomendasi Preskripsi Lapangan:
-          </p>
-          <p className="text-slate-600 leading-relaxed">
-            Tanah berada dalam kelembaban optimal ({'>'}40%). Lakukan pemupukan Urea dengan teknik benam samping tanaman (7–10 cm dari pangkal batang) untuk memastikan efisiensi penyerapan nitrogen mencapai maksimal.
+        {/* 3. Traktori Kinetika 12 Jam (Hourly Trajectory) */}
+        <div>
+          <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider mb-2.5 flex items-center gap-1.5">
+            <Clock className="w-3.5 h-3.5 text-slate-600" />
+            Proyeksi Traktori Kinetika 12 Jam Hari Ini
+          </h3>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+            {trajectorySlots.map((slot, idx) => (
+              <div
+                key={idx}
+                className={`p-3 rounded-2xl border text-center ${
+                  slot.status === 'optimal'
+                    ? 'bg-emerald-50/60 border-emerald-200 text-emerald-950'
+                    : slot.status === 'warning'
+                    ? 'bg-amber-50/60 border-amber-200 text-amber-950'
+                    : 'bg-red-50/60 border-red-200 text-red-950'
+                }`}
+              >
+                <span className="text-[10px] font-semibold text-slate-500 block">
+                  {slot.time}
+                </span>
+                <span
+                  className={`text-lg font-black block mt-0.5 ${
+                    slot.status === 'optimal'
+                      ? 'text-emerald-700'
+                      : slot.status === 'warning'
+                      ? 'text-amber-700'
+                      : 'text-red-700'
+                  }`}
+                >
+                  {slot.score}
+                </span>
+                <span className="text-[10px] font-bold line-clamp-1 mt-0.5">{slot.label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* 4. Rekomendasi Preskripsi Agronomi Lapangan Terperinci */}
+        <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+          <div className="flex items-center justify-between">
+            <h3 className="text-xs font-bold text-slate-900 flex items-center gap-1.5 uppercase tracking-wider">
+              {isAman ? (
+                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+              ) : (
+                <AlertTriangle className="w-4 h-4 text-red-600" />
+              )}
+              Protokol Rekomendasi Preskripsi Lapangan
+            </h3>
+            <span className="text-[11px] font-bold text-[#236B32]">
+              {isAman ? 'Target Serapan N ≥ 88–92%' : 'Pencegahan Kehilangan N > 60%'}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-1 text-xs">
+            <div className="p-2.5 rounded-xl bg-white border border-slate-200">
+              <span className="text-[10px] font-bold text-slate-400 uppercase block">Metode Aplikasi</span>
+              <span className="font-bold text-slate-800 block mt-0.5">
+                {isAman ? 'Tugal Benam Samping 5–7 cm' : 'TUNDA / Irigasi Pra-Tebar'}
+              </span>
+            </div>
+            <div className="p-2.5 rounded-xl bg-white border border-slate-200">
+              <span className="text-[10px] font-bold text-slate-400 uppercase block">Batas Waktu Aman</span>
+              <span className="font-bold text-slate-800 block mt-0.5">
+                {isAman ? 'Sebelum 10:30 WIB (< 30°C)' : 'Tunggu Besok 06:00 WIB'}
+              </span>
+            </div>
+            <div className="p-2.5 rounded-xl bg-white border border-slate-200">
+              <span className="text-[10px] font-bold text-slate-400 uppercase block">Estimasi Finansial</span>
+              <span className="font-bold text-emerald-700 block mt-0.5">
+                {isAman ? 'Hemat ~Rp750.000/ha' : 'Cegah Rugi ~Rp1.200.000/ha'}
+              </span>
+            </div>
+          </div>
+
+          <p className="text-[11.5px] text-slate-600 leading-relaxed pt-1">
+            {isAman
+              ? 'Tanah berada dalam kelembaban optimal (>40%). Butiran urea akan segera terikat ke larutan tanah dalam 30 menit. Aplikasikan dengan teknik tugal di samping rumpun jagung lalu tutup tanah tipis.'
+              : 'Tanah sedang sangat kering dan terik di atas 30°C. Jangan menabur urea sekarang karena penguapan gas amonia akan langsung terjadi. Lakukan penyiraman ringan atau tunggu jendela aman besok pagi.'}
           </p>
         </div>
 
-        {/* Modal Action Button */}
-        <button
-          onClick={onClose}
-          className="w-full mt-5 py-3 rounded-xl bg-[#236B32] hover:bg-[#1C5628] text-white font-bold text-sm transition-all shadow-sm active:scale-[0.98]"
-        >
-          Mengerti & Tutup
-        </button>
+        {/* Modal Actions */}
+        <div className="flex flex-col sm:flex-row items-center gap-3 pt-1">
+          {onOpenSimulator && (
+            <button
+              onClick={onOpenSimulator}
+              className="w-full sm:flex-1 py-3 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-800 font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-sm active:scale-[0.98]"
+            >
+              <SlidersHorizontal className="w-4 h-4 text-slate-600" />
+              <span>Buka What-If Simulator (Uji 4 Slider)</span>
+              <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
+            </button>
+          )}
+
+          <button
+            onClick={onClose}
+            className="w-full sm:w-auto px-7 py-3 rounded-xl bg-[#236B32] hover:bg-[#1C5628] text-white font-bold text-xs transition-all shadow-sm active:scale-[0.98]"
+          >
+            Mengerti & Tutup
+          </button>
+        </div>
       </div>
     </div>
   );

@@ -4,6 +4,89 @@ Seluruh catatan kemajuan, keputusan teknis, dan implementasi antarmuka frontend 
 
 ---
 
+## [2026-10-25] — Perombakan Total Modal Detail Prediksi AVRI (Physics-Informed ML, Explainable AI TreeSHAP & Traktori Kinetika 12 Jam)
+
+### 🧠 Arsitektur & Kedalaman Analisis Baru (`PredictionDetailModal.tsx`)
+- **Menghilangkan Duplikasi Data Telemetri:**
+  - Versi sebelumnya hanya menampilkan ulang 3 kartu telemetri yang sama persis dengan kartu metrik di dashboard (Kelembaban, Suhu, pH) tanpa memberikan nilai tambah analitis.
+  - Memperbarui komponen menjadi pusat diagnosa cerdas berlapis dengan mengintegrasikan spesifikasi sains model dari [`docs/ai/MODEL_SPEC.md`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/docs/ai/MODEL_SPEC.md) dan [`docs/ai/EXPLAINABILITY_SHAP.md`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/docs/ai/EXPLAINABILITY_SHAP.md).
+- **Header Resmi & Input Telemetry Pill Bar:**
+  - Logo daun IoT transparan langsung (*boxless direct emblem*) tanpa kotak pembungkus.
+  - Judul: *"Detail Analisis Prediksi AVRI"* dengan lencana hijau `PIML Hybrid Engine` dan subjudul *"Dekomposisi Lapisan Fisika Arrhenius, Koreksi Residual LightGBM & TreeSHAP"*.
+  - Menampilkan bilah kapsul telemetri masukan aktif secara ringkas (*Kelembaban 42,0%*, *Suhu 26,0°C*, *pH 7,10*) sebagai parameter input mesin inferensi.
+- **Dekomposisi Skor Komposit Physics-Informed ML (PIML):**
+  - Menguraikan skor akhir AVRI (misal 4% Aman) menjadi:
+    1. **Base Physics (Kinetika Urease & Difusi Air): 2.8%** — persamaan kinetika Arrhenius $k_{urease}$ tertekan suhu sejuk ($26^\circ\text{C}$) + difusi larutan urea lancar ($42\%\text{ VWC}$).
+    2. **Koreksi Residual LightGBM: +1.2%** — penyesuaian fluks angin tenang ($1,2\text{ m/s}$) dan kelembaban udara ambien BMKG.
+    3. Interval Tingkat Keyakinan Model: $\pm 1,2\%$ (Confidence Level 95%).
+    4. Estimasi Jendela Rekomendasi Terbuka: *Sekarang (06:00 – 10:00 WIB) · Jendela terbuka sekitar 4 jam ke depan*.
+- **Air Terjun Atribusi Fitur Explainable AI (TreeSHAP Waterfall):**
+  - Menyajikan 4 faktor mikroklimat penentu penguapan dengan nilai SHAP kuantitatif, badge status, dan narasi agronomi Indonesia:
+    1. *Kelembaban Tanah (VWC 42,0%):* `-32% Menekan Risiko` | Optimal (Difusi Cepat) — Urea larut langsung ke rizosfer dalam 30 menit tanpa kristalisasi permukaan.
+    2. *Suhu Tanah Permukaan (26,0°C):* `-18% Menekan Risiko` | Sejuk (Enzim Tertekan) — Di bawah ambang termal $30^\circ\text{C}$, hidrolisis tertekan hingga 70%.
+    3. *Derajat Keasaman pH Tanah (7,10):* `+4% Netral Stabil` | Netral (Kesetimbangan Stabil) — Kesetimbangan ionik $\text{NH}_4^+$ stabil, $\text{NH}_3$ bebas minim.
+    4. *Prakiraan Curah Hujan & Angin:* `-8% Meredam Pelepasan` | Tenang & Lembap — Angin tenang tidak menyapu lapisan batas gas amonia.
+- **Proyeksi Traktori Kinetika 12 Jam Hari Ini (Hourly Volatilization Trajectory):**
+  - Menjelaskan evolusi risiko sepanjang hari dalam 4 blok waktu:
+    - `06:00 – 09:00`: **4%** (Jendela Emas Penaburan)
+    - `09:00 – 12:00`: **12%** (Penyerapan Berjalan)
+    - `12:00 – 15:00`: **32%** (Waspada Suhu Naik)
+    - `15:00 – 18:00`: **16%** (Kembali Sejuk)
+- **Protokol Rekomendasi Preskripsi Lapangan Terperinci:**
+  - 3 parameter operasional lapangan: *Metode Aplikasi (Tugal Benam Samping 5–7 cm)*, *Batas Waktu Aman (Sebelum 10:30 WIB)*, dan *Estimasi Finansial (Hemat ~Rp750.000/ha)*.
+  - Teks preskripsi teknis agronomi dengan target serapan pupuk $\text{N} \ge 88\text{--}92\%$.
+- **Navigasi Cepat ke What-If Simulator:**
+  - Tombol aksi sekunder *"Buka What-If Simulator (Uji 4 Slider)"* yang terhubung langsung ke rute `/simulator`.
+- **Validasi Build & Runtime:**
+  - `npm run build` sukses 100% tanpa error TypeScript dan ESLint.
+  - Verifikasi browser subagent memastikan modal terbuka dengan visual proporsional, layout rapi, dan responsif.
+
+---
+
+## [2026-10-25] — Integrasi Logo Resmi VolatiSafe AIoT (Brand Identity, Direct Emblem & PWA Assets)
+
+### 🌿 Identitas Visual & Aset Grafis Resmi (Direct Emblem Tanpa Kotak)
+- **Tampilan Logo Langsung (Boxless & Transparent):**
+  - Menghapus kotak pembungkus (*container box / rounded border*) pada logo, sehingga lambang daun sirkuit IoT tampil langsung secara bersih (*direct emblem*) di atas latar belakang hijau tema VolatiSafe.
+- **Implementasi Komponen Antarmuka (`next/image`):**
+  - **Desktop Sidebar (`DesktopSidebar.tsx`):** Menampilkan logo daun IoT langsung tanpa bingkai kotak/border putih, menyatu mulus dengan latar sidebar `#5E9E49`, berdampingan dengan tipografi *"VolatiSafe"* tebal dan subjudul *"AIoT Precision"*.
+  - **Mobile Header (`MobileHeader.tsx`):** Menampilkan logo langsung tanpa kotak pembungkus pada bilah navigasi ponsel/PWA.
+  - **Modal Pengaturan Petak (`SettingsModal.tsx`):** Menampilkan logo langsung tanpa kotak di samping judul modal *"Pengaturan Petak & Node IoT"*.
+  - **Modal Onboarding QR Node (`OnboardingQRModal.tsx`):** Menampilkan logo langsung tanpa kotak pada tajuk registrasi node.
+  - **Simulasi WhatsApp Petani (`WhatsAppPreviewModal.tsx`):** Menampilkan logo langsung tanpa lingkaran putih sebagai profil *VolatiSafe Bot*.
+- **Penerapan Penuh pada Ikon Web (Favicon & PWA Manifest):**
+  - Mengonversi logo transparan langsung ke [`frontend/src/app/favicon.ico`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/frontend/src/app/favicon.ico), [`frontend/src/app/icon.png`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/frontend/src/app/icon.png), [`frontend/public/favicon.ico`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/frontend/public/favicon.ico), [`frontend/public/icon.png`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/frontend/public/icon.png), dan [`frontend/public/icon.svg`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/frontend/public/icon.svg).
+  - Memperbarui [`manifest.json`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/frontend/public/manifest.json) dengan `purpose: "any"` agar icon PWA tidak terpotong oleh kotak adaptif OS, melainkan tampil langsung sebagai lambang daun IoT transparan.
+  - Memperbarui metadata [`layout.tsx`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/frontend/src/app/layout.tsx).
+- **Validasi Build:**
+  - `npm run build` sukses 11/11 halaman statis (termasuk rute metadata statis `/icon.png`) dengan 0 warning dan 0 error.
+
+---
+
+## [2026-10-25] — Pembaruan Skala Pengukur Risiko: Segmented Radial Arc Gauge (Sesuai Referensi Desain)
+
+### 🎨 Desain Antarmuka & Visualisasi Baru (`WhatIfPanel.tsx`)
+- **Transisi dari Analog Needle Speedometer ke Segmented Radial Arc Gauge:**
+  - Menghapus jarum penunjuk (*needle*) dan titik poros (*pivot cap*) analog.
+  - Mengimplementasikan skala busur setengah lingkaran bersegmen (*segmented radial arc*) yang terdiri dari **14 blok tile melengkung** berjarak radial presisi ($2.6^\circ$ gap), sesuai referensi visual pengguna.
+- **Mempertahankan Karakteristik Warna Semantik VolatiSafe AIoT:**
+  - Blok segmen $0\text{–}30\%$ (Aman): Hijau Emerald (`#16A34A` / border `#15803D`).
+  - Blok segmen $31\text{–}60\%$ (Waspada): Kuning Amber (`#CA8A04` / border `#A16207`).
+  - Blok segmen $61\text{–}80\%$ (Kritis): Oranye (`#EA580C` / border `#C2410C`).
+  - Blok segmen $>80\%$ (Bahaya): Merah Terang (`#DC2626` / border `#B91C1C`).
+  - Blok inaktif / sisa kapasitas: Abu-abu lembut (`#F1F5F9` / border `#CBD5E1` dengan opacity 0.45) yang memperlihatkan kontur busur penuh secara elegan.
+- **Tipografi Nilai Skor di Tengah Kubah Busur (Center Arch Readout):**
+  - Angka persentase skor utama (`{calculation.avriScore}%`) berukuran besar ($34\text{ px}$, font ekstra tebal) terpusat di dalam rongga kubah busur setengah lingkaran.
+  - Warna angka berubah secara dinamis mengikuti warna tingkat risiko yang aktif.
+  - Subjudul label `"SKOR AVRI (12 JAM)"` berhuruf kapital rapi berada tepat di bawah angka persentase.
+- **Legenda Skala Terstruktur (2x2 Grid):**
+  - Menambahkan legenda 4 tingkat risiko di bawah kartu gauge: Aman ($\le 30\%$), Waspada ($31\text{–}60\%$), Kritis ($61\text{–}80\%$), dan Bahaya ($>80\%$) dengan indikator lingkaran warna semantik.
+- **Validasi Build & Visual Browser:**
+  - TypeScript dan ESLint bersih tanpa variabel yang tidak terpakai (`needleAngle` dibersihkan).
+  - Verifikasi responsivitas pada Skenario A (Waspada 44% / Kritis 77%), Skenario B (Aman 2%), dan Skenario C (Aman 6%) berjalan mulus secara real-time.
+
+---
+
 ## [2026-10-25] — Modul Laporan, Provenance Data & Batas Kejujuran Ilmiah (Screen 5 / PRD Seksi 7.3, 5.6 & 11)
 
 ### 🚀 Fitur & Implementasi Baru
@@ -35,9 +118,9 @@ Seluruh catatan kemajuan, keputusan teknis, dan implementasi antarmuka frontend 
     - Kelembaban Tanah ($5\% - 80\% \text{ VWC}$).
     - Derajat Keasaman pH Tanah ($4.0 - 9.5 \text{ pH}$).
     - Curah Hujan 6 Jam ($0 - 50 \text{ mm}$).
-  - **Speedometer Gauge Meter Dinamis:**
-    - Visual jarum gauge meter SVG berputar mulus (-90° s.d. +90°) merespons langsung tarikan slider.
-    - Transisi warna mulus (Hijau Aman, Kuning Waspada, Oranye Kritis, Merah Bahaya).
+  - **Speedometer Gauge Meter Dinamis & Perbaikan Overlap:**
+    - Menata ulang susunan geometris SVG arc ($240 \times 135\text{ px}$) dan memisahkan teks angka persentase serta label *"Skor AVRI (12 Jam)"* secara vertikal di bawah instrumen gauge, menghilangkan bug tabrakan/tumpang-tindih visual (*overlapping text bug*) antara jarum putar, titik pivot, dan teks skor.
+    - Dilengkapi label batas skala $0\%$, $50\%$, dan $100\%$ serta transisi warna semantik real-time.
   - **Dekomposisi Kontribusi Fitur TreeSHAP Mini:**
     - Visual bar progress kontribusi faktor pemicu (suhu urease, kekeringan tanah, pH basa, dan peredaman air hujan).
   - **Pintasan 3 Skenario Pengujian 1-Klik untuk Presentasi Hackathon:**

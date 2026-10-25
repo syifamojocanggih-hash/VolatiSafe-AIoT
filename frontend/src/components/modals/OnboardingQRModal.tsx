@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Image from 'next/image';
 import { X, QrCode, CheckCircle } from 'lucide-react';
 import { FieldNodeItem } from '@/types/admin';
 
@@ -52,13 +53,20 @@ export const OnboardingQRModal: React.FC<OnboardingQRModalProps> = ({
           <X className="w-5 h-5" />
         </button>
 
-        <div className="flex items-center gap-2 text-xs font-bold text-emerald-800 uppercase tracking-wider mb-1">
-          <QrCode className="w-4 h-4 text-emerald-600" />
-          Field Node Registration
+        <div className="flex items-center gap-2.5 mb-2">
+          <div className="w-8 h-8 flex items-center justify-center shrink-0">
+            <Image src="/logo.png" alt="VolatiSafe" width={30} height={30} className="w-full h-full object-contain" />
+          </div>
+          <div>
+            <div className="flex items-center gap-1.5 text-2xs font-bold text-emerald-800 uppercase tracking-wider">
+              <QrCode className="w-3.5 h-3.5 text-emerald-600" />
+              Field Node Registration
+            </div>
+            <h3 className="text-base font-bold text-slate-900 leading-tight">
+              Onboarding Node Baru (QR Code)
+            </h3>
+          </div>
         </div>
-        <h3 className="text-lg font-bold text-slate-900 mb-1">
-          Onboarding Node Baru (QR Code)
-        </h3>
         <p className="text-xs text-slate-500 mb-4">
           Pindai kode QR fisik pada stiker enclosure IP65 atau ketik ID node
         </p>

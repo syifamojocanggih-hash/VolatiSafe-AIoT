@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Image from 'next/image';
 import {
   LayoutDashboard,
   MapPin,
@@ -34,31 +35,25 @@ export const DesktopSidebar: React.FC<DesktopSidebarProps> = ({
   return (
     <aside className="hidden md:flex flex-col w-64 bg-[#5E9E49] text-white min-h-screen p-5 shrink-0 select-none">
       {/* Brand & Logo */}
-      <div className="flex items-center gap-3.5 pt-2 pb-6 px-1">
-        <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center p-1.5 shadow-sm">
-          <svg viewBox="0 0 512 512" fill="none" className="w-full h-full">
-            <path
-              d="M256 32C360 76 432 108 432 232C432 360 336 448 256 480C176 448 80 360 80 232C80 108 152 76 256 32Z"
-              fill="white"
-              fillOpacity="0.9"
-            />
-            <path
-              d="M256 160C235 190 228 250 240 310C248 315 264 315 272 310C284 250 277 190 256 160Z"
-              fill="#5E9E49"
-            />
-            <path
-              d="M256 330C220 320 180 270 196 190C204 230 228 280 256 330Z"
-              fill="#5E9E49"
-            />
-            <path
-              d="M256 330C292 320 332 270 316 190C308 230 284 280 256 330Z"
-              fill="#5E9E49"
-            />
-          </svg>
+      <div className="flex items-center gap-3 pt-2 pb-6 px-1">
+        <div className="w-10 h-10 flex items-center justify-center shrink-0">
+          <Image
+            src="/logo.png"
+            alt="Logo Resmi VolatiSafe AIoT"
+            width={40}
+            height={40}
+            className="w-full h-full object-contain filter drop-shadow-md"
+            priority
+          />
         </div>
-        <span className="text-2xl font-bold tracking-tight text-white drop-shadow-sm">
-          VolatiSafe
-        </span>
+        <div>
+          <span className="text-2xl font-black tracking-tight text-white drop-shadow-sm block leading-none">
+            VolatiSafe
+          </span>
+          <span className="text-[10px] font-bold text-emerald-100 tracking-wider uppercase block mt-1">
+            AIoT Precision
+          </span>
+        </div>
       </div>
 
       {/* Nav Section Label */}

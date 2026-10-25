@@ -118,6 +118,10 @@ export default function DashboardPage() {
         onClose={() => setIsDetailModalOpen(false)}
         statusBanner={currentData.statusBanner}
         metrics={currentData.metrics}
+        onOpenSimulator={() => {
+          setIsDetailModalOpen(false);
+          setActiveTab('simulator');
+        }}
       />
 
       {/* Settings & Hardware Info Modal */}

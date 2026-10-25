@@ -61,6 +61,81 @@ const PRESET_SCENARIOS = [
   },
 ];
 
+// Definisi Geometri Busur Radial Bersegmen (14 Blok Semicircle Tile sesuai referensi)
+const SEGMENTS_COUNT = 14;
+const GAUGE_CX = 130;
+const GAUGE_CY = 130;
+const GAUGE_R_OUT = 104;
+const GAUGE_R_IN = 72;
+const GAUGE_GAP_DEG = 2.6;
+const GAUGE_MARGIN_DEG = 1.2;
+const GAUGE_TOTAL_ARC = 180;
+const GAUGE_SEG_DEG =
+  (GAUGE_TOTAL_ARC - 2 * GAUGE_MARGIN_DEG - (SEGMENTS_COUNT - 1) * GAUGE_GAP_DEG) /
+  SEGMENTS_COUNT; // ~10.2714 deg
+
+interface RadialSegment {
+  id: number;
+  pathD: string;
+  midPct: number;
+  activeColor: string;
+  activeStroke: string;
+}
+
+const RADIAL_SEGMENTS: RadialSegment[] = Array.from(
+  { length: SEGMENTS_COUNT },
+  (_, i) => {
+    const theta1 = GAUGE_MARGIN_DEG + i * (GAUGE_SEG_DEG + GAUGE_GAP_DEG);
+    const theta2 = theta1 + GAUGE_SEG_DEG;
+    const rad1 = (theta1 * Math.PI) / 180;
+    const rad2 = (theta2 * Math.PI) / 180;
+
+    // Koordinat busur setengah lingkaran: theta=0 di kiri (-X), theta=90 di atas (-Y), theta=180 di kanan (+X)
+    const p1 = {
+      x: GAUGE_CX - GAUGE_R_IN * Math.cos(rad1),
+      y: GAUGE_CY - GAUGE_R_IN * Math.sin(rad1),
+    };
+    const p2 = {
+      x: GAUGE_CX - GAUGE_R_OUT * Math.cos(rad1),
+      y: GAUGE_CY - GAUGE_R_OUT * Math.sin(rad1),
+    };
+    const p3 = {
+      x: GAUGE_CX - GAUGE_R_OUT * Math.cos(rad2),
+      y: GAUGE_CY - GAUGE_R_OUT * Math.sin(rad2),
+    };
+    const p4 = {
+      x: GAUGE_CX - GAUGE_R_IN * Math.cos(rad2),
+      y: GAUGE_CY - GAUGE_R_IN * Math.sin(rad2),
+    };
+
+    const pathD = `M ${p1.x.toFixed(2)} ${p1.y.toFixed(2)} L ${p2.x.toFixed(2)} ${p2.y.toFixed(2)} A ${GAUGE_R_OUT} ${GAUGE_R_OUT} 0 0 1 ${p3.x.toFixed(2)} ${p3.y.toFixed(2)} L ${p4.x.toFixed(2)} ${p4.y.toFixed(2)} A ${GAUGE_R_IN} ${GAUGE_R_IN} 0 0 0 ${p1.x.toFixed(2)} ${p1.y.toFixed(2)} Z`;
+
+    const midPct = ((i + 0.5) / SEGMENTS_COUNT) * 100;
+
+    // Karakteristik warna VolatiSafe AIoT (Aman, Waspada, Kritis, Bahaya)
+    let activeColor = '#16A34A'; // Hijau Aman (0-30%)
+    let activeStroke = '#15803D';
+    if (midPct > 80) {
+      activeColor = '#DC2626'; // Merah Bahaya (81-100%)
+      activeStroke = '#B91C1C';
+    } else if (midPct > 60) {
+      activeColor = '#EA580C'; // Oranye Kritis (61-80%)
+      activeStroke = '#C2410C';
+    } else if (midPct > 30) {
+      activeColor = '#CA8A04'; // Kuning Waspada (31-60%)
+      activeStroke = '#A16207';
+    }
+
+    return {
+      id: i,
+      pathD,
+      midPct,
+      activeColor,
+      activeStroke,
+    };
+  }
+);
+
 export const WhatIfPanel: React.FC = () => {
   const [params, setParams] = useState<SimulationParams>({
     soilTemp: 34.0,
@@ -172,8 +247,14 @@ export const WhatIfPanel: React.FC = () => {
     setTimeout(() => setToastMessage(null), 2500);
   };
 
-  // Sudut rotasi jarum speedometer gauge (-90 deg s.d. +90 deg)
-  const needleAngle = -90 + (calculation.avriScore / 100) * 180;
+  // Jumlah segmen radial aktif (0 s.d. 14) proporsional terhadap skor AVRI
+  const activeSegmentsCount = Math.min(
+    SEGMENTS_COUNT,
+    Math.max(
+      calculation.avriScore > 0 ? 1 : 0,
+      Math.round((calculation.avriScore / 100) * SEGMENTS_COUNT)
+    )
+  );
 
   return (
     <div className="space-y-6">
@@ -399,76 +480,55 @@ export const WhatIfPanel: React.FC = () => {
               Indeks Volatilisasi Amonia Terkalkulasi
             </span>
 
-            {/* Custom SVG Half-Donut Gauge */}
-            <div className="relative w-56 h-32 my-2 flex items-center justify-center">
-              <svg viewBox="0 0 200 115" className="w-full h-full overflow-visible">
-                {/* Background arc gradient paths */}
-                {/* 1. Hijau Aman (0 - 30%) */}
-                <path
-                  d="M 20 100 A 80 80 0 0 1 52 43"
-                  fill="none"
-                  stroke="#16A34A"
-                  strokeWidth="16"
-                  strokeLinecap="round"
-                />
-                {/* 2. Kuning Waspada (31 - 60%) */}
-                <path
-                  d="M 58 38 A 80 80 0 0 1 120 22"
-                  fill="none"
-                  stroke="#CA8A04"
-                  strokeWidth="16"
-                />
-                {/* 3. Oranye Kritis (61 - 80%) */}
-                <path
-                  d="M 126 23 A 80 80 0 0 1 164 54"
-                  fill="none"
-                  stroke="#EA580C"
-                  strokeWidth="16"
-                />
-                {/* 4. Merah Bahaya (81 - 100%) */}
-                <path
-                  d="M 168 60 A 80 80 0 0 1 180 100"
-                  fill="none"
-                  stroke="#DC2626"
-                  strokeWidth="16"
-                  strokeLinecap="round"
-                />
+            {/* Custom SVG Segmented Radial Arc Gauge (14 Blok Tile Semicircle Tanpa Jarum) */}
+            <div className="w-full max-w-[280px] h-44 my-1 flex items-center justify-center">
+              <svg viewBox="0 0 260 145" className="w-full h-full overflow-visible">
+                {/* 14 Blok Segmen Busur Radial */}
+                {RADIAL_SEGMENTS.map((seg, idx) => {
+                  const isActive = idx < activeSegmentsCount;
+                  return (
+                    <path
+                      key={seg.id}
+                      d={seg.pathD}
+                      fill={isActive ? seg.activeColor : '#F1F5F9'}
+                      stroke={isActive ? seg.activeStroke : '#CBD5E1'}
+                      strokeWidth="1.8"
+                      strokeLinejoin="round"
+                      strokeLinecap="round"
+                      opacity={isActive ? 1 : 0.45}
+                      className="transition-all duration-300"
+                    />
+                  );
+                })}
 
-                {/* Center Pivot Point */}
-                <circle cx="100" cy="100" r="8" fill="#1E293B" />
-
-                {/* Animated Needle */}
-                <g
-                  style={{
-                    transform: `rotate(${needleAngle}deg)`,
-                    transformOrigin: '100px 100px',
-                    transition: 'transform 250ms cubic-bezier(0.34, 1.56, 0.64, 1)',
-                  }}
-                >
-                  <polygon
-                    points="97,100 103,100 100,26"
-                    fill="#0F172A"
-                  />
-                  <circle cx="100" cy="100" r="4" fill="#FFFFFF" />
-                </g>
-              </svg>
-
-              {/* Gauge center numerical value */}
-              <div className="absolute bottom-0 text-center">
-                <div
-                  className="text-4xl font-extrabold tracking-tight transition-colors duration-300"
-                  style={{ color: calculation.statusColor }}
+                {/* Angka Persentase Skor Utama & Subtitle di Tengah Kubah (Persis Referensi) */}
+                <text
+                  x={GAUGE_CX}
+                  y={GAUGE_CY - 22}
+                  textAnchor="middle"
+                  fill={calculation.statusColor}
+                  fontSize="34"
+                  fontWeight="800"
+                  className="font-black tracking-tight"
                 >
                   {calculation.avriScore}%
-                </div>
-                <span className="text-[11px] font-semibold text-slate-500 uppercase">
-                  Skor AVRI (12 Jam)
-                </span>
-              </div>
+                </text>
+                <text
+                  x={GAUGE_CX}
+                  y={GAUGE_CY - 6}
+                  textAnchor="middle"
+                  fill="#64748B"
+                  fontSize="10"
+                  fontWeight="700"
+                  letterSpacing="0.05em"
+                >
+                  SKOR AVRI (12 JAM)
+                </text>
+              </svg>
             </div>
 
             {/* Dynamic Status Badge */}
-            <div className={`mt-3 px-3.5 py-1.5 rounded-full text-xs font-bold border uppercase tracking-wide flex items-center gap-1.5 ${calculation.bgBadge}`}>
+            <div className={`mt-2 px-3.5 py-1.5 rounded-full text-xs font-bold border uppercase tracking-wide flex items-center gap-1.5 ${calculation.bgBadge}`}>
               {calculation.category === 'aman' ? (
                 <CheckCircle2 className="w-4 h-4 text-emerald-600" />
               ) : calculation.category === 'waspada' ? (
@@ -479,6 +539,26 @@ export const WhatIfPanel: React.FC = () => {
                 <AlertOctagon className="w-4 h-4 text-red-600" />
               )}
               <span>Status: {calculation.category}</span>
+            </div>
+
+            {/* Legenda Karakteristik Warna VolatiSafe AIoT */}
+            <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 mt-3 text-[11px] font-semibold text-slate-500 text-left">
+              <span className="flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#16A34A] shrink-0" />
+                Aman (≤30%)
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#CA8A04] shrink-0" />
+                Waspada (31-60%)
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#EA580C] shrink-0" />
+                Kritis (61-80%)
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#DC2626] shrink-0" />
+                Bahaya (&gt;80%)
+              </span>
             </div>
 
             {/* Recommendation headline and guidance */}

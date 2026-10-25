@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Image from 'next/image';
 import { X, Cpu, Wifi, Battery, MapPin, SlidersHorizontal } from 'lucide-react';
 import { FieldInfo } from '@/types/dashboard';
 
@@ -35,9 +36,14 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           <X className="w-5 h-5" />
         </button>
 
-        <h3 className="text-lg font-bold text-slate-900 mb-1">
-          Pengaturan Petak & Node IoT
-        </h3>
+        <div className="flex items-center gap-2.5 mb-1">
+          <div className="w-6 h-6 flex items-center justify-center shrink-0">
+            <Image src="/logo.png" alt="VolatiSafe" width={24} height={24} className="w-full h-full object-contain" />
+          </div>
+          <h3 className="text-lg font-bold text-slate-900 leading-tight">
+            Pengaturan Petak & Node IoT
+          </h3>
+        </div>
         <p className="text-xs text-slate-500 mb-5">
           Informasi perangkat keras fisik dan simulasi data
         </p>

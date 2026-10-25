@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Image from 'next/image';
 import { X, Smartphone, CheckCheck, Send } from 'lucide-react';
 
 interface WhatsAppPreviewModalProps {
@@ -36,8 +37,14 @@ export const WhatsAppPreviewModal: React.FC<WhatsAppPreviewModalProps> = ({
 
         {/* WhatsApp Chat Header */}
         <div className="flex items-center gap-3 px-4 py-3 bg-[#202C33]">
-          <div className="w-9 h-9 rounded-full bg-[#00A884] flex items-center justify-center text-white font-bold text-sm">
-            VS
+          <div className="w-8 h-8 flex items-center justify-center shrink-0">
+            <Image
+              src="/logo.png"
+              alt="VolatiSafe Bot Logo"
+              width={32}
+              height={32}
+              className="w-full h-full object-contain filter drop-shadow-sm"
+            />
           </div>
           <div className="flex-1 min-w-0">
             <h4 className="text-sm font-bold text-white truncate flex items-center gap-1.5">
