@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <!-- Shield Background -->
+  <path d="M256 32C360 76 432 108 432 232C432 360 336 448 256 480C176 448 80 360 80 232C80 108 152 76 256 32Z" fill="#5E9E49" stroke="#4B8637" stroke-width="16" stroke-linejoin="round"/>
+  <!-- Inner Shield Glow -->
+  <path d="M256 64C336 100 392 128 392 232C392 336 316 412 256 440C196 412 120 336 120 232C120 128 176 100 256 64Z" fill="#6AA655"/>
+  <!-- Golden Ear of Corn in Center -->
+  <path d="M256 140C230 170 220 240 235 320C245 325 267 325 277 320C292 240 282 170 256 140Z" fill="#F59E0B"/>
+  <circle cx="256" cy="180" r="10" fill="#FBBF24"/>
+  <circle cx="244" cy="210" r="10" fill="#FBBF24"/>
+  <circle cx="268" cy="210" r="10" fill="#FBBF24"/>
+  <circle cx="242" cy="240" r="10" fill="#FBBF24"/>
+  <circle cx="270" cy="240" r="10" fill="#FBBF24"/>
+  <circle cx="245" cy="270" r="9" fill="#FBBF24"/>
+  <circle cx="267" cy="270" r="9" fill="#FBBF24"/>
+  <circle cx="256" cy="295" r="8" fill="#FBBF24"/>
+  <!-- Left Leaf/Husk embracing -->
+  <path d="M256 350C210 340 160 280 180 180C190 230 220 290 256 350Z" fill="#2E7D32"/>
+  <!-- Right Leaf/Husk embracing -->
+  <path d="M256 350C302 340 352 280 332 180C322 230 292 290 256 350Z" fill="#388E3C"/>
+  <!-- Top Vapor / Letter V curve -->
+  <path d="M242 120C248 100 256 90 256 80C256 90 264 100 270 120C260 115 252 115 242 120Z" fill="#FFFFFF"/>
+</svg>
