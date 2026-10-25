@@ -3,7 +3,7 @@
 > **PENANGGUNG JAWAB:** Aris Kurniawan (Aris / Lead)  
 > **ROLE:** *AI Engineer, System Architect, & AI Quality Auditor*  
 > **AREA KERJA (R/W):** `ai_engine/`, `models/`, `docs/ai/`, `docs/universal/`  
-> **CABANG GIT:** `ai`
+> **CABANG GIT:** `ai`  
 > **KONTRAK DATA:** [`docs/universal/INTERFACES.md`](../universal/INTERFACES.md) §2 (FeatureVectorDTO & PredictionResultDTO)  
 > **INTEGRASI DIGITAL TWIN:** Menghubungkan output dari domain [`docs/digital_twin/`](../digital_twin/README.md) (Andharu)  
 
@@ -45,20 +45,99 @@ Membangun model *Physics-Informed Machine Learning (PIML)* yang menggabungkan fo
 
 ---
 
-### TAHAP 3: Pelatihan Model Residual LightGBM
+### TAHAP 3: Pelatihan Model Residual LightGBM & SOP Eksekusi Training
 
 #### 🟢 AI-1.3: Training LightGBM dengan Monotone Constraints
 - **Deskripsi:** Melatih model gradient boosting yang mempelajari deviasi lokal (*residual*) di atas model fisika dasar, dengan batasan arah kurva monoton.
 - **Target File:** `ai_engine/train.py`
-- **Konfigurasi Parameter:**
+- **Konfigurasi Parameter Inti:**
   - `monotone_constraints`:
     - `soil_temp_c`: `+1` (Makin panas tanah, risiko WAJIB naik).
     - `moisture_pct`: `-1` (Makin lembap tanah, risiko WAJIB turun).
     - `ph`: `+1` (Makin basa/berkapur tanah, risiko WAJIB naik).
   - Objective: `regression_l1` (MAE) atau `huber`.
-- **Checklist:**
-  - [ ] Model berhasil mengalahkan baseline aturan statis (*if-else*) minimal 15% pada evaluasi out-of-time.
-  - [ ] Latensi inferensi model tunggal $\le 20\text{ milidetik}$ di CPU.
+  - Hyperparameters: `n_estimators=300`, `learning_rate=0.03`, `num_leaves=31`, `max_depth=6`, `min_child_samples=20`.
+
+---
+
+### 🚀 PROSEDUR OPERASIONAL STANDAR (SOP) TRAINING MODEL LANGKAH-DEMI-LANGKAH
+
+Berikut adalah instruksi langkah-demi-langkah yang wajib dieksekusi oleh AI Developer / Coding Agent untuk melatih model dari awal hingga terkompilasi:
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                       ALUR 8 LANGKAH TRAINING MODEL AI                      │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ 1. SETUP ENV     : Instalasi dependencies (lightgbm, shap, scikit-learn)   │
+│ 2. BUILD DATASET : Generate fitur dari BMKG Lamongan + fisika urease        │
+│ 3. TIME SPLIT    : 80% train awal / 20% validation out-of-time (no shuffle) │
+│ 4. BASE RESIDUAL : Hitung BaseLoss_physics & ekstrak target residual        │
+│ 5. FIT MODEL     : Latih LightGBM dengan monotone constraints               │
+│ 6. BENCHMARK     : Uji evaluasi MAE, RMSE vs baseline if-else (> 15% better)│
+│ 7. SHAP AUDIT    : Hitung TreeSHAP & simpan visualisasi summary plot        │
+│ 8. SERIALIZE     : Ekspor model teks ke models/avri_model.txt (~2 MB)       │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+#### Langkah 1: Setup Lingkungan & Instalasi Dependensi
+Jalankan di terminal lokal (atau virtual environment proyek):
+```bash
+cd /home/aris/projek/VolatiSafe-AIoT
+pip install lightgbm scikit-learn shap pandas numpy matplotlib
+```
+
+#### Langkah 2: Ekstraksi & Pembangunan Dataset Latih
+Jalankan skrip generator dataset yang menyerap cuaca Lamongan dan menjalankan rumus fisika tanah:
+```bash
+python ai_engine/dataset_builder.py \
+  --weather-source simulations/data_replay/datasets/bmkg_lamongan.csv \
+  --soil-profile karst_lamongan \
+  --output data/training_dataset_lamongan.csv
+```
+*Output:* File CSV tabular berisi kolom: `[timestamp, soil_temp_c, moisture_pct, ph, air_temp_c, humidity_rh, wind_speed_ms, solar_rad_mj, dat, base_physics_loss, true_loss_target]`.
+
+#### Langkah 3: Eksekusi Skrip Pelatihan (Training Execution)
+Jalankan skrip training utama:
+```bash
+python ai_engine/train.py \
+  --dataset data/training_dataset_lamongan.csv \
+  --split-ratio 0.80 \
+  --model-out models/avri_model.txt \
+  --report-out docs/ai/evaluation_report.json
+```
+
+#### Langkah 4: Evaluasi Metrik & Benchmark terhadap Baseline Statis
+Di dalam `train.py`, model otomatis diuji pada data holdout (20% akhir) dan dibandingkan dengan aturan statis:
+1. **Model PIML LightGBM:** Target MAE $\le 3.5\%$ dan $R^2 \ge 0.85$.
+2. **Baseline Aturan Statis (*if-else*):**
+   ```python
+   # Aturan petani konvensional
+   if soil_temp > 30.0 and moisture < 25.0 and ph > 7.5:
+       baseline_pred = 70.0
+   else:
+       baseline_pred = 20.0
+   ```
+3. **Syarat Lolos Gate:** Penurunan MAE model PIML harus **minimal 15% lebih rendah** daripada MAE aturan statis.
+
+#### Langkah 5: Audit TreeSHAP & Ekspor Gambar Grafis
+Jalankan audit explainability untuk menghasilkan plot pembuktian ke juri:
+```bash
+python ai_engine/explainability.py \
+  --model models/avri_model.txt \
+  --dataset data/training_dataset_lamongan.csv \
+  --output-plot docs/ai/assets/shap_summary_plot.png
+```
+*Verifikasi Tanda:*
+* Suhu tanah $> 30^\circ\text{C}$ $\rightarrow$ SHAP bernilai positif (+).
+* Kelembaban $> 35\%$ $\rightarrow$ SHAP bernilai negatif (-).
+* pH basa $> 7.5$ $\rightarrow$ SHAP bernilai positif (+).
+
+#### Langkah 6: Verifikasi Model Binary / Text
+Pastikan file artifak model telah tercipta dan siap dipanggil:
+```bash
+ls -lh models/avri_model.txt
+# Ukuran berkas harus berkisar antara 1.5 MB s.d 3.0 MB
+```
 
 ---
 
@@ -69,7 +148,7 @@ Membangun model *Physics-Informed Machine Learning (PIML)* yang menggabungkan fo
 - **Target File:** `ai_engine/inference.py`
 - **Formula:**
   $$AVRI = \text{clip}\Big(\text{BaseLoss}_{physics} + \text{Residual}_{LightGBM}, \; 0.0, \; 100.0\Big)$$
-  - `0.0 – 30.0%`: **Aman** (Hijau) $\rightarrow$ Rekomendasi: Sebar merata sekarang.
+  - `0.0 – 30.0%`: **Aman** (Hijau) $\rightarrow$ Rekomendasi: Sebar pupuk sekarang.
   - `30.1 – 60.0%`: **Waspada** (Kuning) $\rightarrow$ Rekomendasi: Wajib metode tugal/benam atau siram sebelum tebar.
   - `60.1 – 80.0%`: **Kritis** (Oranye) $\rightarrow$ Rekomendasi: Tunda aplikasi, tunggu jendela aman sore/besok.
   - `80.1 – 100.0%`: **Bahaya** (Merah) $\rightarrow$ Rekomendasi: DILARANG TEBAR (kehilangan amonia >80%).
@@ -83,10 +162,8 @@ Membangun model *Physics-Informed Machine Learning (PIML)* yang menggabungkan fo
 #### 🟢 AI-1.5: Perhitungan TreeSHAP & Sanity Check Arah Dampak
 - **Deskripsi:** Menghitung kontribusi tiap fitur menggunakan `shap.TreeExplainer` untuk disajikan ke petani dan juri sebagai bukti transparansi AI.
 - **Target File:** `ai_engine/explainability.py`
-- **Sanity Check Tanda Nilai Dampak SHAP:**
-  - [ ] Suhu tanah tinggi ($> 30^\circ\text{C}$) $\rightarrow$ SHAP bernilai **POSITIF** (+ menambah risiko).
-  - [ ] Kelembaban tanah tinggi ($> 35\%$) $\rightarrow$ SHAP bernilai **NEGATIF** (- meredam risiko).
-  - [ ] pH basa ($> 7.5$) $\rightarrow$ SHAP bernilai **POSITIF** (+ memicu amonia).
+- **Checklist:**
+  - [ ] Sanity check tanda nilai SHAP lolos 100%.
   - [ ] Format output teks narasi: *"Pemicu risiko dominan: Suhu tanah 34.2°C (+45% dampak risiko)"*.
 
 ---
