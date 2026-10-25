@@ -20,9 +20,12 @@ export default function MapPage() {
       <DesktopSidebar
         activeTab="map"
         onTabChange={(tab) => {
-          if (tab === 'dashboard') {
-            router.push('/');
-          }
+          if (tab === 'dashboard') router.push('/');
+          else if (tab === 'map') router.push('/map');
+          else if (tab === 'prescription') router.push('/prescription');
+          else if (tab === 'admin') router.push('/admin');
+          else if (tab === 'report') router.push('/report');
+          else if (tab === 'simulator') router.push('/simulator');
         }}
         farmerName={initialDashboardData.field.farmerName}
         location={initialDashboardData.field.location}

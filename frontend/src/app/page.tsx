@@ -9,6 +9,10 @@ import { MetricCardsGrid } from '@/components/dashboard/MetricCardsGrid';
 import { Trend24hChart } from '@/components/dashboard/Trend24hChart';
 import { SafeWindowForecast } from '@/components/dashboard/SafeWindowForecast';
 import { ParcelRiskMap } from '@/components/map/ParcelRiskMap';
+import { AgronomyPlanning } from '@/components/agronomy/AgronomyPlanning';
+import { NodeManagement } from '@/components/admin/NodeManagement';
+import { ReportAnalytics } from '@/components/report/ReportAnalytics';
+import { WhatIfPanel } from '@/components/simulator/WhatIfPanel';
 import { PredictionDetailModal } from '@/components/modals/PredictionDetailModal';
 import { SettingsModal } from '@/components/modals/SettingsModal';
 import { initialDashboardData, criticalDashboardData } from '@/mocks/dashboardMock';
@@ -49,13 +53,7 @@ export default function DashboardPage() {
       {/* Desktop Left Sidebar */}
       <DesktopSidebar
         activeTab={activeTab}
-        onTabChange={(tab) => {
-          setActiveTab(tab);
-          if (tab !== 'dashboard' && tab !== 'map') {
-            setToastMessage(`Modul "${tab}" sedang disiapkan untuk tahap selanjutnya.`);
-            setTimeout(() => setToastMessage(null), 2500);
-          }
-        }}
+        onTabChange={(tab) => setActiveTab(tab)}
         farmerName={currentData.field.farmerName}
         location={currentData.field.location}
       />
@@ -66,16 +64,30 @@ export default function DashboardPage() {
         <MobileHeader />
 
         {/* Field Title & Node Status Header */}
-        <FieldHeader
-          field={currentData.field}
-          onOpenSettings={() => setIsSettingsModalOpen(true)}
-        />
+        {activeTab !== 'report' && activeTab !== 'admin' && (
+          <FieldHeader
+            field={currentData.field}
+            onOpenSettings={() => setIsSettingsModalOpen(true)}
+          />
+        )}
 
         {/* Main Canvas View Switcher */}
         <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-6xl w-full mx-auto">
           {activeTab === 'map' ? (
             /* Layar 2: Peta Zonasi Risiko Volatilisasi Lahan */
             <ParcelRiskMap onBackToDashboard={() => setActiveTab('dashboard')} />
+          ) : activeTab === 'prescription' ? (
+            /* Layar 3: Preskripsi, Kalender Tanam & Kalkulator Pupuk */
+            <AgronomyPlanning />
+          ) : activeTab === 'admin' ? (
+            /* Layar 4: Manajemen Field Node & Jaringan LoRa */
+            <NodeManagement />
+          ) : activeTab === 'report' ? (
+            /* Layar 5: Laporan, Provenance Data & Batas Kejujuran Ilmiah */
+            <ReportAnalytics />
+          ) : activeTab === 'simulator' ? (
+            /* Layar 6 / FE-1.7: What-If Risk Simulator Demo Juri */
+            <WhatIfPanel />
           ) : (
             /* Layar 1: Dashboard Utama Petak */
             <div className="space-y-4 sm:space-y-5">
@@ -90,7 +102,7 @@ export default function DashboardPage() {
               {/* 4 Metric Telemetry Cards */}
               <MetricCardsGrid metrics={currentData.metrics} />
 
-              {/* 24-Hour Forecast Trend Chart */}
+              {/* 24-Hour Forecast Trend Chart (ECharts + Shadcn styling) */}
               <Trend24hChart data={currentData.trend24h} />
 
               {/* 72-Hour Safe Window Bar Strip */}

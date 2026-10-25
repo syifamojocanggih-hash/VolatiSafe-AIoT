@@ -4,6 +4,111 @@ Seluruh catatan kemajuan, keputusan teknis, dan implementasi antarmuka frontend 
 
 ---
 
+## [2026-10-25] — Modul Laporan, Provenance Data & Batas Kejujuran Ilmiah (Screen 5 / PRD Seksi 7.3, 5.6 & 11)
+
+### 🚀 Fitur & Implementasi Baru
+- **Tampilan Presisi Sesuai Mockup Referensi (`ReportAnalytics.tsx`):**
+  - **Header Halaman Resmi:**
+    - Judul: *"Laporan, Provenance Data & Batas Kejujuran Ilmiah"*
+    - Subjudul: *"Ringkasan dampak, sumber data, dan batas klaim sistem — untuk audit PPL & juri"*
+  - **3 Kartu Ringkasan Dampak Atas (Top Row Cards):**
+    1. *Target Efisiensi Pupuk Urea:* Nilai tebal hijau $\ge 20\text{–}35\%$ dengan teks penghematan $\pm\text{Rp}750.000\text{/ha}$ per musim tanam.
+    2. *Penurunan Kehilangan Nitrogen:* Nilai tebal biru $45\% \rightarrow <15\%$ dengan penjelasan pencegahan aplikasi pada tanah panas-kering ($>30^\circ\text{C}$, kelembaban $<25\%\text{ VWC}$).
+    3. *Ekspor Data Audit:* Latar kartu hijau muda lembut (`#EDF8EE` / border `#C6E7C9`) dilengkapi tombol aksi hijau solid (`#236B32`) **"Ekspor CSV Telemetri"**.
+  - **Fitur Ekspor CSV Mandiri (Client-Side Trigger):**
+    - Meng-generate file CSV riil `volatisafe_audit_telemetri_2026.csv` lengkap dengan kolom timestamp, node ID, kelembaban, suhu tanah, pH, voltase baterai, skor AVRI, klasifikasi risiko, dan sumber provenance data.
+    - Notifikasi toast konfirmasi saat pengunduhan berhasil dieksekusi.
+  - **Tabel Audit Data Provenance (Anti-Jebakan "Fake Simulator"):**
+    - Modul 1: `BMKG Historical Weather` $\rightarrow$ Stasiun Meteorologi Lampung & Lamongan $\rightarrow$ Replay suhu udara, RH, radiasi, hujan.
+    - Modul 2: `FAO-56 Penman-Monteith` $\rightarrow$ Allen et al. (1998) $\rightarrow$ Transisi kelembaban & failover imputasi.
+    - Modul 3: `Urease Kinetics Layer` $\rightarrow$ Kissel & Cabrera (2005) / Sommer et al. $\rightarrow$ Persamaan fisika penguapan $\text{NH}_3$.
+    - Modul 4: `Dosis Pupuk Majemuk` $\rightarrow$ Permentan No. 40/2007 & Balitbangtan $\rightarrow$ Kalkulator Urea + Phonska + ZA.
+  - **Kartu Batas Kejujuran Ilmiah / The Moat (PRD Seksi 11):**
+    - Box 1: *1. Menolak Sensor NPK Murah (Gimmick)* — Menolak probe NPK Rp200 ribuan palsu dan mengukur suhu, kelembaban, serta pH sejati.
+    - Box 2: *2. Fokus Jalur Volatilisasi Amonia* — Model berfokus pada penguapan $\text{NH}_3$ 12–72 jam pasca-tabur, tidak mengklaim mengukur leaching atau denitrifikasi.
+    - Box 3: *3. Kejujuran Status TKT 3* — Prototipe berjalan sebagai simulasi tertutup end-to-end sebelum pencairan dana komponen fisik menuju TKT 6.
+- **Keselarasan Sidebar Desktop:**
+  - Mempertahankan 5 menu navigasi presisi: `Dashboard Petak`, `Peta Risiko Lahan`, `Preskripsi & Kalender`, `Admin & Node`, dan `Laporan & Ekspor`.
+- **Simulator Risiko What-If Dewan Juri (`WhatIfPanel.tsx`):**
+  - **Kontrol 4 Slider Interaktif (Debounce 0 ms):**
+    - Suhu Tanah Permukaan ($15^\circ\text{C} - 45^\circ\text{C}$).
+    - Kelembaban Tanah ($5\% - 80\% \text{ VWC}$).
+    - Derajat Keasaman pH Tanah ($4.0 - 9.5 \text{ pH}$).
+    - Curah Hujan 6 Jam ($0 - 50 \text{ mm}$).
+  - **Speedometer Gauge Meter Dinamis:**
+    - Visual jarum gauge meter SVG berputar mulus (-90° s.d. +90°) merespons langsung tarikan slider.
+    - Transisi warna mulus (Hijau Aman, Kuning Waspada, Oranye Kritis, Merah Bahaya).
+  - **Dekomposisi Kontribusi Fitur TreeSHAP Mini:**
+    - Visual bar progress kontribusi faktor pemicu (suhu urease, kekeringan tanah, pH basa, dan peredaman air hujan).
+  - **Pintasan 3 Skenario Pengujian 1-Klik untuk Presentasi Hackathon:**
+    - *Skenario A (Terik Ekstrem Siang Hari):* Suhu 34.5°C, Kelembaban 21%, pH 7.85, Hujan 0 mm → Skor AVRI 78% (Kritis).
+    - *Skenario B (Hujan Sore 15 mm):* Suhu 25.5°C, Kelembaban 42%, pH 6.95, Hujan 15 mm → Skor AVRI 14% (Aman).
+    - *Skenario C (Pagi Sejuk & Lembap):* Suhu 23.0°C, Kelembaban 38%, pH 6.80, Hujan 2 mm → Skor AVRI 12% (Aman).
+- **Routing & Navigasi Terpadu:**
+  - Sidebar desktop kini memuat akses langsung ke `Laporan & Ekspor` (`/report`) dan `Simulator What-If` (`/simulator` bertanda badge *Demo*).
+  - Banner navigasi pintas dari halaman Laporan langsung ke Simulator What-If.
+
+---
+
+## [2026-10-25] — Modul Manajemen Field Node & Jaringan LoRa 433 MHz (Screen 4 / Admin)
+
+### 🚀 Fitur & Implementasi Baru
+- **Tabel Monitoring Status Node Lapangan (`NodeManagement.tsx`):**
+  - Pemantauan 5 node terdistribusi (`VS-A1-001` s.d. `VS-B2-005`) dengan parameter live (Kelembaban % VWC, Suhu Tanah °C, pH Tanah).
+  - Status transmisi radio LoRa 433 MHz (`Online · Sleep 15m` vs `Offline → [Est-Simulated]`).
+  - Indikator voltase baterai 18650 + solar charging (tegangan $3.55\text{V} - 4.05\text{V}$, konsumsi $0.067\text{ mAh/siklus}$).
+  - Nilai RSSI LoRa aktual ($-64\text{ dBm}$ s.d. $-94\text{ dBm}$).
+- **Live LoRa Payload Inspector (SF7 · 52 Bytes):**
+  - Terminal JSON payload kompak dengan tombol salin payload (`n`, `ts`, `m`, `t`, `ph`, `b`).
+  - Frekuensi ISM 433.0 MHz bebas lisensi SDPPI.
+  - Catatan proteksi MOSFET Gate Control (GPIO25) pemutus VCC sensor saat deep sleep untuk mencegah elektrolisis probe tanah.
+- **Ringkasan BoM & Pin Mapping ESP32:**
+  - 4 kartu komponen utama: Capacitive Moisture v1.2 (GPIO34), Soil pH Probe (GPIO32), DS18B20 1-Wire (GPIO04), dan LoRa SX1278 SPI (GPIO 5/18/19/23).
+  - Estimasi total BoM per node: **± Rp305.000** (memenuhi batas anggaran plafon prototipe Rp3.000.000 untuk 10 node).
+- **Modal Kalibrasi Sensor 2-Titik (`CalibrationModal.tsx`):**
+  - Kalibrasi ADC Kelembaban: Nilai Udara Kering (*Dry ADC*) & Air Basah (*Wet ADC*).
+  - Kalibrasi pH Probe: Buffer pH netral 6.86 dan buffer asam 4.01 dengan kalkulasi slope dan offset NVS flash.
+- **Modal Onboarding Node QR (`OnboardingQRModal.tsx`):**
+  - Viewfinder kamera scanner QR code node fisik.
+  - Form pendaftaran manual node baru (Node ID, Blok Lahan, Koordinat GPS) dengan feedback instan.
+- **Routing & Navigasi:**
+  - Terintegrasi di sidebar `Admin & Node` dan route mandiri `/admin`.
+
+---
+
+## [2026-10-25] — Modul Preskripsi, Kalender Tanam & Kalkulator Pupuk Ketik (FE-1.5 & FE-1.6)
+
+### 🚀 Fitur & Implementasi Baru
+- **Fitur A: Dynamic DAT Tracker & Early–Warning Logistik:**
+  - **Kalkulasi Hari Setelah Tanam (HST) Dinamis:** Form tanggal tanam (`input type="date"`), pemilih varietas jagung hibrida (`Bisi-18`, `NK-212`, `Pioneer P27`), dan badge umur tanaman dinamis (`30 HST`).
+  - **Timeline Fenologi 5 Fase Pertumbuhan Jagung:**
+    1. `0–7 HST`: Perkecambahan (VE).
+    2. `10–14 HST`: V3 · Pupuk Dasar (NPK + Urea awal).
+    3. `30–35 HST`: V8 · Susulan I (Kritis) bertanda **Fase Aktif** dengan outline hijau zamrud dan ring sorotan.
+    4. `45–50 HST`: V12 / Tasseling (Susulan II).
+    5. `95–105 HST`: Masak & Panen (Estimasi pipilan kering).
+  - **Banner Peringatan Logistik H-3:** Teks preskriptif pengingat tebus pupuk di kios desa 3 hari sebelum fase V8 tiba.
+  - **Modal Simulasi Notifikasi WhatsApp Petani (`WhatsAppPreviewModal.tsx`):** Mensimulasikan tampilan notifikasi bot WhatsApp (*VolatiSafe Bot*) lengkap dengan tombol respon cepat *Cek Jendela Jam Aman* dan *Buka Takaran Ember Karung*.
+- **Fitur B: Multi-Fertilizer Blender (Permentan No. 40/2007 & Balitbangtan):**
+  - **Input Angka Ketik Langsung (Typed Inputs):** Mengganti model slider geser menjadi input teks numerik ketik langsung untuk:
+    - *Luas Lahan Garapan* (satuan `Ha` + konversi otomatis ke $m^2$).
+    - *Target Tonase Panen* (satuan `Ton/Ha` + estimasi tonase hasil total).
+  - **Kalkulasi Resep Pupuk Reaktif & Otomatis:**
+    - Perhitungan otomatis resep Pemupukan I (NPK Phonska, Urea, ZA) dan Pemupukan II (Urea Fokus N, NPK Phonska).
+    - **Konversi Satuan Lapangan Praktis:** Menghitung jumlah karung fisik (50 kg) dan takaran ember lapangan (8 kg).
+- **Catatan Aplikasi Aktual (Sinkronisasi Digital Twin `F_log`):**
+  - Daftar riwayat pemupukan riil dengan status AVRI saat penaburan.
+  - **Modal Form Pencatatan Aktual (`RecordFertilizerModal.tsx`):** Petani dapat mencatat tanggal, fase, takaran pupuk nyata, dan skor AVRI ke state Digital Twin secara *real-time*.
+- **Routing & Integrasi:**
+  - Terintegrasi di menu sidebar `Preskripsi & Kalender` dan route mandiri `/prescription`.
+
+### 🔍 Verifikasi Browser Subagent
+- Pengujian desktop dan mobile tuntas.
+- Input ketik luas lahan berhasil mengkalkulasi ulang karung dan ember secara instan.
+- Modal WhatsApp dan modal pencatatan aktual berfungsi sempurna.
+
+---
+
 ## [2026-10-25] — Integrasi Apache ECharts (`echarts-for-react`) dengan Estetika Shadcn UI
 
 ### 🚀 Fitur & Implementasi Baru
