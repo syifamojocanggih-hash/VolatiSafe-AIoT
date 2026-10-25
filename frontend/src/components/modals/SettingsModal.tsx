@@ -10,6 +10,7 @@ interface SettingsModalProps {
   field: FieldInfo;
   isSimulatedCritical: boolean;
   onToggleScenario: () => void;
+  onOpenWhatIf?: () => void;
 }
 
 export const SettingsModal: React.FC<SettingsModalProps> = ({
@@ -18,6 +19,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   field,
   isSimulatedCritical,
   onToggleScenario,
+  onOpenWhatIf,
 }) => {
   if (!isOpen) return null;
 
@@ -97,6 +99,16 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               ? '🔴 Aktif: Skenario Terik Ekstrem (AVRI 74% - Kritis)'
               : '🟢 Aktif: Skenario Aman Presipitasi (AVRI 4% - Sesuai Desain)'}
           </button>
+
+          {onOpenWhatIf && (
+            <button
+              onClick={onOpenWhatIf}
+              className="w-full mt-2 py-2 px-3 rounded-xl border border-emerald-300 bg-white hover:bg-emerald-50 text-emerald-800 text-[11px] font-bold transition-all flex items-center justify-center gap-1.5"
+            >
+              <SlidersHorizontal className="w-3.5 h-3.5 text-emerald-700" />
+              <span>Buka What-If Simulator Interaktif (4 Slider) →</span>
+            </button>
+          )}
         </div>
 
         <button

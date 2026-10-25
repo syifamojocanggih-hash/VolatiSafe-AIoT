@@ -127,6 +127,10 @@ export default function DashboardPage() {
         field={currentData.field}
         isSimulatedCritical={isSimulatedCritical}
         onToggleScenario={handleToggleScenario}
+        onOpenWhatIf={() => {
+          setIsSettingsModalOpen(false);
+          setActiveTab('simulator');
+        }}
       />
 
       {/* Toast Notification */}
