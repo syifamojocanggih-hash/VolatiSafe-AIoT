@@ -9,9 +9,27 @@ Dokumen ini mencatat seluruh riwayat pengembangan, pelatihan model, evaluasi met
 
 ---
 
-## [Unreleased] — Tahap 5: Prediksi Jendela Waktu 72 Jam (Safe Application Window Forecaster)
-- **Fokus:** Pembuatan skrip `ai_engine/window_forecaster.py` untuk mengagregasikan prakiraan cuaca 72 jam BMKG Lamongan dan mendeteksi interval jam aman tebar pupuk.
+## [Unreleased] — Tahap 6: Validasi Closed-Loop Virtual Testbed (TKT 3) & Integrasi Final
+- **Fokus:** Menjalankan skenario pengujian stres lab (L1–L4) sesuai `docs/universal/LAB_VALIDATION_PROTOCOL.md` dan verifikasi kesiapan demo juri.
 - **PIC:** Aris Kurniawan (Lead AI Engineer & Auditor).
+
+---
+
+## [0.6.0] - 2026-10-25 — Penyelesaian AI Tahap 5: Peramalan Jendela Waktu Aman 72 Jam (Safe Application Window Forecaster)
+
+### Ditambahkan (Added)
+- **Modul Peramalan Horizon 72 Jam (`ai_engine/window_forecaster.py`):**
+  - Implementasi `SafeWindowForecaster` yang mengevaluasi deret waktu cuaca BMKG Lamongan jam demi jam selama 3 hari ke depan (72 jam).
+  - Algoritma `detect_safe_windows` untuk mendeteksi blok jam berurutan dengan $AVRI \le 30\%$ dan durasi minimal 2 jam.
+  - Perhitungan **Confidence Decay**: tingkat keyakinan prakiraan menurun realistis seiring berjalannya waktu ($95\%$ pada 24 jam pertama, $88\%$ pada 24–48 jam, dan $78\%$ pada 48–72 jam).
+  - Penentuan jendela optimal (`get_optimal_safe_window`) untuk segera ditampilkan pada notifikasi petani.
+- **Integrasi Service Wrapper (`ai_engine/service.py`):**
+  - Penambahan method `forecast_windows_72h(...)` pada `AIEngineService` untuk memasok data deret waktu visualisasi grafik Recharts di dashboard Next.js.
+- **Suite Pengujian Unit Peramalan 72 Jam (`ai_engine/tests/test_window_forecaster.py`):**
+  - 4 unit test: validasi struktur 72 jam, deteksi blok aman berurutan minimal 2 jam, pengujian penurunan confidence secara temporal, dan integrasi pemanggilan melalui service wrapper.
+
+### Diverifikasi (Verified)
+- Seluruh 23 unit test lulus 100% via `pytest` (7 fisika + 5 dataset + 3 training + 4 inferensi + 4 forecaster dalam 4.81s).
 
 ---
 

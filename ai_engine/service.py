@@ -13,9 +13,10 @@ import time
 from datetime import datetime, timezone
 from pathlib import Path
 from dataclasses import dataclass, asdict
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List, Optional, Union
 
 import numpy as np
+import pandas as pd
 import lightgbm as lgb
 import shap
 
@@ -24,6 +25,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from ai_engine.inference import AVRIInferenceEngine, DEFAULT_MODEL_PATH
 from ai_engine.train import FEATURE_COLUMNS
+from ai_engine.window_forecaster import SafeWindowForecaster, SafeWindowInterval, HourlyForecastPoint
 
 
 # =====================================================================
@@ -124,6 +126,7 @@ class AIEngineService:
     """
     def __init__(self, model_path: str = DEFAULT_MODEL_PATH):
         self.inference_engine = AVRIInferenceEngine(model_path=model_path)
+        self.forecaster = SafeWindowForecaster(model_path=model_path)
         self.booster = self.inference_engine.booster
         self.explainer = shap.TreeExplainer(self.booster)
         self.version = "piml-lgbm-v1.0.0-tkt3"
@@ -296,6 +299,34 @@ class AIEngineService:
             physics_diagnostics=physics_diag,
             model_meta=model_meta
         )
+
+    def forecast_windows_72h(
+        self,
+        weather_forecast_72h: Union[pd.DataFrame, List[Dict[str, Any]]],
+        base_moisture: float = 28.0,
+        base_ph: float = 7.8,
+        dat: int = 30
+    ) -> Dict[str, Any]:
+        """
+        Menghasilkan timeline lengkap 72 jam dan mendeteksi seluruh jendela aman.
+        Berguna untuk menyuplai grafik tren Recharts pada PWA Next.js.
+        """
+        timeline = self.forecaster.forecast_72h_timeline(
+            weather_df_or_list=weather_forecast_72h,
+            base_moisture=base_moisture,
+            base_ph=base_ph,
+            dat=dat
+        )
+        safe_windows = self.forecaster.detect_safe_windows(timeline, min_consecutive_hours=2)
+        optimal_window = self.forecaster.get_optimal_safe_window(timeline)
+
+        return {
+            "optimal_window": optimal_window.to_dto_dict() if optimal_window else None,
+            "all_safe_windows": [w.to_dto_dict() for w in safe_windows],
+            "total_safe_hours": sum(1 for pt in timeline if pt.is_safe),
+            "timeline_length": len(timeline),
+            "timeline": [asdict(pt) for pt in timeline]
+        }
 
 
 # Singleton instance untuk impor langsung

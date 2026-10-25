@@ -10,6 +10,11 @@ Master changelog tingkat sistem yang mencatat rilis dan tonggak integrasi utama 
 
 ---
 
+## [0.6.0] - 2026-10-25
+- Penyelesaian AI Tahap 5: Implementasi Safe Application Window Forecaster 72 jam.
+- Deteksi blok jam aman berurutan minimal 2 jam (AVRI <= 30%) dan perhitungan confidence decay temporal.
+- Lolos 23/23 unit test suite.
+
 ## [0.5.0] - 2026-10-25
 - Penyelesaian AI Tahap 4: Implementasi mesin inferensi AVRI (0–100%) dan service wrapper DTO compliance.
 - Pemetaan 4 tingkat risiko resmi (Aman, Waspada, Kritis, Bahaya) dan penjelasan TreeSHAP dinamis.
