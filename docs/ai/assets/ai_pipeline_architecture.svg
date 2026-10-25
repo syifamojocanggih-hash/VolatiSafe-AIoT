@@ -1,0 +1,318 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" width="1600" height="1000" style="background-color: #020617; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+  <defs>
+    <!-- Background Grid -->
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1e293b" stroke-width="0.7" opacity="0.6"/>
+    </pattern>
+
+    <!-- Gradients -->
+    <linearGradient id="grad-cyan" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#083344" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#0e7490" stop-opacity="0.3"/>
+    </linearGradient>
+
+    <linearGradient id="grad-emerald" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#064e3b" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#047857" stop-opacity="0.3"/>
+    </linearGradient>
+
+    <linearGradient id="grad-amber" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#78350f" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#b45309" stop-opacity="0.3"/>
+    </linearGradient>
+
+    <linearGradient id="grad-violet" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4c1d95" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#6d28d9" stop-opacity="0.3"/>
+    </linearGradient>
+
+    <linearGradient id="grad-rose" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#881337" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#be123c" stop-opacity="0.3"/>
+    </linearGradient>
+
+    <!-- Arrow Marker -->
+    <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#38bdf8"/>
+    </marker>
+    <marker id="arrow-emerald" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#34d399"/>
+    </marker>
+    <marker id="arrow-amber" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#fbbf24"/>
+    </marker>
+    <marker id="arrow-violet" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#a78bfa"/>
+    </marker>
+  </defs>
+
+  <!-- Background Layer -->
+  <rect width="1600" height="1000" fill="#020617"/>
+  <rect width="1600" height="1000" fill="url(#grid)"/>
+
+  <!-- ==================== TITLE HEADER ==================== -->
+  <g transform="translate(60, 45)">
+    <circle cx="10" cy="10" r="6" fill="#38bdf8"/>
+    <circle cx="10" cy="10" r="12" fill="none" stroke="#38bdf8" stroke-width="1.5" opacity="0.4"/>
+    <text x="32" y="16" font-size="22" font-weight="700" fill="#f8fafc" letter-spacing="0.5">VOLATISAFE AIoT — PHYSICS-INFORMED ML PIPELINE ARCHITECTURE</text>
+    <text x="32" y="38" font-size="12" font-weight="400" fill="#94a3b8">End-to-End Nitrogen Loss Forecasting, Arrhenius Kinetics Coupling, Residual LightGBM, &amp; Actionable Prescriptive Engine</text>
+  </g>
+
+  <!-- ==================== FLOW CONNECTORS (Z-ORDER: BACK) ==================== -->
+  <!-- Layer 1 to Layer 2 -->
+  <path d="M 330 200 L 390 200" fill="none" stroke="#38bdf8" stroke-width="2" marker-end="url(#arrow)"/>
+  <path d="M 330 360 L 360 360 L 360 270 L 390 270" fill="none" stroke="#38bdf8" stroke-width="2" marker-end="url(#arrow)"/>
+  <path d="M 330 520 L 370 520 L 370 330 L 390 330" fill="none" stroke="#38bdf8" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- Layer 2 to Layer 3 (PIML Branching) -->
+  <path d="M 670 280 L 715 280 L 715 200 L 750 200" fill="none" stroke="#fbbf24" stroke-width="2.5" marker-end="url(#arrow-amber)"/>
+  <path d="M 670 280 L 715 280 L 715 440 L 750 440" fill="none" stroke="#34d399" stroke-width="2.5" marker-end="url(#arrow-emerald)"/>
+
+  <!-- Layer 3 (Branches to AVRI Synthesizer) -->
+  <path d="M 1060 200 L 1100 200 L 1100 300 L 1140 300" fill="none" stroke="#fbbf24" stroke-width="2.5" marker-end="url(#arrow-amber)"/>
+  <path d="M 1060 440 L 1100 440 L 1100 340 L 1140 340" fill="none" stroke="#34d399" stroke-width="2.5" marker-end="url(#arrow-emerald)"/>
+
+  <!-- Layer 3 to Layer 4 (Inference & Explainability) -->
+  <path d="M 1360 320 L 1400 320" fill="none" stroke="#a78bfa" stroke-width="2.5" marker-end="url(#arrow-violet)"/>
+
+  <!-- Layer 4 down to Actuation Delivery -->
+  <path d="M 1480 430 L 1480 640 L 1420 640" fill="none" stroke="#38bdf8" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- Feedback / Retraining Loop (Dashed) -->
+  <path d="M 905 530 L 905 760 L 530 760 L 530 430" fill="none" stroke="#f43f5e" stroke-width="1.8" stroke-dasharray="6,6" marker-end="url(#arrow)"/>
+  <text x="715" y="750" font-size="10" font-weight="600" fill="#fb7185" text-anchor="middle">OFFLINE MODEL RETRAINING LOOP (TimeSeriesSplit / Every 14 Days)</text>
+
+
+  <!-- ==================== LAYER 1: DATA INGESTION (X: 60) ==================== -->
+  <!-- Container Box -->
+  <rect x="60" y="110" width="270" height="770" rx="10" fill="#0f172a" fill-opacity="0.6" stroke="#334155" stroke-width="1.5"/>
+  <rect x="75" y="125" width="160" height="24" rx="4" fill="#083344"/>
+  <text x="85" y="141" font-size="11" font-weight="700" fill="#38bdf8">1. MULTI-MODAL INGESTION</text>
+
+  <!-- Component 1A: IoT Telemetry -->
+  <g transform="translate(75, 160)">
+    <rect width="240" height="135" rx="6" fill="#0f172a" stroke="#0284c7" stroke-width="1.5"/>
+    <rect width="240" height="135" rx="6" fill="url(#grad-cyan)"/>
+    <text x="14" y="24" font-size="12" font-weight="700" fill="#38bdf8">A. IoT In-Situ Soil Node</text>
+    <text x="14" y="40" font-size="10" font-weight="500" fill="#94a3b8">ESP32 + LoRa 433MHz (52-Byte)</text>
+    <line x1="14" y1="48" x2="226" y2="48" stroke="#334155" stroke-width="1"/>
+    <text x="14" y="66" font-size="10" fill="#f1f5f9">• Soil Temp T_soil (DS18B20 1-Wire)</text>
+    <text x="14" y="84" font-size="10" fill="#f1f5f9">• Moisture θ (Capacitive v1.2)</text>
+    <text x="14" y="102" font-size="10" fill="#f1f5f9">• Soil pH (Analog Probe 4.5 - 9.0)</text>
+    <text x="14" y="120" font-size="9" fill="#38bdf8">Telemetry Interval: 15 Mins (Burst 5x)</text>
+  </g>
+
+  <!-- Component 1B: Weather Data Stream -->
+  <g transform="translate(75, 315)">
+    <rect width="240" height="135" rx="6" fill="#0f172a" stroke="#0284c7" stroke-width="1.5"/>
+    <rect width="240" height="135" rx="6" fill="url(#grad-cyan)"/>
+    <text x="14" y="24" font-size="12" font-weight="700" fill="#38bdf8">B. Meteorological Stream</text>
+    <text x="14" y="40" font-size="10" font-weight="500" fill="#94a3b8">BMKG Radin Inten II (WMO 96295)</text>
+    <line x1="14" y1="48" x2="226" y2="48" stroke="#334155" stroke-width="1"/>
+    <text x="14" y="66" font-size="10" fill="#f1f5f9">• Air Temp T_air (°C) &amp; RH (%)</text>
+    <text x="14" y="84" font-size="10" fill="#f1f5f9">• Solar Radiation Rs (MJ/m²/h)</text>
+    <text x="14" y="102" font-size="10" fill="#f1f5f9">• Wind Velocity u2 (m/s at 2m)</text>
+    <text x="14" y="120" font-size="10" fill="#f1f5f9">• Rainfall Event &amp; Forecast P (mm)</text>
+  </g>
+
+  <!-- Component 1C: Agronomic Context -->
+  <g transform="translate(75, 470)">
+    <rect width="240" height="135" rx="6" fill="#0f172a" stroke="#0284c7" stroke-width="1.5"/>
+    <rect width="240" height="135" rx="6" fill="url(#grad-cyan)"/>
+    <text x="14" y="24" font-size="12" font-weight="700" fill="#38bdf8">C. Crop &amp; Soil Profiles</text>
+    <text x="14" y="40" font-size="10" font-weight="500" fill="#94a3b8">Dynamic Phenology &amp; SoilGrids</text>
+    <line x1="14" y1="48" x2="226" y2="48" stroke="#334155" stroke-width="1"/>
+    <text x="14" y="66" font-size="10" fill="#f1f5f9">• Days After Transplanting (DAT)</text>
+    <text x="14" y="84" font-size="10" fill="#f1f5f9">• Crop Factor Kc(DAT) [0.40 - 1.15]</text>
+    <text x="14" y="102" font-size="10" fill="#f1f5f9">• Soil Texture: Clay 38%, Sand 24%</text>
+    <text x="14" y="120" font-size="10" fill="#f1f5f9">• Retensi: θ_wp 13.8%, θ_fc 39.5%</text>
+  </g>
+
+  <!-- Component 1D: Data Provenance Badge -->
+  <g transform="translate(75, 625)">
+    <rect width="240" height="75" rx="6" fill="#1e293b" stroke="#475569" stroke-width="1"/>
+    <text x="12" y="20" font-size="10" font-weight="700" fill="#94a3b8">DATA PROVENANCE (AUDIT-PROOF)</text>
+    <text x="12" y="38" font-size="9" fill="#cbd5e1">SHA-256 Checksum Verified</text>
+    <text x="12" y="52" font-size="9" fill="#cbd5e1">No Random / Synthetic Hallucination</text>
+    <text x="12" y="66" font-size="9" fill="#38bdf8">1-Year Historical Real Series Replay</text>
+  </g>
+
+
+  <!-- ==================== LAYER 2: FEATURE ENGINEERING & PREPROCESSING (X: 390) ==================== -->
+  <rect x="390" y="110" width="280" height="770" rx="10" fill="#0f172a" fill-opacity="0.6" stroke="#334155" stroke-width="1.5"/>
+  <rect x="405" y="125" width="200" height="24" rx="4" fill="#1e1b4b"/>
+  <text x="415" y="141" font-size="11" font-weight="700" fill="#a78bfa">2. PREPROCESSING &amp; STORE</text>
+
+  <!-- Component 2A: Signal Conditioning & Imputation -->
+  <g transform="translate(405, 160)">
+    <rect width="250" height="110" rx="6" fill="#0f172a" stroke="#7c3aed" stroke-width="1.5"/>
+    <rect width="250" height="110" rx="6" fill="url(#grad-violet)"/>
+    <text x="14" y="22" font-size="11" font-weight="700" fill="#c4b5fd">Anti-Corruption Adapter</text>
+    <text x="14" y="38" font-size="9.5" fill="#e2e8f0">• Packet Unpacking &amp; Range Check</text>
+    <text x="14" y="54" font-size="9.5" fill="#e2e8f0">• pH Moisture Coupling Calibration</text>
+    <text x="14" y="70" font-size="9.5" fill="#e2e8f0">• FAO-56 Dropout Failover Imputer</text>
+    <text x="14" y="88" font-size="9" font-weight="600" fill="#a78bfa">Output: Tag [is_predicted: bool]</text>
+  </g>
+
+  <!-- Component 2B: TimescaleDB Store -->
+  <g transform="translate(405, 290)">
+    <rect width="250" height="120" rx="6" fill="#0f172a" stroke="#7c3aed" stroke-width="1.5"/>
+    <rect width="250" height="120" rx="6" fill="url(#grad-violet)"/>
+    <text x="14" y="22" font-size="11" font-weight="700" fill="#c4b5fd">TimescaleDB Hypertable</text>
+    <text x="14" y="38" font-size="9.5" fill="#e2e8f0">• Partisi 7-Hari Deret Waktu Otomatis</text>
+    <text x="14" y="54" font-size="9.5" fill="#e2e8f0">• Tabel: telemetry, field_state</text>
+    <text x="14" y="70" font-size="9.5" fill="#e2e8f0">• Sub-10ms Aggregation Query</text>
+    <text x="14" y="86" font-size="9.5" fill="#e2e8f0">• Provenance &amp; Calibration Metadata</text>
+    <text x="14" y="104" font-size="9" fill="#a78bfa">Engine: PostgreSQL 16 + TimescaleDB</text>
+  </g>
+
+  <!-- Component 2C: Anti-Leakage Feature Extraction -->
+  <g transform="translate(405, 430)">
+    <rect width="250" height="140" rx="6" fill="#0f172a" stroke="#7c3aed" stroke-width="1.5"/>
+    <rect width="250" height="140" rx="6" fill="url(#grad-violet)"/>
+    <text x="14" y="22" font-size="11" font-weight="700" fill="#c4b5fd">Feature Vector Pipeline</text>
+    <text x="14" y="38" font-size="9" font-weight="600" fill="#f43f5e">STRICT: TimeSeriesSplit (Zero Leak)</text>
+    <line x1="14" y1="46" x2="236" y2="46" stroke="#4c1d95" stroke-width="1"/>
+    <text x="14" y="62" font-size="9.5" fill="#e2e8f0">• VPD = es - ea (Vapor Deficit kPa)</text>
+    <text x="14" y="78" font-size="9.5" fill="#e2e8f0">• Delta T = T_soil - T_air</text>
+    <text x="14" y="94" font-size="9.5" fill="#e2e8f0">• Solar Flux Accumulated 6h</text>
+    <text x="14" y="110" font-size="9.5" fill="#e2e8f0">• Soil Moisture Depletion Ratio</text>
+    <text x="14" y="128" font-size="9" font-weight="700" fill="#38bdf8">Payload: FeatureVectorDTO (9 Fitur)</text>
+  </g>
+
+
+  <!-- ==================== LAYER 3: CORE PIML ENGINE (X: 750) ==================== -->
+  <rect x="730" y="110" width="350" height="770" rx="10" fill="#0f172a" fill-opacity="0.6" stroke="#334155" stroke-width="1.5"/>
+  <rect x="745" y="125" width="240" height="24" rx="4" fill="#064e3b"/>
+  <text x="755" y="141" font-size="11" font-weight="700" fill="#34d399">3. HYBRID PIML DUAL-ENGINE</text>
+
+  <!-- Branch 3A: Physics Layer -->
+  <g transform="translate(750, 160)">
+    <rect width="310" height="190" rx="6" fill="#0f172a" stroke="#d97706" stroke-width="1.8"/>
+    <rect width="310" height="190" rx="6" fill="url(#grad-amber)"/>
+    <text x="16" y="24" font-size="12" font-weight="700" fill="#fbbf24">BRANCH A: Deterministic Physics</text>
+    <text x="16" y="40" font-size="10" font-weight="500" fill="#fde68a">Arrhenius &amp; Urease Enzymatic Kinetics</text>
+    <line x1="16" y1="48" x2="294" y2="48" stroke="#78350f" stroke-width="1"/>
+    
+    <rect x="16" y="56" width="278" height="34" rx="4" fill="#451a03"/>
+    <text x="24" y="78" font-size="10.5" font-family="monospace" fill="#fef08a">k_u(T) = A · exp(-Ea / (R·T_soil))</text>
+    
+    <text x="16" y="108" font-size="9.5" fill="#fef3c7">• Ea = 51,000 J/mol | R = 8.314 J/(mol·K)</text>
+    <text x="16" y="124" font-size="9.5" fill="#fef3c7">• Michaelis-Menten: f(θ) = θ / (θ + Km)</text>
+    <text x="16" y="140" font-size="9.5" fill="#fef3c7">• Sigmoidal pH Response: f(pH) = 10^(pH-7)/...</text>
+    <line x1="16" y1="150" x2="294" y2="150" stroke="#78350f" stroke-width="1"/>
+    <text x="16" y="170" font-size="10" font-weight="700" fill="#fbbf24">Output: BaseLoss_physics (%)</text>
+    <text x="16" y="184" font-size="8.5" fill="#fde68a">Jaminan Termodinamika: Tidak Pernah Negatif</text>
+  </g>
+
+  <!-- Branch 3B: Machine Learning Residual Layer -->
+  <g transform="translate(750, 370)">
+    <rect width="310" height="200" rx="6" fill="#0f172a" stroke="#059669" stroke-width="1.8"/>
+    <rect width="310" height="200" rx="6" fill="url(#grad-emerald)"/>
+    <text x="16" y="24" font-size="12" font-weight="700" fill="#34d399">BRANCH B: LightGBM Regressor</text>
+    <text x="16" y="40" font-size="10" font-weight="500" fill="#a7f3d0">Data-Driven Residual Variance Learning</text>
+    <line x1="16" y1="48" x2="294" y2="48" stroke="#065f46" stroke-width="1"/>
+    
+    <rect x="16" y="56" width="278" height="48" rx="4" fill="#064e3b"/>
+    <text x="24" y="74" font-size="9" font-weight="700" fill="#6ee7b7">MONOTONE CONSTRAINTS ENFORCED:</text>
+    <text x="24" y="90" font-size="9" font-family="monospace" fill="#ecfdf5">T_soil: +1 | Moisture θ: -1 | pH: +1</text>
+    
+    <text x="16" y="122" font-size="9.5" fill="#d1fae5">• Belajar deviasi lingkungan mikro lokal</text>
+    <text x="16" y="138" font-size="9.5" fill="#d1fae5">• Tangguh pada small-sample (&lt; 1,000 baris)</text>
+    <text x="16" y="154" font-size="9.5" fill="#d1fae5">• Latensi inferensi super kilat: &lt; 20 ms CPU</text>
+    <line x1="16" y1="164" x2="294" y2="164" stroke="#065f46" stroke-width="1"/>
+    <text x="16" y="182" font-size="10" font-weight="700" fill="#34d399">Output: Residual_ML Deviasi (%)</text>
+    <text x="16" y="194" font-size="8.5" fill="#a7f3d0">Mencegah Overfitting &amp; Kurva Melanggar Hukum Alam</text>
+  </g>
+
+
+  <!-- ==================== LAYER 4: SYNTHESIS & EXPLAINABILITY (X: 1140) ==================== -->
+  <rect x="1120" y="110" width="420" height="770" rx="10" fill="#0f172a" fill-opacity="0.6" stroke="#334155" stroke-width="1.5"/>
+  <rect x="1135" y="125" width="240" height="24" rx="4" fill="#881337"/>
+  <text x="1145" y="141" font-size="11" font-weight="700" fill="#fb7185">4. SYNTHESIS &amp; ACTIONABLE</text>
+
+  <!-- Component 4A: AVRI Synthesizer -->
+  <g transform="translate(1140, 160)">
+    <rect width="380" height="150" rx="6" fill="#0f172a" stroke="#e11d48" stroke-width="1.8"/>
+    <rect width="380" height="150" rx="6" fill="url(#grad-rose)"/>
+    <text x="16" y="24" font-size="12" font-weight="700" fill="#fb7185">AVRI Synthesizer &amp; Thresholding</text>
+    <text x="16" y="40" font-size="10" fill="#fecdd3">Ammonia Volatilization Risk Index (0 - 100%)</text>
+    <line x1="16" y1="48" x2="364" y2="48" stroke="#881337" stroke-width="1"/>
+    
+    <rect x="16" y="56" width="348" height="28" rx="4" fill="#4c0519"/>
+    <text x="26" y="74" font-size="10.5" font-family="monospace" fill="#ffe4e6">AVRI = clip(BaseLoss + Residual, 0, 100)</text>
+    
+    <!-- 4 Tier Badges -->
+    <g transform="translate(16, 96)">
+      <rect x="0" y="0" width="80" height="22" rx="3" fill="#065f46"/>
+      <text x="40" y="15" font-size="9" font-weight="700" fill="#34d399" text-anchor="middle">0-30% AMAN</text>
+      
+      <rect x="88" y="0" width="85" height="22" rx="3" fill="#854d0e"/>
+      <text x="130" y="15" font-size="9" font-weight="700" fill="#facc15" text-anchor="middle">31-60% WASPADA</text>
+
+      <rect x="181" y="0" width="80" height="22" rx="3" fill="#9a3412"/>
+      <text x="221" y="15" font-size="9" font-weight="700" fill="#fb923c" text-anchor="middle">61-80% KRITIS</text>
+
+      <rect x="269" y="0" width="80" height="22" rx="3" fill="#991b1b"/>
+      <text x="309" y="15" font-size="9" font-weight="700" fill="#f87171" text-anchor="middle">81-100% BAHAYA</text>
+    </g>
+    <text x="16" y="138" font-size="9" fill="#fecdd3">Tie-Break Logic: Strict Contract INTERFACES.md §2</text>
+  </g>
+
+  <!-- Component 4B: TreeSHAP Explainer -->
+  <g transform="translate(1140, 325)">
+    <rect width="380" height="155" rx="6" fill="#0f172a" stroke="#7c3aed" stroke-width="1.5"/>
+    <rect width="380" height="155" rx="6" fill="url(#grad-violet)"/>
+    <text x="16" y="24" font-size="12" font-weight="700" fill="#c4b5fd">Explainable AI (TreeSHAP Engine)</text>
+    <text x="16" y="40" font-size="10" fill="#e9d5ff">Transparansi Faktor Fisik Pemicu Risiko ke Petani</text>
+    <line x1="16" y1="48" x2="364" y2="48" stroke="#4c1d95" stroke-width="1"/>
+    
+    <!-- SHAP Sanity Bars -->
+    <g transform="translate(16, 58)">
+      <text x="0" y="12" font-size="9.5" fill="#f1f5f9">Suhu Tanah (34.2°C)</text>
+      <rect x="140" y="2" width="130" height="14" rx="2" fill="#ef4444"/>
+      <text x="278" y="13" font-size="9" font-weight="700" fill="#fca5a5">+44% (Naik)</text>
+
+      <text x="0" y="34" font-size="9.5" fill="#f1f5f9">pH Tanah (7.85)</text>
+      <rect x="140" y="24" width="70" height="14" rx="2" fill="#ef4444"/>
+      <text x="218" y="35" font-size="9" font-weight="700" fill="#fca5a5">+22% (Naik)</text>
+
+      <text x="0" y="56" font-size="9.5" fill="#f1f5f9">Kadar Air θ (21%)</text>
+      <rect x="140" y="46" width="90" height="14" rx="2" fill="#10b981"/>
+      <text x="238" y="57" font-size="9" font-weight="700" fill="#6ee7b7">-28% (Meredam)</text>
+    </g>
+    
+    <text x="16" y="142" font-size="9" font-weight="600" fill="#a78bfa">Sanity Check: Tanda SHAP Terverifikasi (T+, pH+, Moisture-)</text>
+  </g>
+
+  <!-- Component 4C: Actionable Delivery Layer -->
+  <g transform="translate(1140, 495)">
+    <rect width="380" height="235" rx="6" fill="#0f172a" stroke="#0284c7" stroke-width="1.8"/>
+    <rect width="380" height="235" rx="6" fill="url(#grad-cyan)"/>
+    <text x="16" y="24" font-size="12" font-weight="700" fill="#38bdf8">Actionable Output Generator</text>
+    <text x="16" y="40" font-size="10" fill="#bae6fd">Instruksi Konkret Siap Eksekusi di Ladang</text>
+    <line x1="16" y1="48" x2="364" y2="48" stroke="#0369a1" stroke-width="1"/>
+    
+    <rect x="16" y="58" width="348" height="42" rx="4" fill="#082f49"/>
+    <text x="26" y="74" font-size="9.5" font-weight="700" fill="#38bdf8">1. JENDELA WAKTU JAM-KE-JAM (72h Forecast):</text>
+    <text x="26" y="90" font-size="9" fill="#f0f9ff">"Besok pagi pukul 06.00 – 08.30 WIB (Risiko 18% - AMAN)"</text>
+
+    <rect x="16" y="108" width="348" height="42" rx="4" fill="#082f49"/>
+    <text x="26" y="124" font-size="9.5" font-weight="700" fill="#38bdf8">2. PANDUAN REKAYASA MITIGASI FISIK:</text>
+    <text x="26" y="140" font-size="9" fill="#f0f9ff">"Wajib Metode Tugal/Benam 4 cm atau Siram Macak-Macak"</text>
+
+    <rect x="16" y="158" width="348" height="42" rx="4" fill="#082f49"/>
+    <text x="26" y="174" font-size="9.5" font-weight="700" fill="#38bdf8">3. TAKARAN PRAKTIS (MULTI-FERTILIZER BLENDER):</text>
+    <text x="26" y="190" font-size="9" fill="#f0f9ff">"Petak Blok A (30 HST): 1½ Karung Urea + 1½ Karung Phonska (18 Ember)"</text>
+
+    <text x="16" y="222" font-size="9" font-weight="700" fill="#38bdf8">Delivery: WhatsApp Gateway (Wablas) &amp; Next.js 14 PWA Dashboard</text>
+  </g>
+
+  <!-- ==================== FOOTER ==================== -->
+  <g transform="translate(60, 930)">
+    <text x="0" y="0" font-size="11" font-weight="600" fill="#64748b">VOLATISAFE AIoT — SYSTEM SPECIFICATION v1.0 | LEAD AI ENGINEER: ARIS KURNIAWAN (PENS)</text>
+    <text x="0" y="16" font-size="9" fill="#475569">Target: Hackathon DeepTech for FoodTech Indonesia 2026 (Kemendiktisaintek × LPDP) | UM Metro, Lampung</text>
+    <text x="1480" y="0" font-size="10" font-weight="600" fill="#38bdf8" text-anchor="end">CLOSED-LOOP TESTBED READY (TKT 3)</text>
+  </g>
+
+</svg>
