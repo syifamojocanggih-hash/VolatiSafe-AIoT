@@ -33,6 +33,7 @@ docs/
 ├── digital_twin/                      <-- DOMAIN 2: AGRO-CLIMATIC DIGITAL TWIN (Andharu)
 │   ├── README.md                      <-- Lingkup, wewenang & zona terlarang Andharu
 │   ├── TASK_GUIDE.md                  <-- Panduan tugas teknis langkah demi langkah
+│   ├── SOIL_BASELINE_DATA.md          <-- Metodologi data baseline BBSDLP Kementan, SoilGrids & Saxton-Rawls
 │   ├── FAO56_WATER_BALANCE.md         <-- Neraca air tanah FAO-56 Penman-Monteith & Kc jagung
 │   ├── THERMAL_DIFFUSION.md           <-- Model difusi termal tanah teredam (inersia panas)
 │   ├── FAILOVER_IMPUTATION.md         <-- Mesin imputasi state saat sensor offline / dropout

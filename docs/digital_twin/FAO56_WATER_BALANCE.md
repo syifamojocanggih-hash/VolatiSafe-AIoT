@@ -79,9 +79,13 @@ $$\Delta \theta = \frac{P_{eff} - ET_c - DRAIN}{Z_r \cdot 1000} \cdot 100\%$$
    - Jika curah hujan $P \le 5\text{ mm}$, maka $P_{eff} = 0.7 \cdot P$ (sebagian tertahan di kanopi).
    - Jika curah hujan $P > 5\text{ mm}$, maka $P_{eff} = 0.85 \cdot P - 2.0$.
 2. **Titik Layu Permanen ($\theta_{wp}$):**
-   Batas bawah kelembaban tanah di mana akar tidak mampu lagi menyerap air. Untuk tanah lempung berpasir/karst: $\theta_{wp} \approx 12.0\%$.
+   Batas bawah kelembaban tanah di mana akar tidak mampu lagi menyerap air. Diturunkan dari data BBSDLP Kementan & ISRIC SoilGrids menggunakan Pedotransfer Function Saxton & Rawls (2006) (lihat rincian di [`SOIL_BASELINE_DATA.md`](SOIL_BASELINE_DATA.md)):
+   * Tanah Karst Lamongan: $\theta_{wp} = 13.8\%$.
+   * Tanah Ultisol Lampung: $\theta_{wp} = 11.5\%$.
 3. **Kapasitas Lapang ($\theta_{fc}$):**
-   Batas atas kelembaban tanah setelah kelebihan air gravitasi mengalir habis: $\theta_{fc} \approx 42.0\%$.
+   Batas atas kelembaban tanah optimal setelah kelebihan air gravitasi mengalir habis:
+   * Tanah Karst Lamongan: $\theta_{fc} = 39.5\%$.
+   * Tanah Ultisol Lampung: $\theta_{fc} = 36.2\%$.
 4. **Drainase Gravitasi ($DRAIN$):**
    Jika $\theta > \theta_{fc}$, kelebihan air akan terbuang sebagai perkolasi dalam waktu 24 jam:
    $$DRAIN = \max\Big(0.0, \; (\theta - \theta_{fc}) \cdot Z_r \cdot 1000\Big)$$
