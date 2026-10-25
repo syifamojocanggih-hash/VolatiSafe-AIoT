@@ -20,16 +20,15 @@ Pada **VolatiSafe AIoT**, seluruh simulasi software fase TKT 3 digerakkan oleh *
 ## 2. Spesifikasi Stasiun Cuaca & Format Dataset
 
 ### 2.1 Stasiun Sumber Resmi
-1. **Stasiun Utama (Lokus Lampung):**  
-   * **Nama:** Stasiun Meteorologi Radin Inten II Lampung (Stamet Lampung)  
-   * **WMO ID / Stasiun ID:** 96295  
-   * **Koordinat:** 5°14' LS, 105°11' BT (Elevasi: 86 mdpl)  
-   * **Karakteristik Iklim:** Dataran rendah tropis basah dengan musim kemarau terik (suhu permukaan siang hari mencapai 33–36°C), sangat representatif untuk sentra jagung Lampung Tengah dan Lampung Timur.
-2. **Stasiun Pembanding (Lokus Lamongan):**  
-   * **Nama:** Stasiun Meteorologi Tuban / AWS Lamongan Utara  
-   * **Karakteristik Iklim:** Wilayah pesisir utara dan tanah karst kapur dengan kelembaban udara rendah saat musim kemarau.
+1. **Stasiun Utama (Lokus Home-Base Lamongan):**  
+   * **Nama:** Stasiun Meteorologi BMKG Tuban / Lamongan Utara & Pos Pengamatan Agroklimat Lamongan  
+   * **WMO ID / Stasiun ID:** 96933  
+   * **Karakteristik Iklim:** Dataran pantai utara Jawa Timur dengan tanah karst kapur dan suhu terik siang hari (33–36°C) saat musim kemarau serta kelembaban udara rendah, sangat representatif untuk sentra jagung dan padi sawah Kabupaten Lamongan.
+2. **Stasiun Replikasi (Lokus Lampung):**  
+   * **Nama:** Stasiun Meteorologi Radin Inten II Lampung (Stamet Lampung, WMO 96295)  
+   * **Karakteristik Iklim:** Dataran rendah tropis basah dengan tanah masam ultisol yang dikapur, untuk pengujian adaptabilitas multi-lokus di Lampung.
 
-### 2.2 Format Berkas CSV (`simulations/data_replay/datasets/bmkg_lampung_tengah.csv`)
+### 2.2 Format Berkas CSV (`simulations/data_replay/datasets/bmkg_lamongan.csv`)
 Dataset mencakup rentang 1 tahun penuh dengan resolusi per jam (8.760 baris data):
 
 ```csv

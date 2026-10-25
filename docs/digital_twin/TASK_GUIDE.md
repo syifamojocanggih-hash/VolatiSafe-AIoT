@@ -15,14 +15,14 @@ Membangun mesin biofisika tanah virtual kontinu yang mampu memutakhirkan state t
 
 ## 📋 Daftar Tugas & Tahapan Implementasi
 
-### TAHAP 1: Replay Data Cuaca Historis BMKG
+### TAHAP 1: Replay Data Cuaca Historis BMKG Wilayah Lamongan
 
 #### 🟢 DT-1.1: Streaming Replay Ingestion Controller
-- **Deskripsi:** Menyiapkan skrip pembaca dataset cuaca riil dari BMKG Stasiun Meteorologi Radin Inten II Lampung (interval 1 jam: radiasi surya, suhu udara, kelembaban udara, kecepatan angin, curah hujan) untuk memutar ulang kondisi nyata 24 jam.
+- **Deskripsi:** Menyiapkan skrip pembaca dataset cuaca riil dari **BMKG Wilayah Lamongan (Stasiun Meteorologi BMKG Tuban/Lamongan & Pos Pengamatan Agroklimat Lamongan Utara, WMO ID: 96933)** (interval 1 jam: radiasi surya, suhu udara, kelembaban udara, kecepatan angin, curah hujan) untuk memutar ulang kondisi nyata 24 jam sentra pertanian Lamongan.
 - **Target File:** `simulations/data_replay/bmkg_replay.py`
 - **Acuan Spesifikasi:** [`docs/digital_twin/WEATHER_REPLAY.md`](WEATHER_REPLAY.md)
 - **Checklist:**
-  - [ ] Membaca CSV cuaca historis tanpa error.
+  - [ ] Membaca CSV cuaca historis Lamongan tanpa error (`datasets/bmkg_lamongan.csv`).
   - [ ] Menyediakan generator streaming yang memancarkan data cuaca per interval simulasi (tiap 15 menit).
   - [ ] Mencatat checksum SHA-256 berkas CSV ke tabel `data_provenance` untuk audit juri.
 

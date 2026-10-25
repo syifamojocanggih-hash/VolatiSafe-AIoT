@@ -13,7 +13,7 @@ Andharu bertanggung jawab penuh atas seluruh kecerdasan pemodelan biofisika tana
 - **Bukan Visualisasi 3D Grafis:** Model state-space biofisik kontinu berbasis deret waktu yang mereplikasi neraca air dan suhu perakaran secara matematis.
 - **Failover Imputation Engine:** Mengisi celah data saat sensor fisik putus (*dropout*) agar sistem tidak pernah lumpuh.
 - **72-Hour Temporal Forecaster:** Memproyeksikan kurva kelembaban dan suhu tanah ke depan berbasis data ramalan cuaca BMKG.
-- **Weather Data Replay:** Mengelola pemutaran ulang data historis riil stasiun cuaca BMKG Radin Inten II Lampung.
+- **Weather Data Replay:** Mengelola pemutaran ulang data historis riil stasiun cuaca BMKG Wilayah Lamongan (Stasiun BMKG Tuban/Lamongan Utara, WMO 96933).
 
 ---
 

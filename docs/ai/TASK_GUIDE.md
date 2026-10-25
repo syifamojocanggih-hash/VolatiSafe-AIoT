@@ -33,12 +33,13 @@ Membangun model *Physics-Informed Machine Learning (PIML)* yang menggabungkan fo
 ### TAHAP 2: Pembentukan Dataset & Pencegahan Kebocoran Waktu
 
 #### 🟢 AI-1.2: Anti-Leakage Dataset Builder & TimeSeriesSplit
-- **Deskripsi:** Menyiapkan pipeline penggabungan data sensor fisik/Wokwi, state Digital Twin (`FieldStateDTO`), dan data cuaca historis BMKG menjadi matriks fitur tabular.
+- **Deskripsi:** Menyiapkan pipeline penggabungan data sensor fisik/Wokwi, state Digital Twin (`FieldStateDTO`), dan data cuaca historis BMKG Wilayah Lamongan (Stasiun BMKG Tuban/Lamongan Utara) menjadi matriks fitur tabular bebas kebocoran waktu.
 - **Target File:** `ai_engine/dataset_builder.py`
 - **Aturan Audit Ketat:**
   - **DILARANG KERAS MENGGUNAKAN `train_test_split(shuffle=True)`**.
   - Wajib menggunakan `TimeSeriesSplit(n_splits=5)` atau *Block Out-of-Time Holdout* (8 bulan awal untuk training, 2 bulan akhir untuk testing).
 - **Checklist:**
+  - [ ] Membaca dataset iklim historis Lamongan (`datasets/bmkg_lamongan.csv`).
   - [ ] Skrip verifikasi kebocoran waktu (`leakage_test`) menghasilkan 0% overlap antara train dan test set.
   - [ ] Seluruh fitur numerik distandarisasi tanpa menggunakan statistik test set (*no fit_transform on validation set*).
 
