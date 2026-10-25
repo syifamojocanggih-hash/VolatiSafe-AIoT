@@ -6,10 +6,6 @@ import {
   X,
   CheckCircle2,
   AlertTriangle,
-  Thermometer,
-  Droplets,
-  TestTube2,
-  Wind,
   Layers,
   Sparkles,
   Clock,
@@ -45,7 +41,7 @@ export const PredictionDetailModal: React.FC<PredictionDetailModalProps> = ({
   const currentMoisture = metrics.find((m) => m.id === 'moisture')?.value || '42,0%';
   const currentPh = metrics.find((m) => m.id === 'ph')?.value || '7,10';
 
-  // Nilai Komposit Physics-Informed ML (PIML)
+  // Nilai Komposit Physics-Informed ML
   const basePhysics = isAman ? 2.8 : 61.4;
   const residualAI = isAman ? 1.2 : 12.6;
   const confidenceMargin = isAman ? '±1,2%' : '±2,4%';
@@ -62,8 +58,7 @@ export const PredictionDetailModal: React.FC<PredictionDetailModalProps> = ({
           impactLabel: '-32% Menekan Risiko',
           badge: 'Optimal (Difusi Cepat)',
           narrative:
-            'Kadar air tanah berada di atas kapasitas layu (>25%). Urea terlarut langsung ke zona perakaran dalam 30 menit tanpa kristalisasi di permukaan.',
-          icon: Droplets,
+            'Kadar air optimal (>25%) melarutkan urea langsung ke zona perakaran tanpa kristalisasi.',
         },
         {
           id: 'temp',
@@ -74,8 +69,7 @@ export const PredictionDetailModal: React.FC<PredictionDetailModalProps> = ({
           impactLabel: '-18% Menekan Risiko',
           badge: 'Sejuk (Enzim Tertekan)',
           narrative:
-            'Suhu tanah berada jauh di bawah ambang aktivasi termal enzim urease (30,0°C). Laju hidrolisis Arrhenius tertekan hingga 70%.',
-          icon: Thermometer,
+            'Suhu sejuk di bawah 28°C menekan laju hidrolisis enzim urease hingga 70%.',
         },
         {
           id: 'ph',
@@ -86,8 +80,7 @@ export const PredictionDetailModal: React.FC<PredictionDetailModalProps> = ({
           impactLabel: '+4% Netral Stabil',
           badge: 'Netral (Kesetimbangan Stabil)',
           narrative:
-            'pH tanah mendekati netral. Kesetimbangan ionik NH4+ stabil, pembentukan gas amonia bebas (NH3) sangat minim.',
-          icon: TestTube2,
+            'pH netral 7,10 menjaga stabilitas ionik sehingga pembentukan gas amonia sangat minim.',
         },
         {
           id: 'wind_weather',
@@ -98,8 +91,7 @@ export const PredictionDetailModal: React.FC<PredictionDetailModalProps> = ({
           impactLabel: '-8% Meredam Pelepasan',
           badge: 'Tenang & Lembap',
           narrative:
-            'Angin tenang tidak meniup lapisan batas gas, kelembaban atmosfer mikro membantu infiltrasi pupuk ke pori tanah.',
-          icon: Wind,
+            'Angin tenang 1,2 m/s mempertahankan lapisan gas mikro tanpa memicu pelepasan amonia.',
         },
       ]
     : [
@@ -112,8 +104,7 @@ export const PredictionDetailModal: React.FC<PredictionDetailModalProps> = ({
           impactLabel: '+45% Memicu Penguapan',
           badge: 'Kritis (Aktivasi Termal)',
           narrative:
-            'Suhu tanah sangat terik melampaui 30°C. Enzim urease terakselerasi secara eksponensial sesuai hukum Arrhenius, menguraikan urea sebelum meresap.',
-          icon: Thermometer,
+            'Suhu terik 34,2°C mengakselerasi enzim urease secara eksponensial memicu pelepasan gas.',
         },
         {
           id: 'moisture',
@@ -124,8 +115,7 @@ export const PredictionDetailModal: React.FC<PredictionDetailModalProps> = ({
           impactLabel: '+26% Kering Kerontang',
           badge: 'Defisit Air Kritis',
           narrative:
-            'Kadar air di bawah ambang difusi 25%. Butiran urea mengkristal di permukaan dan 60-80% nitrogen menguap bebas ke udara.',
-          icon: Droplets,
+            'Kadar air kritis <25% mengkristalisasi butiran urea dan menyebabkan penguapan bebas.',
         },
         {
           id: 'ph',
@@ -136,8 +126,7 @@ export const PredictionDetailModal: React.FC<PredictionDetailModalProps> = ({
           impactLabel: '+18% Tanah Berkapur',
           badge: 'Alkalin Tinggi',
           narrative:
-            'Kondisi basa Solokuro menggeser kesetimbangan ionik secara sigmoidal ke arah gas amonia bebas (NH3) yang langsung hilang ke atmosfer.',
-          icon: TestTube2,
+            'Alkalinitas tinggi pH 7,80 menggeser kesetimbangan ionik langsung menjadi gas amonia.',
         },
         {
           id: 'wind_weather',
@@ -148,8 +137,7 @@ export const PredictionDetailModal: React.FC<PredictionDetailModalProps> = ({
           impactLabel: '+11% Sapuan Angin',
           badge: 'Turbulensi Kuat',
           narrative:
-            'Hembusan angin konveksi menyapu lapisan batas gas di permukaan bedeng, mempercepat pelepasan amonia.',
-          icon: Wind,
+            'Turbulensi angin 2,8 m/s menyapu lapisan batas gas amonia di atas permukaan bedeng.',
         },
       ];
 
@@ -162,10 +150,10 @@ export const PredictionDetailModal: React.FC<PredictionDetailModalProps> = ({
         { time: '15:00 - 18:00', score: '16%', label: 'Kembali Sejuk', status: 'optimal' },
       ]
     : [
-        { time: '06:00 - 09:00', score: '48%', label: 'Mulai Hangat', status: 'warning' },
-        { time: '09:00 - 12:00', score: '74%', label: 'Puncak Kritis Penguapan', status: 'danger' },
-        { time: '12:00 - 15:00', score: '82%', label: 'Bahaya Ekstrem Terik', status: 'danger' },
-        { time: '15:00 - 18:00', score: '56%', label: 'Mulai Menurun', status: 'warning' },
+        { time: '06:00 - 09:00', score: '41%', label: 'Suhu Mulai Meningkat', status: 'warning' },
+        { time: '09:00 - 12:00', score: '68%', label: 'Terik Kritis Berlangsung', status: 'danger' },
+        { time: '12:00 - 15:00', score: '74%', label: 'Puncak Volatilisasi Ekstrem', status: 'danger' },
+        { time: '15:00 - 18:00', score: '52%', label: 'Penurunan Bertahap', status: 'warning' },
       ];
 
   return (
@@ -180,7 +168,7 @@ export const PredictionDetailModal: React.FC<PredictionDetailModalProps> = ({
           <X className="w-5 h-5" />
         </button>
 
-        {/* Modal Header: Logo + Judul + AI Tag */}
+        {/* Modal Header: Logo + Judul (Badge PIML dihapus) */}
         <div className="flex items-start gap-3 pt-1">
           <div className="w-9 h-9 flex items-center justify-center shrink-0">
             <Image
@@ -192,14 +180,9 @@ export const PredictionDetailModal: React.FC<PredictionDetailModalProps> = ({
             />
           </div>
           <div>
-            <div className="flex items-center gap-2">
-              <h2 className="text-lg sm:text-xl font-extrabold text-slate-900 tracking-tight leading-tight">
-                Detail Analisis Prediksi AVRI
-              </h2>
-              <span className="hidden sm:inline-flex px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
-                PIML Hybrid Engine
-              </span>
-            </div>
+            <h2 className="text-lg sm:text-xl font-extrabold text-slate-900 tracking-tight leading-tight">
+              Detail Analisis Prediksi AVRI
+            </h2>
             <p className="text-xs text-slate-500 font-medium mt-0.5">
               Dekomposisi Lapisan Fisika Arrhenius, Koreksi Residual LightGBM & TreeSHAP
             </p>
@@ -218,7 +201,7 @@ export const PredictionDetailModal: React.FC<PredictionDetailModalProps> = ({
           </div>
         </div>
 
-        {/* 1. Composite PIML Score Card (Physics vs Machine Learning Breakdown) */}
+        {/* 1. Composite Score Card (Physics vs Machine Learning Breakdown) */}
         <div
           className={`rounded-2xl p-4 sm:p-5 border ${
             isAman
@@ -226,12 +209,12 @@ export const PredictionDetailModal: React.FC<PredictionDetailModalProps> = ({
               : 'bg-gradient-to-br from-red-50 to-orange-100/40 border-red-200'
           }`}
         >
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div>
-              <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">
-                Skor Prediksi AVRI (Ammonia Volatilization Risk Index)
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="min-w-0">
+              <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block whitespace-nowrap">
+                Skor Prediksi AVRI (12 Jam)
               </span>
-              <div className="flex items-baseline gap-2 mt-0.5">
+              <div className="flex items-baseline gap-2 mt-0.5 whitespace-nowrap">
                 <span
                   className={`text-3xl sm:text-4xl font-black tracking-tight ${
                     isAman ? 'text-emerald-700' : 'text-red-700'
@@ -254,14 +237,14 @@ export const PredictionDetailModal: React.FC<PredictionDetailModalProps> = ({
               </div>
             </div>
 
-            <div className="text-left sm:text-right">
-              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">
+            <div className="text-left sm:text-right shrink-0">
+              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block whitespace-nowrap">
                 Jendela Rekomendasi
               </span>
-              <span className="text-xs sm:text-sm font-bold text-slate-900 block mt-0.5">
+              <span className="text-xs sm:text-sm font-bold text-slate-900 block mt-0.5 whitespace-nowrap">
                 {statusBanner.bestWindow}
               </span>
-              <span className="text-[11px] text-slate-600 block">
+              <span className="text-[11px] text-slate-600 block whitespace-nowrap">
                 {statusBanner.openDurationText}
               </span>
             </div>
@@ -301,21 +284,17 @@ export const PredictionDetailModal: React.FC<PredictionDetailModalProps> = ({
           </div>
         </div>
 
-        {/* 2. TreeSHAP Feature Attribution (Explainable AI Waterfall) */}
+        {/* 2. TreeSHAP Feature Attribution */}
         <div>
-          <div className="flex items-center justify-between mb-2.5">
+          <div className="mb-2.5">
             <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
               <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
               Dekomposisi TreeSHAP (Faktor Penentu Penguapan)
             </h3>
-            <span className="text-[11px] font-semibold text-slate-500">
-              Explainable AI · SHAP Values
-            </span>
           </div>
 
           <div className="space-y-2.5">
             {shapFactors.map((f) => {
-              const Icon = f.icon;
               const isDamping = f.impactType === 'damping';
               const isIncreasing = f.impactType === 'increasing';
 
@@ -324,35 +303,29 @@ export const PredictionDetailModal: React.FC<PredictionDetailModalProps> = ({
                   key={f.id}
                   className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 hover:bg-slate-50/80 transition-colors"
                 >
-                  <div className="flex items-center justify-between gap-2 mb-1.5">
-                    <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 rounded-lg bg-white border border-slate-200 flex items-center justify-center shrink-0">
-                        <Icon className="w-3.5 h-3.5 text-slate-600" />
-                      </div>
-                      <span className="text-xs font-bold text-slate-900">{f.name}</span>
-                    </div>
+                  <div className="flex items-center justify-between gap-2 mb-1">
+                    <span className="text-xs font-bold text-slate-900">{f.name}</span>
 
-                    <div className="flex items-center gap-2">
-                      <span
-                        className={`text-[11px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 ${
-                          isDamping
-                            ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
-                            : isIncreasing
-                            ? 'bg-red-100 text-red-800 border border-red-200'
-                            : 'bg-slate-200 text-slate-700 border border-slate-300'
-                        }`}
-                      >
-                        {isDamping ? (
-                          <TrendingDown className="w-3 h-3 text-emerald-600" />
-                        ) : isIncreasing ? (
-                          <TrendingUp className="w-3 h-3 text-red-600" />
-                        ) : null}
-                        {f.impactLabel}
-                      </span>
-                    </div>
+                    {/* Teks dampak langsung tanpa kotak / pill capsule */}
+                    <span
+                      className={`text-xs font-bold flex items-center gap-1 shrink-0 ${
+                        isDamping
+                          ? 'text-emerald-700'
+                          : isIncreasing
+                          ? 'text-red-700'
+                          : 'text-slate-600'
+                      }`}
+                    >
+                      {isDamping ? (
+                        <TrendingDown className="w-3.5 h-3.5 text-emerald-600" />
+                      ) : isIncreasing ? (
+                        <TrendingUp className="w-3.5 h-3.5 text-red-600" />
+                      ) : null}
+                      <span>{f.impactLabel}</span>
+                    </span>
                   </div>
 
-                  <p className="text-[11.5px] text-slate-600 leading-relaxed pl-8">
+                  <p className="text-[11.5px] text-slate-600 leading-relaxed">
                     {f.narrative}
                   </p>
                 </div>

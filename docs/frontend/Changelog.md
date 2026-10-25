@@ -4,6 +4,52 @@ Seluruh catatan kemajuan, keputusan teknis, dan implementasi antarmuka frontend 
 
 ---
 
+## [2026-10-25] — Pembersihan Visual Modal Detail Prediksi AVRI (Format Sebaris, Hapus Ikon, Badge PIML & Teks SHAP Values)
+
+### 🧹 Penyederhanaan Visual & Tata Letak Sebaris (`PredictionDetailModal.tsx`)
+- **Penghapusan Teks *"Explainable AI · SHAP Values"*:**
+  - Menghapus label sekunder `Explainable AI · SHAP Values` pada tajuk dekomposisi TreeSHAP agar antarmuka lebih bersih dan rapi.
+- **Tata Letak Sebaris Tanpa Wrap (*Single-Line Alignment*):**
+  - **Label Skor Kiri:** Mengubah label menjadi `SKOR PREDIKSI AVRI (12 JAM)` dengan `whitespace-nowrap`, sehingga teks tidak lagi terpotong ke bawah (*two-line wrapping*).
+  - **Jendela Rekomendasi Kanan:** Menerapkan `whitespace-nowrap shrink-0` pada `Sekarang (06:00 – 10:00 WIB)`, memastikan teks waktu tetap sebaris dan tidak mematahkan kata "WIB" ke bawah.
+- **Penghapusan Ikon & Kotak Tabung Reaksi / Sensor:**
+  - Menghapus pembungkus kotak ikon (`w-6 h-6 rounded-lg bg-white border`) dan ikon visual (`TestTube2`, `Droplets`, `Thermometer`, `Wind`) pada kartu faktor TreeSHAP, sehingga judul mikroklimat tampil bersih langsung dari batas kiri.
+- **Penghapusan Lencana Badge *"PIML Hybrid Engine"*:**
+  - Menghapus lencana pil `PIML Hybrid Engine` di samping judul modal, membuat tajuk modal lebih ringkas dan fokus pada judul *"Detail Analisis Prediksi AVRI"*.
+- **Penyajian Nilai Dampak SHAP Secara Langsung (Tanpa Kotak/Kapsul/Square):**
+  - Menghapus latar belakang kapsul abu-abu/hijau/merah (`px-2 py-0.5 rounded-full border bg-...`) pada label dampak (seperti `+4% Netral Stabil`, `-32% Menekan Risiko`, dll.).
+  - Menampilkannya secara langsung (*direct text*) dengan tipografi tebal berwarna semantik (`text-emerald-700`, `text-red-700`, atau `text-slate-600`) berdampingan dengan ikon panah tren tanpa kotak pembungkus.
+- **Validasi Build:**
+  - `npm run build` sukses 100% tanpa error TypeScript/ESLint.
+  - Verifikasi browser subagent mengonfirmasi tampilan modal yang bersih, minimalis, dan elegan.
+
+---
+
+## [2026-10-25] — Dinamika Kartu Metrik Telemetri: Indikator Tren Naik/Turun & Penyesuaian Warna Semantik Risiko Kritis (Merah/Hijau)
+
+### 📊 Desain & Responsivitas Warna Semantik (`MetricCardsGrid.tsx`)
+- **Penyesuaian Warna Kartu AVRI Sesuai Kategori Risiko (Bukan Statis Hijau):**
+  - **Kondisi Kritis / Bahaya ($>60\%$):** Kartu AVRI berubah dari hijau menjadi **merah pekat semantik** (`bg-[#DC2626]` dengan border `#B91C1C`), lencana merah gelap `+18% · Kritis`, nilai angka putih kontras tinggi, dan subjudul *"Tunda Pemupukan"*.
+  - **Kondisi Waspada ($31\text{--}60\%$):** Kartu AVRI berganti ke **kuning amber** (`bg-[#D97706]` dengan border `#B45309`) dengan lencana waspada dan subjudul *"Pantau Mikroklimat"*.
+  - **Kondisi Aman ($\le 30\%$):** Mempertahankan hijau botani (`bg-[#236B32]` dengan border `#1C5B2A`) dengan lencana aman `-14% · Aman` dan subjudul *"Optimal Pemupukan"*.
+- **Pemberian Indikator Tren Naik / Turun & Lencana Status Kondisi:**
+  - Setiap kartu telemetri kini dilengkapi pil status di pojok kanan atas dengan ikon panah tren (`TrendingUp`, `TrendingDown`, atau `Minus` stabil) dan teks status kondisi yang adaptif terhadap parameter fisik:
+    - *Kelembapan Tanah:* Menampilkan badge `Optimal` (hijau, $\nearrow$) pada $42,0\%$ vs badge `Kritis` (merah, $\searrow$) pada $22,4\%$.
+    - *Suhu Tanah:* Menampilkan badge `Optimal (Sejuk)` (hijau, $\searrow$) pada $26,0^\circ\text{C}$ vs badge `Kritis (Terik)` (merah, $\nearrow$) pada $34,1^\circ\text{C}$.
+    - *pH Tanah:* Menampilkan badge `Optimal (Netral)` (hijau, $-$) pada $7,10$ vs badge `Waspada (Basa)` (amber, $\nearrow$) pada $7,83$.
+- **Penyesuaian Warna Angka Nilai Telemetri Sesuai Tingkat Bahaya:**
+  - Menghapus pewarnaan teks hijau keras (`#1B6633`) saat kondisi kritis.
+  - Nilai sensor yang berada di zona bahaya/kritis berubah otomatis menjadi **merah terang** (`text-[#DC2626]` untuk kelembaban defisit $22,4\%$ dan suhu terik $34,1^\circ\text{C}$).
+  - Nilai sensor dalam zona waspada berubah menjadi **oranye amber** (`text-[#D97706]` untuk pH $7,83$).
+  - Nilai sensor optimal tetap berwarna **hijau botani** (`text-[#1B6633]`).
+- **Narasi Delta 24 Jam Bawah Kartu:**
+  - Menambahkan baris info tren terperinci di bawah angka utama (misal: `-3.2% • Defisit Air (<25%)`, `+1.8°C • Panas Terik (>30°C)`, `+3.4% • Kapasitas Lapang (>40%)`, dll.).
+- **Validasi Build & Visual Browser:**
+  - `npm run build` sukses 100% tanpa error TypeScript/ESLint.
+  - Verifikasi browser subagent mengonfirmasi peralihan visual mulus secara instan antara mode Aman ($4\%$) dan mode Kritis ($74\%$).
+
+---
+
 ## [2026-10-25] — Perombakan Total Modal Detail Prediksi AVRI (Physics-Informed ML, Explainable AI TreeSHAP & Traktori Kinetika 12 Jam)
 
 ### 🧠 Arsitektur & Kedalaman Analisis Baru (`PredictionDetailModal.tsx`)

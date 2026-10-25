@@ -100,7 +100,10 @@ export default function DashboardPage() {
               />
 
               {/* 4 Metric Telemetry Cards */}
-              <MetricCardsGrid metrics={currentData.metrics} />
+              <MetricCardsGrid
+                metrics={currentData.metrics}
+                riskCategory={currentData.statusBanner.category}
+              />
 
               {/* 24-Hour Forecast Trend Chart (ECharts + Shadcn styling) */}
               <Trend24hChart data={currentData.trend24h} />
