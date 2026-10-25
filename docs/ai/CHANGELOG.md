@@ -9,9 +9,35 @@ Dokumen ini mencatat seluruh riwayat pengembangan, pelatihan model, evaluasi met
 
 ---
 
-## [Unreleased] — Tahap 3: Pelatihan Model Residual LightGBM & SHAP (Next)
-- **Fokus:** Pembuatan skrip `ai_engine/train.py` dengan monotone constraints dan pembuktian benchmark terhadap baseline aturan statis.
+## [Unreleased] — Tahap 4: Formulasi AVRI & Service Wrapper Inference (Next)
+- **Fokus:** Pembuatan skrip `ai_engine/inference.py` dan `ai_engine/service.py` untuk mengintegrasikan output model ke format DTO `INTERFACES.md` §2.
 - **PIC:** Aris Kurniawan (Lead AI Engineer & Auditor).
+
+---
+
+## [0.4.0] - 2026-10-25 — Penyelesaian AI Tahap 3: Pelatihan Model Residual LightGBM & SHAP
+
+### Ditambahkan (Added)
+- **Modul Pelatihan Residual LightGBM (`ai_engine/train.py`):**
+  - Implementasi regresi residual $y_{res} = y_{target} - y_{physics}$ dengan arsitektur Physics-Informed ML.
+  - Penegakan **Monotone Constraints**: $T_{soil} (+1)$, $\theta (-1)$, $pH (+1)$ agar kurva selalu logis searah hukum termodinamika.
+  - Pemisahan data latih (7.008 baris) dan data uji holdout (1.752 baris) tanpa acak (*zero leakage*).
+- **Berkas Model Terkompilasi (`models/avri_model.txt`):**
+  - Model teks booster LightGBM berukuran kompak (711.4 KB), siap diintegrasikan ke edge / FastAPI.
+- **Laporan Evaluasi Benchmark (`docs/ai/evaluation_report.json`):**
+  - Metrik Model PIML: **MAE = 1.004%** (Target: $\le 3.5\%$), **RMSE = 1.272%**, **$R^2 = 0.9875$** (Target: $\ge 0.85$).
+  - Baseline Aturan Statis Petani: **MAE = 6.530%**, **RMSE = 9.870%**.
+  - Peningkatan Efisiensi Prediksi: **84.62% lebih akurat** dibanding aturan statis (Target Lolos: $\ge 15.0\%$).
+  - Latensi Inferensi: **0.006 ms / sampel** (Target: $\le 20\text{ ms}$).
+- **Modul Explainable AI & Audit TreeSHAP (`ai_engine/explainability.py`):**
+  - Implementasi `shap.TreeExplainer` untuk mengekstrak kontribusi fitur ke dalam bahasa petani.
+  - Sanity check tanda nilai SHAP lolos 100%: Defisit Uap Air VPD (+0.9943), Kecepatan Angin (+0.9673), Kelembaban Relatif (-0.7605), Suhu Tanah (+0.8732).
+  - Ekspor grafik pembuktian dewan juri: `docs/ai/assets/shap_summary_plot.png` (181 KB) dan salinan di folder Downloads Windows.
+- **Suite Pengujian Unit Training (`ai_engine/tests/test_train.py`):**
+  - 3 unit test: integritas berkas model teks, pemenuhan seluruh quality gates pada report JSON, dan verifikasi grafik visualisasi SHAP.
+
+### Diverifikasi (Verified)
+- Seluruh 15 unit test lulus 100% via `pytest` (7 fisika + 5 dataset + 3 training dalam 3.34s).
 
 ---
 

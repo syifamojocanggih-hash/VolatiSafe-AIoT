@@ -10,6 +10,11 @@ Master changelog tingkat sistem yang mencatat rilis dan tonggak integrasi utama 
 
 ---
 
+## [0.4.0] - 2026-10-25
+- Penyelesaian AI Tahap 3: Pelatihan model Physics-Informed LightGBM residual learning dengan monotone constraints.
+- Model berhasil mengalahkan baseline aturan statis petani sebesar 84.62% (MAE 1.004% vs 6.530%, R2 0.9875).
+- Ekspor TreeSHAP summary plot dan lulus 15/15 unit test suite.
+
 ## [0.3.0] - 2026-10-25
 - Penyelesaian AI Tahap 2: Dataset builder anti-bocor dengan 8.760 jam data iklim BMKG Lamongan.
 - Lolos 12/12 unit test suite pengujian sains dan dataset.
