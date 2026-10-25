@@ -10,6 +10,11 @@ Master changelog tingkat sistem yang mencatat rilis dan tonggak integrasi utama 
 
 ---
 
+## [0.5.0] - 2026-10-25
+- Penyelesaian AI Tahap 4: Implementasi mesin inferensi AVRI (0–100%) dan service wrapper DTO compliance.
+- Pemetaan 4 tingkat risiko resmi (Aman, Waspada, Kritis, Bahaya) dan penjelasan TreeSHAP dinamis.
+- Lolos 19/19 unit test suite.
+
 ## [0.4.0] - 2026-10-25
 - Penyelesaian AI Tahap 3: Pelatihan model Physics-Informed LightGBM residual learning dengan monotone constraints.
 - Model berhasil mengalahkan baseline aturan statis petani sebesar 84.62% (MAE 1.004% vs 6.530%, R2 0.9875).

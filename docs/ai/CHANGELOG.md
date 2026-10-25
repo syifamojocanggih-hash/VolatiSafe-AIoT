@@ -9,9 +9,32 @@ Dokumen ini mencatat seluruh riwayat pengembangan, pelatihan model, evaluasi met
 
 ---
 
-## [Unreleased] — Tahap 4: Formulasi AVRI & Service Wrapper Inference (Next)
-- **Fokus:** Pembuatan skrip `ai_engine/inference.py` dan `ai_engine/service.py` untuk mengintegrasikan output model ke format DTO `INTERFACES.md` §2.
+## [Unreleased] — Tahap 5: Prediksi Jendela Waktu 72 Jam (Safe Application Window Forecaster)
+- **Fokus:** Pembuatan skrip `ai_engine/window_forecaster.py` untuk mengagregasikan prakiraan cuaca 72 jam BMKG Lamongan dan mendeteksi interval jam aman tebar pupuk.
 - **PIC:** Aris Kurniawan (Lead AI Engineer & Auditor).
+
+---
+
+## [0.5.0] - 2026-10-25 — Penyelesaian AI Tahap 4: Formulasi AVRI & Service Wrapper DTO
+
+### Ditambahkan (Added)
+- **Mesin Inferensi AVRI (`ai_engine/inference.py`):**
+  - Menggabungkan kehilangan dasar fisika Arrhenius dengan residual LightGBM ke dalam skor $AVRI = \text{clip}(BaseLoss + Residual, 0.0, 100.0)$.
+  - Memetakan skor AVRI ke dalam **4 Tingkat Risiko Resmi**:
+    - `0.0 – 30.0%`: **Aman** (Hijau `#16A34A` $\rightarrow$ `APPLY_NOW`)
+    - `30.1 – 60.0%`: **Waspada** (Kuning `#CA8A04` $\rightarrow$ `INCORPORATE_OR_IRRIGATE`)
+    - `60.1 – 80.0%`: **Kritis** (Oranye `#EA580C` $\rightarrow$ `DELAY_FERTILIZATION`)
+    - `80.1 – 100.0%`: **Bahaya** (Merah `#DC2626` $\rightarrow$ `PROHIBIT_APPLICATION`)
+  - Mendukung inferensi cepat tunggal (*single inference*) dan inferensi berkecepatan tinggi berbasis array DataFrame (*batch inference*).
+- **Service Wrapper Sesuai Kontrak DTO (`ai_engine/service.py`):**
+  - Implementasi `PredictRiskRequestDTO` dan `PredictRiskResponseDTO` yang mematuhi 100% spesifikasi `docs/universal/INTERFACES.md` §2.
+  - Pembangkit penjelasan fitur TreeSHAP dinamis (`_generate_shap_explanations`) untuk menerjemahkan kontribusi fitur teknis ke dalam bahasa agronomi petani.
+  - Diagnostik kinetika fisika ($k_{urease}$ per jam, laju hidrolisis, penanda `is_physics_constrained: True`).
+- **Suite Pengujian Unit Inferensi & Service (`ai_engine/tests/test_inference_and_service.py`):**
+  - 4 unit test: uji batas Monte Carlo 1.000 titik acak, uji pemetaan 4-tingkat risiko, uji skenario agronomi nyata Lamongan, dan verifikasi kepatuhan DTO respons JSON.
+
+### Diverifikasi (Verified)
+- Seluruh 19 unit test lulus 100% via `pytest` (7 fisika + 5 dataset + 3 training + 4 inferensi/service dalam 6.35s).
 
 ---
 
