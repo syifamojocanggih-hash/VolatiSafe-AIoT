@@ -52,6 +52,10 @@ Semua perubahan pada subsistem backend didokumentasikan di sini dengan merujuk p
    - `POST /api/v1/simulation/what-if`: Simulator interaktif pengujian juri.
    - `WebSocket /ws/v1/live`: Streaming live update & heartbeat ping/pong.
 
-8. **Infrastruktur Kontainer & Basis Data (`docker/`, `backend/app/models/`)**:
+8. **Infrastruktur Kontainer & Basis Data (`docker/`, `backend/app/models/`, `migrations/`)**:
    - `docker/mosquitto.conf` & `docker/docker-compose.yml` untuk Mosquitto MQTT dan TimescaleDB PostgreSQL 16.
-   - Model ORM SQLAlchemy 2.0 untuk seluruh tabel relasional dan hypertable deret waktu.
+   - `docker/init.sql`: Otomatisasi inisialisasi DDL, ekstensi TimescaleDB, pembuatan 8 tabel relasional, dan seeding awal data lahan `BLOK-A` & node `VS-A1-003`.
+   - `volatisafe_db_admin` (Adminer Web GUI) di port `8082` untuk manajemen visual database di browser.
+   - Konfigurasi migrasi database Alembic (`alembic.ini`, `migrations/env.py`, `migrations/versions/001_initial_schema.py`).
+   - Modul konektor database `backend/app/core/database.py` dengan driver `psycopg 3.3.6`.
+

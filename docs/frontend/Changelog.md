@@ -4,6 +4,20 @@ Seluruh catatan kemajuan, keputusan teknis, dan implementasi antarmuka frontend 
 
 ---
 
+## [2026-10-26] — Pemantapan Tipografi Plus Jakarta Sans via Direct Google Fonts CDN
+
+### 🎨 Ketahanan Tipografi Antarmuka (`globals.css`, `layout.tsx`, `tailwind.config.ts`)
+- **Direct CDN Import & Preconnect:**
+  - Menambahkan `@import url(...)` untuk Google Fonts `Plus Jakarta Sans` dan `Inter` pada baris paling atas [`frontend/src/app/globals.css`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/frontend/src/app/globals.css).
+  - Menambahkan tag `<link rel="preconnect">` dan `<link rel="stylesheet">` langsung di `<head>` [`layout.tsx`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/frontend/src/app/layout.tsx) guna mencegah ketergantungan rapuh pada unduhan server internal `next/font/google`.
+  - Menetapkan `'Plus Jakarta Sans'` sebagai prioritas utama dalam array `fontFamily.sans` di [`tailwind.config.ts`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/frontend/tailwind.config.ts).
+- **Pembersihan Berkas Redundan:**
+  - Menghapus berkas duplikat `frontend/src/app/icon.png` yang sempat memicu error kompilasi HTTP 500 Next.js.
+- **Validasi Visual:**
+  - Browser subagent memverifikasi antarmuka telah kembali secara konsisten menggunakan font **Plus Jakarta Sans** (computed font: `"Plus Jakarta Sans", sans-serif`).
+
+---
+
 ## [2026-10-25] — Penghapusan Sub-Keterangan Durasi Jendela Rekomendasi
 
 ### 🧹 Penyederhanaan Teks Kartu Skor (`PredictionDetailModal.tsx` & `dashboardMock.ts`)
