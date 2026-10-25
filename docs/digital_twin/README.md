@@ -26,6 +26,7 @@ Dokumentasi domain Digital Twin dipecah menjadi berkas-berkas spesifikasi modula
 docs/digital_twin/
 ├── README.md                 <-- Dokumen ini (Master Index, Mandat & Batasan)
 ├── TASK_GUIDE.md             <-- Panduan langkah demi langkah implementasi tugas Andharu
+├── MATHEMATICAL_FOUNDATIONS.md<-- 4 Hukum sains (FAO-56, Saxton-Rawls, Fourier 1D, Arrhenius)
 ├── SOIL_BASELINE_DATA.md     <-- Metodologi data baseline BBSDLP Kementan, SoilGrids & Saxton-Rawls
 ├── FAO56_WATER_BALANCE.md    <-- Formulasi neraca air perakaran Penman-Monteith & Kc jagung
 ├── THERMAL_DIFFUSION.md      <-- Model perambatan panas tanah teredam (damped diffusion)
