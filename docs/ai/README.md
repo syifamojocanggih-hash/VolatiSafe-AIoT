@@ -24,6 +24,7 @@ Aris bertanggung jawab penuh atas arsitektur sistem menyeluruh, penjaminan integ
 docs/ai/
 ├── README.md               <-- Dokumen ini (Master Index, Mandat & Batasan AI)
 ├── TASK_GUIDE.md           <-- Panduan langkah demi langkah implementasi tugas Aris
+├── CHANGELOG.md            <-- Riwayat rilis, task, dan audit pengujian pilar AI
 ├── MODEL_SPEC.md           <-- Spesifikasi teknis arsitektur PIML LightGBM & formula AVRI
 ├── EXPLAINABILITY_SHAP.md  <-- Kalkulasi TreeSHAP & pemetaan teks narasi petani
 └── MOCK_PREDICTOR.md       <-- Skrip mock predictor terisolasi untuk pengujian backend
