@@ -55,7 +55,7 @@ Berdasarkan studi literatur dan observasi lapangan pada sektor agritech Indonesi
 | **Sub-Tema** | Sub-Tema A: *Smart Production & Precision Agriculture* |
 | **Batas Proposal** | 31 Oktober 2026 |
 | **Fase 1 (TKT 3)** | Purwarupa *low-fidelity* berbasis software (Wokwi Virtual Node + Digital Twin + Live Dashboard). |
-| **Fase 2 (TKT 6)** | Uji lapangan multi-bedeng komparatif (*Bedeng AI vs Bedeng Kontrol*) setelah insentif pencairan komponen fisik (Rp3.000.000/tim). |
+| **Fase 2 (TKT 6)** | Uji lapangan split-plot komparatif (*Plot Presisi VolatiSafe vs Plot Kontrol Konvensional Petani*) setelah insentif pencairan komponen fisik (Rp3.000.000/tim). |
 
 ---
 

@@ -55,26 +55,26 @@ docs/
 
 ---
 
-## 2. Matriks Wewenang & Batasan AI Agent (Boundary Matrix)
+## 2. Matriks Wewenang & Pembagian Tugas Tim Pengembang (Team Access Matrix)
 
-Untuk menghindari kerusakan silang (*cross-domain regression*), setiap AI agent memiliki batasan yang tidak boleh dilanggar:
+Untuk menghindari kerusakan silang (*cross-domain regression*), setiap anggota tim pengembang memiliki batas kepemilikan folder yang tegas:
 
-| Domain AI | Fokus Tugas Utama | Folder Boleh Ditulis | Zona Terlarang (DILARANG KERAS) | Titik Kontak Resmi |
+| Peran & Developer | Fokus Tugas Utama | Folder Boleh Ditulis (R/W) | Zona Terlarang (DILARANG KERAS) | Titik Kontak Resmi |
 |---|---|---|---|---|
-| **Hardware AI** | Firmware ESP32, driver sensor, LoRa SX1278, Wokwi virtual node, manajemen daya | `firmware/`, `simulation/wokwi/`, `docs/hardware/` | Dilarang menyentuh kode database, API backend, atau UI frontend | Mengirim payload JSON/byte ke topik MQTT Gateway via `docs/universal/INTERFACES.md` §1 |
-| **AI / Digital Twin AI** | Model LightGBM, persamaan fisika FAO-56, inferensi AVRI, TreeSHAP, Digital Twin state | `ai_engine/`, `digital_twin/`, `models/`, `docs/ai/` | Dilarang query database langsung atau membuat route endpoint HTTP publik | Menghasilkan DTO inferensi standar melalui Python interface di `docs/universal/INTERFACES.md` §2 |
-| **Backend AI** | MQTT ingestion broker, TimescaleDB, REST API FastAPI, WebSocket, WhatsApp/Telegram bot | `backend/`, `migrations/`, `docker/`, `docs/backend/` | Dilarang memodifikasi firmware hardware atau styling frontend | Mengekspos REST DTO & WebSocket stream sesuai `docs/universal/INTERFACES.md` §3 |
-| **Frontend AI** | Next.js 14 Dashboard, PWA, peta Leaflet bedeng, Recharts, What-If simulator, UX petani | `frontend/`, `public/`, `docs/frontend/` | Dilarang menyambung langsung ke database atau mendikte struktur payload LoRa | Mengonsumsi endpoint FastAPI dan data mock via `docs/universal/INTERFACES.md` §3 |
+| **IoT & Hardware**<br>*(Hafiiz)* | Firmware ESP32 C++, sensor tanah (Moisture & pH), LoRa SX1278 433 MHz, Wokwi virtual node, deep sleep | `firmware/`, `simulation/wokwi/`, `docs/hardware/` | Dilarang menyentuh kode database, API backend, model AI, atau UI frontend | Mengirim payload 52-byte ke topik MQTT Gateway via `docs/universal/INTERFACES.md` §1 |
+| **Digital Twin**<br>*(Andharu)* | Model biofisika tanah FAO-56 ($ET_0$), difusi termal tanah damped, imputasi failover dropout, BMKG weather replay | `digital_twin/`, `simulations/data_replay/`, `docs/ai/DIGITAL_TWIN.md` | Dilarang mengutak-atik model LightGBM, firmware ESP32, atau membuat UI web | Menghasilkan `FieldStateDTO` standar melalui interface di `docs/universal/INTERFACES.md` §2 |
+| **Fullstack (BE + FE)**<br>*(Syifa)* | Ingestion MQTT, TimescaleDB, REST API FastAPI, WebSocket, bot WhatsApp/Telegram, Next.js 14 PWA, Leaflet, Recharts, What-If UI | `backend/`, `frontend/`, `migrations/`, `docker/`, `docs/backend/`, `docs/frontend/` | Dilarang mengubah formula kinetika urease PIML atau mendikte pinout mikrokontroler hardware | Mengekspos REST DTO & WebSocket stream sesuai `docs/universal/INTERFACES.md` §3 |
+| **AI Engineer & Lead**<br>*(Aris)* | Arsitek sistem, penjamin kontrak data, Physics-Informed ML (PIML), LightGBM Regressor, AVRI formula, TreeSHAP | `ai_engine/`, `models/`, `docs/ai/` (MODEL_SPEC, SHAP), `docs/universal/` | Dilarang mengubah implementasi internal firmware atau styling CSS sepihak di luar kontrak | Menghasilkan model PIML terlatih dan mengelola *Single Source of Truth* universal |
 
 ---
 
 ## 3. Empat Aturan Emas Anti-Tabrakan (*Golden Rules*)
 
 1. **Contract-First Development (Single Source of Truth):**
-   Semua bentuk data yang melintasi batas domain didefinisikan secara mutlak di [`docs/universal/INTERFACES.md`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/docs/universal/INTERFACES.md). Tidak ada agent yang boleh mengubah struktur data tanpa persetujuan lintas domain.
+   Semua bentuk data yang melintasi batas domain didefinisikan secara mutlak di [`docs/universal/INTERFACES.md`](universal/INTERFACES.md). Tidak ada agent yang boleh mengubah struktur data tanpa persetujuan lintas domain.
 2. **Anti-Corruption Layer (Adapter Pattern):**
    Perubahan pada level sensor/hardware (misal: ganti pin atau format paket LoRa) **hanya boleh ditangani oleh Adapter di Gateway/Ingestion**. Logika inti backend, AI, dan frontend tidak boleh terpengaruh.
 3. **Mock-Driven Decoupling:**
-   Frontend agent bekerja dengan [`docs/frontend/MOCK_DATA.md`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/docs/frontend/MOCK_DATA.md). Backend agent menguji AI dengan [`docs/ai/MOCK_PREDICTOR.md`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/docs/ai/MOCK_PREDICTOR.md). Masing-masing dapat berjalan dan diuji 100% tanpa menunggu subsistem lain selesai.
+   Frontend agent bekerja dengan [`docs/frontend/MOCK_DATA.md`](frontend/MOCK_DATA.md). Backend agent menguji AI dengan [`docs/ai/MOCK_PREDICTOR.md`](ai/MOCK_PREDICTOR.md). Masing-masing dapat berjalan dan diuji 100% tanpa menunggu subsistem lain selesai.
 4. **Breaking Change Protocol:**
-   Jika suatu perubahan memerlukan modifikasi pada `INTERFACES.md`, wajib melalui prosedur RFC (Request for Comments) yang didokumentasikan di [`docs/universal/GIT_WORKFLOW.md`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/docs/universal/GIT_WORKFLOW.md).
+   Jika suatu perubahan memerlukan modifikasi pada `INTERFACES.md`, wajib melalui prosedur RFC (Request for Comments) yang didokumentasikan di [`docs/universal/GIT_WORKFLOW.md`](universal/GIT_WORKFLOW.md).

@@ -53,7 +53,7 @@ Setiap fitur memiliki aturan konversi otomatis berdasarkan tanda (*sign*) dan be
 
 ## 4. Struktur Data Output SHAP (`shap_values`)
 
-Struktur JSON ini disematkan di dalam respons inferensi sesuai [`docs/universal/INTERFACES.md`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/docs/universal/INTERFACES.md) §2.2:
+Struktur JSON ini disematkan di dalam respons inferensi sesuai [`docs/universal/INTERFACES.md`](../universal/INTERFACES.md) §2.2:
 
 ```json
 [

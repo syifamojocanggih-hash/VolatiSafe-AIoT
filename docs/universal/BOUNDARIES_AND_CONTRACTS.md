@@ -5,78 +5,83 @@
 
 ---
 
-## 1. Filosofi Isolasi Multi-AI
+## 1. Filosofi Isolasi Multi-Domain & Pembagian 4 Anggota Tim
 
-Proyek VolatiSafe AIoT dikembangkan secara modular menggunakan AI coding assistant yang dapat ditugaskan secara terpisah untuk tiap domain:
-1. **Hardware AI** (ESP32, LoRa, Sensor, Wokwi)
-2. **AI & Digital Twin AI** (Neraca Fisika FAO-56, LightGBM, TreeSHAP)
-3. **Backend AI** (FastAPI, TimescaleDB, MQTT Broker, Bot WhatsApp/Telegram)
-4. **Frontend AI** (Next.js 14, Leaflet Map, Recharts, PWA Dashboard)
+Proyek VolatiSafe AIoT dikembangkan secara modular dengan pembagian kepemilikan tanggung jawab yang tegas kepada 4 anggota tim pengembang:
+1. **Domain IoT & Embedded Hardware:** Hadi M. Hafiiz Hilmi (Hafiiz)
+2. **Domain Digital Twin Engine:** Andharu Raffi (Andharu)
+3. **Domain Fullstack Development (Backend & Frontend):** Syifa (Syifa)
+4. **Domain AI Engineer & System Architecture (Team Lead):** Aris Kurniawan (Aris)
 
-Tanpa tata kelola batas yang ketat, modifikasi pada satu komponen dapat menyebabkan efek domino kegagalan (*cascading failures*). Oleh karena itu, diterapkan prinsip:
+Setiap anggota tim memiliki zona kerja (*Read/Write Zone*), zona terlarang (*Forbidden Zone*), dan kontrak antarmuka yang mengikat. Hal ini menjamin bahwa pengerjaan oleh 4 orang dapat berjalan paralel secara serempak tanpa saling menunggu atau merusak (*zero-collision development*).
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │                            DEPENDENCY GRAPH & FLOW                          │
 │                                                                             │
-│  [ Hardware AI ]           [ AI / Digital Twin AI ]                         │
-│   (ESP32 / LoRa)           (PIML LightGBM & FAO-56)                         │
-│         │                             ▲                                     │
-│         │ Telemetry Payload           │ Feature DTO / State Vector          │
-│         ▼ (Contract 1)                ▼ (Contract 2)                        │
-│  ┌────────────────────────────────────────────────────────┐                 │
-│  │                     [ Backend AI ]                     │                 │
-│  │   (FastAPI / Ingestion Adapter / TimescaleDB Engine)   │                 │
-│  └────────────────────────────────────────────────────────┘                 │
-│                               ▲                                             │
-│                               │ REST API / WebSocket Stream (Contract 3)    │
-│                               ▼                                             │
-│                       [ Frontend AI ]                                       │
-│                 (Next.js Dashboard & PWA)                                   │
+│  [ IoT: Hafiiz ]              [ Digital Twin: Andharu ]                     │
+│  ESP32, Sensor & LoRa         FAO-56 & State Imputation                     │
+│         │                                  ▲                                │
+│         │ Telemetry Payload 52-byte        │ State Vector Replay            │
+│         ▼ (Contract 1)                     ▼ (Contract 2)                   │
+│  ┌───────────────────────────────────────────────────────────────────────┐  │
+│  │                        [ Fullstack: Syifa ]                           │  │
+│  │   • Backend: FastAPI, Ingestion Adapter, TimescaleDB & Bot            │  │
+│  │   • Frontend: Next.js PWA, Leaflet Map, Recharts & What-If UI         │  │
+│  └───────────────────────────────────────────────────────────────────────┘  │
+│                                            ▲                                │
+│                                            │ Feature Vector DTO             │
+│                                            ▼ (Contract 2)                   │
+│                              [ AI Engineer: Aris (Lead) ]                   │
+│                              Physics-Informed ML (PIML), AVRI & TreeSHAP    │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
-> **Hukum Utama:** Tidak ada komunikasi langsung antar-cabang tepi (*no edge-to-edge bypassing*). Hardware AI **tidak pernah** berbicara langsung dengan Frontend AI. AI Engine **tidak pernah** menerima koneksi HTTP langsung dari browser. Semua alur diorkestrasi melalui Backend Anti-Corruption Layer.
+> **Hukum Utama:** Tidak ada komunikasi pintas (*no bypassing*). IoT node yang dikerjakan Hafiiz **tidak pernah** berhubungan langsung dengan frontend Syifa. Model AI yang dikerjakan Aris **tidak pernah** dipanggil langsung oleh browser tanpa melalui API Gateway backend Syifa. Semua alur data diikat oleh kontrak `INTERFACES.md`.
 
 ---
 
-## 2. Definisi Batasan & Hak Akses per AI Agent
+## 2. Definisi Batasan & Hak Akses per Anggota Tim
 
-### 2.1 Hardware / Edge AI Agent
-
-| Atribut | Ketetapan |
-|---|---|
-| **Area Kerja** | `firmware/`, `simulation/wokwi/`, `docs/hardware/` |
-| **Tanggung Jawab** | Akuisisi sensor, kalibrasi analog-ke-fisik, sampling burst median filter, penghematan daya (deep sleep), transmisi LoRa SX1278, dan simulasi Wokwi. |
-| **Output Resmi** | Paket telemetri terkompresi ke topik MQTT Gateway (`/volatisafe/v1/node/{node_id}/telemetry`). |
-| **Zona Terlarang** | ❌ DILARANG menyentuh kode backend (FastAPI), skema database (SQL/TimescaleDB), modul ML, atau file UI frontend.<br>❌ DILARANG mengubah struktur field JSON payload LoRa tanpa membuat *Adapter* penerjemah di gateway backend. |
-
-### 2.2 AI & Digital Twin Agent
+### 2.1 Domain IoT & Embedded Hardware (PIC: Hafiiz)
 
 | Atribut | Ketetapan |
 |---|---|
-| **Area Kerja** | `ai_engine/`, `digital_twin/`, `models/`, `docs/ai/` |
-| **Tanggung Jawab** | Implementasi neraca air tanah FAO-56, model difusi termal damped, estimasi imputasi saat sensor dropout, model LightGBM regresi residual, formulasi kinetika urease PIML, dan perhitungan TreeSHAP. |
-| **Output Resmi** | Python Callable Function / Service Interface yang menerima `FeatureVectorDTO` dan mengembalikan `PredictionResultDTO` (AVRI score, klasifikasi risiko, dan atribusi SHAP). |
-| **Zona Terlarang** | ❌ DILARANG membuka koneksi database langsung (`psycopg2`, `SQLAlchemy`, dsb). AI menerima data bersih dari backend via argumen DTO.<br>❌ DILARANG membuat server HTTP publik sendiri.<br>❌ DILARANG memodifikasi kode frontend atau firmware ESP32. |
+| **Penanggung Jawab** | **Hadi M. Hafiiz Hilmi (Hafiiz)** |
+| **Area Akses R/W** | `firmware/`, `simulation/wokwi/`, `docs/hardware/` |
+| **Tanggung Jawab** | Akuisisi sensor tanah (Moisture, Temp, pH), kalibrasi analog-ke-fisik, sampling burst median filter, manajemen daya (deep sleep 15 menit), transmisi radio LoRa SX1278 433 MHz, dan simulasi Wokwi virtual testbed. |
+| **Output Resmi** | Paket telemetri LoRa 52-byte terkompresi ke gateway lokal yang diteruskan ke broker MQTT (`/volatisafe/v1/node/{node_id}/telemetry`). |
+| **Zona Terlarang** | ❌ DILARANG memodifikasi kode backend (FastAPI), skema database (TimescaleDB), model AI/ML, atau file UI frontend.<br>❌ DILARANG mengubah struktur bit-packing LoRa tanpa koordinasi melalui kontrak `INTERFACES.md` §1. |
 
-### 2.3 Backend & Ingestion AI Agent
-
-| Atribut | Ketetapan |
-|---|---|
-| **Area Kerja** | `backend/`, `migrations/`, `docker/`, `docs/backend/` |
-| **Tanggung Jawab** | MQTT broker bridge, penerjemah paket LoRa (Anti-Corruption Adapter), penyimpanan TimescaleDB & PostgreSQL, pemanggilan orkestrasi AI Engine, penyedia REST API & WebSocket, dan dispatcher bot notifikasi (WhatsApp/Telegram). |
-| **Output Resmi** | REST API endpoints (`/api/v1/...`) dan WebSocket stream (`/ws/v1/live`) dengan JSON envelope standar. |
-| **Zona Terlarang** | ❌ DILARANG mengubah logika algoritma fisika urease atau membongkar model AI internal.<br>❌ DILARANG menulis styling CSS atau komponen UI frontend.<br>❌ DILARANG mendikte pinout mikrokontroler hardware. |
-
-### 2.4 Frontend AI Agent
+### 2.2 Domain Digital Twin (PIC: Andharu)
 
 | Atribut | Ketetapan |
 |---|---|
-| **Area Kerja** | `frontend/`, `public/`, `docs/frontend/` |
-| **Tanggung Jawab** | Penyajian visual Dashboard Petak, visualisasi peta poligon Leaflet, grafik tren Recharts, kalkulator pupuk multi-komponen, Dynamic DAT Tracker, panel simulasi What-If, dan kapabilitas offline PWA. |
-| **Output Resmi** | Web Application SPA/PWA yang terisolasi dengan state management lokal (Zustand/React Query). |
-| **Zona Terlarang** | ❌ DILARANG menjalankan query SQL atau koneksi langsung ke TimescaleDB.<br>❌ DILARANG membuat endpoint API mock palsu di backend (frontend wajib menggunakan layer mock lokal di `frontend/src/mocks/` jika backend offline).<br>❌ DILARANG memodifikasi logika AI atau firmware. |
+| **Penanggung Jawab** | **Andharu Raffi (Andharu)** |
+| **Area Akses R/W** | `digital_twin/`, `simulations/data_replay/`, `docs/ai/DIGITAL_TWIN.md` |
+| **Tanggung Jawab** | Implementasi neraca air tanah perakaran FAO-56 ($ET_0$ Penman-Monteith), model perambatan termal tanah teredam (*damped*), modul imputasi failover saat sensor *offline* (`[Est-Simulated]`), dan pemutaran ulang (*replay*) data klimatologi historis BMKG Lampung. |
+| **Output Resmi** | Vektor state tanah virtual kontinu (`FieldStateDTO`) yang disuplai ke backend database dan AI Engine. |
+| **Zona Terlarang** | ❌ DILARANG membongkar algoritma machine learning LightGBM atau merombak formula AVRI.<br>❌ DILARANG membuka koneksi langsung ke hardware ESP32 atau menulis komponen UI dashboard.<br>❌ DILARANG mengubah format output DTO di luar ketentuan `INTERFACES.md` §3. |
+
+### 2.3 Domain Fullstack Development: Backend & Frontend (PIC: Syifa)
+
+| Atribut | Ketetapan |
+|---|---|
+| **Penanggung Jawab** | **Syifa (Syifa)** |
+| **Area Akses R/W** | `backend/`, `frontend/`, `migrations/`, `docker/`, `docs/backend/`, `docs/frontend/` |
+| **Tanggung Jawab** | <br>• **Backend:** Ingestion MQTT bridge, pemetaan paket LoRa (Anti-Corruption Adapter), persistensi PostgreSQL & TimescaleDB hypertable, integrasi service AI Engine, penyedia REST API (`/api/v1/...`) & WebSocket, serta webhook notifikasi WhatsApp (Wablas/Fonnte) dan Telegram Bot.<br>• **Frontend:** Next.js 14 App Router, PWA installable, visualisasi peta petak Leaflet, grafik tren Recharts, UI Dynamic DAT Tracker, UI Multi-Fertilizer Blender (konversi karung & ember), dan panel simulasi What-If. |
+| **Output Resmi** | Layanan Backend REST/WebSocket yang stabil dan Aplikasi Web PWA yang responsif dan ramah sinyal lambat desa. |
+| **Zona Terlarang** | ❌ DILARANG mengubah formula kinetika kimia enzim urease atau merusak pipeline pelatihan model AI.<br>❌ DILARANG mengubah skema payload sensor hardware tanpa adapter penerjemah.<br>❌ DILARANG melanggar amplop response `{ "data": ..., "meta": ... }` di REST API. |
+
+### 2.4 Domain AI Engine & System Architecture (PIC: Aris / Lead)
+
+| Atribut | Ketetapan |
+|---|---|
+| **Penanggung Jawab** | **Aris Kurniawan (Aris / Koordinator Teknis)** |
+| **Area Akses R/W** | `ai_engine/`, `models/`, `docs/ai/` (MODEL_SPEC, EXPLAINABILITY_SHAP, MOCK_PREDICTOR), dan seluruh `docs/universal/` |
+| **Tanggung Jawab** | Arsitek sistem dan penjamin keutuhan kontrak antarmuka, implementasi model Physics-Informed ML (PIML), integrasi persamaan Arrhenius kinetika urease dengan LightGBM Regressor, formulasi skor AVRI (0–100%), penjelasan TreeSHAP, dan pengujian akurasi prediksi. |
+| **Output Resmi** | Model PIML terlatih (`avri_model.txt`), modul inferensi Python (`predict_avri`), serta pemeliharaan *Single Source of Truth* dokumen universal (`INTERFACES.md`, `BOUNDARIES_AND_CONTRACTS.md`, `DECISIONS.md`, `PRD.md`). |
+| **Zona Terlarang** | ❌ DILARANG mengubah implementasi internal firmware atau styling CSS frontend secara sepihak di luar perjanjian antarmuka `INTERFACES.md`. |
 
 ---
 

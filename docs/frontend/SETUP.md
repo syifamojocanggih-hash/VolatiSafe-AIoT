@@ -63,5 +63,5 @@ Buka aplikasi di browser Anda:
 ## 5. Mode Pengembangan Mandiri (Offline Mock Mode)
 
 Saat `NEXT_PUBLIC_USE_MOCK_DATA=true`:
-- Seluruh panggilan API otomatis dialihkan ke objek data di [`docs/frontend/MOCK_DATA.md`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/docs/frontend/MOCK_DATA.md).
+- Seluruh panggilan API otomatis dialihkan ke objek data di [`docs/frontend/MOCK_DATA.md`](MOCK_DATA.md).
 - Frontend AI dapat menguji responsivitas kartu metrik, render grafik Recharts, poligon Leaflet, dan slider simulator tanpa memerlukan backend berjalan.

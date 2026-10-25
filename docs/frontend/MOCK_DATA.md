@@ -1,7 +1,7 @@
 # MOCK_DATA.md — Fixture Mock Data Offline untuk Pengembangan Frontend
 
 > **PANDUAN MANDIRI FRONTEND:**  
-> Seluruh JSON di bawah ini adalah data tiruan resmi yang mematuhi kontrak [`docs/universal/INTERFACES.md`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/docs/universal/INTERFACES.md). Frontend AI **dapat mengembangkan seluruh layar dan visualisasi 100% tuntas** menggunakan data ini tanpa perlu menjalankan server backend, database, maupun hardware IoT.
+> Seluruh JSON di bawah ini adalah data tiruan resmi yang mematuhi kontrak [`docs/universal/INTERFACES.md`](../universal/INTERFACES.md). Frontend AI **dapat mengembangkan seluruh layar dan visualisasi 100% tuntas** menggunakan data ini tanpa perlu menjalankan server backend, database, maupun hardware IoT.
 
 ---
 

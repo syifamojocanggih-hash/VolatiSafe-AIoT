@@ -6,7 +6,7 @@
 
 - **Base URL:** `http://localhost:8000/api/v1`
 - **Format:** `application/json` (UTF-8)
-- **Amplop:** Selalu dibungkus objek `{"data": ...}` untuk sukses dan `{"error": ...}` untuk kegagalan (lihat [`docs/universal/INTERFACES.md`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/docs/universal/INTERFACES.md) §0).
+- **Amplop:** Selalu dibungkus objek `{"data": ...}` untuk sukses dan `{"error": ...}` untuk kegagalan (lihat [`docs/universal/INTERFACES.md`](../universal/INTERFACES.md) §0).
 
 ---
 
@@ -142,7 +142,57 @@ Menghitung takaran campuran pupuk majemuk (Urea + Phonska + ZA) dan mengonversin
 
 ---
 
-### 2.5 `POST /simulation/what-if`
+### 2.5 `POST /crop-cycles`
+Inisiasi atau pembaruan siklus tanam aktif untuk menghitung umur tanaman (*Days After Transplanting / DAT*) dan menjadwalkan notifikasi H-3 persiapan pemupukan.
+- **Request Body:**
+```json
+{
+  "field_id": "BLOK-A",
+  "planting_date": "2026-11-01",
+  "seed_variety": "BISI-18",
+  "field_area_ha": 0.75,
+  "target_yield_ton_ha": 8.0
+}
+```
+- **Contoh Respons (HTTP 201):**
+```json
+{
+  "data": {
+    "cycle_id": "CYC-2026-001",
+    "field_id": "BLOK-A",
+    "planting_date": "2026-11-01",
+    "current_dat": 0,
+    "growth_stage": "Fase Perkecambahan (VE)",
+    "milestones": [
+      {
+        "phase": "Fase V3 (Pemupukan Dasar)",
+        "target_dat": 12,
+        "calendar_date": "2026-11-13",
+        "h3_alert_date": "2026-11-10",
+        "action_required": "Tebus 2 karung Phonska + 1/2 karung Urea"
+      },
+      {
+        "phase": "Fase V8 (Pemupukan Susulan I)",
+        "target_dat": 32,
+        "calendar_date": "2026-12-03",
+        "h3_alert_date": "2026-11-30",
+        "action_required": "Tebus 2 karung Urea + 1/2 karung Phonska"
+      },
+      {
+        "phase": "Estimasi Panen Fisiologis (R6)",
+        "target_dat": 105,
+        "calendar_date": "2027-02-14",
+        "h3_alert_date": "2027-02-11",
+        "action_required": "Persiapan pengeringan terpal & panen"
+      }
+    ]
+  }
+}
+```
+
+---
+
+### 2.6 `POST /simulation/what-if`
 Mode simulasi langsung tanpa database untuk demonstrasi juri.
 - **Request Body:**
 ```json

@@ -32,8 +32,8 @@ Target utama: Menghasilkan bukti purwarupa perangkat lunak tertutup (*closed-loo
 ## 3. Fase 3: Validasi Empiris Lapangan TKT 6 (Bulan 5–12)
 
 - **Uji Komparatif 2 Siklus Tanam:**
-  - *Petak A (Bedeng AI):* Pemupukan Urea ditabur hanya saat sistem mengeluarkan rekomendasi "Jendela Aman" (AVRI < 30%).
-  - *Petak B (Bedeng Kontrol):* Pemupukan mengikuti praktik kebiasaan petani setempat (berdasarkan kalender).
+  - *Petak A (Plot Presisi VolatiSafe):* Pemupukan Urea ditabur hanya saat sistem mengeluarkan rekomendasi "Jendela Aman" (AVRI < 30%).
+  - *Petak B (Plot Kontrol Konvensional Petani):* Pemupukan mengikuti praktik kebiasaan petani setempat (berdasarkan kalender).
 - **Pengukuran Metrik:**
   - Efisiensi pupuk (target penghematan Urea ≥ 20%).
   - Tonase panen jagung pipilan kering per hektar.

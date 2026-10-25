@@ -9,7 +9,7 @@ Untuk memastikan tim Backend AI dan Frontend AI dapat menguji seluruh alur integ
 ### Karakteristik Mock Predictor:
 - **Zero Heavy Dependency:** Hanya menggunakan Python standar (tanpa perlu install `lightgbm`, `shap`, atau `scikit-learn`).
 - **Deterministik & Realistis:** Menghasilkan skor AVRI yang masuk akal dan konsisten secara fisika (bukan angka acak murni).
-- **100% Sesuai Kontrak:** Menghasilkan struktur dictionary yang mematuhi `PredictRiskResponseDTO` di [`docs/universal/INTERFACES.md`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/docs/universal/INTERFACES.md) §2.2.
+- **100% Sesuai Kontrak:** Menghasilkan struktur dictionary yang mematuhi `PredictRiskResponseDTO` di [`docs/universal/INTERFACES.md`](../universal/INTERFACES.md) §2.2.
 
 ---
 

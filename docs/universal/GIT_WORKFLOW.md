@@ -7,74 +7,76 @@
 
 ## 1. Konvensi Cabang Git (Branching Strategy)
 
-Setiap AI coding assistant atau developer wajib bekerja pada branch spesifik sesuai domainnya:
+Setiap anggota tim pengembang wajib bekerja pada branch spesifik sesuai domain tanggung jawabnya:
 
 ```
 main (Production / Stable TKT 3 Demo)
   │
-  ├── feat/hw-firmware-sampling      <-- Dikerjakan Hardware AI
-  ├── feat/ai-piml-lightgbm          <-- Dikerjakan AI/ML Engine Agent
-  ├── feat/be-ingestion-adapter      <-- Dikerjakan Backend AI
-  └── feat/fe-risk-dashboard         <-- Dikerjakan Frontend AI
+  ├── feat/iot-firmware-sampling     <-- Dikerjakan Hafiiz (IoT)
+  ├── feat/dt-fao56-water-balance    <-- Dikerjakan Andharu (Digital Twin)
+  ├── feat/fullstack-dashboard-pwa   <-- Dikerjakan Syifa (Fullstack: BE + FE)
+  └── feat/ai-piml-avri-engine       <-- Dikerjakan Aris (AI Engine / Lead)
 ```
 
-### 1.1 Pola Penamaan Branch
+### 1.1 Pola Penamaan Branch per Anggota Tim
 
-| Awalan Branch | Domain | Contoh Nama Branch |
-|---|---|---|
-| `feat/hw-*` | Hardware, sensor, LoRa, Wokwi | `feat/hw-esp32-burst-sampling`, `feat/hw-wokwi-mqtt-bridge` |
-| `feat/ai-*` | Model ML, Digital Twin, FAO-56 | `feat/ai-fao56-water-balance`, `feat/ai-shap-explainer` |
-| `feat/be-*` | Backend, database, API, WebSocket| `feat/be-timescaledb-hypertable`, `feat/be-whatsapp-bot` |
-| `feat/fe-*` | Frontend, UI component, PWA | `feat/fe-leaflet-risk-map`, `feat/fe-what-if-slider` |
-| `contract/rfc-*`| Perubahan skema `INTERFACES.md`| `contract/rfc-add-wind-speed-metric` |
-| `fix/*` | Hotfix bug terisolasi | `fix/fe-chart-legend-wrap`, `fix/be-mqtt-reconnect` |
+| Awalan Branch | Penanggung Jawab | Domain Kerja | Contoh Nama Branch |
+|---|---|---|---|
+| `feat/iot-*` | **Hafiiz** | Sensor, firmware ESP32, LoRa, Wokwi | `feat/iot-burst-sampling`, `feat/iot-wokwi-mqtt-bridge` |
+| `feat/dt-*` | **Andharu** | Digital Twin, FAO-56, BMKG replay, imputasi | `feat/dt-fao56-water-balance`, `feat/dt-failover-imputation` |
+| `feat/fullstack-*` / `feat/be-*` / `feat/fe-*` | **Syifa** | Backend, TimescaleDB, REST, WebSocket, PWA UI | `feat/be-timescale-hypertable`, `feat/fe-leaflet-risk-map` |
+| `feat/ai-*` | **Aris** (Lead) | PIML LightGBM, AVRI formula, TreeSHAP | `feat/ai-piml-residual-model`, `feat/ai-shap-explainer` |
+| `contract/rfc-*`| **Aris** (Lead) / Tim | Usulan perubahan skema `INTERFACES.md` | `contract/rfc-add-wind-speed-metric` |
+| `fix/*` | Seluruh Tim | Hotfix bug terisolasi sesuai wewenang | `fix/fe-chart-legend-wrap`, `fix/be-mqtt-reconnect` |
 
 ---
 
 ## 2. Aturan Perlindungan File Kontrak (`docs/universal/INTERFACES.md`)
 
-File [`docs/universal/INTERFACES.md`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/docs/universal/INTERFACES.md) adalah **Protected Asset**.
+File [`docs/universal/INTERFACES.md`](INTERFACES.md) adalah **Protected Asset**.
 
 ### 2.1 Aturan Ketat:
-1. **Dilarang Direct Edit di Feature Branch:** AI Agent yang bekerja di `feat/fe-*` atau `feat/hw-*` **DILARANG SEPIHAK** mengedit `INTERFACES.md`.
+1. **Dilarang Direct Edit di Feature Branch:** Developer yang bekerja di branch fitur (`feat/iot-*`, `feat/dt-*`, atau `feat/fullstack-*`) **DILARANG SEPIHAK** mengedit `INTERFACES.md`.
 2. **Prosedur RFC (Request for Comments):** Jika suatu fitur baru membutuhkan perubahan struktur data kontrak:
    - Buat branch khusus `contract/rfc-<nama-perubahan>`.
+   - Diskusikan dan setujui bersama Aris (Lead Architect).
    - Perbarui `INTERFACES.md`, `MOCK_DATA.md`, dan `MOCK_PREDICTOR.md`.
    - Lakukan merge ke `main` terlebih dahulu sebelum branch implementasi kode dimulai.
 3. **Kompatibilitas Mundur:** Field baru wajib bersifat opsional (`optional / default None`) agar subsistem lain yang belum diperbarui tidak mengalami crash.
 
 ---
 
-## 3. Checklist Pull Request (PR) per Domain
+## 3. Checklist Pull Request (PR) per Anggota Tim
 
 Sebelum kode dari branch digabungkan ke `main`, lakukan verifikasi checklist:
 
-### 3.1 Checklist PR Hardware (`feat/hw-*`)
-- [ ] Kode C++ lolos kompilasi tanpa warning di PlatformIO / Arduino CLI.
-- [ ] Verifikasi payload LoRa tidak melebihi 52 byte.
+### 3.1 Checklist PR IoT & Hardware (`feat/iot-*` — Hafiiz)
+- [ ] Kode C++ lolos kompilasi tanpa warning di PlatformIO / Arduino IDE.
+- [ ] Verifikasi ukuran payload LoRa tidak melebihi 52 byte.
 - [ ] Simulasi Wokwi berjalan normal dan data terkirim ke MQTT `localhost:1883`.
-- [ ] Tidak ada modifikasi file di luar `firmware/`, `simulation/`, dan `docs/hardware/`.
+- [ ] Tidak ada modifikasi file di luar `firmware/`, `simulation/wokwi/`, dan `docs/hardware/`.
 
-### 3.2 Checklist PR AI / Digital Twin (`feat/ai-*`)
+### 3.2 Checklist PR Digital Twin (`feat/dt-*` — Andharu)
+- [ ] Model neraca air tanah FAO-56 ($ET_0$) teruji matematis pada rentang kelembaban wajar (10–50% VWC).
+- [ ] Modul failover sukses mengisi celah data (*imputation*) saat sensor offline dan menandai `is_predicted: true`.
+- [ ] Skrip replay data BMKG Lampung berjalan mulus tanpa memory leak.
+- [ ] Tidak ada modifikasi file di luar `digital_twin/`, `simulations/data_replay/`, dan `docs/ai/DIGITAL_TWIN.md`.
+
+### 3.3 Checklist PR Fullstack (`feat/fullstack-*` / `feat/be-*` / `feat/fe-*` — Syifa)
+- [ ] Backend: Migrasi database Alembic berjalan sukses (*up* dan *down*).
+- [ ] Backend: Ingestion adapter berhasil memproses paket LoRa dari Wokwi dan menyimpan ke hypertable TimescaleDB.
+- [ ] Backend: Endpoint REST mematuhi amplop `{"data": ..., "meta": ...}` sesuai `INTERFACES.md`.
+- [ ] Frontend: Halaman web berjalan mulus pada mode offline menggunakan `MOCK_DATA.md`.
+- [ ] Frontend: Peta Leaflet merender poligon petak tanpa error lisensi map tile.
+- [ ] Frontend: Responsive test rapi pada resolusi mobile (375px) dan desktop (1440px).
+- [ ] Tidak ada modifikasi file di luar `backend/`, `frontend/`, `docs/backend/`, dan `docs/frontend/`.
+
+### 3.4 Checklist PR AI Engine & Architecture (`feat/ai-*` — Aris)
 - [ ] Unit test validasi fisika urease lulus (hasil AVRI selalu di rentang 0–100%).
 - [ ] Model LightGBM menghasilkan latensi inferensi < 50 ms.
 - [ ] TreeSHAP menghasilkan atribusi valid untuk semua fitur input.
-- [ ] Mock script `docs/ai/MOCK_PREDICTOR.md` teruji independen tanpa koneksi database.
-- [ ] Tidak ada modifikasi file di luar `ai_engine/`, `models/`, dan `docs/ai/`.
-
-### 3.3 Checklist PR Backend (`feat/be-*`)
-- [ ] Migrasi Alembic berjalan sukses (*up* dan *down*).
-- [ ] Endpoint REST mematuhi amplop `{"data": ..., "meta": ...}` sesuai `INTERFACES.md`.
-- [ ] Ingestion adapter berhasil memproses payload LoRa sintetis dari Wokwi.
-- [ ] Test suite pytest lulus 100%.
-- [ ] Tidak ada modifikasi file di luar `backend/` dan `docs/backend/`.
-
-### 3.4 Checklist PR Frontend (`feat/fe-*`)
-- [ ] Halaman web berjalan mulus pada mode offline menggunakan `docs/frontend/MOCK_DATA.md`.
-- [ ] Peta Leaflet merender poligon bedeng tanpa error lisensi map tile.
-- [ ] Responsive test: Tampilan rapi pada resolusi mobile (375px) dan desktop (1440px).
-- [ ] `npm run build` sukses tanpa linting error.
-- [ ] Tidak ada modifikasi file di luar `frontend/` dan `docs/frontend/`.
+- [ ] Skrip mock `MOCK_PREDICTOR.md` teruji independen tanpa koneksi database.
+- [ ] Tidak ada modifikasi file di luar `ai_engine/`, `models/`, `docs/ai/`, dan `docs/universal/`.
 
 ---
 
