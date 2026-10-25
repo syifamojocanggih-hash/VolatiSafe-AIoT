@@ -16,6 +16,7 @@ docs/
 │   ├── ARCHITECTURE.md                <-- Arsitektur sistem 4 lapis & aliran data
 │   ├── BOUNDARIES_AND_CONTRACTS.md    <-- Aturan batasan isolasi antar-AI & anti-tabrakan
 │   ├── INTERFACES.md                  <-- Skema data pasti: LoRa, MQTT, DTO AI, REST, WebSocket
+│   ├── LAB_VALIDATION_PROTOCOL.md     <-- Protokol uji validasi laboratorium & 3 skenario stres (TKT 3)
 │   ├── PROJECT_CONTEXT.md             <-- Latar belakang, problem agronomi, & target kompetisi
 │   ├── PRD.md                         <-- Product Requirements Document (PRD) inti
 │   ├── DECISIONS.md                   <-- Architecture Decision Records (ADR 001 - ADR 008)

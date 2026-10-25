@@ -20,9 +20,10 @@ VolatiSafe-AIoT/
 │   │
 │   ├── universal/                     # [KONTRAK GLOBAL — LEAD: ARIS]
 │   │   ├── ARCHITECTURE.md            # Arsitektur sistem 4 lapis & aliran data tertutup
-│   │   ├── BOUNDARIES_AND_CONTRACTS.md# Matriks wewenang R/W 4 anggota tim & anti-tabrakan
-│   │   ├── INTERFACES.md              # SUMBER KEBENARAN TUNGGAL skema data (LoRa, REST, DTO)
-│   │   ├── PROJECT_CONTEXT.md         # Problem statement, research gap, & lokus Lampung/Lamongan
+│   ├── BOUNDARIES_AND_CONTRACTS.md# Matriks wewenang R/W 4 anggota tim & anti-tabrakan
+│   ├── INTERFACES.md              # SUMBER KEBENARAN TUNGGAL skema data (LoRa, REST, DTO)
+│   ├── LAB_VALIDATION_PROTOCOL.md # Protokol uji validasi lab & 3 skenario stres simulasi (TKT 3)
+│   ├── PROJECT_CONTEXT.md         # Problem statement, research gap, & lokus Lampung/Lamongan
 │   │   ├── PRD.md                     # Ringkasan spesifikasi kebutuhan produk
 │   │   ├── DECISIONS.md               # Architecture Decision Records (ADR 001 s.d ADR 008)
 │   │   ├── GIT_WORKFLOW.md            # Dokumen ini (Alur Git Role-Based & struktur direktori)
