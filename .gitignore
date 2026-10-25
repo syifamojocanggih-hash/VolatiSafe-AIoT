@@ -1,0 +1,19 @@
+# Virtual Environment
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+
+# Data artifacts
+data/
+datasets/*.csv.tmp
+*.log
+
+# Distribution / Model builds
+dist/
+build/
+*.egg-info/
