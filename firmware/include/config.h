@@ -39,6 +39,9 @@
 #define LORA_FREQUENCY      433E6   // 433.0 MHz
 #define LORA_TX_POWER       17      // +17 dBm
 #define LORA_SYNC_WORD      0x12
+#define LORA_SF             7       // SF7: tercepat, jangkauan cukup untuk TKT 4
+#define LORA_BANDWIDTH      125E3   // 125 kHz
+#define LORA_CODING_RATE    5       // CR 4/5
 
 // --- Sampling & Filtering ---------------------------------------------------
 // ADC_11db hanya ada di core Arduino. env:native mengompilasi config.h tanpa

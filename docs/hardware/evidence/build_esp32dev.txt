@@ -23,71 +23,16 @@ Dependency Graph
 |-- LoRa @ 0.8.0
 |-- ArduinoJson @ 7.4.3
 |-- Preferences @ 3.3.12
+|-- SPI @ 3.3.12
 Building in release mode
-Building .pio\build\esp32dev\bootloader.bin
-Generating partitions .pio\build\esp32dev\partitions.bin
-esptool v5.4.0
-Creating ESP32 image...
-Merged 2 ELF sections.
-Successfully created ESP32 image.
-.pio\libdeps\esp32dev\OneWire\OneWire.cpp:599:22: warning: extra tokens at end of #undef directive
-  599 | #  undef noInterrupts() {portMUX_TYPE mux = portMUX_INITIALIZER_UNLOCKED;portENTER_CRITICAL(&mux)
-      |                      ^
-.pio\libdeps\esp32dev\OneWire\OneWire.cpp:600:20: warning: extra tokens at end of #undef directive
-  600 | #  undef interrupts() portEXIT_CRITICAL(&mux);}
-      |                    ^
-In file included from C:\Users\hafii\.platformio\packages\framework-arduinoespressif32\cores\esp32/esp32-hal-gpio.h:30,
-                 from C:\Users\hafii\.platformio\packages\framework-arduinoespressif32\cores\esp32/esp32-hal.h:115,
-                 from C:\Users\hafii\.platformio\packages\framework-arduinoespressif32\cores\esp32/Arduino.h:44,
-                 from .pio\libdeps\esp32dev\OneWire\OneWire.cpp:147:
-.pio\libdeps\esp32dev\OneWire\util/OneWire_direct_gpio.h: In function 'void directModeInput(uint32_t)':
-C:\Users\hafii\.platformio\packages\framework-arduinoespressif32-esp32-libs\include/esp_driver_gpio/include/driver/gpio.h:25:56: warning: comparison of unsigned expression in '>= 0' is always true [-Wtype-limits]
-   25 | #define GPIO_IS_VALID_GPIO(gpio_num)        ((gpio_num >= 0) && \
-C:\Users\hafii\.platformio\packages\framework-arduinoespressif32\cores\esp32/esp32-hal-gpio.h:68:34: note: in expansion of macro 'GPIO_IS_VALID_GPIO'
-   68 | #define digitalPinIsValid(pin)   GPIO_IS_VALID_GPIO(pin)
-      |                                  ^~~~~~~~~~~~~~~~~~
-.pio\libdeps\esp32dev\OneWire\util/OneWire_direct_gpio.h:214:10: note: in expansion of macro 'digitalPinIsValid'
-  214 |     if ( digitalPinIsValid(pin) )
-      |          ^~~~~~~~~~~~~~~~~
-.pio\libdeps\esp32dev\OneWire\util/OneWire_direct_gpio.h: In function 'void directModeOutput(uint32_t)':
-C:\Users\hafii\.platformio\packages\framework-arduinoespressif32-esp32-libs\include/esp_driver_gpio/include/driver/gpio.h:25:56: warning: comparison of unsigned expression in '>= 0' is always true [-Wtype-limits]
-   25 | #define GPIO_IS_VALID_GPIO(gpio_num)        ((gpio_num >= 0) && \
-C:\Users\hafii\.platformio\packages\framework-arduinoespressif32\cores\esp32/esp32-hal-gpio.h:68:34: note: in expansion of macro 'GPIO_IS_VALID_GPIO'
-   68 | #define digitalPinIsValid(pin)   GPIO_IS_VALID_GPIO(pin)
-      |                                  ^~~~~~~~~~~~~~~~~~
-.pio\libdeps\esp32dev\OneWire\util/OneWire_direct_gpio.h:240:10: note: in expansion of macro 'digitalPinIsValid'
-  240 |     if ( digitalPinIsValid(pin) && pin <= 33 ) // pins above 33 can be only inputs
-      |          ^~~~~~~~~~~~~~~~~
-.pio\libdeps\esp32dev\LoRa\src\LoRa.cpp: In member function 'long int LoRaClass::packetFrequencyError()':
-.pio\libdeps\esp32dev\LoRa\src\LoRa.cpp:277:71: warning: 'B111' is deprecated: use 0b111 instead [-Wdeprecated-declarations]
-  277 |   freqError = static_cast<int32_t>(readRegister(REG_FREQ_ERROR_MSB) & B111);
-      |                                                                       ^~~~
-In file included from C:\Users\hafii\.platformio\packages\framework-arduinoespressif32\cores\esp32/Arduino.h:40,
-                 from .pio\libdeps\esp32dev\LoRa\src/LoRa.h:7,
-                 from .pio\libdeps\esp32dev\LoRa\src\LoRa.cpp:4:
-C:\Users\hafii\.platformio\packages\framework-arduinoespressif32\cores\esp32/binary.h:86:3: note: declared here
-   86 |   B111 DEPRECATED(0b111) = 7,
-      |   ^~~~
-.pio\libdeps\esp32dev\LoRa\src\LoRa.cpp:283:42: warning: 'B1000' is deprecated: use 0b1000 instead [-Wdeprecated-declarations]
-  283 |   if (readRegister(REG_FREQ_ERROR_MSB) & B1000) { // Sign bit is on
-      |                                          ^~~~~
-C:\Users\hafii\.platformio\packages\framework-arduinoespressif32\cores\esp32/binary.h:92:3: note: declared here
-   92 |   B1000 DEPRECATED(0b1000) = 8,
-      |   ^~~~~
-Linking .pio\build\esp32dev\firmware.elf
 Retrieving maximum program size .pio\build\esp32dev\firmware.elf
 Checking size .pio\build\esp32dev\firmware.elf
 Advanced Memory Usage is available via "PlatformIO Home > Project Inspect"
-RAM:   [=         ]   6.8% (used 22300 bytes from 327680 bytes)
-Flash: [==        ]  24.0% (used 314556 bytes from 1310720 bytes)
-Building .pio\build\esp32dev\firmware.bin
-esptool v5.4.0
-Creating ESP32 image...
-Merged 3 ELF sections.
-Successfully created ESP32 image.
-========================= [SUCCESS] Took 65.87 seconds =========================
+RAM:   [=         ]   6.9% (used 22452 bytes from 327680 bytes)
+Flash: [==        ]  24.5% (used 320984 bytes from 1310720 bytes)
+========================= [SUCCESS] Took 4.32 seconds =========================
 
 Environment    Status    Duration
 -------------  --------  ------------
-esp32dev       SUCCESS   00:01:05.868
-========================= 1 succeeded in 00:01:05.868 =========================
+esp32dev       SUCCESS   00:00:04.321
+========================= 1 succeeded in 00:00:04.321 =========================
