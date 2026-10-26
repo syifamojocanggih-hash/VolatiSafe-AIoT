@@ -1,0 +1,29 @@
+name: 'Skenario A — Terik Ekstrem (High Risk)'
+version: 1
+author: 'VolatiSafe AIoT — Hafiiz'
+
+# Nilai target diambil dari docs/hardware/playbook/05_WOKWI_SIMULASI.md 5.5.
+# Potensiometer Wokwi hanya punya 1024 langkah, jadi kontrol `position`
+# (float 0..1) dipakai agar ADC tepat seperti di tabel, bukan ditebak dari
+# posisi slider. position = ADC / 4095.
+
+steps:
+  - set-control:
+      part-id: pot_moist
+      name: position
+      value: 0.609523      # ADC 2496 -> m 21.0 %
+  - set-control:
+      part-id: pot_ph
+      name: position
+      value: 0.310378      # ADC 1271 -> ph 7.85
+  - set-control:
+      part-id: pot_batt
+      name: position
+      value: 0.586325      # ADC 2401 -> b 3.87 V
+  - set-control:
+      part-id: ds18b20
+      name: temperature
+      value: 34.5
+
+  - delay: 6s
+  - wait-serial: '[PROBE] m=21.0%(OK) ph=7.85(OK) t=34.50C(OK) b=3.87V(OK)'

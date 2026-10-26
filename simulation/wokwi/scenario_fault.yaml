@@ -1,0 +1,28 @@
+name: 'Skenario Fault — DS18B20 di luar rentang fisik'
+version: 1
+author: 'VolatiSafe AIoT — Hafiiz'
+
+# Membuktikan jalur SENSOR_OUT_OF_RANGE benar-benar sampai ke Serial, bukan
+# hanya lulus di unit test. Nilai dikirim apa adanya (70.00), tidak di-clamp:
+# menyamarkannya jadi angka wajar akan membuat data palsu lolos ke backend.
+
+steps:
+  - set-control:
+      part-id: pot_moist
+      name: position
+      value: 0.609523
+  - set-control:
+      part-id: pot_ph
+      name: position
+      value: 0.310378
+  - set-control:
+      part-id: pot_batt
+      name: position
+      value: 0.586325
+  - set-control:
+      part-id: ds18b20
+      name: temperature
+      value: 70.0
+
+  - delay: 6s
+  - wait-serial: '[PROBE] m=21.0%(OK) ph=7.85(OK) t=70.00C(RANGE) b=3.87V(OK)'

@@ -1,0 +1,29 @@
+HW-2.6 - Kalibrasi NVS + fallback default compile-time
+Tanggal : 26 Okt 2026
+Build   : pio run -e wokwi  (SENSOR_PROBE=1 CAL_NVS_SELFTEST=1)
+
+Yang dibuktikan:
+1. NVS kosong (flash baru) -> firmware tetap jalan dengan default config.h
+   dan mencetak peringatan bahwa nilai BELUM TERKALIBRASI.
+2. calibration_save() benar-benar menulis 4 key ke namespace vscal, dan
+   calibration_begin() membacanya kembali dengan nilai identik dan
+   from_nvs=1. Nilai selftest sengaja beda dari default (2760/1310/1470/305)
+   supaya tertukar nilai langsung kelihatan.
+3. calibration_validate() menolak nilai tidak masuk akal sebelum disimpan
+   maupun sesudah dibaca; diuji di unit test native (6 kasus).
+
+Batas bukti yang jujur:
+Wokwi CLI memakai flash bersih setiap run (tidak ada opsi persistensi flash),
+jadi DoD "nilai bertahan setelah reboot" TIDAK bisa dibuktikan di sini dan
+baru diverifikasi di hardware TKT 4. Yang terbukti di simulasi adalah
+round-trip tulis-baca NVS di dalam satu boot, yaitu bagian yang berisiko
+salah tulis key atau salah tipe data.
+
+Bukti tidak langsung: dua run berturut-turut sama-sama mencetak
+"[CAL] NVS kosong", membuktikan flash memang tidak dipertahankan antar run.
+
+--- Serial log (boot, NVS kosong -> default -> selftest tulis/baca) ---
+[CAL] NVS kosong. Memakai default compile-time (BELUM TERKALIBRASI).
+[CAL] moist_dry=2800 moist_wet=1350 ph_n=1500.0 ph_s=300.0 from_nvs=0
+[CAL] tersimpan ke NVS
+[CAL] selftest OK: m_dry=2760 m_wet=1310 ph_n=1470.0 ph_s=305.0 from_nvs=1

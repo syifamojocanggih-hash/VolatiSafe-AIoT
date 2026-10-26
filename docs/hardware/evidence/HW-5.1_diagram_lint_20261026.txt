@@ -1,0 +1,23 @@
+HW-5.1 - Lint diagram Wokwi
+Tanggal : 26 Okt 2026
+Perintah: wokwi-cli lint simulation/wokwi
+Hasil   : 0 error, 2 info
+
+Dua info itu bukan masalah: keduanya hanya menandai bahwa tipe part
+board-esp32-devkit-c-v4 dan wokwi-ds18b20 belum terdokumentasi publik,
+bukan bahwa part-nya tidak dikenali simulator.
+
+--- Keluaran ---
+Wokwi CLI v0.29.1 (0aa185144b92)
+wokwi-cli : Γä╣ [unsupported-part] Part "esp" uses undocumented type "board-esp32-devkit-c-v4". This part may change 
+or be removed in future versions. (esp)
+At line:2 char:1
++ wokwi-cli lint simulation/wokwi 2>&1 | Out-File -Encoding utf8 "$tmp\ ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Γä╣ [unsupporte...versions. (esp):String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+Γä╣ [unsupported-part] Part "ds18b20" uses undocumented type "wokwi-ds18b20". This part may change or be removed in 
+future versions. (ds18b20)
+
+Found 2 info
