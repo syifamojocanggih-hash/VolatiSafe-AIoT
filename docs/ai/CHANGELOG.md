@@ -11,6 +11,7 @@ Dokumen ini mencatat seluruh riwayat pengembangan, pelatihan model, evaluasi met
 
 ## [Unreleased] — Tahap 6: Validasi Closed-Loop Virtual Testbed (TKT 3) & Integrasi Final
 - **Fokus:** Menjalankan skenario pengujian stres lab (L1–L4) sesuai `docs/universal/LAB_VALIDATION_PROTOCOL.md` dan verifikasi kesiapan demo juri.
+- **Penyelarasan Baseline Solokuro:** Integrasi kontrak endpoint 15 parameter Digital Twin (`GET /api/v1/digital-twin/telemetry/{field_id}`) dan sinkronisasi baseline empiris Solokuro (pH 7.62, θ_fc 36.5%, θ_wp 14.2%, CF 12%).
 - **PIC:** Aris Kurniawan (Lead AI Engineer & Auditor).
 
 ---

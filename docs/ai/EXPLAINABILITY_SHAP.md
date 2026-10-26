@@ -45,7 +45,7 @@ Setiap fitur memiliki aturan konversi otomatis berdasarkan tanda (*sign*) dan be
 | `soil_temp_c` | Nilai < 27.0°C | Negatif (Turun) | *"Suhu tanah sejuk ({val}°C) memperlambat penguapan gas"* |
 | `moisture_pct`| Nilai < 25.0% | Positif (Naik) | *"Tanah terlalu kering ({val}%), butiran Urea tidak dapat larut ke perakaran"* |
 | `moisture_pct`| Nilai 35% – 50%| Negatif (Turun) | *"Kelembaban tanah ideal ({val}%), pupuk langsung larut aman ke perakaran"* |
-| `ph` | Nilai > 7.50 | Positif (Naik) | *"Tanah berkapur/basa (pH {val}) mempercepat pelepasan gas amonia bebas"* |
+| `ph` | Nilai > 7.40 | Positif (Naik) | *"Reaksi tanah alkalin Solokuro (pH {val}) mempercepat pelepasan gas amonia bebas"* |
 | `wind_speed_ms`| Nilai > 3.5 m/s | Positif (Naik) | *"Hembusan angin kencang ({val} m/s) menyapu lapisan gas di atas tanah"* |
 | `rain_forecast`| Nilai > 5.0 mm | Negatif (Turun) | *"Prakiraan hujan dalam waktu dekat akan membantu melarutkan pupuk ke dalam tanah"* |
 

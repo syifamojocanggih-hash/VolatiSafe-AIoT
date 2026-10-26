@@ -2,7 +2,7 @@
   "model_metadata": {
     "model_type": "Physics-Informed LightGBM Regressor (PIML)",
     "version": "1.0.0-tkt3",
-    "training_date": "2026-10-25 08:55:44Z",
+    "training_date": "2026-10-26 16:14:18Z",
     "dataset_source": "data/training_dataset_lamongan.csv",
     "monotone_constraints": {
       "soil_temp_c": 1,
@@ -18,7 +18,7 @@
       "dat": 0
     },
     "model_file": "models/avri_model.txt",
-    "model_size_kb": 711.4,
+    "model_size_kb": 719.5,
     "inference_latency_per_sample_ms": 0.006
   },
   "sample_split": {
@@ -30,16 +30,16 @@
     "zero_time_series_leakage": true
   },
   "piml_model_metrics": {
-    "mae": 1.004,
-    "rmse": 1.272,
-    "r2_score": 0.9875
+    "mae": 1.008,
+    "rmse": 1.275,
+    "r2_score": 0.9873
   },
   "static_rule_baseline_metrics": {
-    "mae": 6.53,
-    "rmse": 8.669
+    "mae": 7.005,
+    "rmse": 9.033
   },
   "benchmark_comparison": {
-    "mae_reduction_pct": 84.62,
+    "mae_reduction_pct": 85.61,
     "target_gate_passed": true
   }
 }
