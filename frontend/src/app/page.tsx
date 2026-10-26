@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { DesktopSidebar } from '@/components/sidebar/DesktopSidebar';
 import { MobileHeader } from '@/components/header/MobileHeader';
 import { FieldHeader } from '@/components/header/FieldHeader';
+import { MobileBottomNav } from '@/components/navigation/MobileBottomNav';
 import { RiskStatusBanner } from '@/components/dashboard/RiskStatusBanner';
 import { MetricCardsGrid } from '@/components/dashboard/MetricCardsGrid';
 import { Trend24hChart } from '@/components/dashboard/Trend24hChart';
@@ -72,7 +73,7 @@ export default function DashboardPage() {
         )}
 
         {/* Main Canvas View Switcher */}
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-6xl w-full mx-auto">
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 pb-24 md:pb-8 max-w-6xl w-full mx-auto">
           {activeTab === 'map' ? (
             /* Layar 2: Peta Zonasi Risiko Volatilisasi Lahan */
             <ParcelRiskMap onBackToDashboard={() => setActiveTab('dashboard')} />
@@ -140,9 +141,18 @@ export default function DashboardPage() {
         }}
       />
 
+      {/* Mobile Bottom Navigation Bar (Same functions as Desktop Sidebar) */}
+      <MobileBottomNav
+        activeTab={activeTab}
+        onTabChange={(tab) => {
+          setActiveTab(tab);
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }}
+      />
+
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="fixed bottom-5 right-5 z-50 flex items-center gap-2.5 px-4 py-3 rounded-2xl bg-slate-900 text-white text-xs font-semibold shadow-xl border border-slate-700 animate-in fade-in slide-in-from-bottom-2">
+        <div className="fixed bottom-20 md:bottom-5 right-5 z-50 flex items-center gap-2.5 px-4 py-3 rounded-2xl bg-slate-900 text-white text-xs font-semibold shadow-xl border border-slate-700 animate-in fade-in slide-in-from-bottom-2">
           <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
           <span>{toastMessage}</span>
         </div>

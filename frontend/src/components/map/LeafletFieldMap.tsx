@@ -82,17 +82,21 @@ export const LeafletFieldMap: React.FC<LeafletFieldMapProps> = ({
         maxZoom: 19,
       }).addTo(map);
 
-      // Dividing Road & Drainage ditch line
+      // Dividing Road & Drainage ditch line (Winding terrain road in Solokuro)
       const roadLine = L.polyline(
         [
-          [-6.92935, 112.3525],
-          [-6.92935, 112.3563],
+          [-6.92935, 112.35180],
+          [-6.92925, 112.35265],
+          [-6.92915, 112.35340],
+          [-6.92928, 112.35445],
+          [-6.92930, 112.35560],
+          [-6.92945, 112.35660],
         ],
         {
           color: '#0284C7',
           weight: 4,
           dashArray: '8, 8',
-          opacity: 0.85,
+          opacity: 0.9,
         }
       ).addTo(map);
 

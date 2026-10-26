@@ -3,6 +3,7 @@
 import React from 'react';
 import { DesktopSidebar } from '@/components/sidebar/DesktopSidebar';
 import { MobileHeader } from '@/components/header/MobileHeader';
+import { MobileBottomNav } from '@/components/navigation/MobileBottomNav';
 import { ReportAnalytics } from '@/components/report/ReportAnalytics';
 import { initialDashboardData } from '@/mocks/dashboardMock';
 import { useRouter } from 'next/navigation';
@@ -31,10 +32,16 @@ export default function ReportPage() {
       <div className="flex-1 flex flex-col min-w-0">
         <MobileHeader />
 
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-6xl w-full mx-auto">
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 pb-24 md:pb-8 max-w-6xl w-full mx-auto">
           <ReportAnalytics />
         </main>
       </div>
+
+      {/* Mobile Bottom Navigation Bar */}
+      <MobileBottomNav
+        activeTab="report"
+        onTabChange={handleTabChange}
+      />
     </div>
   );
 }

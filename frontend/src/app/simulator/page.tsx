@@ -3,6 +3,7 @@
 import React from 'react';
 import { DesktopSidebar } from '@/components/sidebar/DesktopSidebar';
 import { MobileHeader } from '@/components/header/MobileHeader';
+import { MobileBottomNav } from '@/components/navigation/MobileBottomNav';
 import { FieldHeader } from '@/components/header/FieldHeader';
 import { WhatIfPanel } from '@/components/simulator/WhatIfPanel';
 import { initialDashboardData } from '@/mocks/dashboardMock';
@@ -36,10 +37,16 @@ export default function SimulatorPage() {
           onOpenSettings={() => {}}
         />
 
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-6xl w-full mx-auto">
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 pb-24 md:pb-8 max-w-6xl w-full mx-auto">
           <WhatIfPanel />
         </main>
       </div>
+
+      {/* Mobile Bottom Navigation Bar */}
+      <MobileBottomNav
+        activeTab="simulator"
+        onTabChange={handleTabChange}
+      />
     </div>
   );
 }
