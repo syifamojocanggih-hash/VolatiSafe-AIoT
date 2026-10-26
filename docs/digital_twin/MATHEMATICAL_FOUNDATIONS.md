@@ -121,9 +121,13 @@ Rumus ini memastikan bahwa jika petani memupuk di pagi hari saat tanah masih din
 
 ---
 
-## 3. Matriks Parameter State Tanah dalam 1 Siklus 15 Menit
+## 3. Sinkronisasi Skala Waktu & Dual-Scale Timing
 
-Setiap 15 menit, Digital Twin mengeksekusi integrasi 4 hukum di atas secara simultan:
+Model Digital Twin beroperasi secara adaptif sesuai mode lingkungan:
+1. **Lahan Nyata (Real-World Deployment):** Berjalan pada interval sinkronisasi **1 Jam ($\Delta t = 1.0\text{ jam}$)** mengikuti tibanya paket telemetri LoRa dari node sensor dan feed data per jam stasiun BMKG. Keputusan jadwal pupuk diperbarui pada horizon **72 jam** setiap pukul 05:30 WIB.
+2. **Uji Simulasi Cepat / Laboratorium:** Mendukung langkah waktu sub-interval **15 Menit ($\Delta t = 0.25\text{ jam}$)** untuk resolusi transisi yang lebih rapat saat dieksekusi di virtual testbed.
+
+Setiap siklus sinkronisasi, Digital Twin mengeksekusi integrasi 4 hukum di atas secara simultan:
 
 ```
 [ INPUT CUACA BMKG ]               [ STATE TANAH SAAT INI (t) ]

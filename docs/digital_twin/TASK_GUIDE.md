@@ -9,7 +9,16 @@
 ---
 
 ## 🎯 Target Utama Domain Digital Twin
-Membangun mesin biofisika tanah virtual kontinu yang mampu memutakhirkan state tanah setiap interval 15 menit, mengestimasi kelembaban dan suhu lapisan perakaran jagung menggunakan neraca air FAO-56 Penman-Monteith, menjalankan failover imputasi otomatis saat sensor fisik/Wokwi terputus, serta memproyeksikan kurva mikroklimat 72 jam ke depan berbasis data prakiraan BMKG.
+Membangun mesin biofisika tanah virtual kontinu yang mampu memutakhirkan state tanah setiap interval operasional (1 jam pada lahan nyata, atau sub-siklus 15 menit pada pengujian tertutup), mengestimasi kelembaban dan suhu lapisan perakaran jagung menggunakan neraca air FAO-56 Penman-Monteith, menjalankan failover imputasi otomatis saat sensor fisik/Wokwi terputus, serta memproyeksikan kurva mikroklimat 72 jam ke depan berbasis data prakiraan BMKG.
+
+### ⏱️ Arsitektur Waktu Keputusan Dua Tingkat (*Dual-Scale Operational Framework*)
+Sistem mengambil keputusan berdasarkan dua skala waktu terpisah:
+1. **Skala Strategis Utama (Horizon 72 Jam — Evaluasi Harian Pukul 05:30 WIB):**
+   - Menghitung jendela aman aplikasi pemupukan sepanjang 3 hari ke depan ($H+0$ s.d $H+72$) agar pupuk tidak terjebak puncak volatilisasi amonia hari ke-1 s.d ke-3 (Fillery & Khimashia 2016).
+2. **Skala Taktis / Safety Trigger (Interval 1 Jam):**
+   - Mengolah paket telemetri LoRa yang masuk tiap 1 jam sekali sebagai rem darurat (*safety valve*). Jika suhu atau pengeringan tanah melonjak tiba-tiba melampaui ambang batas, sistem langsung mengaktifkan preskripsi mitigasi fisik (tugal/benam 4 cm atau penyiraman pra-aplikasi).
+3. **Parameter Statis Musiman (pH Tanah Ruah):**
+   - pH makro tanah kapur Lamongan dikunci konstan pada baseline $7.85$ (tidak diubah-ubah per 15 menit), diperbarui melalui kalibrasi berkala tiap musim tanam (3–4 bulan).
 
 ---
 
