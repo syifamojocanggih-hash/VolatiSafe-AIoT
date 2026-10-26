@@ -23,11 +23,11 @@ Menghasilkan firmware ESP32 dan simulasi sirkuit Wokwi yang mampu melakukan akui
 |---|---|
 | TAHAP 1 — Struktur Proyek & Pinout | ✅ selesai 26 Okt 2026 |
 | TAHAP 2 — Driver Sensor & Kalibrasi | ✅ selesai 26 Okt 2026 |
-| TAHAP 3 — Protokol Telemetri LoRa | 🟨 sebagian: encoder payload final + 6 unit test; dua transport masih stub |
+| TAHAP 3 — Protokol Telemetri LoRa | ✅ selesai 26 Okt 2026 (LoRa level build; radio belum memancar → HW-9.3) |
 | TAHAP 4 — Manajemen Daya & Deep Sleep | ⬜ |
-| TAHAP 5 — Virtual Testbed Wokwi | ⬜ |
+| TAHAP 5 — Virtual Testbed Wokwi | 🟨 sebagian: `diagram.json` + 4 skenario jalan; bukti telemetri sampai broker → HW-5.4 |
 
-**Unit test:** `pio test -e native` → 16 test PASS (6 payload, 10 sensors_core). Bukti: [`evidence/unit_test_native_20261026.txt`](evidence/unit_test_native_20261026.txt).
+**Unit test:** `pio test -e native` → 45 test PASS (6 payload, 24 sensors_core, 7 calibration_core, 8 transport_core). Bukti: [`evidence/unit_test_native_20261026.txt`](evidence/unit_test_native_20261026.txt).
 
 ---
 
@@ -64,33 +64,42 @@ Menghasilkan firmware ESP32 dan simulasi sirkuit Wokwi yang mampu melakukan akui
   - `analogSetAttenuation(ADC_11db);` untuk ADC ESP32.
   - **Burst Sampling:** Ambil 5 sampel pembacaan berturut-turut dengan jeda 50 ms, buang nilai min dan max, lalu hitung rata-rata 3 nilai tengah (median-average filter).
   - **Kalibrasi Kelembaban:** Konversi ADC ke % VWC:
-    `moisture_pct = constrain(map(raw_adc, dry_adc, wet_adc, 0, 100), 0, 100);`
+    `moisture_pct = (dry_adc - raw_adc) / (dry_adc - wet_adc) * 100;`
   - **Kompensasi pH terhadap Kelembaban:**
     `ph_corrected = ph_raw + (0.15 * (50.0 - moisture_pct) / 50.0);`
 - **Checklist:**
-  - [x] Nilai kelembaban selalu dalam rentang 0.0 – 100.0%.
+  - [x] Nilai kelembaban dikirim **apa adanya**, tanpa clamp ke 0–100 (lihat `DEC-IOT-18`). Sensor short (ADC 0) menghasilkan >100 %, sensor putus (ADC 4095) menghasilkan <0 %, keduanya ditandai `OUT_OF_RANGE` sehingga backend menolak paketnya.
   - [x] Nilai suhu DS18B20 valid (-10°C s.d. 60°C); di luar itu dikirim apa adanya dengan status `OUT_OF_RANGE`, putus (-127 °C) jadi `-999`/`DISCONNECTED`.
-  - [x] Nilai pH terkoreksi dalam rentang wajar (3.0 – 10.0).
-- **Bukti:** 30 unit test native PASS; nilai Serial di simulator cocok persis dengan `playbook/05_WOKWI_SIMULASI.md` §5.5–5.6 (`evidence/HW-2.1_adc_burst_wokwi_20261026.txt`, `evidence/HW-2.2_ds18b20_wokwi_20261026.txt`, `evidence/HW-2.6_nvs_selftest_wokwi_20261026.txt`).
+  - [x] Nilai pH juga tidak di-clamp ke 3,0–10,0; yang dibatasi hanya **input** kompensasi kelembaban agar sentinel -999 tidak menggeser pH 3,1 satuan.
+- **Bukti:** 45 unit test native PASS; nilai Serial di simulator cocok persis dengan `playbook/05_WOKWI_SIMULASI.md` §5.5–5.6 (`evidence/HW-2.1_adc_burst_wokwi_20261026.txt`, `evidence/HW-2.2_ds18b20_wokwi_20261026.txt`, `evidence/HW-2.6_nvs_selftest_wokwi_20261026.txt`).
 - **Catatan:** DS18B20 memakai konversi blocking 375 ms (resolusi 11-bit), bukan non-blocking seperti bunyi `playbook/03_ROADMAP_TUGAS.md` HW-2.2 — alasannya di `DEC-IOT-17`. Persistensi kalibrasi lintas reboot belum bisa dibuktikan di Wokwi CLI (flash bersih tiap run), diverifikasi di HW-9.2.
 
 ---
 
-### TAHAP 3: Protokol Telemetri LoRa & Bit-Packing
+### TAHAP 3: Protokol Telemetri LoRa & Bit-Packing — ✅ SELESAI 26 Okt 2026
+
+> **Bukti:** `evidence/HW-3.1_no_clamp_wokwi_20261026.txt`, `evidence/HW-3.3_lora_transport_20261026.txt`, `evidence/HW-3.4_mqtt_transport_20261026.txt`, `evidence/build_esp32dev.txt`, `evidence/build_wokwi.txt`.
+> Detail task atomik ada di [`playbook/03_ROADMAP_TUGAS.md`](playbook/03_ROADMAP_TUGAS.md) FASE 3 (HW-3.1 … HW-3.5), status di [`playbook/00_INDEX.md`](playbook/00_INDEX.md) §4.
 
 #### 🟢 HW-1.3: Transmisi LoRa SX1278 433 MHz
 - **Deskripsi:** Mengemas data telemetri ke dalam format payload ringkas dan memancarkannya via modul LoRa SX1278.
-- **Target File:** `firmware/src/lora_comm.cpp`, `firmware/include/lora_comm.h`
+- **Target File:** `firmware/src/transport_lora.cpp`, `firmware/src/transport_mqtt.cpp`, `firmware/src/transport_core.cpp`, `firmware/include/transport.h` (bukan `lora_comm.cpp`; abstraksi transport diputuskan di `DEC-IOT-01`)
 - **Spesifikasi:**
   - Frekuensi: **433.0 MHz**, Bandwidth: 125 kHz, Spreading Factor: SF7, Coding Rate: 4/5, TxPower: +17 dBm.
-  - **Format JSON 52-Byte (Strict Contract `INTERFACES.md` §1):**
+  - **Format JSON (bukan 52 byte):**
     ```json
     {"n":"VS-A1-003","ts":1792934400,"m":22.4,"t":34.1,"ph":7.83,"b":3.87}
     ```
-  - Logika retry: Maksimal 3x percobaan transmisi jika tidak ada ACK gateway.
+    Panjang nyata 70–76 byte untuk Node ID 12 karakter (`DEC-IOT-02`). Klaim "≤ 52 byte" di dokumen ini salah dan sudah dieskalasi.
+  - Logika retry: maksimal 3× percobaan, jeda 2 s hanya di antara percobaan, berhenti di percobaan yang berhasil.
 - **Checklist:**
-  - [ ] Ukuran total string payload ≤ 52 byte (hemat airtime).
-  - [ ] Node ID unik per perangkat (misal: `VS-A1-001`).
+  - [x] Ukuran total string payload terukur dan tercatat: 71 byte untuk `VS-SIM-001` (`DEC-IOT-02`). Klaim ≤ 52 byte dicabut, bukan dicapai dengan memotong data.
+  - [x] Node ID unik per perangkat (`VS-A1-003` fisik, `VS-SIM-001` simulasi, `DEC-IOT-03`).
+  - [x] Build `esp32dev` menautkan `transport_lora.o` tanpa `transport_mqtt.o`; `main.cpp` tidak menyentuh LoRa/SPI langsung.
+  - [x] Retry diuji di `env:native` (8 kasus), bukan hanya dibaca.
+  - [ ] **Radio benar-benar memancar dan gateway menerima** — belum. Wokwi tidak punya part SX1278, verifikasi di HW-9.3.
+  - [x] Retry **tidak** berarti "sampai gateway": `LoRa.endPacket()` hanya menandakan modul selesai memancarkan (`DEC-IOT-08`). Klaim "retry jika tidak ada ACK" di baris atas sudah dikoreksi.
+- **Catatan:** Satu-satunya transport yang punya bukti runtime adalah MQTT, dan itu pun berhenti di `transport_send()`: `wokwi-cli` memakai gateway publik yang tidak bisa menjangkau Mosquitto di mesin ini (`DEC-IOT-19`). Bukti "data sampai broker" adalah DoD HW-5.4.
 
 ---
 

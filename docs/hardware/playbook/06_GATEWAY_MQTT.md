@@ -258,7 +258,7 @@ BOUNDS = {
     "m": (0.0, 100.0),
     "t": (-10.0, 60.0),
     "ph": (3.0, 10.0),
-    "b": (2.5, 4.5),
+    "b": (2.80, 4.25),
 }
 
 
@@ -338,11 +338,15 @@ python simulation\wokwi\validate_payload.py '{"n":"VS-SIM-001","ts":1792934400,"
 #   - t=120.0 di luar batas -10.0..60.0
 ```
 
+> **Versi yang dijalankan ada di [`simulation/wokwi/validate_payload.py`](../../../simulation/wokwi/validate_payload.py), bukan di blok ini.** File itu yang menjadi acuan; blok di atas adalah ringkasan. Bedanya: file menambah pemeriksaan jumlah desimal sesuai kontrak (1 desimal untuk `m`/`t`, 2 untuk `ph`/`b`), menolak `bool` yang lolos `isinstance(int)`, dan memakai batas `b` 2,80–4,25 sesuai `INTERFACES.md` §1.3 (blok lama menulis 2,5–4,5, itu keliru).
+>
+> Di PowerShell, tanda kutip ganda di dalam argumen native dihapus. Pakai `'{\"n\":...}'` atau `--file`.
+
 ### 5.4 Perbedaan yang disengaja antara validator lokal dan backend
 
 | Aspek | Validator lokal | Backend |
 |---|---|---|
-| Batas `b` | 2,5–4,5 | 2,5–4,5 (sama) |
+| Batas `b` | 2,80–4,25 | 2,80–4,25 (sama, `INTERFACES.md` §1.3) |
 | Batas `t` | −10…60 (menolak −999) | −10…60 (menolak −999) |
 | Aksi bila gagal | cetak error | dead-letter + status `MALFUNCTION` |
 | Perubahan kontrak | harus selaras | sumber kebenaran |

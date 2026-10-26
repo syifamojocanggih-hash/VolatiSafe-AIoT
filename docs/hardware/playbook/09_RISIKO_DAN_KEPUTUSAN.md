@@ -225,6 +225,38 @@
 
 ---
 
+### DEC-IOT-18 — Clamp Dibuang: Nilai Rusak Dikirim Apa Adanya + Status Per Kanal
+
+| | |
+|---|---|
+| **Tanggal** | 26 Okt 2026 |
+| **Status** | ✅ Diputuskan |
+| **Konteks** | `03_ROADMAP_TUGAS.md` HW-3.1 sudah memperingatkan "jangan men-clamp nilai rusak menjadi nilai valid", tetapi `sensors_core.cpp` FASE 2 masih memakai `clampf()` di moisture dan pH. |
+| **Masalah** | Clamp mengubah kerusakan menjadi angka yang tampak sah. Sensor short (ADC 0) menjadi `m=100.0 %`, sensor putus (ADC 4095) menjadi `m=0.0 %`, kalibrasi kosong (`dry == wet`) menjadi `m=0.0 %`, dan slope pH 0 menjadi `ph=0.00` yang ter-clamp ke `3.00`. Semua lolos `validate_sensor_bounds()` dan masuk database sebagai tanah jenuh/kering atau pH asam sungguhan. |
+| **Keputusan** | Clamp dihapus dari `sensors_adcToMoisturePct` dan `sensors_adcToPh`. Nilai keluar apa adanya; status per kanal (`SENSOR_OUT_OF_RANGE`) menandai kanal yang di luar batas fisik. Kerusakan kalibrasi menghasilkan sentinel `MOISTURE_ERROR_FLAG` / `PH_ERROR_FLAG` (-999) yang dijamin ditolak gate backend. |
+| **Pengecualian** | Kompensasi pH tetap membatasi **input** `moisture_pct` ke 0..100. Tanpa itu, sentinel -999 menggeser pH sejauh 3,1 satuan dan menutupi penyebab sebenarnya. Yang tidak dibatasi adalah hasil pH-nya. |
+| **Prioritas status** | `OUT_OF_RANGE` menang atas `UNSTABLE`. Nilai di luar batas sudah pasti rusak; menyebutnya "cuma goyang" menutupi penyebabnya. |
+| **Konsekuensi** | Payload bisa berisi `m=193.1` atau `ph=-1.65`. Backend **wajib** menolaknya, dan itu memang tujuannya: data rusak harus terlihat sebagai data rusak, bukan dibulatkan menjadi data sah. `simulation/wokwi/validate_payload.py` meniru gate itu supaya kegagalan bisa dibedakan: payload salah vs backend salah. |
+| **Batas bukti** | Yang diuji adalah konversi ADC → nilai → status di simulator (`evidence/HW-3.1_no_clamp_wokwi_20261026.txt`). Efeknya terhadap backend belum diuji karena backend belum ada; validator lokal menjadi pengganti sementara. |
+
+---
+
+### DEC-IOT-19 — Broker Lokal Tidak Terjangkau dari `wokwi-cli` (Gateway Publik)
+
+| | |
+|---|---|
+| **Tanggal** | 26 Okt 2026 |
+| **Status** | ⛔ Terbuka — memblokir I-03, ditangani di HW-5.4 |
+| **Konteks** | HW-3.4 membutuhkan bukti "payload sampai broker" (I-03: 5 paket, `ts` monoton). |
+| **Temuan** | `wokwi-cli` 0.29.1 memakai **gateway publik** Wokwi. Gateway publik hanya bisa menghubungi internet, bukan jaringan lokal mesin ini. Hasil nyata di simulator: `host.wokwi.internal` berhasil di-resolve ke `10.13.37.254` (alamat gateway), tetapi TCP ke port 1883 gagal (`state=-2`), sementara NTP lewat UDP 123 berhasil pada run yang sama. |
+| **Percobaan yang gagal** | (a) Menjalankan `wokwigw.exe` v2.0.1 di port 9011 dan menambahkan `[net] gateway = "ws://localhost:9011"` ke `wokwi.toml`: CLI tidak pernah membuka koneksi ke 9011 (dicek dengan `netstat`), dan penambahan `[net]` justru membuat NTP ikut gagal. Konfigurasi itu sudah dibatalkan. (b) Mengarahkan `SIM_MQTT_HOST` ke `test.mosquitto.org`: DNS berhasil, TCP 1883 tetap gagal. |
+| **Sebab** | Private Gateway, satu-satunya jalur yang membuat `host.wokwi.internal` bisa dipakai, **hanya tersedia untuk akun Wokwi berbayar** (dokumentasi Wokwi, "The Private Gateway"). |
+| **Keputusan** | DoD HW-3.4 diturunkan ke level yang bisa dibuktikan: build lulus, topik persis kontrak, payload 71 byte dengan `ts` NTP valid, dan retry 3× tanpa crash (I-04). Bukti "data sampai broker" tetap menjadi DoD **HW-5.4**, tidak dipindahkan diam-diam. |
+| **Jalan keluar untuk HW-5.4** | (1) Pakai Wokwi for VS Code atau wokwi.com dengan Private Gateway aktif, lalu jalankan `wokwigw.exe`; (2) jalankan broker di host yang terjangkau gateway publik; (3) rekam bukti I-03 dari mesin yang punya lisensi Wokwi. Pilih satu sebelum FASE 5 dimulai, bukan saat demo. |
+| **Konsekuensi** | R-02 naik dari "sedang" ke "sudah terbukti terjadi". `scenario_mqtt_down.yaml` sekarang menguji jalur gagal (bukan jalur sukses) karena itulah satu-satunya yang bisa dijalankan konsisten di lingkungan ini. |
+
+---
+
 ## Bagian B — Risk Register
 
 Probabilitas & dampak: T = Tinggi, S = Sedang, R = Rendah.
@@ -232,7 +264,7 @@ Probabilitas & dampak: T = Tinggi, S = Sedang, R = Rendah.
 | ID | Risiko | P | D | Mitigasi | Pemilik |
 |---|---|---|---|---|---|
 | R-01 | Waktu habis sebelum FASE 5 (Wokwi) selesai | T | T | Ikuti jalur kritis §2 di `03_ROADMAP_TUGAS.md`; potong task non-esensial (§14) | Hafiiz |
-| R-02 | Wokwi tidak bisa menjangkau broker lokal | S | T | Uji `host.wokwi.internal` lebih dulu (HW-5.4); cadangan pakai IP LAN + buka firewall | Hafiiz |
+| R-02 | Wokwi tidak bisa menjangkau broker lokal | **T (terbukti)** | T | DEC-IOT-19: gateway publik memblokir TCP ke host; I-03 dipindah ke HW-5.4 dengan Private Gateway / VS Code, diputuskan sebelum FASE 5 | Hafiiz |
 | R-03 | Backend Syifa belum siap saat HW-7.2 | T | S | Bukti integrasi bisa berupa payload di `mosquitto_sub` + validator; jadwalkan HW-7.2 lebih lambat | Hafiiz + Syifa |
 | R-04 | Klaim 52 byte terbukti salah di depan juri | S | T | DEC-IOT-02: koreksi dokumen + jawaban jujur di video | Hafiiz → Aris |
 | R-05 | Kuota simulasi Wokwi habis saat demo | S | T | Uji penuh H-1; rekam semua segmen H-1; jangan simulasi berulang hari-H | Hafiiz |

@@ -187,6 +187,22 @@ Catatan penting untuk bukti: `wokwi-cli` **memakai flash bersih setiap run**. Is
 bertahan antar run, jadi uji "simpan kalibrasi → reboot → nilai bertahan" tidak bisa
 dibuktikan di simulasi (lihat DEC-IOT-17, diverifikasi di HW-9.2).
 
+### 4.1.1 Daftar skenario yang ada
+
+| File | Yang diuji | Status |
+|---|---|---|
+| `scenario_a.yaml` | Skenario A, nilai persis tabel §5.5 | ✅ lulus |
+| `scenario_b.yaml` | Skenario B, nilai persis tabel §5.6 | ✅ lulus |
+| `scenario_fault.yaml` | DS18B20 70 °C → `RANGE`, nilai tidak di-clamp | ✅ lulus |
+| `scenario_fault_range.yaml` | Moisture short/putus dan divider baterai putus → `RANGE` | ✅ lulus |
+| `scenario_mqtt_down.yaml` | Broker tidak terjangkau → `ok=0 attempts=3`, siklus tetap jalan | ✅ lulus |
+
+**Yang belum ada: skenario "payload sampai broker".** `wokwi-cli` memakai gateway publik Wokwi
+yang hanya bisa menghubungi internet, bukan jaringan lokal, sehingga Mosquitto di mesin ini
+tidak terjangkau (`host.wokwi.internal` → `10.13.37.254`, TCP 1883 gagal, `state=-2`). Private
+Gateway yang membuatnya bisa dipakai hanya untuk akun berbayar. Lihat DEC-IOT-19; bukti itu
+menjadi DoD HW-5.4.
+
 Jika ekstensi mengeluh `wokwi.toml not found`, buka folder `simulation/wokwi` sebagai workspace (bukan root repo), atau salin `wokwi.toml` ke root repo sebagai symlink-equivalent. Ekstensi mencari `wokwi.toml` di root workspace yang dibuka.
 
 ### 4.2 Konfigurasi WiFi & MQTT di build Wokwi

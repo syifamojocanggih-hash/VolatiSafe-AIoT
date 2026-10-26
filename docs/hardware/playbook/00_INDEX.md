@@ -100,11 +100,11 @@ Update kolom Status dan Bukti setiap menyelesaikan task. Jangan tandai `✅` tan
 ### FASE 3 — Payload & Transport
 | ID | Task | Status | Bukti |
 |---|---|---|---|
-| HW-3.1 | Validasi rentang lokal sebelum kirim | ⬜ | |
+| HW-3.1 | Validasi rentang lokal sebelum kirim | ✅ | `sensors_core.cpp` `channelStatus()`, clamp dibuang, sentinel `-999`, `evidence/HW-3.1_no_clamp_wokwi_20261026.txt` |
 | HW-3.2 | Encoder JSON 6 field + ukur panjang | ✅ | `payload.cpp`, 6 test lulus (70 B / ≤76 B) |
-| HW-3.3 | `transport_lora.cpp` (SX1278, retry 3×) | ⬜ | |
-| HW-3.4 | `transport_mqtt.cpp` (WiFi + publish) | ⬜ | |
-| HW-3.5 | Unit test payload di env `native` | ✅ | `evidence/unit_test_native_20261026.txt`, 30 PASS (payload + sensors_core + calibration_core) |
+| HW-3.3 | `transport_lora.cpp` (SX1278, retry 3×) | ✅ | Build-only: `evidence/HW-3.3_lora_transport_20261026.txt`; radio belum memancar → HW-9.3 |
+| HW-3.4 | `transport_mqtt.cpp` (WiFi + publish) | ✅ | `evidence/HW-3.4_mqtt_transport_20261026.txt`; data sampai broker → HW-5.4 (DEC-IOT-19) |
+| HW-3.5 | Unit test payload di env `native` | ✅ | `evidence/unit_test_native_20261026.txt`, 45 PASS (payload + sensors_core + calibration_core + transport_core) |
 
 ### FASE 4 — Power Management
 | ID | Task | Status | Bukti |

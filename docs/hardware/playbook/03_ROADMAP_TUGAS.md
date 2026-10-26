@@ -233,6 +233,8 @@ Aturan: `main.cpp` tidak boleh berisi logika sensor/kalibrasi/radio. Hanya uruta
 | **Output** | `TelemetryFrame` selalu dalam batas fisik sebelum dikirim |
 | **DoD** | Nilai di luar batas **tidak** dikirim mentah; ditandai status dan dikirim dengan flag agar backend bisa menolak (bukan dipalsukan) |
 
+> **Koreksi 26 Okt 2026:** kontrak payload hanya punya enam key (`n, ts, m, t, ph, b`), jadi **tidak ada tempat untuk flag**. DoD di atas karena itu tidak bisa dicapai persis seperti tertulis. Yang dicapai: nilai rusak dikirim **apa adanya** (tidak di-clamp) sehingga jatuh di luar batas kontrak, dan backend menolaknya lewat `validate_sensor_bounds()`. Status per kanal tetap ada di `TelemetryFrame` untuk logging dan untuk keputusan lokal, tetapi tidak melintas ke jaringan. Usulan menambah field status per kanal dieskalasi ke Syifa (lihat `DEC-IOT-18`).
+
 > **Perhatikan:** backend punya `validate_sensor_bounds()` ([`../../backend/INGESTION_PIPELINE.md`](../../backend/INGESTION_PIPELINE.md) §2). Jangan men-*clamp* nilai rusak menjadi nilai valid — itu menyembunyikan kerusakan sensor dan membuat data palsu lolos gate. Biarkan nilai asli terkirim dengan penanda; backend yang memutuskan.
 
 Catatan implementasi 26 Okt 2026 (FASE 2 selesai): HW-2.1, 2.2, 2.3, 2.4, 2.5 sudah final dan terverifikasi di simulator. Fungsi murni ada di `sensors_core.cpp`, I/O di `sensors.cpp`, kalibrasi murni di `calibration_core.cpp`, I/O NVS di `calibration.cpp`. Total 30 unit test native PASS. Bukti runtime: `evidence/HW-2.1_adc_burst_wokwi_20261026.txt`, `evidence/HW-2.2_ds18b20_wokwi_20261026.txt`, `evidence/HW-2.6_nvs_selftest_wokwi_20261026.txt`.
@@ -275,6 +277,16 @@ Penyimpangan dari tabel di atas (detail di `DEC-IOT-17`): DS18B20 memakai konver
 | **DoD** | Test memverifikasi: urutan key, jumlah desimal, panjang, nilai batas (0/100 °C, pH 3,0/10,0), dan `TEMP_ERROR_FLAG` |
 
 > Kenapa `native`: logika encoder tidak butuh hardware. Menjalankannya di PC = tes dalam <1 detik, bisa dijalankan tiap commit.
+
+Catatan implementasi 26 Okt 2026 (FASE 3 selesai): HW-3.1, 3.2, 3.3, 3.4, 3.5 selesai. Bukti: `evidence/HW-3.1_no_clamp_wokwi_20261026.txt`, `evidence/HW-3.3_lora_transport_20261026.txt`, `evidence/HW-3.4_mqtt_transport_20261026.txt`, `evidence/unit_test_native_20261026.txt` (45 test PASS), `evidence/build_esp32dev.txt`, `evidence/build_wokwi.txt`.
+
+Penyimpangan dari tabel di atas (detail di `DEC-IOT-18` dan `DEC-IOT-19`):
+
+1. **HW-3.1 tidak meng-clamp.** Clamp dibuang seluruhnya: nilai rusak dikirim apa adanya dan ditandai `SENSOR_OUT_OF_RANGE`, karena clamp mengubah sensor short/putus menjadi `m=100.0`/`m=0.0` yang lolos gate backend. Sentinel `-999` dipakai untuk kerusakan kalibrasi.
+2. **HW-3.3 lulus di level build, bukan radio.** Wokwi tidak punya part SX1278 dan hardware belum ada, jadi tidak ada paket LoRa yang benar-benar dipancarkan. Klaim "radio terbukti" ditunda ke HW-9.3, dan itu dinyatakan di evidence, bukan disembunyikan.
+3. **HW-3.4 lulus tanpa bukti sampai broker.** `wokwi-cli` memakai gateway publik Wokwi yang tidak bisa menjangkau jaringan lokal, sehingga Mosquitto di mesin ini tidak terjangkau. I-03 tetap menjadi DoD HW-5.4.
+4. **Retry dipindah ke `transport_core.cpp`.** Kedua transport memanggil `transport_retry()` yang sama, sehingga aturan jeda tidak bisa menyimpang antar build dan bisa diuji di `env:native` (8 kasus).
+5. **Estimasi aktual:** FASE 3 memakan ±4 jam, di bawah estimasi 5,5 jam. Yang paling banyak menghabiskan waktu bukan kode, melainkan membuktikan jalur MQTT sampai broker (lihat butir 3).
 
 ---
 

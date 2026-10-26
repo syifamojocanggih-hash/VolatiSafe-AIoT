@@ -117,6 +117,8 @@ Isi = output lengkap `pio test -e native`. Format akhir harus:
 | I-05 | NVS kosong | `pio run -t erase` lalu jalankan | Serial mencetak `[CAL] NVS kosong ...`, node tetap mengirim data |
 | I-06 | DS18B20 terputus | hapus part DS18B20 di diagram, jalankan | payload berisi `"t":-999.0`; backend menolak (bukan diterima) |
 
+**Status per 26 Okt 2026:** I-01, I-02, I-04, I-05 lulus. I-03 ⛔ **belum bisa dijalankan**: `wokwi-cli` memakai gateway publik Wokwi, yang tidak bisa menghubungi jaringan lokal mesin ini, sehingga Mosquitto di `localhost:1883` tidak terjangkau (`state=-2`, DNS berhasil ke `10.13.37.254`). Private Gateway yang membuat `host.wokwi.internal` bisa dipakai hanya tersedia untuk akun berbayar. I-03 tetap menjadi DoD HW-5.4 dan dicatat sebagai `DEC-IOT-19`; jangan menandainya lulus tanpa `I03_mqtt_rx.txt`.
+
 ### 3.1 Bukti I-03 (contoh format yang harus disimpan)
 
 ```
@@ -172,9 +174,12 @@ Nilai injeksi tepat: [`05_WOKWI_SIMULASI.md`](05_WOKWI_SIMULASI.md) §5.
 | 2 | `esp32dev` | 6,8 % (22.300 / 327.680 B) | 24,0 % (314.556 / 1.310.720 B) | 26 Okt 2026 | driver sensor + kalibrasi NVS, transport masih stub |
 | 2 | `wokwi` | 6,8 % (22.324 / 327.680 B) | 24,7 % (323.468 / 1.310.720 B) | 26 Okt 2026 | idem + PubSubClient + `SENSOR_PROBE`/`CAL_NVS_SELFTEST` |
 | 2 | `native` | — | — | 26 Okt 2026 | 30 test PASS (payload + sensors_core + calibration_core) |
-| 3 | `esp32dev` | | | | + LoRa + payload |
-| 3 | `wokwi` | | | | + WiFi + PubSubClient |
+| 3 | `esp32dev` | 6,9 % (22.452 / 327.680 B) | 24,5 % (320.984 / 1.310.720 B) | 26 Okt 2026 | + transport LoRa nyata (SX1278), payload nyata |
+| 3 | `wokwi` | 14,5 % (47.676 / 327.680 B) | 76,1 % (996.810 / 1.310.720 B) | 26 Okt 2026 | + WiFi + PubSubClient + NTP nyata |
+| 3 | `native` | — | — | 26 Okt 2026 | 45 test PASS (payload + sensors_core + calibration_core + transport_core) |
 | 4 | `esp32dev` | | | | final |
+
+**Catatan lompatan Flash `wokwi` 24,7 % → 76,1 %.** Bukan regresi kode aplikasi: menautkan WiFi + lwIP + mbedTLS untuk NTP memakan ±670 KB. Batas waspada 80 % karena itu **hampir tersentuh**, dan FASE 4 tidak boleh menambah dependensi baru tanpa memeriksa angka ini. Build fisik tetap 24,5 % karena tidak membawa tumpukan jaringan.
 
 Ambang waspada: RAM > 60 % atau Flash > 80 % → tinjau dependensi.
 
@@ -220,6 +225,9 @@ Semua file disimpan di `docs/hardware/evidence/` (folder ini milik domain IoT, a
 | 3e | NVS kosong → default + round-trip tulis/baca | `HW-2.6_nvs_selftest_wokwi_20261026.txt` | HW-2.6 |
 | 3f | Lint `diagram.json` | `HW-5.1_diagram_lint_20261026.txt` | HW-5.1 |
 | 3g | Dua skenario demo jalan di simulator | `HW-5.2_wokwi_scenario_ab_20261026.txt` | HW-5.2 |
+| 3h | Short & putus jadi `OUT_OF_RANGE`, bukan 0/100 | `HW-3.1_no_clamp_wokwi_20261026.txt` | HW-3.1 |
+| 3i | LoRa: build + isolasi modul (radio belum memancar) | `HW-3.3_lora_transport_20261026.txt` | HW-3.3 |
+| 3j | MQTT: topik kontrak, payload 71 B, NTP valid, retry 3× | `HW-3.4_mqtt_transport_20261026.txt` | HW-3.4 |
 | 4 | Payload sampai broker | `I03_mqtt_rx.txt` | HW-5.4 |
 | 5 | Hex dump payload | `payload_hexdump.txt` | HW-3.2 |
 | 6 | Integrasi ke backend | `I07_backend.png` + `I07_query.txt` | HW-7.2 |
@@ -271,6 +279,9 @@ Bukti F-06 disimpan sebagai tabel jarak vs RSSI/SNR + screenshot `LoRa.packetRss
 | HW-2.4 | U-14 … U-22 | #3 |
 | HW-2.5 | U-23 … U-25 | #3 |
 | HW-3.2 | U-26 … U-33 | #3, #5 |
+| HW-3.1 | U-34 … U-45 (range & status per kanal) | #3, #3h |
+| HW-3.3 | Build + isolasi objek | #1, #3i |
+| HW-3.4 | U-46 … U-53 (retry), I-04 | #2, #3j |
 | HW-4.3 | I-01, I-05 | #1, #3 |
 | HW-5.4 | I-03 | #4 |
 | HW-6.1 | I-04 | #4 |

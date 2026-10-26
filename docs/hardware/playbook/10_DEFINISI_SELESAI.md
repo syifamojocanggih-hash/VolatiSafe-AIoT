@@ -60,6 +60,15 @@ Tanpa nomor 5, status tetap `🟨`.
 | Panjang terukur | dicatat (70 / 71 / 76 byte), bukan diklaim 52 |
 | Dua transport | hanya `transport_*.cpp` yang berbeda; `diff` bersih |
 | Tidak bocor | `main.cpp` tidak meng-include `<LoRa.h>` atau `<WiFi.h>` |
+| Validasi rentang | nilai rusak dikirim di luar kontrak + `SENSOR_OUT_OF_RANGE`, bukan di-clamp (DEC-IOT-18) |
+| Retry teruji | U-46 … U-53 PASS di `env:native`, bukan hanya di kode |
+
+**Yang belum tercakup di FASE 3 dan sengaja tidak diklaim:**
+
+| Kriteria | Alasan |
+|---|---|
+| Radio LoRa benar-benar memancar | Wokwi tidak punya part SX1278 → HW-9.3 |
+| Payload sampai broker (I-03) | Gateway publik Wokwi tidak bisa menjangkau host → HW-5.4, DEC-IOT-19 |
 
 ### FASE 4 — Daya
 
