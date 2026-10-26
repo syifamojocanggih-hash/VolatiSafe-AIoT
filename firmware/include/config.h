@@ -68,6 +68,14 @@
 #define SOIL_TEMP_MAX       60.0f
 #define PH_MIN              3.0f
 #define PH_MAX              10.0f
+#define BATTERY_MIN_V       2.80f   // sama dengan types.h dan gate backend
+#define BATTERY_MAX_V       4.25f
+
+// Sentinel untuk kerusakan yang tidak punya nilai fisik. Semuanya sengaja di
+// luar rentang kontrak supaya backend menolak paket, bukan menerimanya sebagai
+// pembacaan wajar (DEC-IOT-18).
+#define MOISTURE_ERROR_FLAG -999.0f
+#define PH_ERROR_FLAG       -999.0f
 #define TEMP_ERROR_FLAG     -999.0f // DS18B20 terputus (-127C)
 #define TEMP_DISCONNECTED_C -126.0f // DallasTemperature DEVICE_DISCONNECTED_C
 #define ADC_UNSTABLE_RANGE  800     // placeholder; diukur nyata di HW-9.1 (F-01)

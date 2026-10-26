@@ -1,0 +1,56 @@
+HW-3.1 - Buang clamp: kerusakan sensor tidak boleh jadi data wajar
+Tanggal : 26 Okt 2026
+Build   : pio run -e wokwi  (SENSOR_PROBE=1)
+
+Yang dibuktikan:
+1. Sensor moisture short (ADC 0) menghasilkan 193,1 % dan sensor putus
+   (ADC 4095) menghasilkan -89,3 %. Keduanya BERADA DI LUAR kontrak 0..100,
+   bukan dipotong jadi 100,0 / 0,0 seperti versi sebelumnya.
+2. Kanal yang nilainya di luar batas fisik ditandai SENSOR_OUT_OF_RANGE,
+   sementara tiga kanal lain tetap SENSOR_OK. Satu sensor rusak tidak
+   menjatuhkan kanal lain.
+3. Divider baterai putus (0,00 V) ditandai RANGE, tidak dibaca sebagai
+   "baterai habis 0 V".
+4. pH tetap dihitung walau moisture rusak: kompensasi dibatasi pada INPUT
+   (moisture di-clamp 0..100), bukan pada hasil, supaya sentinel -999 tidak
+   menggeser pH 3,1 satuan dan menutupi penyebabnya.
+5. Kalibrasi tidak valid (dry == wet) dan slope pH <= 0 menghasilkan sentinel
+   -999, bukan 0 yang lolos gate backend. Diuji di unit test native.
+
+Kenapa clamp dibuang:
+Clamp mengubah kerusakan menjadi angka yang tampak sah. Contoh nyata sebelum
+perbaikan: sensor short -> "m=100.0%(OK)", sensor putus -> "m=0.0%(OK)",
+kalibrasi kosong -> "m=0.0%(OK)". Semuanya lolos validate_sensor_bounds() dan
+masuk database sebagai tanah kering/jenuh sungguhan. Tanpa clamp, nilai keluar
+dari kontrak sehingga paket ditolak dan kerusakan terlihat.
+
+Batas bukti yang jujur:
+Yang diuji adalah jalur konversi ADC -> nilai -> status di simulasi. Ambang
+ADC_UNSTABLE_RANGE (800) masih placeholder dan baru diukur di HW-9.1. Efek
+nilai di luar kontrak terhadap backend dibuktikan terpisah oleh
+simulation/wokwi/validate_payload.py, bukan oleh firmware.
+
+--- Serial log (Skenario Fault Range, 3 tahap) ---
+[SIM] SENSOR_PROBE: siklus probing, TANPA TX dan TANPA sleep
+[SIM] probe siap, siklus tiap 5 detik
+[SENS] adc m=0[0..0] ph=1271[1271..1271] b=2401 t=34.50C
+[PROBE] m=193.1%(RANGE) ph=7.61(OK) t=34.50C(OK) b=3.87V(OK)
+[Skenario Fault Range - sensor short & putus] Expected text matched: "[PROBE] m=193.1%(RANGE) ph=7.61(OK) t=34.50C(OK) b=3.87V(OK)"
+[SENS] adc m=4095[4095..4095] ph=1271[1271..1271] b=2401 t=34.50C
+[PROBE] m=-89.3%(RANGE) ph=7.91(OK) t=34.50C(OK) b=3.87V(OK)
+[Skenario Fault Range - sensor short & putus] Expected text matched: "[PROBE] m=-89.3%(RANGE) ph=7.91(OK) t=34.50C(OK) b=3.87V(OK)"
+[SENS] adc m=4095[4095..4095] ph=1271[1271..1271] b=0 t=34.50C
+[PROBE] m=-89.3%(RANGE) ph=7.91(OK) t=34.50C(OK) b=0.00V(RANGE)
+[Skenario Fault Range - sensor short & putus] Expected text matched: "[PROBE] m=-89.3%(RANGE) ph=7.91(OK) t=34.50C(OK) b=0.00V(RANGE)"
+[Skenario Fault Range - sensor short & putus] Scenario completed successfully
+
+--- Regresi: tiga skenario FASE 2 tetap lulus ---
+scenario_a.yaml     -> Scenario completed successfully
+scenario_b.yaml     -> Scenario completed successfully
+scenario_fault.yaml -> Scenario completed successfully
+
+--- Unit test native (pio test -e native) ---
+native test_calibration_core  PASSED
+native test_payload           PASSED
+native test_sensors_core      PASSED
+37 test cases: 37 succeeded

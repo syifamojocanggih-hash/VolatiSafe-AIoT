@@ -1,5 +1,5 @@
-// Fungsi murni tanpa hardware. Hanya file ini, payload.cpp, dan
-// calibration_core.cpp yang ikut env:native, jadi jangan tarik Arduino.h.
+// Fungsi murni tanpa hardware. Hanya file ini, payload.cpp, transport_core.cpp,
+// dan calibration_core.cpp yang ikut env:native, jadi jangan tarik Arduino.h.
 #include "config.h"
 #include "sensors.h"
 
@@ -7,6 +7,18 @@ static float clampf(float v, float lo, float hi) {
   if (v < lo) return lo;
   if (v > hi) return hi;
   return v;
+}
+
+static bool inRange(float v, float lo, float hi) {
+  return v >= lo && v <= hi;
+}
+
+// Urutan prioritas: OUT_OF_RANGE menang atas UNSTABLE. Kanal yang nilainya di
+// luar batas fisik sudah pasti rusak, jadi menyebutnya "cuma goyang" menutupi
+// penyebab sebenarnya.
+static SensorStatus channelStatus(float v, float lo, float hi, bool unstable) {
+  if (!inRange(v, lo, hi)) return SENSOR_OUT_OF_RANGE;
+  return unstable ? SENSOR_UNSTABLE : SENSOR_OK;
 }
 
 // Buang satu min & satu max, rata-rata sisanya (DEC-IOT-06: median-average,
@@ -30,19 +42,25 @@ float sensors_medianAverage(const uint16_t* s, uint8_t n) {
 }
 
 float sensors_adcToMoisturePct(uint16_t adc, uint16_t dry, uint16_t wet) {
-  if (dry == wet) return 0.0f;   // kalibrasi tidak valid, jangan bagi nol
-  float pct = ((float)dry - (float)adc) / ((float)dry - (float)wet) * 100.0f;
-  return clampf(pct, MOISTURE_MIN, MOISTURE_MAX);
+  // Kalibrasi tidak valid tidak boleh menghasilkan 0 %: itu angka wajar yang
+  // lolos gate backend. Sentinel memaksa paket ditolak.
+  if (dry == wet) return MOISTURE_ERROR_FLAG;
+
+  // Tidak di-clamp. Sensor short (ADC 0) menghasilkan >100 % dan sensor putus
+  // (ADC 4095) menghasilkan <0 %; keduanya di luar kontrak sehingga backend
+  // menolaknya. Memotong ke 0/100 justru mengubah kerusakan jadi data sah.
+  return ((float)dry - (float)adc) / ((float)dry - (float)wet) * 100.0f;
 }
 
 float sensors_adcToPh(uint16_t adc, float neutral_adc, float slope, float moisture_pct) {
-  // Slope 0 berarti kalibrasi rusak. Kembalikan 0, bukan inf yang ter-clamp
-  // jadi pH_MIN, supaya backend menolak lewat bounds check 3.0-10.0.
-  if (slope <= 0.0f) return 0.0f;
+  if (!(slope > 0.0f)) return PH_ERROR_FLAG;   // menangkap NaN juga
 
-  float raw = 7.0f - ((float)adc - neutral_adc) / slope;
-  float corrected = raw + 0.15f * (50.0f - moisture_pct) / 50.0f;
-  return clampf(corrected, PH_MIN, PH_MAX);
+  const float raw = 7.0f - ((float)adc - neutral_adc) / slope;
+
+  // Kompensasi dibatasi ke inputnya, bukan hasilnya. moisture sentinel (-999)
+  // akan menggeser pH sejauh 3,1 satuan kalau dibiarkan, menutupi penyebab.
+  const float m = clampf(moisture_pct, MOISTURE_MIN, MOISTURE_MAX);
+  return raw + 0.15f * (50.0f - m) / 50.0f;
 }
 
 float sensors_adcToBatteryV(uint16_t adc) {
@@ -70,16 +88,19 @@ void sensors_composeFrame(const AdcBurst& moist, const AdcBurst& ph,
                           uint16_t batt_adc, float temp_c,
                           const Calibration& cal, TelemetryFrame& out) {
   out.moisture.value = sensors_adcToMoisturePct(moist.median, cal.moist_dry, cal.moist_wet);
-  out.moisture.status = sensors_isUnstable(moist.min, moist.max) ? SENSOR_UNSTABLE
-                                                                 : SENSOR_OK;
+  out.moisture.status = channelStatus(out.moisture.value, MOISTURE_MIN, MOISTURE_MAX,
+                                     sensors_isUnstable(moist.min, moist.max));
 
   // Kompensasi pH memakai moisture yang baru dihitung, bukan nilai mentah.
   out.ph.value = sensors_adcToPh(ph.median, cal.ph_neutral_adc, cal.ph_slope,
                                  out.moisture.value);
-  out.ph.status = sensors_isUnstable(ph.min, ph.max) ? SENSOR_UNSTABLE : SENSOR_OK;
+  out.ph.status = channelStatus(out.ph.value, PH_MIN, PH_MAX,
+                                sensors_isUnstable(ph.min, ph.max));
 
   sensors_classifyTemp(temp_c, out.soil_temp);
 
+  // Divider putus -> 0 V, divider short -> >4,25 V. Keduanya bukan baterai.
   out.battery.value  = sensors_adcToBatteryV(batt_adc);
-  out.battery.status = SENSOR_OK;
+  out.battery.status = channelStatus(out.battery.value, BATTERY_MIN_V, BATTERY_MAX_V,
+                                     false);
 }
