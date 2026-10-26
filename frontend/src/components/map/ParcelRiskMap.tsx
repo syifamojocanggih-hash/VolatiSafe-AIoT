@@ -3,6 +3,7 @@ import dynamic from 'next/dynamic';
 import { BedengParcel, ActiveLayer, ParcelMapSummary } from '@/types/parcel';
 import { initialParcels, initialMapSummary } from '@/mocks/parcelsMock';
 import { RefreshCw, Radio, Map as MapIcon, LayoutGrid, Layers } from 'lucide-react';
+import { SchematicFieldDiagram } from './SchematicFieldDiagram';
 
 // Dynamic import with ssr: false for Leaflet map component
 const LeafletFieldMap = dynamic(() => import('./LeafletFieldMap'), {
@@ -226,83 +227,15 @@ export const ParcelRiskMap: React.FC<ParcelRiskMapProps> = () => {
             </p>
           </div>
         ) : (
-          /* Polygons Schematic Container */
-          <div className="space-y-4">
-            {/* Upper Row: Bedeng A1, A2, A3 */}
-            <div className="grid grid-cols-3 gap-3.5 sm:gap-4">
-              {parcels.slice(0, 3).map((p) => {
-                const style = getParcelStyle(p);
-                const isSelected = p.id === selectedId;
-                return (
-                  <button
-                    key={p.id}
-                    onClick={() => setSelectedId(p.id)}
-                    className={`rounded-2xl p-3 sm:p-4 border-2 text-center transition-all cursor-pointer flex flex-col justify-between min-h-[120px] sm:min-h-[140px] ${
-                      style.bg
-                    } ${style.border} ${
-                      isSelected
-                        ? 'ring-4 ring-[#236B32]/30 shadow-md scale-[1.02]'
-                        : 'hover:shadow-sm hover:scale-[1.01]'
-                    }`}
-                  >
-                    <div>
-                      <p className="font-bold text-xs sm:text-sm text-slate-900 tracking-tight">
-                        {p.id} · {p.nodeId}
-                      </p>
-                      <p className={`text-2xs sm:text-xs font-bold mt-1 ${style.text}`}>
-                        {style.label}
-                      </p>
-                    </div>
-                    <p className="text-3xs sm:text-2xs text-slate-600 font-medium mt-2">
-                      θ {p.moisturePct.toString().replace('.', ',')}% | T {p.soilTempC.toString().replace('.', ',')}°C | pH {p.ph.toString().replace('.', ',')}
-                    </p>
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Dividing Ditch & Road: Alur Drainase & Jalan Usaha Tani */}
-            <div className="relative py-2 flex items-center justify-center">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t-2 border-dashed border-sky-400/80" />
-              </div>
-              <span className="relative bg-[#FAF4E6] px-3 text-3xs sm:text-2xs font-semibold text-sky-700 italic">
-                Alur Drainase & Jalan Usaha Tani
-              </span>
-            </div>
-
-            {/* Lower Row: Bedeng B1, B2 */}
-            <div className="grid grid-cols-2 gap-4">
-              {parcels.slice(3, 5).map((p) => {
-                const style = getParcelStyle(p);
-                const isSelected = p.id === selectedId;
-                return (
-                  <button
-                    key={p.id}
-                    onClick={() => setSelectedId(p.id)}
-                    className={`rounded-2xl p-3.5 sm:p-4 border-2 text-center transition-all cursor-pointer flex flex-col justify-between min-h-[120px] sm:min-h-[140px] ${
-                      style.bg
-                    } ${style.border} ${
-                      isSelected
-                        ? 'ring-4 ring-[#236B32]/30 shadow-md scale-[1.02]'
-                        : 'hover:shadow-sm hover:scale-[1.01]'
-                    }`}
-                  >
-                    <div>
-                      <p className="font-bold text-xs sm:text-sm text-slate-900 tracking-tight">
-                        {p.id} · {p.nodeId}
-                      </p>
-                      <p className={`text-2xs sm:text-xs font-bold mt-1 ${style.text}`}>
-                        {style.label}
-                      </p>
-                    </div>
-                    <p className="text-3xs sm:text-2xs text-slate-600 font-medium mt-2">
-                      θ {p.moisturePct.toString().replace('.', ',')}% | T {p.soilTempC.toString().replace('.', ',')}°C | pH {p.ph.toString().replace('.', ',')}
-                    </p>
-                  </button>
-                );
-              })}
-            </div>
+          /* Real Vector Schematic Diagram of Agricultural Topography & IoT Nodes */
+          <div className="space-y-3">
+            <SchematicFieldDiagram
+              parcels={parcels}
+              selectedId={selectedId}
+              activeLayer={activeLayer}
+              summary={summary}
+              onSelectParcel={(id) => setSelectedId(id)}
+            />
           </div>
         )}
 
