@@ -133,7 +133,7 @@ export const ParcelRiskMap: React.FC<ParcelRiskMapProps> = () => {
             Peta Zonasi Risiko Volatilisasi
           </h2>
           <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
-            Klik poligon bedeng untuk melihat telemetri node LoRa - Total Luas Pantauan {summary.totalAreaHa.toFixed(2).replace('.', ',')} ha
+            Klik poligon bedeng untuk melihat telemetri node LoRa · Total Luas Kawasan {summary.totalAreaHa.toFixed(1).replace('.', ',')} ha ({parcels.length + (summary.surroundingParcels?.length || 0)} Persil Kadastral)
           </p>
         </div>
 
@@ -197,7 +197,7 @@ export const ParcelRiskMap: React.FC<ParcelRiskMapProps> = () => {
                 }`}
               >
                 <MapIcon className="w-3.5 h-3.5" />
-                <span>Peta Leaflet (OSM)</span>
+                <span>Peta Spasial & Satelit</span>
               </button>
               <button
                 onClick={() => setMapViewMode('schematic')}

@@ -23,6 +23,14 @@ export interface BedengParcel {
   center?: [number, number]; // Titik tengah lokasi node sensor [lat, lng]
 }
 
+export interface SurroundingParcel {
+  id: string; // e.g. 'C01'
+  name: string; // e.g. 'Persil Tegal Kapur Bluri 01'
+  areaHa: number;
+  center: [number, number];
+  polygon: [number, number][];
+}
+
 export interface ParcelMapSummary {
   coordinatesText: string;
   soilTypeText: string;
@@ -30,4 +38,6 @@ export interface ParcelMapSummary {
   totalAreaHa: number;
   centerCoordinates?: [number, number];
   gatewayCoordinates?: [number, number];
+  outerBoundary?: [number, number][];
+  surroundingParcels?: SurroundingParcel[];
 }
