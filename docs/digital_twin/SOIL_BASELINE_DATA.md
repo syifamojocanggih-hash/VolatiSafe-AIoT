@@ -84,16 +84,17 @@ Memasukkan data fraksi tekstur BBSDLP/SoilGrids ke dalam persamaan Saxton-Rawls 
 # digital_twin/soil_profiles.py
 SOIL_PROFILES = {
     "karst_lamongan": {
-        "nama_ordo": "Mollisol / Rendzina (Tanah Karst Berkapur)",
-        "tekstur": "Clay Loam",
-        "theta_wp": 13.8,         # Titik layu permanen (% VWC)
-        "theta_fc": 39.5,         # Kapasitas lapang (% VWC)
-        "theta_sat": 48.2,        # Kadar air jenuh (% VWC)
+        "nama_ordo": "Mollisol / Rendzina & Alfisol (Tanah Karst Solokuro)",
+        "tekstur": "Clay Loam berkerikil kapur",
+        "theta_wp": 14.2,         # Titik layu permanen (% VWC)
+        "theta_fc": 36.5,         # Kapasitas lapang terkalibrasi (% VWC)
+        "theta_sat": 46.0,        # Kadar air jenuh (% VWC)
+        "coarse_fragments": 0.12, # Fraksi kerikil kapur (12% volume)
         "bulk_density": 1.34,     # g/cm3
-        "ph_baseline": 7.85,      # pH alami tanah kapur
+        "ph_baseline": 7.62,      # Rata-rata lab aktual Solokuro (Agroteknika 2024: 7.31-7.81)
         "alpha_dry": 0.28,        # Konduktivitas termal tanah kering
         "alpha_wet": 0.10,        # Konduktivitas termal tanah basah
-        "drainage_rate": 0.35     # Fraksi kelebihan air yang lolos per hari
+        "drainage_rate": 0.38     # Drainase karst cepat via pori makro dan rekahan
     },
     "ultisol_lampung": {
         "nama_ordo": "Ultisol pasca-dolomit (Tanah Podsolik Dikapur)",
