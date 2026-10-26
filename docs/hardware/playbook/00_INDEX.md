@@ -74,7 +74,7 @@ Update kolom Status dan Bukti setiap menyelesaikan task. Jangan tandai `✅` tan
 |---|---|---|---|
 | HW-0.1 | Unduh packages ESP32 + library via `pio run` | ✅ | `evidence/build_esp32dev.txt` |
 | HW-0.2 | Aktifkan lisensi Wokwi CLI | ✅ | `~/.wokwi/user.tok` aktif |
-| HW-0.3 | Jalankan Mosquitto lokal + uji pub/sub | ✅ | container `volatisafe-mqtt` di `localhost:1883` |
+| HW-0.3 | Jalankan Mosquitto lokal + uji pub/sub | ✅ | container `volatisafe-mqtt` di `localhost:1883`, `evidence/I00_mqtt_pubsub_20261026.md` |
 | HW-0.4 | Eskalasi `.gitignore` untuk `firmware/.pio/` | ✅ | `firmware/.gitignore` (commit `5d0ce46`) |
 | HW-0.5 | Kunci versi dependensi + baseline build | ✅ | `firmware/package-lock.json`, 07 §5.1, commit `55e01b8` |
 
