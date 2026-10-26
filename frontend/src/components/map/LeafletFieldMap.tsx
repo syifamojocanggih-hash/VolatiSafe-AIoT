@@ -369,7 +369,7 @@ export const LeafletFieldMap: React.FC<LeafletFieldMapProps> = ({
   };
 
   return (
-    <div className="relative w-full h-[460px] sm:h-[500px] rounded-2xl overflow-hidden border border-[#E5DEC7] shadow-lg bg-slate-900">
+    <div className="relative w-full h-[480px] sm:h-[540px] lg:h-[580px] rounded-2xl overflow-hidden border border-[#E5DEC7] shadow-lg bg-slate-900">
       {/* Map Leaflet Canvas */}
       <div ref={mapContainerRef} className="w-full h-full z-10" />
 

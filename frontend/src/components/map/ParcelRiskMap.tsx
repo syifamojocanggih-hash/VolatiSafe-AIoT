@@ -172,144 +172,143 @@ export const ParcelRiskMap: React.FC<ParcelRiskMapProps> = () => {
         </div>
       </div>
 
-      {/* Main Grid: Map Canvas (Left) + Selected Bedeng Detail (Right) */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        {/* ================= LEFT: MAP CANVAS (8 cols on lg) ================= */}
-        <div className="lg:col-span-8 bg-[#FAF4E6] rounded-3xl p-5 sm:p-6 border border-[#E5DEC7] shadow-2xs relative overflow-hidden">
-          {/* Top Info inside Map Canvas */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-2xs sm:text-xs text-slate-600 font-medium pb-4 border-b border-[#EADFC7]/60 mb-5">
-            <div>
-              <span className="font-semibold text-slate-800">Koordinat Hamparan:</span> {summary.coordinatesText} · {summary.soilTypeText}
-              <div className="flex items-center gap-1.5 text-slate-800 font-semibold mt-1">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                <span>Gateway Basecamp Aktif ({summary.gatewayDistanceKm.toString().replace('.', ',')} km)</span>
-              </div>
-            </div>
-
-            {/* View Mode Toggle: Leaflet Map vs Schematic Grid */}
-            <div className="flex items-center gap-1 bg-white/90 p-1 rounded-xl border border-[#E5DEC7] shadow-2xs shrink-0 self-start sm:self-auto">
-              <button
-                onClick={() => setMapViewMode('leaflet')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                  mapViewMode === 'leaflet'
-                    ? 'bg-[#236B32] text-white shadow-xs'
-                    : 'text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                <MapIcon className="w-3.5 h-3.5" />
-                <span>Peta Spasial & Satelit</span>
-              </button>
-              <button
-                onClick={() => setMapViewMode('schematic')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                  mapViewMode === 'schematic'
-                    ? 'bg-[#236B32] text-white shadow-xs'
-                    : 'text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                <LayoutGrid className="w-3.5 h-3.5" />
-                <span>Diagram Hamparan</span>
-              </button>
+      {/* ================= 1. FULL-WIDTH MAP CANVAS (Tarik ke Kanan Full) ================= */}
+      <div className="w-full bg-[#FAF4E6] rounded-3xl p-5 sm:p-6 border border-[#E5DEC7] shadow-sm relative overflow-hidden">
+        {/* Top Info inside Map Canvas */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-2xs sm:text-xs text-slate-600 font-medium pb-4 border-b border-[#EADFC7]/60 mb-5">
+          <div>
+            <span className="font-semibold text-slate-800">Koordinat Hamparan:</span> {summary.coordinatesText} · {summary.soilTypeText}
+            <div className="flex items-center gap-1.5 text-slate-800 font-semibold mt-1">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span>Gateway Basecamp Aktif ({summary.gatewayDistanceKm.toString().replace('.', ',')} km)</span>
             </div>
           </div>
 
-          {/* Map Content: Leaflet OSM Map or Schematic Grid */}
-          {mapViewMode === 'leaflet' ? (
-            <div className="space-y-4">
-              <LeafletFieldMap
-                parcels={parcels}
-                selectedId={selectedId}
-                activeLayer={activeLayer}
-                summary={summary}
-                onSelectParcel={(id) => setSelectedId(id)}
-              />
-              <p className="text-3xs sm:text-2xs text-slate-500 italic text-center">
-                * Klik langsung poligon bedeng di peta untuk menyorot telemetri node LoRa secara real-time.
-              </p>
-            </div>
-          ) : (
-            /* Polygons Schematic Container */
-            <div className="space-y-4">
-              {/* Upper Row: Bedeng A1, A2, A3 */}
-              <div className="grid grid-cols-3 gap-3.5 sm:gap-4">
-                {parcels.slice(0, 3).map((p) => {
-                  const style = getParcelStyle(p);
-                  const isSelected = p.id === selectedId;
-                  return (
-                    <button
-                      key={p.id}
-                      onClick={() => setSelectedId(p.id)}
-                      className={`rounded-2xl p-3 sm:p-4 border-2 text-center transition-all cursor-pointer flex flex-col justify-between min-h-[120px] sm:min-h-[140px] ${
-                        style.bg
-                      } ${style.border} ${
-                        isSelected
-                          ? 'ring-4 ring-[#236B32]/30 shadow-md scale-[1.02]'
-                          : 'hover:shadow-sm hover:scale-[1.01]'
-                      }`}
-                    >
-                      <div>
-                        <p className="font-bold text-xs sm:text-sm text-slate-900 tracking-tight">
-                          {p.id} · {p.nodeId}
-                        </p>
-                        <p className={`text-2xs sm:text-xs font-bold mt-1 ${style.text}`}>
-                          {style.label}
-                        </p>
-                      </div>
-                      <p className="text-3xs sm:text-2xs text-slate-600 font-medium mt-2">
-                        θ {p.moisturePct.toString().replace('.', ',')}% | T {p.soilTempC.toString().replace('.', ',')}°C | pH {p.ph.toString().replace('.', ',')}
+          {/* View Mode Toggle: Leaflet Map vs Schematic Grid */}
+          <div className="flex items-center gap-1 bg-white/90 p-1 rounded-xl border border-[#E5DEC7] shadow-2xs shrink-0 self-start sm:self-auto">
+            <button
+              onClick={() => setMapViewMode('leaflet')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                mapViewMode === 'leaflet'
+                  ? 'bg-[#236B32] text-white shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              <MapIcon className="w-3.5 h-3.5" />
+              <span>Peta Spasial & Satelit</span>
+            </button>
+            <button
+              onClick={() => setMapViewMode('schematic')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                mapViewMode === 'schematic'
+                  ? 'bg-[#236B32] text-white shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              <LayoutGrid className="w-3.5 h-3.5" />
+              <span>Diagram Hamparan</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Map Content: Leaflet OSM Map or Schematic Grid */}
+        {mapViewMode === 'leaflet' ? (
+          <div className="space-y-3">
+            <LeafletFieldMap
+              parcels={parcels}
+              selectedId={selectedId}
+              activeLayer={activeLayer}
+              summary={summary}
+              onSelectParcel={(id) => setSelectedId(id)}
+            />
+            <p className="text-3xs sm:text-2xs text-slate-500 italic text-center">
+              * Klik langsung poligon bedeng di peta untuk menyorot telemetri node LoRa secara real-time.
+            </p>
+          </div>
+        ) : (
+          /* Polygons Schematic Container */
+          <div className="space-y-4">
+            {/* Upper Row: Bedeng A1, A2, A3 */}
+            <div className="grid grid-cols-3 gap-3.5 sm:gap-4">
+              {parcels.slice(0, 3).map((p) => {
+                const style = getParcelStyle(p);
+                const isSelected = p.id === selectedId;
+                return (
+                  <button
+                    key={p.id}
+                    onClick={() => setSelectedId(p.id)}
+                    className={`rounded-2xl p-3 sm:p-4 border-2 text-center transition-all cursor-pointer flex flex-col justify-between min-h-[120px] sm:min-h-[140px] ${
+                      style.bg
+                    } ${style.border} ${
+                      isSelected
+                        ? 'ring-4 ring-[#236B32]/30 shadow-md scale-[1.02]'
+                        : 'hover:shadow-sm hover:scale-[1.01]'
+                    }`}
+                  >
+                    <div>
+                      <p className="font-bold text-xs sm:text-sm text-slate-900 tracking-tight">
+                        {p.id} · {p.nodeId}
                       </p>
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* Dividing Ditch & Road: Alur Drainase & Jalan Usaha Tani */}
-              <div className="relative py-2 flex items-center justify-center">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t-2 border-dashed border-sky-400/80" />
-                </div>
-                <span className="relative bg-[#FAF4E6] px-3 text-3xs sm:text-2xs font-semibold text-sky-700 italic">
-                  Alur Drainase & Jalan Usaha Tani
-                </span>
-              </div>
-
-              {/* Lower Row: Bedeng B1, B2 */}
-              <div className="grid grid-cols-2 gap-4">
-                {parcels.slice(3, 5).map((p) => {
-                  const style = getParcelStyle(p);
-                  const isSelected = p.id === selectedId;
-                  return (
-                    <button
-                      key={p.id}
-                      onClick={() => setSelectedId(p.id)}
-                      className={`rounded-2xl p-3.5 sm:p-4 border-2 text-center transition-all cursor-pointer flex flex-col justify-between min-h-[120px] sm:min-h-[140px] ${
-                        style.bg
-                      } ${style.border} ${
-                        isSelected
-                          ? 'ring-4 ring-[#236B32]/30 shadow-md scale-[1.02]'
-                          : 'hover:shadow-sm hover:scale-[1.01]'
-                      }`}
-                    >
-                      <div>
-                        <p className="font-bold text-xs sm:text-sm text-slate-900 tracking-tight">
-                          {p.id} · {p.nodeId}
-                        </p>
-                        <p className={`text-2xs sm:text-xs font-bold mt-1 ${style.text}`}>
-                          {style.label}
-                        </p>
-                      </div>
-                      <p className="text-3xs sm:text-2xs text-slate-600 font-medium mt-2">
-                        θ {p.moisturePct.toString().replace('.', ',')}% | T {p.soilTempC.toString().replace('.', ',')}°C | pH {p.ph.toString().replace('.', ',')}
+                      <p className={`text-2xs sm:text-xs font-bold mt-1 ${style.text}`}>
+                        {style.label}
                       </p>
-                    </button>
-                  );
-                })}
-              </div>
+                    </div>
+                    <p className="text-3xs sm:text-2xs text-slate-600 font-medium mt-2">
+                      θ {p.moisturePct.toString().replace('.', ',')}% | T {p.soilTempC.toString().replace('.', ',')}°C | pH {p.ph.toString().replace('.', ',')}
+                    </p>
+                  </button>
+                );
+              })}
             </div>
-          )}
 
-          {/* Bottom Map Legend */}
-          <div className="flex flex-wrap items-center gap-4 sm:gap-6 mt-6 pt-4 border-t border-[#EADFC7]/60 text-xs text-slate-700 font-medium">
+            {/* Dividing Ditch & Road: Alur Drainase & Jalan Usaha Tani */}
+            <div className="relative py-2 flex items-center justify-center">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t-2 border-dashed border-sky-400/80" />
+              </div>
+              <span className="relative bg-[#FAF4E6] px-3 text-3xs sm:text-2xs font-semibold text-sky-700 italic">
+                Alur Drainase & Jalan Usaha Tani
+              </span>
+            </div>
+
+            {/* Lower Row: Bedeng B1, B2 */}
+            <div className="grid grid-cols-2 gap-4">
+              {parcels.slice(3, 5).map((p) => {
+                const style = getParcelStyle(p);
+                const isSelected = p.id === selectedId;
+                return (
+                  <button
+                    key={p.id}
+                    onClick={() => setSelectedId(p.id)}
+                    className={`rounded-2xl p-3.5 sm:p-4 border-2 text-center transition-all cursor-pointer flex flex-col justify-between min-h-[120px] sm:min-h-[140px] ${
+                      style.bg
+                    } ${style.border} ${
+                      isSelected
+                        ? 'ring-4 ring-[#236B32]/30 shadow-md scale-[1.02]'
+                        : 'hover:shadow-sm hover:scale-[1.01]'
+                    }`}
+                  >
+                    <div>
+                      <p className="font-bold text-xs sm:text-sm text-slate-900 tracking-tight">
+                        {p.id} · {p.nodeId}
+                      </p>
+                      <p className={`text-2xs sm:text-xs font-bold mt-1 ${style.text}`}>
+                        {style.label}
+                      </p>
+                    </div>
+                    <p className="text-3xs sm:text-2xs text-slate-600 font-medium mt-2">
+                      θ {p.moisturePct.toString().replace('.', ',')}% | T {p.soilTempC.toString().replace('.', ',')}°C | pH {p.ph.toString().replace('.', ',')}
+                    </p>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Bottom Map Legend */}
+        <div className="flex flex-wrap items-center justify-between gap-4 sm:gap-6 mt-6 pt-4 border-t border-[#EADFC7]/60 text-xs text-slate-700 font-medium">
+          <div className="flex flex-wrap items-center gap-4 sm:gap-6">
             <div className="flex items-center gap-2">
               <span className="w-3 h-3 rounded-full bg-[#16A34A]" />
               <span>Aman (0–30%)</span>
@@ -327,94 +326,117 @@ export const ParcelRiskMap: React.FC<ParcelRiskMapProps> = () => {
               <span>Simulasi Digital Twin FAO-56</span>
             </div>
           </div>
-        </div>
 
-        {/* ================= RIGHT: SELECTED BEDENG DETAIL (4 cols on lg) ================= */}
-        <div className="lg:col-span-4 bg-white rounded-3xl p-5 sm:p-6 border border-slate-200/90 shadow-2xs space-y-4">
-          {/* Header & AVRI Badge */}
-          <div className="flex items-start justify-between gap-2">
-            <div>
-              <p className="text-xs font-mono text-slate-500 font-semibold">
-                Node ID: <span className="text-slate-800">{selectedParcel.nodeId}</span>
-              </p>
-              <h3 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight mt-0.5">
-                {selectedParcel.name}
-              </h3>
+          <div className="text-2xs text-slate-500 font-semibold">
+            Kawasan Tegal Kapur Desa Bluri · {summary.totalAreaHa.toFixed(1).replace('.', ',')} Ha
+          </div>
+        </div>
+      </div>
+
+      {/* ================= 2. SELECTED BEDENG DETAIL CARD (Ditaruh di Bawah Map) ================= */}
+      <div className="w-full bg-white rounded-3xl p-5 sm:p-7 border border-slate-200/90 shadow-sm space-y-5">
+        {/* Header: Node ID + Name + AVRI Badge + Failover Action Button */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-mono text-slate-600 font-bold bg-slate-100 px-2.5 py-0.5 rounded-md">
+                Node ID: {selectedParcel.nodeId}
+              </span>
+              <span className={`px-2.5 py-0.5 rounded-md text-2xs font-bold ${
+                selectedParcel.status === 'online' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
+              }`}>
+                {selectedParcel.status === 'online' ? '● Online Radio LoRa 433 MHz' : '⚠ Digital Twin Mode'}
+              </span>
             </div>
+            <h3 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight mt-1.5">
+              {selectedParcel.name}
+            </h3>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-3 shrink-0">
             <span
-              className={`px-3 py-1 rounded-full text-xs font-bold shrink-0 ${
+              className={`px-4 py-2 rounded-2xl text-xs sm:text-sm font-extrabold shadow-2xs ${
                 selectedParcel.avriCategory === 'aman'
-                  ? 'bg-emerald-100 text-emerald-800'
+                  ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
                   : selectedParcel.avriCategory === 'waspada'
-                  ? 'bg-yellow-100 text-yellow-800'
-                  : 'bg-red-100 text-red-800'
+                  ? 'bg-yellow-100 text-yellow-800 border border-yellow-300'
+                  : 'bg-red-100 text-red-800 border border-red-300'
               }`}
             >
-              AVRI {selectedParcel.avriScore}%
+              AVRI {selectedParcel.avriScore}% ({selectedParcel.avriCategory.toUpperCase()})
+            </span>
+
+            {/* Action: Failover Simulation Button */}
+            <button
+              onClick={handleToggleFailover}
+              className="py-2 px-3.5 rounded-xl border border-amber-600/60 bg-amber-50/60 hover:bg-amber-100 text-amber-900 font-bold text-xs transition-all flex items-center gap-2 shadow-2xs active:scale-[0.98]"
+            >
+              <RefreshCw className="w-3.5 h-3.5 text-amber-700" />
+              <span>
+                {selectedParcel.status === 'simulated'
+                  ? 'Pulihkan Koneksi Node Fisik'
+                  : 'Simulasikan Node Putus (Uji Digital Twin)'}
+              </span>
+            </button>
+          </div>
+        </div>
+
+        {/* 4 Info Parameter Tiles (Wide 4-Column Responsive Layout) */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5 sm:gap-4 text-xs">
+          {/* Tile 1: Varietas & Luas */}
+          <div className="p-4 rounded-2xl bg-slate-50/80 border border-slate-200/80 hover:bg-slate-50 transition-colors">
+            <span className="text-2xs text-slate-400 block font-semibold uppercase tracking-wider">Varietas & Luas</span>
+            <span className="text-sm sm:text-base font-bold text-slate-900 mt-1 block">
+              {selectedParcel.cropVariety} ({selectedParcel.areaHa.toString().replace('.', ',')} Ha)
+            </span>
+            <span className="text-2xs text-slate-500 mt-0.5 block">Komoditas Jagung Hibrida</span>
+          </div>
+
+          {/* Tile 2: Mode Telemetri */}
+          <div className="p-4 rounded-2xl bg-slate-50/80 border border-slate-200/80 hover:bg-slate-50 transition-colors">
+            <span className="text-2xs text-slate-400 block font-semibold uppercase tracking-wider">Mode Telemetri</span>
+            <span
+              className={`text-sm sm:text-base font-bold mt-1 block ${
+                selectedParcel.status === 'online' ? 'text-emerald-700' : 'text-amber-600'
+              }`}
+            >
+              {selectedParcel.telemetryMode}
+            </span>
+            <span className="text-2xs text-slate-500 mt-0.5 block">
+              Sinyal: {selectedParcel.loraSignalDbm} dBm (Transceiver 433 MHz)
             </span>
           </div>
 
-          {/* 4 Info Parameter Tiles (2x2 Grid) */}
-          <div className="grid grid-cols-2 gap-2.5 text-xs">
-            {/* Tile 1 */}
-            <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
-              <span className="text-2xs text-slate-400 block font-medium">Varietas & Luas</span>
-              <span className="font-bold text-slate-800 mt-0.5 block">
-                {selectedParcel.cropVariety} ({selectedParcel.areaHa.toString().replace('.', ',')} Ha)
-              </span>
-            </div>
-
-            {/* Tile 2 */}
-            <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
-              <span className="text-2xs text-slate-400 block font-medium">Mode Telemetri</span>
-              <span
-                className={`font-bold mt-0.5 block ${
-                  selectedParcel.status === 'online' ? 'text-emerald-700' : 'text-amber-600'
-                }`}
-              >
-                {selectedParcel.telemetryMode}
-              </span>
-            </div>
-
-            {/* Tile 3 */}
-            <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
-              <span className="text-2xs text-slate-400 block font-medium">Kelembaban & Suhu</span>
-              <span className="font-bold text-slate-800 mt-0.5 block">
-                {selectedParcel.moisturePct.toString().replace('.', ',')}% · {selectedParcel.soilTempC.toString().replace('.', ',')}°C
-              </span>
-            </div>
-
-            {/* Tile 4 */}
-            <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
-              <span className="text-2xs text-slate-400 block font-medium">pH & Baterai</span>
-              <span className="font-bold text-slate-800 mt-0.5 block">
-                pH {selectedParcel.ph.toString().replace('.', ',')} · {selectedParcel.batteryV.toString().replace('.', ',')}V
-              </span>
-            </div>
-          </div>
-
-          {/* Prescription Box */}
-          <div className="p-4 rounded-2xl bg-[#F0FDF4] border border-[#DCFCE7] space-y-1">
-            <p className="text-xs font-bold text-emerald-950">
-              Rekomendasi Preskripsi Bedeng {selectedParcel.id}:
-            </p>
-            <p className="text-xs text-slate-700 leading-relaxed">
-              {selectedParcel.prescription}
-            </p>
-          </div>
-
-          {/* Action: Failover Simulation Button for Jury */}
-          <button
-            onClick={handleToggleFailover}
-            className="w-full py-2.5 px-4 rounded-xl border border-amber-600/60 bg-white hover:bg-amber-50/60 text-amber-800 font-bold text-xs transition-all flex items-center justify-center gap-2 active:scale-[0.98] shadow-2xs"
-          >
-            <RefreshCw className="w-3.5 h-3.5 text-amber-700" />
-            <span>
-              {selectedParcel.status === 'simulated'
-                ? 'Pulihkan Koneksi Node Fisik'
-                : 'Simulasikan Node Putus (Uji Digital Twin)'}
+          {/* Tile 3: Kelembaban & Suhu */}
+          <div className="p-4 rounded-2xl bg-slate-50/80 border border-slate-200/80 hover:bg-slate-50 transition-colors">
+            <span className="text-2xs text-slate-400 block font-semibold uppercase tracking-wider">Kelembaban & Suhu</span>
+            <span className="text-sm sm:text-base font-bold text-slate-900 mt-1 block">
+              {selectedParcel.moisturePct.toString().replace('.', ',')}% · {selectedParcel.soilTempC.toString().replace('.', ',')}°C
             </span>
-          </button>
+            <span className="text-2xs text-slate-500 mt-0.5 block">Sensor Kapasitif FDR & NTC</span>
+          </div>
+
+          {/* Tile 4: pH & Baterai */}
+          <div className="p-4 rounded-2xl bg-slate-50/80 border border-slate-200/80 hover:bg-slate-50 transition-colors">
+            <span className="text-2xs text-slate-400 block font-semibold uppercase tracking-wider">pH Tanah & Baterai</span>
+            <span className="text-sm sm:text-base font-bold text-slate-900 mt-1 block">
+              pH {selectedParcel.ph.toString().replace('.', ',')} · {selectedParcel.batteryV.toString().replace('.', ',')}V ({selectedParcel.batteryPct}%)
+            </span>
+            <span className="text-2xs text-slate-500 mt-0.5 block">Alkalin Kapur · Panel Surya LiFePO4</span>
+          </div>
+        </div>
+
+        {/* Prescription Box (Full Width Callout) */}
+        <div className="p-4 sm:p-5 rounded-2xl bg-[#F0FDF4] border border-[#DCFCE7] space-y-1.5 shadow-2xs">
+          <div className="flex items-center gap-2">
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+            <p className="text-xs sm:text-sm font-bold text-emerald-950">
+              Rekomendasi Preskripsi Bedeng {selectedParcel.id} (Keputusan Agronomis Real-Time):
+            </p>
+          </div>
+          <p className="text-xs sm:text-sm text-slate-700 leading-relaxed font-medium pl-4.5">
+            {selectedParcel.prescription}
+          </p>
         </div>
       </div>
 
