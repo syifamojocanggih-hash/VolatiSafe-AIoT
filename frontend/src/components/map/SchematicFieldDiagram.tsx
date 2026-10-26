@@ -145,27 +145,9 @@ export const SchematicFieldDiagram: React.FC<SchematicFieldDiagramProps> = ({
   const styleB2 = getCardStyle(pB2, selectedId === 'B2');
 
   return (
-    <div className="relative w-full rounded-3xl overflow-hidden border border-[#E5DEC7] shadow-sm bg-[#F4EFE6] p-5 sm:p-7 select-none">
-      {/* Top Header Section (Matching User Reference) */}
-      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 pb-4">
-        <div>
-          <h3 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
-            Topologi Jaringan Sensor
-          </h3>
-          <p className="text-xs sm:text-sm text-slate-600 mt-1">
-            Kebun Jagung Pak Suparman · Blok A & B · {summary.soilTypeText} · {summary.coordinatesText}
-          </p>
-        </div>
-
-        {/* Gateway Active Badge */}
-        <div className="flex items-center gap-2 bg-[#1C4E28] text-white px-3.5 py-1.5 rounded-full text-xs font-semibold shadow-xs shrink-0 self-start sm:self-auto">
-          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-          <span>Gateway Aktif · {summary.gatewayDistanceKm.toString().replace('.', ',')} km</span>
-        </div>
-      </div>
-
+    <div className="relative w-full select-none py-2">
       {/* Main Diagram Area with SVG Connection Traces behind HTML Cards */}
-      <div className="relative w-full min-h-[440px] sm:min-h-[480px] my-2">
+      <div className="relative w-full min-h-[440px] sm:min-h-[480px]">
         {/* SVG Wireless Traces Layer */}
         <svg
           className="absolute inset-0 w-full h-full pointer-events-none z-0"
@@ -414,32 +396,6 @@ export const SchematicFieldDiagram: React.FC<SchematicFieldDiagramProps> = ({
               </p>
             </div>
           </div>
-        </div>
-      </div>
-
-      {/* Bottom Footer Legend (Matching User Reference) */}
-      <div className="flex flex-wrap items-center justify-between gap-4 pt-6 mt-4 border-t border-[#EADFC7]/80 text-xs text-slate-700 font-medium">
-        <div className="flex flex-wrap items-center gap-4 sm:gap-6">
-          <div className="flex items-center gap-2">
-            <span className="w-3 h-3 rounded-full bg-[#16A34A]" />
-            <span>Aman (0–30%)</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="w-3 h-3 rounded-full bg-[#CA8A04]" />
-            <span>Waspada (31–60%) / simulasi</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="w-3 h-3 rounded-full bg-[#DC2626]" />
-            <span>Kritis / Bahaya (&gt;60%)</span>
-          </div>
-          <div className="flex items-center gap-2 text-slate-600">
-            <span className="w-4 h-0.5 border-t-2 border-dashed border-[#CA8A04]" />
-            <span>Simulasi Digital Twin FAO-56</span>
-          </div>
-        </div>
-
-        <div className="text-2xs text-slate-500 font-semibold">
-          Kawasan Tegal Kapur Desa Bluri · 13,8 Ha · 5 node aktif
         </div>
       </div>
     </div>

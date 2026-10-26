@@ -248,20 +248,20 @@ export const ParcelRiskMap: React.FC<ParcelRiskMapProps> = () => {
             </div>
             <div className="flex items-center gap-2">
               <span className="w-3 h-3 rounded-full bg-[#CA8A04]" />
-              <span>Waspada (31–60%)</span>
+              <span>Waspada (31–60%) / simulasi</span>
             </div>
             <div className="flex items-center gap-2">
               <span className="w-3 h-3 rounded-full bg-[#DC2626]" />
               <span>Kritis / Bahaya (&gt;60%)</span>
             </div>
             <div className="flex items-center gap-2 text-slate-500">
-              <span className="w-3 h-1 border-t-2 border-dashed border-[#CA8A04]" />
+              <span className="w-4 h-0.5 border-t-2 border-dashed border-[#CA8A04]" />
               <span>Simulasi Digital Twin FAO-56</span>
             </div>
           </div>
 
           <div className="text-2xs text-slate-500 font-semibold">
-            Kawasan Tegal Kapur Desa Bluri · {summary.totalAreaHa.toFixed(1).replace('.', ',')} Ha
+            Kawasan Tegal Kapur Desa Bluri · {summary.totalAreaHa.toFixed(1).replace('.', ',')} Ha · {parcels.length} node aktif
           </div>
         </div>
       </div>
