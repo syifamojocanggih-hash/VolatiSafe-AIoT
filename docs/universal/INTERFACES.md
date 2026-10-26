@@ -191,7 +191,8 @@ AI Engine diisolasi sebagai callable service / module. Backend mengemas fitur me
 |---|---|---|---|
 | `GET` | `/api/v1/nodes` | Ringkasan semua node aktif | `?field_id=BLOK-A` |
 | `GET` | `/api/v1/nodes/{id}/telemetry` | Deret waktu telemetri petak | `?hours=24` (default 24 jam) |
-| `GET` | `/api/v1/fields/{id}/current-status` | Status live petak, skor AVRI & banner | — |
+| `GET` | `/api/v1/fields/{id}/current-status` | Status live petak, skor AVRI & banner (Petani View) | — |
+| `GET` | `/api/v1/digital-twin/telemetry/{id}` | Telemetri lengkap 15 parameter biofisika & BMKG (Developer/Jury View) | — |
 | `GET` | `/api/v1/fields/{id}/forecast-window` | Proyeksi 72 jam jendela pemupukan aman | `?hours=72` |
 | `POST` | `/api/v1/fertilizer/blend-calculator` | Hitung dosis pupuk majemuk & konversi ember | Request Body: Luas lahan, target tonase |
 | `POST` | `/api/v1/crop-cycles` | Simpan/ubah tanggal tanam & varietas benih | Request Body: Tanggal tanam, varietas |
@@ -232,7 +233,55 @@ Respons:
 }
 ```
 
-#### B. `GET /api/v1/fields/{id}/forecast-window`
+#### B. `GET /api/v1/digital-twin/telemetry/{id}`
+Menyediakan telemetri lengkap 15 parameter biofisika tanah, cuaca BMKG, dan status failover untuk konsol pengujian dewan juri / developer:
+```json
+{
+  "status": "success",
+  "data": {
+    "field_id": "BLOK-A",
+    "timestamp_utc": "2026-10-26T06:00:00Z",
+    "data_provenance": {
+      "station_name": "BMKG Stasiun Tuban / Lamongan Utara",
+      "wmo_id": "96933",
+      "checksum_sha256": "3a9f7d4c21e8b7a65f90123456789abcdef0123456789abcdef0123456789abc"
+    },
+    "atmosphere_bmkg": {
+      "air_temp_c": 31.0,
+      "humidity_rh": 62.0,
+      "wind_speed_ms": 2.1,
+      "solar_radiation_mj": 2.8,
+      "precipitation_mm": 0.0
+    },
+    "soil_profile_karst": {
+      "clay_pct": 38.0,
+      "sand_pct": 24.0,
+      "silt_pct": 38.0,
+      "coarse_fragments_pct": 12.0,
+      "bulk_density_g_cm3": 1.34,
+      "field_capacity_theta_fc": 36.5,
+      "wilting_point_theta_wp": 14.2
+    },
+    "soil_biophysics_dynamic": {
+      "moisture_pct": 28.4,
+      "soil_temp_c": 26.4,
+      "thermal_phase_lag_minutes": 75,
+      "etc_daily_mm": 4.12,
+      "ph": 7.62,
+      "is_simulated_failover": false,
+      "failover_confidence_pct": 100
+    },
+    "crop_and_kinetics": {
+      "dat": 32,
+      "crop_stage": "V8 (Vegetatif Cepat)",
+      "kc_coefficient": 0.85,
+      "k_urease_rate_hr": 0.42
+    }
+  }
+}
+```
+
+#### C. `GET /api/v1/fields/{id}/forecast-window`
 Menyediakan data bar 72 jam (dibagi per blok 3 jam) untuk visualisasi bar strip di dashboard.
 ```json
 {
@@ -259,7 +308,7 @@ Menyediakan data bar 72 jam (dibagi per blok 3 jam) untuk visualisasi bar strip 
 }
 ```
 
-#### C. `POST /api/v1/fertilizer/blend-calculator`
+#### D. `POST /api/v1/fertilizer/blend-calculator`
 **Request:**
 ```json
 {
@@ -296,7 +345,7 @@ Menyediakan data bar 72 jam (dibagi per blok 3 jam) untuk visualisasi bar strip 
 }
 ```
 
-#### D. `POST /api/v1/simulation/`
+#### E. `POST /api/v1/simulation/`
 Endpoint pengujian langsung juri untuk mengubah slider parameter cuaca/tanah secara interaktif.
 **Request:**
 ```json

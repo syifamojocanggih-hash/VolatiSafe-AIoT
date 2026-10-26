@@ -93,6 +93,16 @@ Sistem mengambil keputusan berdasarkan dua skala waktu terpisah:
   
 ---
 
+#### 🟢 DT-1.6: REST API Telemetri 15 Parameter Digital Twin
+- **Deskripsi:** Menyediakan handler endpoint data `GET /api/v1/digital-twin/telemetry/{field_id}` yang mengembalikan 15 parameter lengkap (BMKG, profil tanah karst Solokuro, status FAO-56, failover state, dan kinetika kimia) sesuai kontrak [`docs/universal/INTERFACES.md`](../universal/INTERFACES.md) §3.2.B.
+- **Target File:** `digital_twin/service.py`
+- **Checklist:**
+  - [ ] Respons memuat blok `atmosphere_bmkg`, `soil_profile_karst`, `soil_biophysics_dynamic`, dan `crop_and_kinetics`.
+  - [ ] Nilai `checksum_sha256` terverifikasi cocok dengan dataset BMKG Lamongan.
+  - [ ] Latensi respons endpoint $\le 50\text{ ms}$.
+
+---
+
 ## 🚫 Zona Terlarang Andharu (DILARANG KERAS)
 1. ❌ DILARANG mengubah algoritma machine learning LightGBM atau merombak formula AVRI di `ai_engine/`.
 2. ❌ DILARANG membuka koneksi langsung ke hardware ESP32 atau menulis kode firmware.
