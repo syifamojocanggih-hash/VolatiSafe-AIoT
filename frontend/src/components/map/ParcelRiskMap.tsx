@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import dynamic from 'next/dynamic';
 import { BedengParcel, ActiveLayer, ParcelMapSummary } from '@/types/parcel';
 import { initialParcels, initialMapSummary } from '@/mocks/parcelsMock';
-import { RefreshCw, Radio, Map as MapIcon, LayoutGrid, Layers } from 'lucide-react';
+import { RefreshCw, Radio, Map as MapIcon, LayoutGrid } from 'lucide-react';
 import { SchematicFieldDiagram } from './SchematicFieldDiagram';
 
 // Dynamic import with ssr: false for Leaflet map component
@@ -53,76 +53,6 @@ export const ParcelRiskMap: React.FC<ParcelRiskMapProps> = () => {
         return p;
       })
     );
-  };
-
-  // Helper styling for polygons based on active layer
-  const getParcelStyle = (p: BedengParcel) => {
-    if (activeLayer === 'battery') {
-      if (p.batteryPct > 80) {
-        return {
-          bg: 'bg-[#DCFCE7]',
-          border: 'border-[#16A34A]',
-          text: 'text-[#16A34A]',
-          label: `${p.batteryPct}% (${p.batteryV}V)`,
-        };
-      }
-      return {
-        bg: 'bg-[#FEF9C3]',
-        border: 'border-[#CA8A04] border-dashed',
-        text: 'text-[#CA8A04]',
-        label: `${p.batteryPct}% (${p.batteryV}V)`,
-      };
-    }
-
-    if (activeLayer === 'lora') {
-      if (p.status === 'online') {
-        return {
-          bg: 'bg-[#DCFCE7]',
-          border: 'border-[#16A34A]',
-          text: 'text-[#16A34A]',
-          label: 'LoRa 433MHz Live',
-        };
-      }
-      return {
-        bg: 'bg-[#FEF9C3]',
-        border: 'border-[#CA8A04] border-dashed',
-        text: 'text-[#CA8A04]',
-        label: '[Est-Simulated] FAO-56',
-      };
-    }
-
-    // Default: Layer Risiko AVRI
-    if (p.avriCategory === 'aman') {
-      return {
-        bg: 'bg-[#DCFCE7]',
-        border: 'border-[#16A34A]',
-        text: 'text-[#16A34A]',
-        label: `AVRI ${p.avriScore}% (Aman)`,
-      };
-    }
-    if (p.avriCategory === 'waspada' || p.status === 'simulated') {
-      return {
-        bg: 'bg-[#FEF9C3]',
-        border: 'border-[#CA8A04] border-dashed',
-        text: 'text-[#CA8A04]',
-        label: p.status === 'simulated' ? '[Est-Simulated] FAO-56' : `AVRI ${p.avriScore}% (Waspada)`,
-      };
-    }
-    if (p.avriCategory === 'kritis') {
-      return {
-        bg: 'bg-[#FCDCD4]',
-        border: 'border-[#EA580C]',
-        text: 'text-[#EA580C]',
-        label: `AVRI ${p.avriScore}% (Kritis)`,
-      };
-    }
-    // Bahaya
-    return {
-      bg: 'bg-[#FEE2E2]',
-      border: 'border-[#DC2626]',
-      text: 'text-[#DC2626]',
-      label: `AVRI ${p.avriScore}% (Bahaya)`,
-    };
   };
 
   return (

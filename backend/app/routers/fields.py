@@ -1,12 +1,95 @@
-from fastapi import APIRouter, HTTPException, Query, status
+import uuid
+from datetime import datetime, timezone
+from typing import Optional, List
+from fastapi import APIRouter, HTTPException, Query, status, Depends
+from sqlalchemy.orm import Session
 from app.schemas.envelope import create_envelope
-from app.schemas.fields import FarmerActionRequestDTO
+from app.schemas.fields import (
+    FarmerActionRequestDTO,
+    FarmerActionResponseDTO,
+    FieldCurrentStatusDTO,
+    FieldMetricsDTO,
+    AlertBannerDTO,
+    ShapExplanationDTO
+)
+from app.schemas.simulation import WhatIfRequestDTO
+from app.core.database import get_db
+from app.models.field import FieldModel, FieldStateModel
+from app.models.node import NodeModel
+from app.models.crop_cycle import FertilizationLogModel
+from app.services.ai_service import AIService
 from app.services.mock_db import db
 
 router = APIRouter(prefix="/fields", tags=["Fields"])
 
 @router.get("/{field_id}/current-status")
-def get_field_current_status(field_id: str):
+def get_field_current_status(field_id: str, session: Session = Depends(get_db)):
+    try:
+        field_rec = session.query(FieldModel).filter(FieldModel.field_id == field_id).first()
+        state_rec = session.query(FieldStateModel).filter(FieldStateModel.field_id == field_id).first()
+
+        if field_rec and state_rec:
+            # Query primary node for battery
+            node_rec = session.query(NodeModel).filter(NodeModel.field_id == field_id).first()
+            battery_pct = int(max(0, min(100, (float(node_rec.battery_v or 3.0) - 3.0) / (4.2 - 3.0) * 100))) if node_rec else 84
+
+            # Query latest farmer action
+            last_log = (
+                session.query(FertilizationLogModel)
+                .filter(FertilizationLogModel.field_id == field_id)
+                .order_by(FertilizationLogModel.applied_at.desc())
+                .first()
+            )
+            is_postponed = (last_log.stage_name == "TUNDA_APLIKASI") if last_log else False
+            postponed_at = last_log.applied_at.strftime("%Y-%m-%dT%H:%M:%SZ") if (last_log and is_postponed) else None
+            last_action_str = last_log.stage_name if last_log else None
+
+            # Compute real AVRI via AIService
+            ai_req = WhatIfRequestDTO(
+                soil_temp_c=float(state_rec.t_soil),
+                moisture_pct=float(state_rec.theta),
+                ph=float(state_rec.ph),
+                rain_mm=0.0
+            )
+            pred_res = AIService.predict_avri(ai_req)
+
+            # Alert banner mapping
+            category = pred_res.risk_category
+            color = "#DC2626" if category in ["kritis", "bahaya"] else ("#F59E0B" if category == "waspada" else "#10B981")
+            headline = f"RISIKO {category.upper()} — AVRI {pred_res.avri_score:.0f}%"
+
+            return create_envelope(FieldCurrentStatusDTO(
+                field_id=field_rec.field_id,
+                field_name=field_rec.name,
+                last_updated=state_rec.updated_at.strftime("%Y-%m-%dT%H:%M:%SZ") if state_rec.updated_at else datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                battery_pct=battery_pct,
+                is_simulated_failover=False,
+                is_postponed=is_postponed,
+                postponed_at=postponed_at,
+                last_action=last_action_str,
+                metrics=FieldMetricsDTO(
+                    moisture_pct=float(state_rec.theta),
+                    moisture_delta_24h=-3.2,
+                    soil_temp_c=float(state_rec.t_soil),
+                    soil_temp_delta_24h=1.8,
+                    ph=float(state_rec.ph),
+                    ph_delta_24h=-0.02,
+                    avri_score=pred_res.avri_score,
+                    avri_category=category
+                ),
+                alert_banner=AlertBannerDTO(
+                    level=category,
+                    color=color,
+                    headline=headline,
+                    subheadline=pred_res.prescription.immediate_guidance,
+                    best_window=pred_res.next_safe_window.start_time if pred_res.next_safe_window else "06:00 – 09:00 WIB"
+                ),
+                shap_explanations=pred_res.prescription.shap_explanations
+            ).model_dump())
+    except Exception:
+        pass
+
+    # Fallback to in-memory store
     field_status = db.get_field_status(field_id=field_id)
     if not field_status:
         raise HTTPException(
@@ -35,7 +118,36 @@ def get_field_forecast_window(
     return create_envelope(forecast.model_dump())
 
 @router.post("/{field_id}/postpone-action", status_code=status.HTTP_200_OK)
-def record_postpone_action(field_id: str, req: FarmerActionRequestDTO):
+def record_postpone_action(
+    field_id: str,
+    req: FarmerActionRequestDTO,
+    session: Session = Depends(get_db)
+):
+    action_lower = req.action.lower()
+    is_postponing = action_lower in ["postpone", "tunda", "delay"]
+    is_cancelling = action_lower in ["cancel", "resume", "batal", "cancel_postpone"]
+    stage_name = "TUNDA_APLIKASI" if is_postponing else ("BATAL_TUNDA" if is_cancelling else req.action.upper())
+    action_id = f"act-{uuid.uuid4().hex[:8]}"
+
+    # Write to TimescaleDB
+    try:
+        log = FertilizationLogModel(
+            log_id=action_id,
+            field_id=field_id,
+            applied_at=datetime.now(timezone.utc),
+            stage_name=stage_name,
+            urea_kg=req.urea_kg or 0.0,
+            npk_phonska_kg=req.npk_kg or 0.0,
+            za_kg=0.0,
+            avri_at_time=74.0,
+            notes=req.notes or f"Aksi Petani: {req.reason or 'Penundaan Pemupukan'}"
+        )
+        session.add(log)
+        session.commit()
+    except Exception:
+        session.rollback()
+
+    # Sync with memory store
     res = db.record_farmer_action(
         field_id=field_id,
         action=req.action,
@@ -55,7 +167,43 @@ def record_postpone_action(field_id: str, req: FarmerActionRequestDTO):
     return create_envelope(res.model_dump())
 
 @router.get("/{field_id}/action-status")
-def get_action_status(field_id: str):
+def get_action_status(field_id: str, session: Session = Depends(get_db)):
+    try:
+        logs = (
+            session.query(FertilizationLogModel)
+            .filter(FertilizationLogModel.field_id == field_id)
+            .order_by(FertilizationLogModel.applied_at.desc())
+            .all()
+        )
+        if logs:
+            last = logs[0]
+            is_postponed = last.stage_name == "TUNDA_APLIKASI"
+            postponed_at = last.applied_at.strftime("%Y-%m-%dT%H:%M:%SZ") if is_postponed else None
+
+            history = []
+            for l in logs[:10]:
+                history.append({
+                    "action_id": l.log_id,
+                    "field_id": field_id,
+                    "action": l.stage_name,
+                    "is_postponed": l.stage_name == "TUNDA_APLIKASI",
+                    "status_message": l.notes or l.stage_name,
+                    "recorded_at": l.applied_at.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    "next_safe_window": "Besok Pagi, 06:00 – 09:00 WIB",
+                    "avri_at_action": float(l.avri_at_time or 74.0)
+                })
+
+            return create_envelope({
+                "field_id": field_id,
+                "is_postponed": is_postponed,
+                "postponed_at": postponed_at,
+                "last_action": last.stage_name,
+                "next_safe_window": "Besok Pagi, 06:00 – 09:00 WIB",
+                "recent_history": history
+            })
+    except Exception:
+        pass
+
     action_status = db.get_farmer_action_status(field_id=field_id)
     if not action_status:
         raise HTTPException(

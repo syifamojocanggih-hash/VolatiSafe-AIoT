@@ -15,7 +15,6 @@ export const SchematicFieldDiagram: React.FC<SchematicFieldDiagramProps> = ({
   parcels,
   selectedId,
   activeLayer,
-  summary,
   onSelectParcel,
 }) => {
   const getParcel = (id: string) => parcels.find((p) => p.id === id) || parcels[0];

@@ -45,9 +45,15 @@ services:
       DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-volatisafe}:${POSTGRES_PASSWORD:-volatisafe_secret}@timescaledb:5432/${POSTGRES_DB:-volatisafe_db}
       MQTT_BROKER_HOST: mosquitto
       MQTT_BROKER_PORT: 1883
-      MOCK_AI_PREDICTOR: "true"
+      MOCK_AI_PREDICTOR: "false"
     volumes:
       - ../backend:/app
+      - ../ai_engine:/app/ai_engine
+      - ../models:/app/models
+      - ../simulations:/app/simulations
+      - ../simulation:/app/simulation
+      - ../docs:/app/docs
+      - ../data:/app/data
     depends_on:
       timescaledb:
         condition: service_healthy

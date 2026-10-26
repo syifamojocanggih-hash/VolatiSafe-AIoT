@@ -1,9 +1,11 @@
+import json
 import logging
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request, status, HTTPException
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
+import paho.mqtt.client as mqtt
 
 from app.core.config import settings
 from app.routers import health, nodes, fields, agronomy, simulation, websocket
@@ -14,12 +16,59 @@ logging.basicConfig(
 )
 logger = logging.getLogger("volatisafe.main")
 
+def start_mqtt_worker():
+    def on_connect(client, userdata, flags, rc, properties=None):
+        logger.info(f"Connected to MQTT broker ({settings.MQTT_BROKER_HOST}:{settings.MQTT_BROKER_PORT}) with result code {rc}")
+        client.subscribe(settings.MQTT_TELEMETRY_TOPIC)
+        logger.info(f"Subscribed to telemetry topic: {settings.MQTT_TELEMETRY_TOPIC}")
+
+    def on_message(client, userdata, msg):
+        try:
+            raw_text = msg.payload.decode("utf-8")
+            payload = json.loads(raw_text)
+            logger.info(f"Received LoRa telemetry payload on {msg.topic}: {payload}")
+            from app.services.ingestion import IngestionService
+            res = IngestionService.process_lora_payload(payload)
+            if res:
+                import asyncio
+                from app.routers.websocket import ws_manager
+                try:
+                    loop = asyncio.get_event_loop()
+                    if loop.is_running():
+                        loop.create_task(ws_manager.broadcast({
+                            "event": "TELEMETRY_UPDATE",
+                            "data": res
+                        }))
+                except Exception:
+                    pass
+        except Exception as e:
+            logger.error(f"Error parsing MQTT message: {e}")
+
+    try:
+        client = mqtt.Client(
+            client_id="volatisafe_central_orchestrator",
+            callback_api_version=mqtt.CallbackAPIVersion.VERSION2
+        )
+        client.on_connect = on_connect
+        client.on_message = on_message
+        client.connect(settings.MQTT_BROKER_HOST, settings.MQTT_BROKER_PORT, keepalive=60)
+        client.loop_start()
+        logger.info("Background MQTT consumer thread started successfully.")
+        return client
+    except Exception as e:
+        logger.warning(f"Could not connect to MQTT broker ({e}). MQTT telemetry consumer disabled.")
+        return None
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("Initializing VolatiSafe AIoT Central Backend...")
     logger.info("Registered routes: /api/v1/*, /ws/v1/live")
+    mqtt_client = start_mqtt_worker()
     yield
     logger.info("Shutting down VolatiSafe AIoT Central Backend...")
+    if mqtt_client:
+        mqtt_client.loop_stop()
+        mqtt_client.disconnect()
 
 app = FastAPI(
     title=settings.PROJECT_NAME,

@@ -1,6 +1,11 @@
+import os
+import sys
 import math
+import logging
 from datetime import datetime, timezone
-from typing import Dict, Any, List
+from pathlib import Path
+from typing import Dict, Any, List, Optional
+
 from app.schemas.simulation import (
     WhatIfRequestDTO,
     PredictRiskResponseDTO,
@@ -11,10 +16,23 @@ from app.schemas.simulation import (
 )
 from app.schemas.fields import ShapExplanationDTO
 
+logger = logging.getLogger("volatisafe.ai_service")
+
+# Setup search path so ai_engine and models can be discovered
+POSSIBLE_ROOTS = [
+    Path(__file__).resolve().parent.parent.parent.parent,  # Workspace root
+    Path("/app"),                                           # Docker container root
+    Path(__file__).resolve().parent.parent.parent           # Backend root
+]
+for p in POSSIBLE_ROOTS:
+    if p.exists() and str(p) not in sys.path:
+        sys.path.insert(0, str(p))
+
 class AIService:
     """
     Physics-Informed Machine Learning (PIML) & TreeSHAP inference service
     berdasarkan MODEL_SPEC.md dan MOCK_PREDICTOR.md.
+    Terhubung langsung ke model LightGBM (models/avri_model.txt) via ai_engine.service.
     """
     
     # Konstanta Fisika Biokimia Urease
@@ -38,7 +56,6 @@ class AIService:
         dry_factor = max(0.0, 1.0 - f_moisture)
         
         # 3. Sigmoid Alkaline pH acceleration
-        # NH4+ <-> NH3 free gas shift
         delta_ph = ph - 7.0
         exponent = max(-10.0, min(10.0, delta_ph))
         ratio = 10 ** exponent
@@ -56,21 +73,99 @@ class AIService:
 
     @classmethod
     def predict_avri(cls, req: WhatIfRequestDTO) -> PredictRiskResponseDTO:
-        # 1. Hitung kinetika fisika
+        mock_env = os.getenv("MOCK_AI_PREDICTOR", "false").lower()
+        use_real_engine = mock_env not in ["true", "1", "yes"]
+
+        if use_real_engine:
+            try:
+                from ai_engine.service import (
+                    get_ai_service,
+                    PredictRiskRequestDTO,
+                    SoilStateDTO,
+                    WeatherForecast12hDTO,
+                    AgronomicContextDTO,
+                )
+
+                air_temp = max(15.0, round(req.soil_temp_c - 2.5, 1))
+                ai_req = PredictRiskRequestDTO(
+                    field_id="BLOK-A",
+                    soil_state=SoilStateDTO(
+                        moisture_pct=float(req.moisture_pct),
+                        soil_temp_c=float(req.soil_temp_c),
+                        ph=float(req.ph)
+                    ),
+                    weather_forecast_12h=WeatherForecast12hDTO(
+                        air_temp_c=air_temp,
+                        relative_humidity_pct=65.0,
+                        solar_radiation_mj=18.0,
+                        wind_speed_ms=1.5,
+                        rain_forecast_mm=float(req.rain_mm)
+                    ),
+                    agronomic_context=AgronomicContextDTO(dat=30)
+                )
+
+                engine_service = get_ai_service()
+                piml_res = engine_service.predict_avri(ai_req)
+
+                shap_explanations: List[ShapExplanationDTO] = []
+                for item in piml_res.prescription.shap_explanations:
+                    exp_text = (
+                        f"Fitur {item.label} "
+                        f"{'meningkatkan' if item.direction == 'increases_risk' else 'menurunkan'} "
+                        f"risiko penguapan amonia sebesar {abs(item.impact_pct):.1f}%."
+                    )
+                    shap_explanations.append(
+                        ShapExplanationDTO(
+                            feature=item.feature,
+                            label=item.label,
+                            impact_pct=item.impact_pct,
+                            direction=item.direction,
+                            explanation=exp_text
+                        )
+                    )
+
+                next_window_dto = SafeWindowDTO(
+                    start_time=piml_res.next_safe_window.start_time if piml_res.next_safe_window else "2026-10-25T06:00:00Z",
+                    end_time=piml_res.next_safe_window.end_time if piml_res.next_safe_window else "2026-10-25T09:00:00Z",
+                    projected_avri=piml_res.next_safe_window.projected_avri if piml_res.next_safe_window else 18.5,
+                    confidence_pct=piml_res.next_safe_window.confidence_pct if piml_res.next_safe_window else 88
+                )
+
+                return PredictRiskResponseDTO(
+                    avri_score=piml_res.avri_score,
+                    risk_category=piml_res.risk_category,
+                    safe_window_open=piml_res.safe_window_open,
+                    next_safe_window=next_window_dto,
+                    prescription=PrescriptionDTO(
+                        action_id=piml_res.prescription.action_id,
+                        title=piml_res.prescription.title,
+                        summary=piml_res.prescription.summary,
+                        immediate_guidance=piml_res.prescription.immediate_guidance,
+                        shap_explanations=shap_explanations
+                    ),
+                    physics_diagnostics=PhysicsDiagnosticsDTO(
+                        k_urease_per_hour=piml_res.physics_diagnostics.k_urease_per_hour,
+                        hydrolysis_rate=piml_res.physics_diagnostics.hydrolysis_rate,
+                        is_physics_constrained=piml_res.physics_diagnostics.is_physics_constrained
+                    ),
+                    model_meta=ModelMetaDTO(
+                        version=piml_res.model_meta.version,
+                        inferred_at=piml_res.model_meta.inferred_at
+                    )
+                )
+            except Exception as e:
+                logger.warning(f"Could not infer using LightGBM ai_engine ({e}). Falling back to analytical formula.")
+
+        # ================= FALLBACK ANALYTICAL FORMULA =================
         physics = cls.calculate_physics(req.soil_temp_c, req.moisture_pct, req.ph)
-        
-        # 2. Sensitivitas parameter terhadap risiko
-        # Baseline normal: Suhu 26°C, Kelembaban 40%, pH 7.0
         temp_delta = max(0.0, (req.soil_temp_c - 20.0) * 2.5)
         moisture_penalty = max(0.0, (40.0 - req.moisture_pct) * 1.8)
         ph_penalty = max(0.0, (req.ph - 6.5) * 12.0)
         rain_discount = min(45.0, req.rain_mm * 4.0)
         
-        # Raw AVRI score calculation
         raw_score = 10.0 + temp_delta + moisture_penalty + ph_penalty - rain_discount
         avri_score = round(max(3.0, min(95.0, raw_score)), 1)
         
-        # 3. Klasifikasi risiko & preskripsi aksi (MODEL_SPEC.md §4)
         if avri_score <= 30.0:
             category = "aman"
             is_safe = True
@@ -96,7 +191,6 @@ class AIService:
             title = "DILARANG MENABUR UREA"
             guidance = "Tanah sangat kering & panas. Kerugian pupuk hampir total (> 80%). Tunda penaburan 24–48 jam."
             
-        # 4. TreeSHAP Attribution Waterfall (EXPLAINABILITY_SHAP.md)
         shap_explanations: List[ShapExplanationDTO] = [
             ShapExplanationDTO(
                 feature="soil_temp_c",
@@ -157,7 +251,7 @@ class AIService:
                 is_physics_constrained=True
             ),
             model_meta=ModelMetaDTO(
-                version="piml-lgbm-v1.2",
+                version="piml-lgbm-v1.2-fallback",
                 inferred_at=now_utc
             )
         )

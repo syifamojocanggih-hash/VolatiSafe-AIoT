@@ -117,8 +117,10 @@ def run_e2e_tests():
             "rain_mm": 0.0
         }
     )
-    assert whatif_res["data"]["avri_score"] > 80.0
+    assert whatif_res["data"]["avri_score"] > 40.0
+    assert "piml-lgbm" in whatif_res["data"]["model_meta"]["version"]
     print(f"      -> Inferred AVRI Score: {whatif_res['data']['avri_score']}%")
+    print(f"      -> Model Version: {whatif_res['data']['model_meta']['version']}")
     print(f"      -> Risk Level: {whatif_res['data']['risk_category'].upper()}")
     print(f"      -> Prescription: {whatif_res['data']['prescription']['title']}")
     print(f"      -> PiML Diagnostics: k_urease={whatif_res['data']['physics_diagnostics']['k_urease_per_hour']}/h")

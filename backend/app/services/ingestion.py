@@ -43,7 +43,7 @@ class IngestionService:
         else:
             iso_time = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
-        # 4. Simpan ke database deret waktu
+        # 4. Simpan ke database deret waktu (In-memory & TimescaleDB)
         point = TelemetryPointDTO(
             timestamp=iso_time,
             moisture_pct=round(float(moisture), 1),
@@ -54,7 +54,7 @@ class IngestionService:
         )
         db.record_telemetry(node_id, point)
 
-        # 5. Picu pemanggilan AI Predictor (PIML)
+        # 5. Picu pemanggilan AI Predictor (PIML LightGBM)
         pred_req = WhatIfRequestDTO(
             soil_temp_c=point.soil_temp_c,
             moisture_pct=point.moisture_pct,
@@ -63,7 +63,56 @@ class IngestionService:
         )
         pred_res = AIService.predict_avri(pred_req)
 
-        # 6. Jika AVRI >= 61% (Kritis/Bahaya), picu AlertDispatcher
+        # 6. Simpan ke hypertable TimescaleDB jika aktif
+        try:
+            from app.core.database import SessionLocal
+            from app.models.telemetry import TelemetryModel
+            from app.models.node import NodeModel
+            from app.models.field import FieldStateModel
+            from app.models.prediction import PredictionModel
+
+            with SessionLocal() as session:
+                # A. Telemetry hypertable
+                t_row = TelemetryModel(
+                    ts=dt,
+                    node_id=node_id,
+                    moisture=point.moisture_pct,
+                    soil_temp=point.soil_temp_c,
+                    ph=point.ph,
+                    battery_v=point.battery_voltage,
+                    is_predicted=False
+                )
+                session.add(t_row)
+
+                # B. Update Node status
+                node = session.query(NodeModel).filter(NodeModel.node_id == node_id).first()
+                if node:
+                    node.last_seen = dt
+                    node.battery_v = point.battery_voltage
+
+                # C. Update Field State
+                f_state = session.query(FieldStateModel).filter(FieldStateModel.field_id == "BLOK-A").first()
+                if f_state:
+                    f_state.updated_at = dt
+                    f_state.theta = point.moisture_pct
+                    f_state.t_soil = point.soil_temp_c
+                    f_state.ph = point.ph
+
+                # D. Predictions hypertable
+                p_row = PredictionModel(
+                    ts=dt,
+                    field_id="BLOK-A",
+                    avri_score=pred_res.avri_score,
+                    risk_class=pred_res.risk_category,
+                    shap_values=[s.model_dump() for s in pred_res.prescription.shap_explanations],
+                    model_version=pred_res.model_meta.version
+                )
+                session.add(p_row)
+                session.commit()
+        except Exception:
+            pass
+
+        # 7. Jika AVRI >= 61% (Kritis/Bahaya), picu AlertDispatcher
         alert_result = None
         if pred_res.avri_score >= 61.0:
             alert_result = alert_dispatcher.dispatch_critical_alert(

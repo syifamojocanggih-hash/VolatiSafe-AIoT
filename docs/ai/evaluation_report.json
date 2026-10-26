@@ -2,8 +2,8 @@
   "model_metadata": {
     "model_type": "Physics-Informed LightGBM Regressor (PIML)",
     "version": "1.0.0-tkt3",
-    "training_date": "2026-10-25 08:55:44Z",
-    "dataset_source": "data/training_dataset_lamongan.csv",
+    "training_date": "2026-10-26 15:50:26Z",
+    "dataset_source": "/app/data/training_dataset_lamongan.csv",
     "monotone_constraints": {
       "soil_temp_c": 1,
       "moisture_pct": -1,
@@ -17,9 +17,9 @@
       "rain_forecast_6h_mm": 0,
       "dat": 0
     },
-    "model_file": "models/avri_model.txt",
+    "model_file": "/app/models/avri_model.txt",
     "model_size_kb": 711.4,
-    "inference_latency_per_sample_ms": 0.006
+    "inference_latency_per_sample_ms": 0.003
   },
   "sample_split": {
     "total_samples": 8760,

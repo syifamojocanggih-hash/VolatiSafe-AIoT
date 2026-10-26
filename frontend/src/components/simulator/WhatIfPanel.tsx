@@ -13,7 +13,6 @@ import {
   CheckCircle2,
   AlertTriangle,
   AlertOctagon,
-  Cpu,
 } from 'lucide-react';
 import { simulateWhatIf, WhatIfSimulationResponse } from '@/services/api';
 

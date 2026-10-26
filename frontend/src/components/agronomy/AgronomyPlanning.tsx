@@ -12,7 +12,6 @@ import {
   CheckCircle2,
   Package,
   Layers,
-  Cpu,
 } from 'lucide-react';
 
 export const AgronomyPlanning: React.FC = () => {
@@ -231,14 +230,22 @@ export const AgronomyPlanning: React.FC = () => {
         {/* ================= FITUR B: MULTI-FERTILIZER BLENDER (7 cols on lg) ================= */}
         <section className="lg:col-span-7 bg-white rounded-3xl p-5 sm:p-6 border border-slate-200/90 shadow-2xs space-y-5">
           <div>
-            <span className="text-xs font-bold text-emerald-800 tracking-wider uppercase">
-              FITUR B · PERMENTAN NO. 40/2007 & BALITBANGTAN
-            </span>
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-emerald-800 tracking-wider uppercase">
+                FITUR B · PERMENTAN NO. 40/2007 & BALITBANGTAN
+              </span>
+              {backendBlend && (
+                <span className="text-3xs font-semibold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                  {isCalculatingBackend ? 'Menghitung...' : 'AI Backend Sync'}
+                </span>
+              )}
+            </div>
             <h3 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight mt-0.5">
               Kalkulator Campuran Pupuk Majemuk
             </h3>
             <p className="text-xs text-slate-500 mt-0.5">
               Konversi kg laboratorium ke takaran fisik lapangan: 1 karung = 50 kg, 1 ember takar = 8 kg.
+              {backendBlend?.application_stage ? ` (${backendBlend.application_stage})` : ''}
             </p>
           </div>
 

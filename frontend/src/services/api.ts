@@ -15,7 +15,7 @@ export interface ApiResponse<T> {
   error?: {
     code: string;
     message: string;
-    details?: any;
+    details?: unknown;
   };
 }
 
@@ -160,7 +160,7 @@ export async function checkBackendHealth() {
       headers: { 'Accept': 'application/json' },
     });
     if (!res.ok) return null;
-    const json: ApiResponse<any> = await res.json();
+    const json: ApiResponse<Record<string, unknown>> = await res.json();
     return json.data;
   } catch {
     return null;
@@ -225,15 +225,48 @@ export async function getFieldActionStatus(fieldId: string = 'BLOK-A'): Promise<
   }
 }
 
+export interface ForecastWindowItem {
+  timestamp_start: string;
+  timestamp_end: string;
+  avri_score: number;
+  risk_category: 'aman' | 'waspada' | 'kritis' | 'bahaya';
+  is_safe: boolean;
+}
+
+export interface ForecastWindowResponse {
+  field_id: string;
+  forecast_hours: number;
+  windows: ForecastWindowItem[];
+}
+
+export interface TelemetryPoint {
+  timestamp: string;
+  moisture_pct: number;
+  soil_temp_c: number;
+  ph: number;
+  battery_voltage: number;
+  is_predicted?: boolean;
+}
+
+export interface NodeTelemetryResponse {
+  node_id: string;
+  hours_requested: number;
+  points_count: number;
+  series: TelemetryPoint[];
+}
+
 // 5. Forecast Window 72h
-export async function getFieldForecastWindow(fieldId: string = 'BLOK-A', hours: number = 72) {
+export async function getFieldForecastWindow(
+  fieldId: string = 'BLOK-A',
+  hours: number = 72
+): Promise<ForecastWindowResponse | null> {
   try {
     const res = await fetch(`${API_BASE_URL}/fields/${fieldId}/forecast-window?hours=${hours}`, {
       cache: 'no-store',
       headers: { 'Accept': 'application/json' },
     });
     if (!res.ok) return null;
-    const json = await res.json();
+    const json: ApiResponse<ForecastWindowResponse> = await res.json();
     return json.data;
   } catch {
     return null;
@@ -283,14 +316,17 @@ export async function calculateFertilizerBlend(
 }
 
 // 8. Node Telemetry 24h
-export async function getNodeTelemetry(nodeId: string = 'VS-A1-003', hours: number = 24) {
+export async function getNodeTelemetry(
+  nodeId: string = 'VS-A1-003',
+  hours: number = 24
+): Promise<NodeTelemetryResponse | null> {
   try {
     const res = await fetch(`${API_BASE_URL}/nodes/${nodeId}/telemetry?hours=${hours}`, {
       cache: 'no-store',
       headers: { 'Accept': 'application/json' },
     });
     if (!res.ok) return null;
-    const json = await res.json();
+    const json: ApiResponse<NodeTelemetryResponse> = await res.json();
     return json.data;
   } catch {
     return null;
