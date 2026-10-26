@@ -5,28 +5,30 @@ from app.core.config import settings
 
 logger = logging.getLogger("volatisafe.database")
 
-# PostgreSQL connection string
-PG_URL = f"postgresql+psycopg://volatisafe:volatisafe_secret@{settings.POSTGRES_SERVER if hasattr(settings, 'POSTGRES_SERVER') else 'localhost'}:5432/volatisafe_db"
+def get_db_url():
+    if settings.DATABASE_URL and "sqlite" not in settings.DATABASE_URL:
+        return settings.DATABASE_URL
+    return f"postgresql+psycopg://{settings.POSTGRES_USER}:{settings.POSTGRES_PASSWORD}@{settings.POSTGRES_SERVER}:{settings.POSTGRES_PORT}/{settings.POSTGRES_DB}"
 
 def get_engine():
-    # Coba koneksi ke PostgreSQL TimescaleDB
+    db_url = get_db_url()
     try:
         engine = create_engine(
-            PG_URL,
+            db_url,
             pool_pre_ping=True,
             connect_args={"connect_timeout": 3}
         )
         with engine.connect() as conn:
             conn.execute(text("SELECT 1"))
-        logger.info("Successfully connected to TimescaleDB PostgreSQL.")
+        logger.info(f"Successfully connected to PostgreSQL/TimescaleDB at {settings.POSTGRES_SERVER}:{settings.POSTGRES_PORT}.")
         return engine, True
     except Exception as e:
-        logger.warning(f"Could not connect to TimescaleDB ({e}). Using SQLite fallback.")
-        engine = create_engine(
-            settings.DATABASE_URL,
-            connect_args={"check_same_thread": False} if "sqlite" in settings.DATABASE_URL else {}
+        logger.warning(f"Could not connect to TimescaleDB ({e}). Falling back to SQLite.")
+        sqlite_engine = create_engine(
+            "sqlite:///./volatisafe.db",
+            connect_args={"check_same_thread": False}
         )
-        return engine, False
+        return sqlite_engine, False
 
 engine, is_timescaledb_active = get_engine()
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

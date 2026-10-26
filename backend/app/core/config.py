@@ -16,10 +16,15 @@ class Settings(BaseSettings):
     ]
     
     # Database (TimescaleDB / Postgres or Fallback SQLite)
-    DATABASE_URL: str = "sqlite:///./volatisafe.db"
+    POSTGRES_SERVER: str = "timescaledb"
+    POSTGRES_PORT: int = 5432
+    POSTGRES_USER: str = "volatisafe"
+    POSTGRES_PASSWORD: str = "volatisafe_secret"
+    POSTGRES_DB: str = "volatisafe_db"
+    DATABASE_URL: str = "postgresql+psycopg://volatisafe:volatisafe_secret@timescaledb:5432/volatisafe_db"
     
     # MQTT
-    MQTT_BROKER_HOST: str = "localhost"
+    MQTT_BROKER_HOST: str = "mosquitto"
     MQTT_BROKER_PORT: int = 1883
     MQTT_TELEMETRY_TOPIC: str = "/volatisafe/v1/node/+/telemetry"
     

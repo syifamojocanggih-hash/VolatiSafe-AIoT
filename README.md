@@ -43,9 +43,68 @@ Seluruh dokumentasi dirancang menggunakan arsitektur modular **Multi-Domain Isol
 
 ---
 
-## 🚀 Panduan Memulai Cepat (Fase Prototipe Software TKT 3)
+## 🚀 Panduan Memulai Cepat (Full-Stack Docker)
 
-1. **Simulasi Hardware Virtual (Wokwi):** Baca panduan di [`docs/hardware/WOKWI_SIMULATION.md`](docs/hardware/WOKWI_SIMULATION.md).
-2. **Backend Services & Database:** Jalankan stack Docker lokal via [`docs/backend/SETUP.md`](docs/backend/SETUP.md).
-3. **Frontend PWA Dashboard:** Ikuti petunjuk instalasi di [`docs/frontend/SETUP.md`](docs/frontend/SETUP.md).
-4. **Validasi Model AI:** Akses mock predictor di [`docs/ai/MOCK_PREDICTOR.md`](docs/ai/MOCK_PREDICTOR.md).
+Seluruh komponen VolatiSafe AIoT (Frontend, Backend, Database TimescaleDB, MQTT Broker, dan Web DB Manager) telah terintegrasi dalam **Docker Compose**:
+
+### 1. Jalankan Seluruh Sistem dalam Sekali Perintah
+```bash
+# Jalankan dari root direktori proyek:
+docker compose -f docker/docker-compose.yml up -d
+```
+
+### 2. URL Akses Layanan (Default Ports)
+| Layanan | URL Akses | Port Host Default |
+| :--- | :--- | :--- |
+| **Frontend Web Dashboard** | [http://localhost:3000](http://localhost:3000) | `3000` |
+| **Backend REST API (Swagger)**| [http://localhost:8000/docs](http://localhost:8000/docs) | `8000` |
+| **Backend Health Check** | [http://localhost:8000/api/v1/health](http://localhost:8000/api/v1/health) | `8000` |
+| **Live WebSocket Stream** | `ws://localhost:8000/ws/v1/live` | `8000` |
+| **Web DB Manager (Adminer)** | [http://localhost:8082](http://localhost:8082) | `8082` |
+| **PostgreSQL / TimescaleDB** | `localhost:5432` | `5432` |
+| **Mosquitto MQTT Broker** | `localhost:1883` | `1883` |
+
+---
+
+## ⚙️ Panduan Mengubah Port (Custom Ports)
+
+Jika port di atas sudah terpakai oleh aplikasi lain di laptop Anda (misalnya port `8000` dipakai project lain, port `5432` dipakai PostgreSQL lokal, atau port `3000` dipakai Next.js lain):
+
+### Langkah-langkah Mengganti Port:
+1. Buka file `.env` di folder root atau `docker/.env` (atau buat dari salinan `docker/.env.example`).
+2. Ubah nomor port pada variabel yang diinginkan, contoh:
+```ini
+# Ganti port sesuai kebutuhan Anda
+FRONTEND_PORT=3001
+BACKEND_PORT=8001
+DB_PORT=5433
+MQTT_PORT=1884
+DB_ADMIN_PORT=8083
+```
+3. Restart container Docker:
+```bash
+docker compose -f docker/docker-compose.yml up -d
+```
+Docker akan secara otomatis memetakan port host baru tanpa perlu mengubah kode sumber backend maupun frontend!
+
+### Perintah Docker Bermanfaat:
+```bash
+# Melihat status seluruh container
+docker compose -f docker/docker-compose.yml ps
+
+# Melihat live logs (contoh: backend)
+docker compose -f docker/docker-compose.yml logs -f backend
+
+# Mematikan seluruh stack
+docker compose -f docker/docker-compose.yml down
+```
+
+---
+
+## 📖 Dokumentasi Per Domain
+
+1. **Hardware & Firmware LoRa:** [`docs/hardware/WOKWI_SIMULATION.md`](docs/hardware/WOKWI_SIMULATION.md)
+2. **AI & Digital Twin:** [`docs/ai/MOCK_PREDICTOR.md`](docs/ai/MOCK_PREDICTOR.md)
+3. **Backend, Database & Ingestion:** [`docs/backend/README.md`](docs/backend/README.md) & [`docs/backend/SETUP.md`](docs/backend/SETUP.md)
+4. **Frontend & PWA Dashboard:** [`docs/frontend/SETUP.md`](docs/frontend/SETUP.md)
+
