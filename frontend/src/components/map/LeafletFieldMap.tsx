@@ -26,7 +26,18 @@ export const LeafletFieldMap: React.FC<LeafletFieldMapProps> = ({
   const mapInstanceRef = useRef<any>(null);
   const currentTileLayerRef = useRef<any>(null);
   const polygonLayersRef = useRef<{ [id: string]: any }>({});
-  
+  const markerLayersRef = useRef<{ [id: string]: { marker: any; createIcon: (selected: boolean) => any } }>({});
+
+  // Keep latest callbacks in refs to avoid rebuilding the map on state changes
+  const onSelectParcelRef = useRef(onSelectParcel);
+  onSelectParcelRef.current = onSelectParcel;
+
+  const activeLayerRef = useRef(activeLayer);
+  activeLayerRef.current = activeLayer;
+
+  const selectedIdRef = useRef(selectedId);
+  selectedIdRef.current = selectedId;
+
   const [tileType, setTileType] = useState<TileType>('satellite');
   const [showLegend, setShowLegend] = useState<boolean>(false);
 
@@ -37,7 +48,7 @@ export const LeafletFieldMap: React.FC<LeafletFieldMapProps> = ({
   const surroundingParcels = summary.surroundingParcels || bluriSurroundingParcels;
 
   // Helper colors based on active layer
-  const getParcelColor = (p: BedengParcel, isSelected: boolean) => {
+  const getParcelColor = (p: BedengParcel, isSelected: boolean, currentLayer: ActiveLayer) => {
     // If selected, highlight with prominent violet/indigo matching the user's cadastral reference
     if (isSelected) {
       return {
@@ -49,13 +60,13 @@ export const LeafletFieldMap: React.FC<LeafletFieldMapProps> = ({
       };
     }
 
-    if (activeLayer === 'battery') {
+    if (currentLayer === 'battery') {
       if (p.batteryPct > 80) return { fill: '#16A34A', stroke: '#15803D', weight: 2, fillOpacity: 0.45, dash: '' };
       if (p.batteryPct > 50) return { fill: '#CA8A04', stroke: '#A16207', weight: 2, fillOpacity: 0.45, dash: '4, 4' };
       return { fill: '#DC2626', stroke: '#B91C1C', weight: 2, fillOpacity: 0.5, dash: '' };
     }
 
-    if (activeLayer === 'lora') {
+    if (currentLayer === 'lora') {
       if (p.status === 'online') return { fill: '#16A34A', stroke: '#15803D', weight: 2, fillOpacity: 0.45, dash: '' };
       return { fill: '#CA8A04', stroke: '#A16207', weight: 2, fillOpacity: 0.45, dash: '5, 5' };
     }
@@ -117,6 +128,7 @@ export const LeafletFieldMap: React.FC<LeafletFieldMapProps> = ({
     setTileType(type);
   };
 
+  // ================= 1. INITIALIZE MAP INSTANCE ONCE ON MOUNT =================
   useEffect(() => {
     let isMounted = true;
 
@@ -124,17 +136,14 @@ export const LeafletFieldMap: React.FC<LeafletFieldMapProps> = ({
     import('leaflet').then((L) => {
       if (!isMounted || !mapContainerRef.current) return;
 
-      // Clean up previous map instance if exists
-      if (mapInstanceRef.current) {
-        mapInstanceRef.current.remove();
-        mapInstanceRef.current = null;
-      }
+      // If map is already initialized, DO NOT RE-CREATE (preserves user zoom and pan position!)
+      if (mapInstanceRef.current) return;
 
       // Initialize map with realistic zoom
       const map = L.map(mapContainerRef.current, {
         center: defaultCenter,
         zoom: 16,
-        zoomControl: false, // We'll render custom top-quality controls
+        zoomControl: false,
         scrollWheelZoom: true,
       });
 
@@ -144,7 +153,7 @@ export const LeafletFieldMap: React.FC<LeafletFieldMapProps> = ({
       L.control.zoom({ position: 'bottomright' }).addTo(map);
 
       // Default Tile Layer: High-Resolution Satellite
-      switchTileLayer(tileType, L, map);
+      switchTileLayer('satellite', L, map);
 
       // 1. OUTER DELIMITATION BOUNDARY: Blue Dashed Polyline (Like the user's reference image)
       if (outerBoundary && outerBoundary.length > 0) {
@@ -254,12 +263,13 @@ export const LeafletFieldMap: React.FC<LeafletFieldMapProps> = ({
 
       // 5. CORE BEDENG PARCELS (A1..B2) with Active Sensors & Multi-Vertex Highlight
       polygonLayersRef.current = {};
+      markerLayersRef.current = {};
 
       parcels.forEach((p) => {
         if (!p.polygon) return;
 
-        const isSelected = p.id === selectedId;
-        const color = getParcelColor(p, isSelected);
+        const isSelected = p.id === selectedIdRef.current;
+        const color = getParcelColor(p, isSelected, activeLayerRef.current);
 
         const polygon = L.polygon(p.polygon, {
           color: color.stroke,
@@ -275,9 +285,9 @@ export const LeafletFieldMap: React.FC<LeafletFieldMapProps> = ({
 
         polygonLayersRef.current[p.id] = polygon;
 
-        // Click handler to select parcel
+        // Click handler to select parcel - DOES NOT RESET ZOOM/CENTER!
         polygon.on('click', () => {
-          onSelectParcel(p.id);
+          onSelectParcelRef.current(p.id);
         });
 
         // Hover tooltip
@@ -319,24 +329,27 @@ export const LeafletFieldMap: React.FC<LeafletFieldMapProps> = ({
 
         // Node Pin Marker
         if (p.center) {
-          const nodeIcon = L.divIcon({
-            className: 'custom-node-icon',
-            html: `
-              <div class="relative flex items-center justify-center cursor-pointer">
-                <div class="w-6 h-6 rounded-full ${
-                  isSelected ? 'bg-indigo-600 ring-4 ring-indigo-300' : 'bg-slate-900 hover:bg-black'
-                } border-2 border-white shadow-md flex items-center justify-center text-white font-bold text-3xs transition-transform hover:scale-110">
-                  ${p.id}
+          const createNodeIcon = (selected: boolean) =>
+            L.divIcon({
+              className: 'custom-node-icon',
+              html: `
+                <div class="relative flex items-center justify-center cursor-pointer">
+                  <div class="w-6 h-6 rounded-full ${
+                    selected ? 'bg-indigo-600 ring-4 ring-indigo-300' : 'bg-slate-900 hover:bg-black'
+                  } border-2 border-white shadow-md flex items-center justify-center text-white font-bold text-3xs transition-transform hover:scale-110">
+                    ${p.id}
+                  </div>
                 </div>
-              </div>
-            `,
-            iconSize: [24, 24],
-            iconAnchor: [12, 12],
-          });
+              `,
+              iconSize: [24, 24],
+              iconAnchor: [12, 12],
+            });
 
-          const nodeMarker = L.marker(p.center, { icon: nodeIcon }).addTo(map);
+          const nodeMarker = L.marker(p.center, { icon: createNodeIcon(isSelected) }).addTo(map);
+          markerLayersRef.current[p.id] = { marker: nodeMarker, createIcon: createNodeIcon };
+
           nodeMarker.on('click', () => {
-            onSelectParcel(p.id);
+            onSelectParcelRef.current(p.id);
             polygon.openPopup();
           });
         }
@@ -350,7 +363,37 @@ export const LeafletFieldMap: React.FC<LeafletFieldMapProps> = ({
         mapInstanceRef.current = null;
       }
     };
-  }, [parcels, selectedId, activeLayer]);
+  }, []); // Run ONLY ONCE on mount!
+
+  // ================= 2. SEAMLESS SELECTION & LAYER UPDATE (NO MAP RESET, ZOOM STAYS EXACT!) =================
+  useEffect(() => {
+    if (!mapInstanceRef.current) return;
+
+    parcels.forEach((p) => {
+      const polygon = polygonLayersRef.current[p.id];
+      const isSelected = p.id === selectedId;
+
+      if (polygon) {
+        const color = getParcelColor(p, isSelected, activeLayer);
+        polygon.setStyle({
+          color: color.stroke,
+          weight: color.weight,
+          fillColor: color.fill,
+          fillOpacity: color.fillOpacity,
+          dashArray: color.dash,
+        });
+
+        if (isSelected) {
+          polygon.bringToFront();
+        }
+      }
+
+      const markerObj = markerLayersRef.current[p.id];
+      if (markerObj) {
+        markerObj.marker.setIcon(markerObj.createIcon(isSelected));
+      }
+    });
+  }, [selectedId, activeLayer, parcels]);
 
   // Handle Layer Switcher via UI buttons
   const handleLayerClick = (type: TileType) => {
@@ -361,7 +404,7 @@ export const LeafletFieldMap: React.FC<LeafletFieldMapProps> = ({
     });
   };
 
-  // Center on Hamparan
+  // Center on Hamparan only when the user explicitly clicks the Reset Button
   const handleResetCenter = () => {
     if (mapInstanceRef.current) {
       mapInstanceRef.current.setView(defaultCenter, 16);
@@ -373,7 +416,7 @@ export const LeafletFieldMap: React.FC<LeafletFieldMapProps> = ({
       {/* Map Leaflet Canvas */}
       <div ref={mapContainerRef} className="w-full h-full z-10" />
 
-      {/* TOP HEADER CONTROLS (Mirip screenshot pengguna: Info Chip + Tombol Legenda + Layer Switcher) */}
+      {/* TOP HEADER CONTROLS (Info Chip + Tombol Legenda + Layer Switcher) */}
       <div className="absolute top-3 left-3 right-3 z-[400] flex flex-wrap items-center justify-between gap-2 pointer-events-none">
         {/* Left: Location & Project Chip */}
         <div className="pointer-events-auto flex items-center gap-1.5 sm:gap-2 bg-white/95 backdrop-blur-md px-3 py-1.5 rounded-xl border border-slate-200/90 shadow-md text-xs font-semibold text-slate-800">
@@ -410,7 +453,7 @@ export const LeafletFieldMap: React.FC<LeafletFieldMapProps> = ({
                   ? 'bg-slate-900 text-white shadow-xs'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
-              title="Citra Satelit Beresolusi Tinggi (Esri World Imagery)"
+              title="Citra Satelit Beresolusi Tinggi (Google Hybrid)"
             >
               🛰️ Satelit
             </button>
@@ -442,7 +485,7 @@ export const LeafletFieldMap: React.FC<LeafletFieldMapProps> = ({
           <button
             onClick={handleResetCenter}
             className="p-1.5 rounded-xl bg-white/95 backdrop-blur-md border border-slate-200 text-slate-700 hover:bg-slate-100 shadow-md transition-colors"
-            title="Pusatkan ke Hamparan Bluri"
+            title="Pusatkan ke Hamparan Bluri (Zoom Default 16)"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m16 12-4-4-4 4"/><path d="M12 16V8"/></svg>
           </button>
