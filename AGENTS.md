@@ -11,7 +11,10 @@
   ```
   <type>(<scope>): <short imperative description>
   ```
-- **Strict Branch Isolation:** Commit strictly to the active task branch (e.g. `ai`). **NEVER auto-merge, fast-forward, or sync changes across other branches** (`Development`, `digittal-twin`, `full-stack`, `iot`, `main`) unless explicitly instructed by the user.
+- **Strict Branch Isolation & Zero Auto-Sync:**
+  - Commit strictly to the active task branch (e.g. `ai`).
+  - **DILARANG OTOMATIS MELAKUKAN SINKRONISASI FILE/PERUBAHAN DARI BRANCH LAIN KECUALI DISURUH SECARA EKSPLISIT OLEH USER.**
+  - **NEVER auto-merge, fast-forward, cherry-pick, copy files across branches, or run multi-branch sync loops** (`Development`, `digittal-twin`, `full-stack`, `iot`, `main`, `ai`) unless the user explicitly orders a sync for that specific branch.
 - **Granularity:** One task = one logical commit. Do not bundle unrelated changes together.
 - **Commit Trigger (STRICT):** **DO NOT COMMIT UNDER ANY CIRCUMSTANCES UNLESS THE USER EXPLICITLY ORDERS A COMMIT.** (e.g. user says "commit", "lakukan commit", or "commit perubahan"). Staging (`git add`) and committing (`git commit`) without a direct imperative instruction from the user is strictly prohibited.
 
