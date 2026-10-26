@@ -24,15 +24,17 @@ void setup() {
 #endif
 
   power_begin();
-  sensors_begin();
 
   calibration_defaults(g_cal);
-  if (calibration_begin()) {
+  if (calibration_begin(g_cal)) {
     Serial.println(F("[CAL] NVS terbaca"));
   } else {
+    calibration_defaults(g_cal);
     Serial.println(F("[CAL] NVS kosong. Memakai default compile-time (BELUM TERKALIBRASI)."));
   }
   calibration_print(g_cal);
+
+  sensors_begin();
 
   Serial.println(F("[STUB] siklus sampling -> encode -> TX -> sleep belum ada"));
   Serial.println(F("[STUB] urutan final: HW-2.x sensor, HW-3.x payload/TX, HW-4.3 orkestrasi"));

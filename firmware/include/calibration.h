@@ -10,6 +10,13 @@ struct Calibration {
 };
 
 void calibration_defaults(Calibration& c);
-bool calibration_begin();               // true bila NVS berisi nilai kalibrasi
-bool calibration_save(const Calibration& c);
 void calibration_print(const Calibration& c);
+
+// Mengisi out hanya bila NVS berisi nilai yang lolos calibration_validate.
+// Nilai keluar lewat parameter karena satu-satunya jalan; versi tanpa
+// parameter di 04_FIRMWARE_CORE.md 6 tidak bisa mengembalikan apa pun.
+bool calibration_begin(Calibration& out);
+bool calibration_save(const Calibration& c);
+
+// Murni, tanpa NVS, supaya bisa diuji di env native.
+bool calibration_validate(const Calibration& c);

@@ -51,6 +51,7 @@
 #define SENSOR_WARMUP_MS    200     // Stabilisasi tegangan setelah MOSFET ON
 #define BATTERY_SAMPLE_COUNT 3      // Baterai cukup 3 sampel, bukan 5
 #define ADC_MAX             4095.0f
+#define DS18B20_RESOLUTION  11      // +-0,125 C, konversi ~375 ms (12-bit 750 ms)
 
 // --- Kalibrasi Kelembaban Kapasitif (2 titik) -------------------------------
 #define MOISTURE_DRY_ADC    2800    // Pembacaan di udara kering
@@ -68,6 +69,8 @@
 #define PH_MIN              3.0f
 #define PH_MAX              10.0f
 #define TEMP_ERROR_FLAG     -999.0f // DS18B20 terputus (-127C)
+#define TEMP_DISCONNECTED_C -126.0f // DallasTemperature DEVICE_DISCONNECTED_C
+#define ADC_UNSTABLE_RANGE  800     // placeholder; diukur nyata di HW-9.1 (F-01)
 
 // --- Manajemen Daya ---------------------------------------------------------
 // SIM_FAST_CYCLE memampatkan tidur ke 10 detik agar demo mungkin; nilai ini

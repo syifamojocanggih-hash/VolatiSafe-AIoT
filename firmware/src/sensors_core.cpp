@@ -1,5 +1,5 @@
-// Fungsi murni tanpa hardware. Hanya file ini + payload.cpp yang ikut
-// dikompilasi ke env:native, jadi jangan tarik Arduino.h ke sini.
+// Fungsi murni tanpa hardware. Hanya file ini, payload.cpp, dan
+// calibration_core.cpp yang ikut env:native, jadi jangan tarik Arduino.h.
 #include "config.h"
 #include "sensors.h"
 
@@ -47,4 +47,39 @@ float sensors_adcToPh(uint16_t adc, float neutral_adc, float slope, float moistu
 
 float sensors_adcToBatteryV(uint16_t adc) {
   return ((float)adc / ADC_MAX) * ADC_REF_VOLTAGE * BATTERY_DIVIDER;
+}
+
+bool sensors_isUnstable(uint16_t min, uint16_t max) {
+  return (uint16_t)(max - min) > (uint16_t)ADC_UNSTABLE_RANGE;
+}
+
+void sensors_classifyTemp(float t_c, SensorReading& out) {
+  if (t_c <= TEMP_DISCONNECTED_C) {
+    out.value  = TEMP_ERROR_FLAG;
+    out.status = SENSOR_DISCONNECTED;
+    return;
+  }
+  // Nilai di luar rentang dikirim apa adanya, tidak di-clamp: menyamarkan
+  // kerusakan sensor jadi pembacaan wajar justru membuat data palsu lolos.
+  out.value  = t_c;
+  out.status = (t_c < SOIL_TEMP_MIN || t_c > SOIL_TEMP_MAX) ? SENSOR_OUT_OF_RANGE
+                                                            : SENSOR_OK;
+}
+
+void sensors_composeFrame(const AdcBurst& moist, const AdcBurst& ph,
+                          uint16_t batt_adc, float temp_c,
+                          const Calibration& cal, TelemetryFrame& out) {
+  out.moisture.value = sensors_adcToMoisturePct(moist.median, cal.moist_dry, cal.moist_wet);
+  out.moisture.status = sensors_isUnstable(moist.min, moist.max) ? SENSOR_UNSTABLE
+                                                                 : SENSOR_OK;
+
+  // Kompensasi pH memakai moisture yang baru dihitung, bukan nilai mentah.
+  out.ph.value = sensors_adcToPh(ph.median, cal.ph_neutral_adc, cal.ph_slope,
+                                 out.moisture.value);
+  out.ph.status = sensors_isUnstable(ph.min, ph.max) ? SENSOR_UNSTABLE : SENSOR_OK;
+
+  sensors_classifyTemp(temp_c, out.soil_temp);
+
+  out.battery.value  = sensors_adcToBatteryV(batt_adc);
+  out.battery.status = SENSOR_OK;
 }
