@@ -163,7 +163,7 @@ Nilai injeksi tepat: [`05_WOKWI_SIMULASI.md`](05_WOKWI_SIMULASI.md) §5.
 
 | Fase | Env | RAM (%) | Flash (%) | Tanggal | Catatan |
 |---|---|---|---|---|---|
-| 0 | `esp32dev` | | | | skeleton |
+| 0 | `esp32dev` | 6,8 % (22.172 / 327.680 B) | 22,6 % (296.752 / 1.310.720 B) | 26 Okt 2026 | skeleton + 4 lib `lib_deps` |
 | 1 | `esp32dev` | | | | multi-modul |
 | 3 | `esp32dev` | | | | + LoRa + payload |
 | 3 | `wokwi` | | | | + WiFi + PubSubClient |
