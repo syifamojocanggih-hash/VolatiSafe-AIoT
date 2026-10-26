@@ -29,7 +29,29 @@ Untuk mencegah benturan kode dengan tim/AI lain:
 
 ## 3. Indeks Dokumen Hardware
 
+### 3.1 Spesifikasi (apa yang harus dibangun)
+
 1. [`PINOUT_AND_SCHEMATICS.md`](PINOUT_AND_SCHEMATICS.md): Pemetaan pin ESP32, rangkaian sensor, pull-up resistor, dan skema power gating MOSFET.
 2. [`FIRMWARE_SPEC.md`](FIRMWARE_SPEC.md): Logika sampling burst (5x median filter), kalibrasi dua titik, dan siklus deep-sleep.
-3. [`TELEMETRY_PAYLOAD.md`](TELEMETRY_PAYLOAD.md): Spesifikasi paket LoRa ringkas (52 byte) dan adapter ekstraksi gateway.
+3. [`TELEMETRY_PAYLOAD.md`](TELEMETRY_PAYLOAD.md): Spesifikasi paket LoRa ringkas dan adapter ekstraksi gateway.
 4. [`WOKWI_SIMULATION.md`](WOKWI_SIMULATION.md): Petunjuk menjalankan purwarupa virtual testbed Wokwi untuk demonstrasi juri 3 skenario.
+5. [`ARCHITECTURE_IOT.md`](ARCHITECTURE_IOT.md): Arsitektur domain IoT (Lapis 1 & 2), alur data end-to-end, dan titik kontak ke Backend/AI.
+
+### 3.2 Playbook Eksekusi (bagaimana membangunnya)
+
+> **[`playbook/00_INDEX.md`](playbook/00_INDEX.md)** — mulai dari sini.
+> Berisi 46 task ber-ID dengan dependensi, estimasi, kriteria terima, dan daftar bukti. Mencakup TKT 3 (simulasi Wokwi) sampai TKT 6 (validasi lapangan).
+
+| # | Dokumen | Isi |
+|---|---|---|
+| 00 | [`playbook/00_INDEX.md`](playbook/00_INDEX.md) | Peta dokumen, status board, temuan awal |
+| 01 | [`playbook/01_SETUP_LINGKUNGAN.md`](playbook/01_SETUP_LINGKUNGAN.md) | Yang sudah ada vs harus diunduh, perintah verifikasi |
+| 02 | [`playbook/02_HARDWARE_BOM.md`](playbook/02_HARDWARE_BOM.md) | BoM, komponen pendukung, daya, prosedur kalibrasi |
+| 03 | [`playbook/03_ROADMAP_TUGAS.md`](playbook/03_ROADMAP_TUGAS.md) | 46 task, jalur kritis, rencana harian |
+| 04 | [`playbook/04_FIRMWARE_CORE.md`](playbook/04_FIRMWARE_CORE.md) | Desain modul, dual build LoRa/MQTT, edge case |
+| 05 | [`playbook/05_WOKWI_SIMULASI.md`](playbook/05_WOKWI_SIMULASI.md) | `diagram.json`, `wokwi.toml`, 3 skenario |
+| 06 | [`playbook/06_GATEWAY_MQTT.md`](playbook/06_GATEWAY_MQTT.md) | Topik MQTT, broker, ACL, gateway LoRa RX |
+| 07 | [`playbook/07_TEST_PLAN.md`](playbook/07_TEST_PLAN.md) | 33 unit test, integrasi, E2E, bukti |
+| 08 | [`playbook/08_DEMO_RUNBOOK.md`](playbook/08_DEMO_RUNBOOK.md) | Skrip video 2 menit, fallback |
+| 09 | [`playbook/09_RISIKO_DAN_KEPUTUSAN.md`](playbook/09_RISIKO_DAN_KEPUTUSAN.md) | 15 keputusan lokal, risk register, eskalasi |
+| 10 | [`playbook/10_DEFINISI_SELESAI.md`](playbook/10_DEFINISI_SELESAI.md) | DoD, checklist PR, paket serah terima |

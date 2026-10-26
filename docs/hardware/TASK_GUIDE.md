@@ -11,6 +11,10 @@
 ## 🎯 Target Utama Domain Hardware
 Menghasilkan firmware ESP32 dan simulasi sirkuit Wokwi yang mampu melakukan akuisisi 3 sensor fisik (kelembaban tanah kapasitif, suhu tanah probe DS18B20, pH tanah), menerapkan kalibrasi & median filter, menghemat daya dengan deep sleep 15 menit, serta memancarkan paket telemetri LoRa 52-byte ke gateway MQTT.
 
+> 📘 **Dokumen ini adalah ringkasan 5 tahap.** Untuk perintah konkret, daftar file, signature fungsi, kriteria terima, dan bukti yang harus disimpan, gunakan **[`playbook/00_INDEX.md`](playbook/00_INDEX.md)** (46 task ber-ID, FASE 0–9, termasuk fabrikasi fisik TKT 4–6).
+>
+> ⚠️ **Koreksi angka:** payload JSON aktual terukur **70 byte** (`VS-A1-003`) / **76 byte** (kasus terburuk), bukan 52 byte. Rincian dan usulan koreksi ada di [`playbook/09_RISIKO_DAN_KEPUTUSAN.md`](playbook/09_RISIKO_DAN_KEPUTUSAN.md) `DEC-IOT-02`.
+
 ---
 
 ## 📋 Daftar Tugas & Tahapan Implementasi
