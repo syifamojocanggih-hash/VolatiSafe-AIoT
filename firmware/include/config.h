@@ -6,8 +6,18 @@
 // ============================================================================
 
 // --- Identitas Node ---------------------------------------------------------
-#define NODE_ID             "VS-A1-003"
+// SIM_NODE dipasang build flag [env:wokwi] (DEC-IOT-03). Lewat #if, bukan
+// -D NODE_ID="...", karena quoting build flag rapuh di Windows.
+#if defined(SIM_NODE)
+  #define NODE_ID             "VS-SIM-001"
+  #define NODE_IS_SIMULATED   1
+#else
+  #define NODE_ID             "VS-A1-003"
+  #define NODE_IS_SIMULATED   0
+#endif
+
 #define FIRMWARE_VERSION    "1.0.0"
+#define PAYLOAD_BUF_SIZE    96      // payload nyata 70-76 byte, bukan 52 (DEC-IOT-02)
 
 // --- Pinout ESP32 NodeMCU V1 (30-pin) ---------------------------------------
 // Analog WAJIB di ADC1 (GPIO 32-39); ADC2 terkunci saat radio aktif.
@@ -29,14 +39,14 @@
 #define LORA_FREQUENCY      433E6   // 433.0 MHz
 #define LORA_TX_POWER       17      // +17 dBm
 #define LORA_SYNC_WORD      0x12
-#define LORA_RETRY_MAX      3
-#define LORA_RETRY_DELAY_MS 2000
 
 // --- Sampling & Filtering ---------------------------------------------------
 #define ADC_ATTENUATION     ADC_11db
 #define SAMPLE_COUNT        5       // Burst sampling 5x
 #define SAMPLE_INTERVAL_MS  50
 #define SENSOR_WARMUP_MS    200     // Stabilisasi tegangan setelah MOSFET ON
+#define BATTERY_SAMPLE_COUNT 3      // Baterai cukup 3 sampel, bukan 5
+#define ADC_MAX             4095.0f
 
 // --- Kalibrasi Kelembaban Kapasitif (2 titik) -------------------------------
 #define MOISTURE_DRY_ADC    2800    // Pembacaan di udara kering
@@ -56,7 +66,24 @@
 #define TEMP_ERROR_FLAG     -999.0f // DS18B20 terputus (-127C)
 
 // --- Manajemen Daya ---------------------------------------------------------
-#define SLEEP_DURATION_US   (15ULL * 60ULL * 1000000ULL)  // 15 menit
+// SIM_FAST_CYCLE memampatkan tidur ke 10 detik agar demo mungkin; nilai ini
+// wajib dicetak di Serial supaya tidak disangka perilaku produksi (DEC-IOT-15).
+#if defined(SIM_FAST_CYCLE)
+  #define SLEEP_DURATION_US   (10ULL * 1000000ULL)
+#else
+  #define SLEEP_DURATION_US   (15ULL * 60ULL * 1000000ULL)  // 15 menit
+#endif
 #define BATTERY_DIVIDER     2.0f    // 100k/100k -> setengah tegangan
 #define ADC_REF_VOLTAGE     3.3f
 #define ADC_RESOLUTION      4095.0f
+
+// --- Transport --------------------------------------------------------------
+#define TRANSPORT_KIND_LORA   1
+#define TRANSPORT_KIND_MQTT   2
+#define TRANSPORT_KIND_DUMMY  0
+
+// --- Retry & Timeout --------------------------------------------------------
+#define TX_RETRY_MAX           3
+#define TX_RETRY_DELAY_MS      2000
+#define WIFI_CONNECT_TIMEOUT_MS 10000
+#define MQTT_CONNECT_TIMEOUT_MS 5000
