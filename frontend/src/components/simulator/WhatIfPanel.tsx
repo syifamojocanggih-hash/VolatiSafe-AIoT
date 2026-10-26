@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   SlidersHorizontal,
   Flame,
@@ -13,7 +13,9 @@ import {
   CheckCircle2,
   AlertTriangle,
   AlertOctagon,
+  Cpu,
 } from 'lucide-react';
+import { simulateWhatIf, WhatIfSimulationResponse } from '@/services/api';
 
 interface SimulationParams {
   soilTemp: number; // 15 - 45 C
@@ -146,6 +148,35 @@ export const WhatIfPanel: React.FC = () => {
 
   const [activePreset, setActivePreset] = useState<string | null>('scen-a');
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [backendPrediction, setBackendPrediction] = useState<WhatIfSimulationResponse | null>(null);
+  const [isSyncingBackend, setIsSyncingBackend] = useState<boolean>(false);
+
+  useEffect(() => {
+    let isCancelled = false;
+    const timer = setTimeout(async () => {
+      setIsSyncingBackend(true);
+      try {
+        const res = await simulateWhatIf({
+          soil_temp_c: params.soilTemp,
+          moisture_pct: params.soilMoisture,
+          ph: params.soilPh,
+          rain_mm: params.rain6h,
+        });
+        if (res && !isCancelled) {
+          setBackendPrediction(res);
+        }
+      } catch (err) {
+        console.warn('Simulator backend call failed:', err);
+      } finally {
+        if (!isCancelled) setIsSyncingBackend(false);
+      }
+    }, 200);
+
+    return () => {
+      isCancelled = true;
+      clearTimeout(timer);
+    };
+  }, [params]);
 
   // Perhitungan Physics-Informed ML (Arrhenius + Michaelis-Menten + pH Sigmoid + Rain Washout)
   const calculation = useMemo(() => {
@@ -272,6 +303,10 @@ export const WhatIfPanel: React.FC = () => {
                 </h1>
                 <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 text-amber-900 border border-amber-300">
                   Physics-Informed ML
+                </span>
+                <span className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-900 border border-emerald-300">
+                  <span className={`w-1.5 h-1.5 rounded-full ${backendPrediction ? 'bg-emerald-600 animate-pulse' : 'bg-slate-400'}`} />
+                  {isSyncingBackend ? 'Menghitung di FastAPI...' : backendPrediction ? `FastAPI Live (${backendPrediction.model_meta.version})` : 'FastAPI Standby'}
                 </span>
               </div>
               <p className="text-xs sm:text-sm text-slate-600 mt-1">

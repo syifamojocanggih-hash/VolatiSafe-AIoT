@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { initialAgronomyData } from '@/mocks/agronomyMock';
 import { ApplicationLog } from '@/types/agronomy';
+import { calculateFertilizerBlend, BlendCalculationResponse } from '@/services/api';
 import { WhatsAppPreviewModal } from '@/components/modals/WhatsAppPreviewModal';
 import { RecordFertilizerModal } from '@/components/modals/RecordFertilizerModal';
 import {
@@ -11,6 +12,7 @@ import {
   CheckCircle2,
   Package,
   Layers,
+  Cpu,
 } from 'lucide-react';
 
 export const AgronomyPlanning: React.FC = () => {
@@ -23,6 +25,8 @@ export const AgronomyPlanning: React.FC = () => {
   const [isWhatsAppModalOpen, setIsWhatsAppModalOpen] = useState(false);
   const [isRecordModalOpen, setIsRecordModalOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [backendBlend, setBackendBlend] = useState<BlendCalculationResponse | null>(null);
+  const [isCalculatingBackend, setIsCalculatingBackend] = useState(false);
 
   // Dynamic DAT Calculation (Days After Transplanting)
   const calculateDat = () => {
@@ -58,6 +62,34 @@ export const AgronomyPlanning: React.FC = () => {
   const totalPhase2 = urea2 + phonska2;
   const sacksPhase2 = (totalPhase2 / 50).toFixed(1).replace('.', ',');
   const bucketsPhase2 = Math.round(totalPhase2 / 8);
+
+  // Sync calculation with FastAPI Backend
+  useEffect(() => {
+    let isCancelled = false;
+    const timer = setTimeout(async () => {
+      setIsCalculatingBackend(true);
+      try {
+        const res = await calculateFertilizerBlend({
+          field_area_ha: safeArea,
+          crop_phase_dat: currentHst,
+          target_yield_ton_ha: safeYield,
+          soil_type: 'clay_alkaline',
+        });
+        if (res && !isCancelled) {
+          setBackendBlend(res);
+        }
+      } catch (err) {
+        console.warn('Blend calculation API call failed:', err);
+      } finally {
+        if (!isCancelled) setIsCalculatingBackend(false);
+      }
+    }, 250);
+
+    return () => {
+      isCancelled = true;
+      clearTimeout(timer);
+    };
+  }, [safeArea, safeYield, currentHst]);
 
   const handleAddLog = (newLog: ApplicationLog) => {
     setLogs((prev) => [newLog, ...prev]);

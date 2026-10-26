@@ -1,3 +1,4 @@
+import uuid
 from datetime import datetime, timezone, timedelta
 from typing import Dict, List, Optional, Any
 from app.schemas.nodes import NodeDTO, TelemetryPointDTO, NodeTelemetrySeriesDTO
@@ -7,7 +8,9 @@ from app.schemas.fields import (
     AlertBannerDTO,
     ForecastWindowDTO,
     ForecastWindowItemDTO,
-    ShapExplanationDTO
+    ShapExplanationDTO,
+    FarmerActionRequestDTO,
+    FarmerActionResponseDTO
 )
 from app.schemas.agronomy import CropCycleResponseDTO
 
@@ -68,6 +71,10 @@ class MockDB:
             "primary_node_id": "VS-A1-003",
             "last_updated": "2026-10-24T16:00:00Z",
             "is_simulated_failover": False,
+            "is_postponed": False,
+            "postponed_at": None,
+            "last_action": None,
+            "action_history": [],
             "metrics": {
                 "moisture_pct": 22.4,
                 "moisture_delta_24h": -3.2,
@@ -145,6 +152,9 @@ class MockDB:
             last_updated=field["last_updated"],
             battery_pct=battery_pct,
             is_simulated_failover=field.get("is_simulated_failover", False),
+            is_postponed=field.get("is_postponed", False),
+            postponed_at=field.get("postponed_at"),
+            last_action=field.get("last_action"),
             metrics=FieldMetricsDTO(**field["metrics"]),
             alert_banner=AlertBannerDTO(**field["alert_banner"]),
             shap_explanations=shap_dtos
@@ -225,5 +235,104 @@ class MockDB:
 
     def save_crop_cycle(self, cycle: CropCycleResponseDTO):
         self._crop_cycles[cycle.cycle_id] = cycle
+
+    def record_farmer_action(
+        self,
+        field_id: str,
+        action: str,
+        reason: Optional[str] = "AVRI_RISK_HIGH",
+        notes: Optional[str] = None,
+        urea_kg: float = 0.0,
+        npk_kg: float = 0.0
+    ) -> Optional[FarmerActionResponseDTO]:
+        field = self._fields.get(field_id)
+        if not field:
+            return None
+
+        now_iso = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+        action_id = f"act-{uuid.uuid4().hex[:8]}"
+
+        action_lower = action.lower()
+        is_postponing = action_lower in ["postpone", "tunda", "delay"]
+        is_cancelling = action_lower in ["cancel", "resume", "batal", "cancel_postpone"]
+
+        if is_postponing:
+            field["is_postponed"] = True
+            field["postponed_at"] = now_iso
+            field["last_action"] = "postpone"
+            status_msg = f"Aplikasi Urea pada {field['field_name']} berhasil ditunda. Sistem memantau jendela aman berikutnya."
+            stage_name = "TUNDA_APLIKASI"
+        elif is_cancelling:
+            field["is_postponed"] = False
+            field["postponed_at"] = None
+            field["last_action"] = "cancel_postpone"
+            status_msg = f"Penundaan pemupukan pada {field['field_name']} dibatalkan."
+            stage_name = "BATAL_TUNDA"
+        else:
+            field["last_action"] = action_lower
+            status_msg = f"Tindakan '{action}' berhasil dicatat di sistem."
+            stage_name = action.upper()
+
+        action_record = {
+            "action_id": action_id,
+            "field_id": field_id,
+            "action": action,
+            "is_postponed": field["is_postponed"],
+            "status_message": status_msg,
+            "recorded_at": now_iso,
+            "next_safe_window": field.get("alert_banner", {}).get("best_window", "Besok 06:00 – 09:00 WIB"),
+            "avri_at_action": field.get("metrics", {}).get("avri_score", 74.0),
+            "reason": reason,
+            "notes": notes
+        }
+
+        if "action_history" not in field:
+            field["action_history"] = []
+        field["action_history"].insert(0, action_record)
+
+        # Persist to PostgreSQL / TimescaleDB if engine is active
+        try:
+            from app.core.database import SessionLocal
+            from app.models.crop_cycle import FertilizationLogModel
+            with SessionLocal() as session:
+                log = FertilizationLogModel(
+                    log_id=action_id,
+                    field_id=field_id,
+                    applied_at=datetime.now(timezone.utc),
+                    stage_name=stage_name,
+                    urea_kg=urea_kg,
+                    npk_phonska_kg=npk_kg,
+                    za_kg=0.0,
+                    avri_at_time=field.get("metrics", {}).get("avri_score", 74.0),
+                    notes=notes or f"{reason or 'Aksi Petani'} | {status_msg}"
+                )
+                session.add(log)
+                session.commit()
+        except Exception:
+            pass
+
+        return FarmerActionResponseDTO(
+            action_id=action_id,
+            field_id=field_id,
+            action=action,
+            is_postponed=field["is_postponed"],
+            status_message=status_msg,
+            recorded_at=now_iso,
+            next_safe_window=action_record["next_safe_window"],
+            avri_at_action=action_record["avri_at_action"]
+        )
+
+    def get_farmer_action_status(self, field_id: str) -> Optional[Dict[str, Any]]:
+        field = self._fields.get(field_id)
+        if not field:
+            return None
+        return {
+            "field_id": field_id,
+            "is_postponed": field.get("is_postponed", False),
+            "postponed_at": field.get("postponed_at"),
+            "last_action": field.get("last_action"),
+            "next_safe_window": field.get("alert_banner", {}).get("best_window"),
+            "recent_history": field.get("action_history", [])[:5]
+        }
 
 db = MockDB()

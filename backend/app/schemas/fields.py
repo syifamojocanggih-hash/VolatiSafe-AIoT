@@ -31,6 +31,9 @@ class FieldCurrentStatusDTO(BaseModel):
     last_updated: str
     battery_pct: int
     is_simulated_failover: bool = False
+    is_postponed: bool = False
+    postponed_at: Optional[str] = None
+    last_action: Optional[str] = None
     metrics: FieldMetricsDTO
     alert_banner: AlertBannerDTO
     shap_explanations: Optional[List[ShapExplanationDTO]] = None
@@ -46,3 +49,21 @@ class ForecastWindowDTO(BaseModel):
     field_id: str
     forecast_hours: int = 72
     windows: List[ForecastWindowItemDTO] = Field(default_factory=list)
+
+class FarmerActionRequestDTO(BaseModel):
+    action: str = Field(..., description="'postpone', 'cancel', 'override_apply', or 'irrigate'")
+    reason: Optional[str] = "AVRI_RISK_HIGH"
+    notes: Optional[str] = None
+    urea_kg: Optional[float] = 0.0
+    npk_kg: Optional[float] = 0.0
+
+class FarmerActionResponseDTO(BaseModel):
+    action_id: str
+    field_id: str
+    action: str
+    is_postponed: bool
+    status_message: str
+    recorded_at: str
+    next_safe_window: Optional[str] = None
+    avri_at_action: Optional[float] = None
+
