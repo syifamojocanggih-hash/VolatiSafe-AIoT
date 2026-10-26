@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include <time.h>
 
 #include "calibration.h"
 #include "config.h"
@@ -90,8 +91,15 @@ void setup() {
   sensors_begin();
 
 #if defined(SENSOR_PROBE)
-  // Blok sementara untuk verifikasi HW-2.1/2.2 di Wokwi. Wajib dihapus saat
-  // HW-4.3 (orkestrasi penuh) masuk; #if menjaga build fisik tetap bersih.
+  // Blok sementara untuk verifikasi HW-2.1/2.2/3.1/3.4 di Wokwi. Wajib dihapus
+  // saat HW-4.3 (orkestrasi penuh) masuk; #if menjaga build fisik tetap bersih.
+  const bool tx_ready = transport_init();
+  // Jam disinkronkan walau MQTT gagal: log dan payload tetap butuh waktu yang
+  // benar, dan NTP hanya butuh WiFi, bukan broker.
+  transport_syncClock();
+  if (!tx_ready) {
+    Serial.println(F("[SIM] transport tidak siap; siklus tetap jalan, TX akan gagal"));
+  }
   Serial.println(F("[SIM] probe siap, siklus tiap 5 detik"));
 #else
   Serial.println(F("[STUB] siklus sampling -> encode -> TX -> sleep belum ada"));
@@ -103,6 +111,7 @@ void loop() {
 #if defined(SENSOR_PROBE)
   TelemetryFrame f{};
   strncpy(f.node_id, NODE_ID, sizeof(f.node_id) - 1);
+  f.timestamp = (uint32_t)time(nullptr);   // NTP dari transport_init
 
   power_sensorOn();
   delay(SENSOR_WARMUP_MS);
@@ -114,6 +123,17 @@ void loop() {
                 f.ph.value, statusName(f.ph.status),
                 f.soil_temp.value, statusName(f.soil_temp.status),
                 f.battery.value, statusName(f.battery.status));
+
+  char buf[PAYLOAD_BUF_SIZE];
+  const size_t len = payload_encode(f, buf, sizeof(buf));
+  if (len == 0) {
+    Serial.println(F("[TX] encode gagal, tidak ada yang dikirim"));
+  } else {
+    Serial.printf("[TX] payload %u byte: %s\n", (unsigned)len, buf);
+    const TxResult r = transport_send(buf, len);
+    Serial.printf("[TX] %s ok=%d attempts=%d\n", r.ok ? "KIRIM" : "GAGAL",
+                  (int)r.ok, (int)r.attempts);
+  }
 
   delay(5000);
 #else

@@ -101,3 +101,4 @@
 #define TX_RETRY_DELAY_MS      2000
 #define WIFI_CONNECT_TIMEOUT_MS 10000
 #define MQTT_CONNECT_TIMEOUT_MS 5000
+#define NTP_SYNC_TIMEOUT_MS     10000   // Wokwi butuh ~1-2 s; 10 s beri ruang
