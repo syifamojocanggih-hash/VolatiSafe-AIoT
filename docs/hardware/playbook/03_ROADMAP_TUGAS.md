@@ -235,6 +235,8 @@ Aturan: `main.cpp` tidak boleh berisi logika sensor/kalibrasi/radio. Hanya uruta
 
 > **Perhatikan:** backend punya `validate_sensor_bounds()` ([`../../backend/INGESTION_PIPELINE.md`](../../backend/INGESTION_PIPELINE.md) §2). Jangan men-*clamp* nilai rusak menjadi nilai valid — itu menyembunyikan kerusakan sensor dan membuat data palsu lolos gate. Biarkan nilai asli terkirim dengan penanda; backend yang memutuskan.
 
+Catatan implementasi 26 Okt 2026: fungsi murni HW-2.1/2.3/2.4/2.5 sudah final di `sensors_core.cpp` dan lulus 10 unit test native. Yang belum: `sensors_readAdcMedian()` dan perakitan frame di `sensors_sampleAll()`.
+
 ### HW-3.2 — Encoder JSON + ukur panjang
 | | |
 |---|---|

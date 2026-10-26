@@ -166,6 +166,9 @@ Nilai injeksi tepat: [`05_WOKWI_SIMULASI.md`](05_WOKWI_SIMULASI.md) §5.
 | 0 | `esp32dev` | 6,8 % (22.172 / 327.680 B) | 22,6 % (296.752 / 1.310.720 B) | 26 Okt 2026 | skeleton + 4 lib `lib_deps` |
 | 1 | `esp32dev` | 6,8 % (22.188 / 327.680 B) | 22,7 % (296.972 / 1.310.720 B) | 26 Okt 2026 | 7 modul, API stub |
 | 1 | `wokwi` | 6,8 % (22.188 / 327.680 B) | 22,7 % (297.116 / 1.310.720 B) | 26 Okt 2026 | 7 modul, API stub, + PubSubClient |
+| 3* | `esp32dev` | 6,8 % (22.188 / 327.680 B) | 22,7 % (296.988 / 1.310.720 B) | 26 Okt 2026 | encoder + fungsi murni nyata, transport masih stub |
+| 3* | `wokwi` | 6,8 % (22.188 / 327.680 B) | 22,7 % (297.132 / 1.310.720 B) | 26 Okt 2026 | idem + PubSubClient |
+| 3* | `native` | — | — | 26 Okt 2026 | env unit test, 16 test PASS (tidak ada batas RAM/Flash) |
 | 3 | `esp32dev` | | | | + LoRa + payload |
 | 3 | `wokwi` | | | | + WiFi + PubSubClient |
 | 4 | `esp32dev` | | | | final |
@@ -207,6 +210,7 @@ Semua file disimpan di `docs/hardware/evidence/` (folder ini milik domain IoT, a
 | 1 | Build fisik sukses | `build_esp32dev.txt` | HW-1.2 |
 | 2 | Build simulasi sukses | `build_wokwi.txt` | HW-1.2 |
 | 3 | Unit test lulus | `unit_test_<tgl>.txt` | HW-7.1 |
+| 3a | Unit test native (payload + sensors_core) | `unit_test_native_20261026.txt` | HW-3.5 |
 | 4 | Payload sampai broker | `I03_mqtt_rx.txt` | HW-5.4 |
 | 5 | Hex dump payload | `payload_hexdump.txt` | HW-3.2 |
 | 6 | Integrasi ke backend | `I07_backend.png` + `I07_query.txt` | HW-7.2 |

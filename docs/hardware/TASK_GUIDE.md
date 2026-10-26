@@ -22,10 +22,12 @@ Menghasilkan firmware ESP32 dan simulasi sirkuit Wokwi yang mampu melakukan akui
 | Tahap | Status |
 |---|---|
 | TAHAP 1 — Struktur Proyek & Pinout | ✅ selesai 26 Okt 2026 |
-| TAHAP 2 — Driver Sensor & Kalibrasi | ⬜ berikutnya (playbook FASE 2) |
-| TAHAP 3 — Protokol Telemetri LoRa | ⬜ |
+| TAHAP 2 — Driver Sensor & Kalibrasi | 🟨 sebagian: konversi VWC/pH/baterai selesai + lulus unit test; driver ADC burst, DS18B20, dan NVS belum |
+| TAHAP 3 — Protokol Telemetri LoRa | 🟨 sebagian: encoder payload final + 6 unit test; dua transport masih stub |
 | TAHAP 4 — Manajemen Daya & Deep Sleep | ⬜ |
 | TAHAP 5 — Virtual Testbed Wokwi | ⬜ |
+
+**Unit test:** `pio test -e native` → 16 test PASS (6 payload, 10 sensors_core). Bukti: [`evidence/unit_test_native_20261026.txt`](evidence/unit_test_native_20261026.txt).
 
 ---
 

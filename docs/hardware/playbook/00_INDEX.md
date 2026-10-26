@@ -89,11 +89,11 @@ Update kolom Status dan Bukti setiap menyelesaikan task. Jangan tandai `✅` tan
 ### FASE 2 — Driver Sensor & Kalibrasi
 | ID | Task | Status | Bukti |
 |---|---|---|---|
-| HW-2.1 | ADC + burst sampling median 5× | ⬜ | |
+| HW-2.1 | ADC + burst sampling median 5× | 🟨 | `sensors_medianAverage` + test lulus; `sensors_readAdcMedian(pin)` belum |
 | HW-2.2 | Driver DS18B20 + flag putus | ⬜ | |
-| HW-2.3 | Konversi moisture ke % VWC | ⬜ | |
-| HW-2.4 | pH raw + kompensasi kelembaban | ⬜ | |
-| HW-2.5 | Pembacaan baterai via divider | ⬜ | |
+| HW-2.3 | Konversi moisture ke % VWC | ✅ | `sensors_core.cpp`, 4 test lulus |
+| HW-2.4 | pH raw + kompensasi kelembaban | ✅ | `sensors_core.cpp`, 3 test lulus |
+| HW-2.5 | Pembacaan baterai via divider | ✅ | `sensors_core.cpp`, ADC 2402 → 3,87 V |
 | HW-2.6 | Kalibrasi NVS + fallback default | ⬜ | |
 | HW-2.7 | Mode kalibrasi 2 titik via Serial | ➖ | |
 
@@ -101,10 +101,10 @@ Update kolom Status dan Bukti setiap menyelesaikan task. Jangan tandai `✅` tan
 | ID | Task | Status | Bukti |
 |---|---|---|---|
 | HW-3.1 | Validasi rentang lokal sebelum kirim | ⬜ | |
-| HW-3.2 | Encoder JSON 6 field + ukur panjang | ⬜ | |
+| HW-3.2 | Encoder JSON 6 field + ukur panjang | ✅ | `payload.cpp`, 6 test lulus (70 B / ≤76 B) |
 | HW-3.3 | `transport_lora.cpp` (SX1278, retry 3×) | ⬜ | |
 | HW-3.4 | `transport_mqtt.cpp` (WiFi + publish) | ⬜ | |
-| HW-3.5 | Unit test payload di env `native` | ⬜ | |
+| HW-3.5 | Unit test payload di env `native` | ✅ | `evidence/unit_test_native_20261026.txt`, 16 PASS |
 
 ### FASE 4 — Power Management
 | ID | Task | Status | Bukti |

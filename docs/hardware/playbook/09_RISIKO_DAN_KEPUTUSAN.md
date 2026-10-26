@@ -194,8 +194,10 @@
 | **Perbaikan 2** | Dipakai `#if defined(SIM_NODE)` sesuai DEC-IOT-03. Guard `#ifndef` tidak diperlukan karena sumber `NODE_ID` hanya satu blok `#if`. |
 | **Perbaikan 3** | `LORA_RETRY_MAX` / `LORA_RETRY_DELAY_MS` dihapus, diganti `TX_RETRY_MAX` / `TX_RETRY_DELAY_MS` (`04` §3). Dua konstanta lama belum dirujuk siapa pun; dibiarkan akan jadi sumber kebenaran ganda untuk angka yang sama. |
 | **Perbaikan 4** | `-D FW_PROFILE="field"` dari `04` §2 tidak dipakai karena tidak dirujuk logika mana pun. Menghindari risiko quoting build flag di Windows. |
-| **Ditunda** | `[env:native]` tidak dibuat di FASE 1, dipindah ke HW-3.5. Alasan: `sensors_core.cpp` belum ada, dan `config.h` masih memakai makro Arduino (`ADC_11db`) sehingga tidak bisa dikompilasi native apa adanya. |
-| **Konsekuensi** | `payload.cpp` dan fungsi murni `sensors.cpp` belum bisa diuji di PC sampai HW-3.5 memisahkan konstanta Arduino keluar dari `config.h`. |
+| **Ditunda** | ~~`[env:native]` tidak dibuat di FASE 1~~ **Dikerjakan 26 Okt 2026.** `config.h` sekarang menyembunyikan `ADC_ATTENUATION` di balik `#if !defined(NATIVE_BUILD)`, fungsi murni dipisah ke `sensors_core.cpp`, dan `payload.cpp` melepas `Arduino.h` (kecuali `payload_hexdump`). |
+| **Perbaikan 5** | `ADC_MAX` dan `ADC_RESOLUTION` sama-sama 4095,0 dan tidak dirujuk siapa pun. `ADC_RESOLUTION` dihapus, `ADC_MAX` dipakai. Alasan sama dengan `LORA_RETRY_*`: dua nama untuk satu angka jadi sumber kebenaran ganda. |
+| **Temuan 5** | PlatformIO tidak mengompilasi `src/` saat `pio test` kecuali `test_build_src = true`. Tanpa itu semua simbol `undefined reference` saat link, dan pesan errornya menunjuk file test, bukan penyebabnya. |
+| **Konsekuensi** | `sensors_readAdcMedian(pin)` dan `sensors_sampleAll` masih stub; `payload_encode` sudah final dan teruji. |
 
 ---
 

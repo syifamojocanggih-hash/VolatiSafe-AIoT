@@ -125,6 +125,7 @@ lib_deps =
 [env:native]
 platform = native
 test_framework = unity
+test_build_src = true           ; tanpa ini src/ tidak dikompilasi saat pio test
 build_flags =
     -D TRANSPORT_KIND=0            ; 0 = dummy
     -D NATIVE_BUILD=1
@@ -133,6 +134,8 @@ build_src_filter =
     +<payload.cpp>
     +<sensors_core.cpp>           ; fungsi murni saja (tanpa ADC)
 ```
+
+> `config.h` yang di-include `sensors_core.cpp` memuat `ADC_ATTENUATION = ADC_11db`, makro yang hanya ada di core Arduino. Bungkus dengan `#if !defined(NATIVE_BUILD)` atau native gagal build. Lihat `09_RISIKO_DAN_KEPUTUSAN.md` `DEC-IOT-16`.
 
 ### 2.1 Catatan `SIM_MQTT_HOST`
 
