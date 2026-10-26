@@ -5,6 +5,8 @@ export const initialMapSummary: ParcelMapSummary = {
   soilTypeText: 'Lahan Kering Kapur',
   gatewayDistanceKm: 0.8,
   totalAreaHa: 2.50,
+  centerCoordinates: [-7.0699, 112.3126],
+  gatewayCoordinates: [-7.0678, 112.3130],
 };
 
 export const initialParcels: BedengParcel[] = [
@@ -27,6 +29,13 @@ export const initialParcels: BedengParcel[] = [
     telemetryMode: 'LoRa Live Stream',
     prescription:
       'Tunda! Tunggu hujan atau lakukan penyiraman pra-aplikasi 2 mm sebelum menabur Urea.',
+    center: [-7.06935, 112.3115],
+    polygon: [
+      [-7.0690, 112.3110],
+      [-7.0690, 112.3120],
+      [-7.0697, 112.3120],
+      [-7.0697, 112.3110],
+    ],
   },
   {
     id: 'A2',
@@ -47,6 +56,13 @@ export const initialParcels: BedengParcel[] = [
     telemetryMode: 'LoRa Live Stream',
     prescription:
       'Kondisi optimal. Jendela pemupukan aman terbuka luas selama 4 jam ke depan.',
+    center: [-7.06935, 112.3126],
+    polygon: [
+      [-7.0690, 112.3121],
+      [-7.0690, 112.3131],
+      [-7.0697, 112.3131],
+      [-7.0697, 112.3121],
+    ],
   },
   {
     id: 'A3',
@@ -67,6 +83,13 @@ export const initialParcels: BedengParcel[] = [
     telemetryMode: 'LoRa Live Stream',
     prescription:
       'BAHAYA PENGUAPAN! Kehilangan nitrogen diperkirakan >80%. Wajib tunda penaburan.',
+    center: [-7.06935, 112.3137],
+    polygon: [
+      [-7.0690, 112.3132],
+      [-7.0690, 112.3142],
+      [-7.0697, 112.3142],
+      [-7.0697, 112.3132],
+    ],
   },
   {
     id: 'B1',
@@ -87,6 +110,13 @@ export const initialParcels: BedengParcel[] = [
     telemetryMode: 'LoRa Live Stream',
     prescription:
       'Kondisi sangat aman. Larutan Urea segera terikat ke zona perakaran tanpa penguapan amonia.',
+    center: [-7.0704, 112.31175],
+    polygon: [
+      [-7.0700, 112.3110],
+      [-7.0700, 112.3125],
+      [-7.0708, 112.3125],
+      [-7.0708, 112.3110],
+    ],
   },
   {
     id: 'B2',
@@ -107,5 +137,12 @@ export const initialParcels: BedengParcel[] = [
     telemetryMode: '[Est-Simulated] FAO-56',
     prescription:
       'Waspada! Gunakan metode benam/tugal berjarak 7–10 cm dan hindari tabur permukaan bebas.',
+    center: [-7.0704, 112.31345],
+    polygon: [
+      [-7.0700, 112.3127],
+      [-7.0700, 112.3142],
+      [-7.0708, 112.3142],
+      [-7.0708, 112.3127],
+    ],
   },
 ];

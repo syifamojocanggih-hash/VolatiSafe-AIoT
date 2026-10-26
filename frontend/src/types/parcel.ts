@@ -19,6 +19,8 @@ export interface BedengParcel {
   status: ParcelStatus;
   telemetryMode: string; // e.g. 'LoRa Live Stream' or '[Est-Simulated] FAO-56'
   prescription: string; // e.g. 'Tunda! Tunggu hujan...'
+  polygon?: [number, number][]; // Poligon koordinat geografis [lat, lng]
+  center?: [number, number]; // Titik tengah lokasi node sensor [lat, lng]
 }
 
 export interface ParcelMapSummary {
@@ -26,4 +28,6 @@ export interface ParcelMapSummary {
   soilTypeText: string;
   gatewayDistanceKm: number;
   totalAreaHa: number;
+  centerCoordinates?: [number, number];
+  gatewayCoordinates?: [number, number];
 }

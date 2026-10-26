@@ -46,6 +46,8 @@ services:
       MQTT_BROKER_HOST: mosquitto
       MQTT_BROKER_PORT: 1883
       MOCK_AI_PREDICTOR: "true"
+    volumes:
+      - ../backend:/app
     depends_on:
       timescaledb:
         condition: service_healthy
@@ -63,6 +65,9 @@ services:
     environment:
       NEXT_PUBLIC_API_URL: http://localhost:${BACKEND_PORT:-8000}/api/v1
       NEXT_PUBLIC_WS_URL: ws://localhost:${BACKEND_PORT:-8000}/ws/v1/live
+    volumes:
+      - ../frontend/src:/app/src
+      - ../frontend/public:/app/public
     depends_on:
       - backend
 
