@@ -23,9 +23,9 @@ export const LeafletFieldMap: React.FC<LeafletFieldMapProps> = ({
   const mapInstanceRef = useRef<any>(null);
   const layersRef = useRef<any[]>([]);
 
-  // Center coordinates (Desa Banyubang, Solokuro, Lamongan)
-  const defaultCenter = summary.centerCoordinates || [-6.9295, 112.3540];
-  const gatewayPos = summary.gatewayCoordinates || [-6.9272, 112.3548];
+  // Center coordinates (Desa Bluri, Solokuro, Lamongan: 4C2M+7QC)
+  const defaultCenter = summary.centerCoordinates || [-6.89931, 112.43439];
+  const gatewayPos = summary.gatewayCoordinates || [-6.89790, 112.43460];
 
   // Helper colors based on active layer
   const getParcelColor = (p: BedengParcel) => {
@@ -82,15 +82,15 @@ export const LeafletFieldMap: React.FC<LeafletFieldMapProps> = ({
         maxZoom: 19,
       }).addTo(map);
 
-      // Dividing Road & Drainage ditch line (Winding terrain road in Solokuro)
+      // Dividing Road & Drainage ditch line (Jalan Usaha Tani Desa Bluri, Solokuro)
       const roadLine = L.polyline(
         [
-          [-6.92935, 112.35180],
-          [-6.92925, 112.35265],
-          [-6.92915, 112.35340],
-          [-6.92928, 112.35445],
-          [-6.92930, 112.35560],
-          [-6.92945, 112.35660],
+          [-6.899332, 112.432965],
+          [-6.899277, 112.433433],
+          [-6.899222, 112.433846],
+          [-6.899293, 112.434423],
+          [-6.899305, 112.435055],
+          [-6.899387, 112.435605],
         ],
         {
           color: '#0284C7',
@@ -234,7 +234,7 @@ export const LeafletFieldMap: React.FC<LeafletFieldMapProps> = ({
       {/* Floating Info Overlay on Map */}
       <div className="absolute top-3 left-3 z-[400] bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-xl border border-slate-200/80 shadow-xs text-2xs sm:text-xs text-slate-700 font-medium flex items-center gap-2">
         <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-        <span>Leaflet + OpenStreetMap · Tegal Kapur Banyubang, Solokuro</span>
+        <span>Leaflet + OpenStreetMap · Tegal Kapur Bluri, Solokuro</span>
       </div>
     </div>
   );
