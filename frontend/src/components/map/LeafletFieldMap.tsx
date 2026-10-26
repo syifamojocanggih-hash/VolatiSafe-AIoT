@@ -87,19 +87,22 @@ export const LeafletFieldMap: React.FC<LeafletFieldMapProps> = ({
 
     let newTileLayer;
     if (type === 'satellite') {
-      // High-resolution Esri World Imagery (real aerial photos of fields, trees, and ground)
+      // High-resolution Google Hybrid Satellite (crystal clear real aerial photo with vegetation, roads, fields)
       newTileLayer = L.tileLayer(
-        'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+        'https://mt{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}',
         {
-          attribution: '&copy; Esri World Imagery & GIS Community',
-          maxZoom: 19,
+          subdomains: ['0', '1', '2', '3'],
+          attribution: '&copy; Google Satellite Imagery & VolatiSafe AIoT',
+          maxZoom: 21,
+          maxNativeZoom: 19,
         }
       );
     } else if (type === 'topo') {
       // OpenTopoMap (altitude contour lines and topography of karst hills)
       newTileLayer = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; OpenTopoMap contributors',
-        maxZoom: 17,
+        maxZoom: 18,
+        maxNativeZoom: 16,
       });
     } else {
       // OpenStreetMap standard street and village vector
@@ -522,7 +525,7 @@ export const LeafletFieldMap: React.FC<LeafletFieldMapProps> = ({
         <span>
           Lapisan:{' '}
           <b className="text-emerald-400 capitalize">
-            {tileType === 'satellite' ? 'Citra Satelit Esri' : tileType === 'topo' ? 'OpenTopoMap Kontur' : 'OpenStreetMap'}
+            {tileType === 'satellite' ? 'Citra Satelit HD' : tileType === 'topo' ? 'OpenTopoMap Kontur' : 'OpenStreetMap'}
           </b>{' '}
           · Hamparan Tegal Kapur Bluri
         </span>
