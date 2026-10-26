@@ -1,0 +1,4 @@
+data/training_dataset_lamongan.csv
+ai_engine/__pycache__
+simulations/__pycache__
+simulations/data_replay/__pycache__
