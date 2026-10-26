@@ -23,9 +23,9 @@ export const LeafletFieldMap: React.FC<LeafletFieldMapProps> = ({
   const mapInstanceRef = useRef<any>(null);
   const layersRef = useRef<any[]>([]);
 
-  // Center coordinates
-  const defaultCenter = summary.centerCoordinates || [-7.0699, 112.3126];
-  const gatewayPos = summary.gatewayCoordinates || [-7.0678, 112.3130];
+  // Center coordinates (Desa Banyubang, Solokuro, Lamongan)
+  const defaultCenter = summary.centerCoordinates || [-6.9295, 112.3540];
+  const gatewayPos = summary.gatewayCoordinates || [-6.9272, 112.3548];
 
   // Helper colors based on active layer
   const getParcelColor = (p: BedengParcel) => {
@@ -85,8 +85,8 @@ export const LeafletFieldMap: React.FC<LeafletFieldMapProps> = ({
       // Dividing Road & Drainage ditch line
       const roadLine = L.polyline(
         [
-          [-7.06985, 112.3105],
-          [-7.06985, 112.3147],
+          [-6.92935, 112.3525],
+          [-6.92935, 112.3563],
         ],
         {
           color: '#0284C7',
@@ -230,7 +230,7 @@ export const LeafletFieldMap: React.FC<LeafletFieldMapProps> = ({
       {/* Floating Info Overlay on Map */}
       <div className="absolute top-3 left-3 z-[400] bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-xl border border-slate-200/80 shadow-xs text-2xs sm:text-xs text-slate-700 font-medium flex items-center gap-2">
         <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-        <span>Leaflet + OpenStreetMap · Solokuro, Lamongan</span>
+        <span>Leaflet + OpenStreetMap · Tegal Kapur Banyubang, Solokuro</span>
       </div>
     </div>
   );

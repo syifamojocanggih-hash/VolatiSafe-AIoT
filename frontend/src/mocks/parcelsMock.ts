@@ -1,12 +1,12 @@
 import { BedengParcel, ParcelMapSummary } from '@/types/parcel';
 
 export const initialMapSummary: ParcelMapSummary = {
-  coordinatesText: '7°04\'12"S 112°18\'45"E',
-  soilTypeText: 'Lahan Kering Kapur',
+  coordinatesText: '6°55\'46"S 112°21\'14"E',
+  soilTypeText: 'Tegal Kapur Solokuro (Alkalin pH 7.8)',
   gatewayDistanceKm: 0.8,
   totalAreaHa: 2.50,
-  centerCoordinates: [-7.0699, 112.3126],
-  gatewayCoordinates: [-7.0678, 112.3130],
+  centerCoordinates: [-6.9295, 112.3540],
+  gatewayCoordinates: [-6.9272, 112.3548],
 };
 
 export const initialParcels: BedengParcel[] = [
@@ -29,12 +29,12 @@ export const initialParcels: BedengParcel[] = [
     telemetryMode: 'LoRa Live Stream',
     prescription:
       'Tunda! Tunggu hujan atau lakukan penyiraman pra-aplikasi 2 mm sebelum menabur Urea.',
-    center: [-7.06935, 112.3115],
+    center: [-6.92885, 112.3533],
     polygon: [
-      [-7.0690, 112.3110],
-      [-7.0690, 112.3120],
-      [-7.0697, 112.3120],
-      [-7.0697, 112.3110],
+      [-6.9285, 112.3528],
+      [-6.9285, 112.3538],
+      [-6.9292, 112.3538],
+      [-6.9292, 112.3528],
     ],
   },
   {
@@ -56,12 +56,12 @@ export const initialParcels: BedengParcel[] = [
     telemetryMode: 'LoRa Live Stream',
     prescription:
       'Kondisi optimal. Jendela pemupukan aman terbuka luas selama 4 jam ke depan.',
-    center: [-7.06935, 112.3126],
+    center: [-6.92885, 112.3544],
     polygon: [
-      [-7.0690, 112.3121],
-      [-7.0690, 112.3131],
-      [-7.0697, 112.3131],
-      [-7.0697, 112.3121],
+      [-6.9285, 112.3539],
+      [-6.9285, 112.3549],
+      [-6.9292, 112.3549],
+      [-6.9292, 112.3539],
     ],
   },
   {
@@ -83,12 +83,12 @@ export const initialParcels: BedengParcel[] = [
     telemetryMode: 'LoRa Live Stream',
     prescription:
       'BAHAYA PENGUAPAN! Kehilangan nitrogen diperkirakan >80%. Wajib tunda penaburan.',
-    center: [-7.06935, 112.3137],
+    center: [-6.92885, 112.3555],
     polygon: [
-      [-7.0690, 112.3132],
-      [-7.0690, 112.3142],
-      [-7.0697, 112.3142],
-      [-7.0697, 112.3132],
+      [-6.9285, 112.3550],
+      [-6.9285, 112.3560],
+      [-6.9292, 112.3560],
+      [-6.9292, 112.3550],
     ],
   },
   {
@@ -110,12 +110,12 @@ export const initialParcels: BedengParcel[] = [
     telemetryMode: 'LoRa Live Stream',
     prescription:
       'Kondisi sangat aman. Larutan Urea segera terikat ke zona perakaran tanpa penguapan amonia.',
-    center: [-7.0704, 112.31175],
+    center: [-6.9299, 112.35355],
     polygon: [
-      [-7.0700, 112.3110],
-      [-7.0700, 112.3125],
-      [-7.0708, 112.3125],
-      [-7.0708, 112.3110],
+      [-6.9295, 112.3528],
+      [-6.9295, 112.3543],
+      [-6.9303, 112.3543],
+      [-6.9303, 112.3528],
     ],
   },
   {
@@ -137,12 +137,12 @@ export const initialParcels: BedengParcel[] = [
     telemetryMode: '[Est-Simulated] FAO-56',
     prescription:
       'Waspada! Gunakan metode benam/tugal berjarak 7–10 cm dan hindari tabur permukaan bebas.',
-    center: [-7.0704, 112.31345],
+    center: [-6.9299, 112.35525],
     polygon: [
-      [-7.0700, 112.3127],
-      [-7.0700, 112.3142],
-      [-7.0708, 112.3142],
-      [-7.0708, 112.3127],
+      [-6.9295, 112.3545],
+      [-6.9295, 112.3560],
+      [-6.9303, 112.3560],
+      [-6.9303, 112.3545],
     ],
   },
 ];
