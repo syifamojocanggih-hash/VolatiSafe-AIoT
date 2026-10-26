@@ -12,37 +12,8 @@ void sensors_begin() {
 }
 
 void sensors_sampleAll(TelemetryFrame& out) {
-  // TODO HW-2.1..2.5: median-average 5x, DS18B20, konversi VWC/pH/baterai.
+  // TODO HW-2.1: sensors_readAdcMedian(). HW-2.2: DS18B20. Lalu rakit frame
+  // memakai fungsi murni di sensors_core.cpp yang sudah teruji native.
   out = TelemetryFrame();
-  Serial.println(F("[STUB] sensors_sampleAll belum ada (HW-2.x)"));
-}
-
-float sensors_medianAverage(const uint16_t* samples, uint8_t n) {
-  // TODO HW-2.1: buang satu min & satu max, rata-rata sisanya (DEC-IOT-06).
-  (void)samples;
-  (void)n;
-  return 0.0f;
-}
-
-float sensors_adcToMoisturePct(uint16_t adc, uint16_t dry, uint16_t wet) {
-  // TODO HW-2.3
-  (void)adc;
-  (void)dry;
-  (void)wet;
-  return 0.0f;
-}
-
-float sensors_adcToPh(uint16_t adc, float neutral_adc, float slope, float moisture_pct) {
-  // TODO HW-2.4
-  (void)adc;
-  (void)neutral_adc;
-  (void)slope;
-  (void)moisture_pct;
-  return 0.0f;
-}
-
-float sensors_adcToBatteryV(uint16_t adc) {
-  // TODO HW-2.5
-  (void)adc;
-  return 0.0f;
+  Serial.println(F("[STUB] sensors_sampleAll belum ada (HW-2.1..2.2)"));
 }

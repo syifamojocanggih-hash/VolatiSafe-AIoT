@@ -41,7 +41,11 @@
 #define LORA_SYNC_WORD      0x12
 
 // --- Sampling & Filtering ---------------------------------------------------
-#define ADC_ATTENUATION     ADC_11db
+// ADC_11db hanya ada di core Arduino. env:native mengompilasi config.h tanpa
+// Arduino.h, jadi makro itu harus disembunyikan agar native tidak gagal build.
+#if !defined(NATIVE_BUILD)
+  #define ADC_ATTENUATION   ADC_11db
+#endif
 #define SAMPLE_COUNT        5       // Burst sampling 5x
 #define SAMPLE_INTERVAL_MS  50
 #define SENSOR_WARMUP_MS    200     // Stabilisasi tegangan setelah MOSFET ON
@@ -75,7 +79,6 @@
 #endif
 #define BATTERY_DIVIDER     2.0f    // 100k/100k -> setengah tegangan
 #define ADC_REF_VOLTAGE     3.3f
-#define ADC_RESOLUTION      4095.0f
 
 // --- Transport --------------------------------------------------------------
 #define TRANSPORT_KIND_LORA   1
