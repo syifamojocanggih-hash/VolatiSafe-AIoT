@@ -1,0 +1,85 @@
+services:
+  timescaledb:
+    image: timescale/timescaledb:latest-pg16
+    container_name: volatisafe_timescaledb
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-volatisafe}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-volatisafe_secret}
+      POSTGRES_DB: ${POSTGRES_DB:-volatisafe_db}
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      - timescaledb_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-volatisafe} -d ${POSTGRES_DB:-volatisafe_db}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  mosquitto:
+    image: eclipse-mosquitto:2
+    container_name: volatisafe_mosquitto
+    restart: always
+    ports:
+      - "${MQTT_PORT:-1883}:1883"
+    volumes:
+      - ./mosquitto.conf:/mosquitto/config/mosquitto.conf
+      - mosquitto_data:/mosquitto/data
+
+  backend:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    container_name: volatisafe_backend
+    restart: always
+    ports:
+      - "${BACKEND_PORT:-8000}:8000"
+    environment:
+      POSTGRES_SERVER: timescaledb
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: ${POSTGRES_USER:-volatisafe}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-volatisafe_secret}
+      POSTGRES_DB: ${POSTGRES_DB:-volatisafe_db}
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-volatisafe}:${POSTGRES_PASSWORD:-volatisafe_secret}@timescaledb:5432/${POSTGRES_DB:-volatisafe_db}
+      MQTT_BROKER_HOST: mosquitto
+      MQTT_BROKER_PORT: 1883
+      MOCK_AI_PREDICTOR: "true"
+    volumes:
+      - ../backend:/app
+    depends_on:
+      timescaledb:
+        condition: service_healthy
+      mosquitto:
+        condition: service_started
+
+  frontend:
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+    container_name: volatisafe_frontend
+    restart: always
+    ports:
+      - "${FRONTEND_PORT:-3000}:3000"
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:${BACKEND_PORT:-8000}/api/v1
+      NEXT_PUBLIC_WS_URL: ws://localhost:${BACKEND_PORT:-8000}/ws/v1/live
+    volumes:
+      - ../frontend/src:/app/src
+      - ../frontend/public:/app/public
+    depends_on:
+      - backend
+
+  db-admin:
+    image: adminer:latest
+    container_name: volatisafe_db_admin
+    restart: always
+    ports:
+      - "${DB_ADMIN_PORT:-8082}:8080"
+    depends_on:
+      - timescaledb
+
+volumes:
+  timescaledb_data:
+  mosquitto_data:
