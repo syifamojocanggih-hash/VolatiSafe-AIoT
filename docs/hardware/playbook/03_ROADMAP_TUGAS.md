@@ -235,7 +235,9 @@ Aturan: `main.cpp` tidak boleh berisi logika sensor/kalibrasi/radio. Hanya uruta
 
 > **Perhatikan:** backend punya `validate_sensor_bounds()` ([`../../backend/INGESTION_PIPELINE.md`](../../backend/INGESTION_PIPELINE.md) §2). Jangan men-*clamp* nilai rusak menjadi nilai valid — itu menyembunyikan kerusakan sensor dan membuat data palsu lolos gate. Biarkan nilai asli terkirim dengan penanda; backend yang memutuskan.
 
-Catatan implementasi 26 Okt 2026: fungsi murni HW-2.1/2.3/2.4/2.5 sudah final di `sensors_core.cpp` dan lulus 10 unit test native. Yang belum: `sensors_readAdcMedian()` dan perakitan frame di `sensors_sampleAll()`.
+Catatan implementasi 26 Okt 2026 (FASE 2 selesai): HW-2.1, 2.2, 2.3, 2.4, 2.5 sudah final dan terverifikasi di simulator. Fungsi murni ada di `sensors_core.cpp`, I/O di `sensors.cpp`, kalibrasi murni di `calibration_core.cpp`, I/O NVS di `calibration.cpp`. Total 30 unit test native PASS. Bukti runtime: `evidence/HW-2.1_adc_burst_wokwi_20261026.txt`, `evidence/HW-2.2_ds18b20_wokwi_20261026.txt`, `evidence/HW-2.6_nvs_selftest_wokwi_20261026.txt`.
+
+Penyimpangan dari tabel di atas (detail di `DEC-IOT-17`): DS18B20 memakai konversi blocking 375 ms, bukan non-blocking; `sensors_sampleAll()` menerima `(TelemetryFrame&, const Calibration&)`; `calibration_begin(Calibration&)` memakai parameter keluaran. HW-5.1/5.2 ditarik ke FASE 2, HW-2.7 tetap `➖`.
 
 ### HW-3.2 — Encoder JSON + ukur panjang
 | | |

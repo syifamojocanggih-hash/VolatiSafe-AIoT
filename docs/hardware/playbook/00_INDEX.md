@@ -89,12 +89,12 @@ Update kolom Status dan Bukti setiap menyelesaikan task. Jangan tandai `✅` tan
 ### FASE 2 — Driver Sensor & Kalibrasi
 | ID | Task | Status | Bukti |
 |---|---|---|---|
-| HW-2.1 | ADC + burst sampling median 5× | 🟨 | `sensors_medianAverage` + test lulus; `sensors_readAdcMedian(pin)` belum |
-| HW-2.2 | Driver DS18B20 + flag putus | ⬜ | |
-| HW-2.3 | Konversi moisture ke % VWC | ✅ | `sensors_core.cpp`, 4 test lulus |
+| HW-2.1 | ADC + burst sampling median 5× | ✅ | `sensors.cpp` `sensors_readAdcBurst/Median`, 4 test lulus, `evidence/HW-2.1_adc_burst_wokwi_20261026.txt` |
+| HW-2.2 | Driver DS18B20 + flag putus | ✅ | `sensors.cpp` `sensors_classifyTemp`, 3 test lulus, `evidence/HW-2.2_ds18b20_wokwi_20261026.txt` |
+| HW-2.3 | Konversi moisture ke % VWC | ✅ | `sensors_core.cpp`, 3 test lulus |
 | HW-2.4 | pH raw + kompensasi kelembaban | ✅ | `sensors_core.cpp`, 3 test lulus |
 | HW-2.5 | Pembacaan baterai via divider | ✅ | `sensors_core.cpp`, ADC 2402 → 3,87 V |
-| HW-2.6 | Kalibrasi NVS + fallback default | ⬜ | |
+| HW-2.6 | Kalibrasi NVS + fallback default | ✅ | `calibration.cpp` + `calibration_core.cpp`, 7 test lulus, `evidence/HW-2.6_nvs_selftest_wokwi_20261026.txt` (persistensi lintas reboot → HW-9.2) |
 | HW-2.7 | Mode kalibrasi 2 titik via Serial | ➖ | |
 
 ### FASE 3 — Payload & Transport
@@ -104,7 +104,7 @@ Update kolom Status dan Bukti setiap menyelesaikan task. Jangan tandai `✅` tan
 | HW-3.2 | Encoder JSON 6 field + ukur panjang | ✅ | `payload.cpp`, 6 test lulus (70 B / ≤76 B) |
 | HW-3.3 | `transport_lora.cpp` (SX1278, retry 3×) | ⬜ | |
 | HW-3.4 | `transport_mqtt.cpp` (WiFi + publish) | ⬜ | |
-| HW-3.5 | Unit test payload di env `native` | ✅ | `evidence/unit_test_native_20261026.txt`, 16 PASS |
+| HW-3.5 | Unit test payload di env `native` | ✅ | `evidence/unit_test_native_20261026.txt`, 30 PASS (payload + sensors_core + calibration_core) |
 
 ### FASE 4 — Power Management
 | ID | Task | Status | Bukti |
@@ -117,8 +117,8 @@ Update kolom Status dan Bukti setiap menyelesaikan task. Jangan tandai `✅` tan
 ### FASE 5 — Wokwi Testbed
 | ID | Task | Status | Bukti |
 |---|---|---|---|
-| HW-5.1 | `diagram.json` | ⬜ | |
-| HW-5.2 | `wokwi.toml` + wiring build | ⬜ | |
+| HW-5.1 | `diagram.json` | ✅ | `simulation/wokwi/diagram.json` (ditarik ke FASE 2, DEC-IOT-17), `evidence/HW-5.1_diagram_lint_20261026.txt` |
+| HW-5.2 | `wokwi.toml` + wiring build | ✅ | `simulation/wokwi/wokwi.toml` + `scenario_a.yaml`, `evidence/HW-5.2_wokwi_scenario_ab_20261026.txt` |
 | HW-5.3 | Verifikasi paritas firmware | ⬜ | |
 | HW-5.4 | Telemetri sampai Mosquitto | ⬜ | |
 

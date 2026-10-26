@@ -151,7 +151,7 @@ log_dest stdout
 Lalu jalankan:
 
 ```powershell
-docker run --rm -d --name volatisafe-mqtt -p 1883:1883 `
+docker run -d --name volatisafe-mqtt --restart unless-stopped -p 1883:1883 `
   -v "${PWD}\docker\mosquitto.conf:/mosquitto/config/mosquitto.conf" `
   eclipse-mosquitto:2
 ```
@@ -159,10 +159,16 @@ docker run --rm -d --name volatisafe-mqtt -p 1883:1883 `
 Jika `docker/mosquitto.conf` belum tersedia dan Anda perlu broker sekarang, jalankan tanpa volume dengan config bawaan image yang mengizinkan anonim:
 
 ```powershell
-docker run --rm -d --name volatisafe-mqtt -p 1883:1883 `
+docker run -d --name volatisafe-mqtt --restart unless-stopped -p 1883:1883 `
   eclipse-mosquitto:2 `
   mosquitto -c /mosquitto-no-auth.conf
 ```
+
+> **Jangan pakai `--rm`.** Container dengan `--rm` hilang begitu dihentikan, sehingga
+> `--restart` tidak menolong dan broker tidak hidup sendiri setelah Docker Desktop
+> atau laptop restart. Syarat autostart demo ada di [`08_DEMO_RUNBOOK.md`](08_DEMO_RUNBOOK.md) H-7.
+> Kedua perintah di atas sengaja memakai `-d` + `--restart unless-stopped` tanpa `--rm`.
+> Saat mengganti config atau image, hapus dulu container lama: `docker rm -f volatisafe-mqtt`.
 
 ### Opsi B — Native Windows (paling cepat untuk uji lokal)
 
@@ -320,6 +326,7 @@ pip install paho-mqtt==2.1.0
 - [ ] File lisensi ada di `~/.wokwi`
 - [ ] `wokwi-cli --version` merespons
 - [ ] Broker MQTT lokal menerima pesan uji (subscriber menerima payload)
+- [ ] Container broker memakai `--restart unless-stopped` dan **tanpa** `--rm`, terverifikasi lewat `docker restart volatisafe-mqtt` lalu `docker ps`
 - [ ] `.gitignore` sudah diajukan ke Lead (atau disetujui tertunda dengan mitigasi stage eksplisit)
 - [ ] Versi platform sudah di-pin, `package-lock.json` tersimpan
 - [ ] Baseline RAM/Flash dicatat di Bab 07 §5

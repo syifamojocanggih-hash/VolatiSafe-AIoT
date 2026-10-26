@@ -83,7 +83,19 @@ simulation/wokwi/
 
 **Nama pin part Wokwi bisa berbeda antar versi.** Arahkan kursor ke pin di simulator untuk melihat labelnya. Jika `ds18b20` memakai label `VDD` bukan `VCC`, sesuaikan. Jika part `wokwi-ds18b20` tidak ditemukan di akun Anda, alternatif: `wokwi-ds18b20` tetap yang benar; pastikan ekstensi Wokwi terbaru.
 
+Terverifikasi 26 Okt 2026 pada CLI 0.29.1: pin GND di `board-esp32-devkit-c-v4` bernama `GND.1`, `GND.2`, `GND.3` (bukan `GND`), dan semua pin DS18B20 memakai `VCC`/`GND`/`DQ`.
+
 ### 3.3 `diagram.json` acuan
+
+> **Sudah diterapkan 26 Okt 2026** di `simulation/wokwi/diagram.json`. Blok di bawah adalah
+> isi file yang benar-benar dipakai dan sudah lulus `wokwi-cli lint` (0 error) serta
+> menjalankan dua skenario demo. Perhatikan tiga koreksi terhadap draf awal bab ini:
+>
+> 1. Atribut `value` part `wokwi-potentiometer` **hanya menerima 0–1023**, bukan ADC mentah
+>    12-bit. Nilai harus dikonversi: `value = ADC × 1023 / 4095`. Draf awal menulis
+>    `"value": "2000"` yang tidak akan pernah menghasilkan ADC 2000.
+> 2. Pin GND pada `board-esp32-devkit-c-v4` bernama `GND.1`, `GND.2`, `GND.3` — bukan `GND`.
+> 3. OLED dilewati. Serial monitor cukup, dan menghindari satu dependensi grafis.
 
 ```json
 {
@@ -92,42 +104,42 @@ simulation/wokwi/
   "editor": "wokwi",
   "parts": [
     { "type": "board-esp32-devkit-c-v4", "id": "esp", "top": 0, "left": 0, "attrs": {} },
-    { "type": "wokwi-potentiometer", "id": "pot_moist", "top": -140, "left": -120, "attrs": { "value": "2000" } },
-    { "type": "wokwi-potentiometer", "id": "pot_ph", "top": -140, "left": -40, "attrs": { "value": "1300" } },
-    { "type": "wokwi-potentiometer", "id": "pot_batt", "top": -140, "left": 40, "attrs": { "value": "2400" } },
-    { "type": "wokwi-ds18b20", "id": "ds18b20", "top": -140, "left": 140, "attrs": { "temperature": "25.0" } },
-    { "type": "wokwi-resistor", "id": "r_pullup", "top": -60, "left": 140, "attrs": { "value": "4700" } },
-    { "type": "wokwi-ssd1306", "id": "oled", "top": 160, "left": -60, "attrs": {} }
+    { "type": "wokwi-potentiometer", "id": "pot_moist", "top": -140, "left": -120, "attrs": { "value": "624" } },
+    { "type": "wokwi-potentiometer", "id": "pot_ph", "top": -140, "left": -40, "attrs": { "value": "318" } },
+    { "type": "wokwi-potentiometer", "id": "pot_batt", "top": -140, "left": 40, "attrs": { "value": "600" } },
+    { "type": "wokwi-ds18b20", "id": "ds18b20", "top": -140, "left": 160, "attrs": { "temperature": "34.5" } },
+    { "type": "wokwi-resistor", "id": "r_pullup", "top": -50, "left": 160, "attrs": { "value": "4700" } }
   ],
   "connections": [
-    [ "esp:3V3",  "pot_moist:VCC", "red",    [] ],
-    [ "esp:GND",  "pot_moist:GND", "black",  [] ],
-    [ "pot_moist:SIG", "esp:34",   "green",  [] ],
+    [ "esp:3V3", "pot_moist:VCC", "red", [] ],
+    [ "esp:GND.1", "pot_moist:GND", "black", [] ],
+    [ "pot_moist:SIG", "esp:34", "green", [] ],
 
-    [ "esp:3V3",  "pot_ph:VCC",    "red",    [] ],
-    [ "esp:GND",  "pot_ph:GND",    "black",  [] ],
-    [ "pot_ph:SIG", "esp:32",      "green",  [] ],
+    [ "esp:3V3", "pot_ph:VCC", "red", [] ],
+    [ "esp:GND.1", "pot_ph:GND", "black", [] ],
+    [ "pot_ph:SIG", "esp:32", "green", [] ],
 
-    [ "esp:3V3",  "pot_batt:VCC",  "red",    [] ],
-    [ "esp:GND",  "pot_batt:GND",  "black",  [] ],
-    [ "pot_batt:SIG", "esp:35",    "green",  [] ],
+    [ "esp:3V3", "pot_batt:VCC", "red", [] ],
+    [ "esp:GND.1", "pot_batt:GND", "black", [] ],
+    [ "pot_batt:SIG", "esp:35", "green", [] ],
 
-    [ "esp:3V3",  "ds18b20:VCC",   "red",    [] ],
-    [ "esp:GND",  "ds18b20:GND",   "black",  [] ],
-    [ "esp:4",    "ds18b20:DQ",    "blue",   [] ],
-    [ "ds18b20:DQ", "r_pullup:1",  "blue",   [] ],
-    [ "esp:3V3",  "r_pullup:2",    "red",    [] ],
-
-    [ "esp:22",   "oled:SCL",      "yellow", [] ],
-    [ "esp:21",   "oled:SDA",      "magenta",[] ],
-    [ "esp:3V3",  "oled:VCC",      "red",    [] ],
-    [ "esp:GND",  "oled:GND",      "black",  [] ]
-  ],
-  "dependencies": {}
+    [ "esp:3V3", "ds18b20:VCC", "red", [] ],
+    [ "esp:GND.1", "ds18b20:GND", "black", [] ],
+    [ "esp:4", "ds18b20:DQ", "blue", [] ],
+    [ "ds18b20:DQ", "r_pullup:1", "blue", [] ],
+    [ "esp:3V3", "r_pullup:2", "red", [] ]
+  ]
 }
 ```
 
-OLED opsional. Jika dipakai, tambahkan `Arduino_GFX`/`Adafruit_SSD1306` hanya di build `[env:wokwi]` agar tidak membebani flash build fisik. Jika ingin hemat waktu, **lewati OLED** — Serial monitor sudah cukup untuk demo video.
+**Jangan mengatur slider manual untuk nilai yang harus persis.** Potensiometer hanya punya
+1024 langkah, sehingga ADC 2496 tidak bisa dicapai (624 → 2498, 623 → 2494). Untuk angka
+demo yang harus tepat seperti tabel §5.2–5.4, pakai skenario YAML dengan kontrol `position`
+(float 0–1): `position = ADC / 4095`. Contoh lengkap ada di
+`simulation/wokwi/scenario_a.yaml` dan `scenario_b.yaml`.
+
+OLED opsional. Jika suatu saat dipakai, tambahkan `Adafruit_SSD1306` hanya di build `[env:wokwi]`
+agar tidak membebani flash build fisik.
 
 ---
 
@@ -144,14 +156,36 @@ Path relatif terhadap lokasi `wokwi.toml`.
 
 ### 4.1 Alur menjalankan
 
-```powershell
-# 1. build khusus simulasi
-pio run -e wokwi --project-dir firmware
+Tiga jalur, pilih sesuai kebutuhan.
 
-# 2. buka simulator
+**A. CLI dengan skenario otomatis (dipakai untuk bukti HW-2.x/HW-5.x)**
+
+```powershell
+pio run -e wokwi --project-dir firmware
+wokwi-cli simulation/wokwi --timeout 30000 --scenario scenario_a.yaml --serial-log-file out.txt
+```
+
+`--scenario` menerima path relatif terhadap **direktori proyek** (`simulation/wokwi`), bukan
+terhadap cwd — `simulation/wokwi/scenario_a.yaml` akan gagal dengan "scenario file not found".
+`wait-serial` di dalam skenario berfungsi sebagai asersi: teks tidak cocok → exit non-zero,
+jadi perintah ini tidak bisa "lulus" karena timeout.
+
+**B. VS Code (interaktif, untuk demo)**
+
+```powershell
 code simulation\wokwi
 # lalu Ctrl+Shift+P -> "Wokwi: Start Simulator"
 ```
+
+**C. Tanpa skenario, lihat Serial apa adanya**
+
+```powershell
+wokwi-cli simulation/wokwi --timeout 25000
+```
+
+Catatan penting untuk bukti: `wokwi-cli` **memakai flash bersih setiap run**. Isi NVS tidak
+bertahan antar run, jadi uji "simpan kalibrasi → reboot → nilai bertahan" tidak bisa
+dibuktikan di simulasi (lihat DEC-IOT-17, diverifikasi di HW-9.2).
 
 Jika ekstensi mengeluh `wokwi.toml not found`, buka folder `simulation/wokwi` sebagai workspace (bukan root repo), atau salin `wokwi.toml` ke root repo sebagai symlink-equivalent. Ekstensi mencari `wokwi.toml` di root workspace yang dibuka.
 

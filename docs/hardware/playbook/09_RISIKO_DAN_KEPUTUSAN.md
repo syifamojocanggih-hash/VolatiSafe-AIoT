@@ -199,6 +199,30 @@
 | **Temuan 5** | PlatformIO tidak mengompilasi `src/` saat `pio test` kecuali `test_build_src = true`. Tanpa itu semua simbol `undefined reference` saat link, dan pesan errornya menunjuk file test, bukan penyebabnya. |
 | **Konsekuensi** | `sensors_readAdcMedian(pin)` dan `sensors_sampleAll` masih stub; `payload_encode` sudah final dan teruji. |
 
+### DEC-IOT-17 — Penyimpangan dari `04_FIRMWARE_CORE.md` saat Implementasi FASE 2
+
+| | |
+|---|---|
+| **Tanggal** | 26 Okt 2026 |
+| **Status** | ✅ Diputuskan |
+| **Konteks** | `00_INDEX.md` §5 aturan 3. FASE 2 (HW-2.1, 2.2, 2.6) menyimpang dari `04_FIRMWARE_CORE.md` di enam titik, ditambah satu keputusan urutan kerja. |
+| **Temuan 1** | `04` §6 mendeklarasikan `bool calibration_begin()` tanpa parameter, tetapi `04` §10 memanggilnya lalu mengharapkan `g_cal` sudah terisi. Tidak ada jalur nilai keluar dari fungsi itu — deklarasinya tidak bisa diimplementasikan sesuai spesifikasi. |
+| **Perbaikan 1** | Signature menjadi `bool calibration_begin(Calibration& out)`. `out` hanya diisi bila NVS lengkap **dan** lolos `calibration_validate`; kalau gagal, pemanggil yang mengisi default. Dengan cara ini pesan Serial bisa membedakan "NVS kosong" dari "NVS tidak valid". |
+| **Temuan 2** | `sensors_sampleAll()` ditulis satu parameter (`TelemetryFrame&`) di `04` §5.1 tetapi dipanggil dua parameter (`f, g_cal`) di `04` §10. Tanpa `Calibration`, fungsi itu tidak bisa mengonversi ADC. |
+| **Perbaikan 2** | Dipakai dua parameter sesuai §10; §5.1 yang salah. |
+| **Temuan 3** | `03` HW-2.2 meminta konversi DS18B20 **non-blocking bila memungkinkan**. Non-blocking menuntut state machine (`requestTemperatures` → kerja lain → `getTempCByIndex`) dan siklus ini satu tembakan sebelum tidur. |
+| **Perbaikan 3** | Blocking dengan `setWaitForConversion(true)` pada resolusi 11-bit (±0,125 °C, ~375 ms). Dari anggaran siklus 3,5 s, 375 ms tidak signifikan dan menghilangkan satu state machine. |
+| **Temuan 4** | `04` §5.5 hanya menyebut "flag `SENSOR_UNSTABLE`" tanpa angka ambang. |
+| **Perbaikan 4** | `ADC_UNSTABLE_RANGE = 800` dari `04` §5.5 dijadikan konstanta di `config.h`, tetap berstatus placeholder sampai noise nyata diukur di HW-9.1 (R-01). Kanal yang goyang ditandai sendiri-sendiri, bukan menjatuhkan frame. |
+| **Temuan 5** | `calibration_defaults` dan `calibration_validate` tidak disebut bisa diuji tanpa board, padahal keduanya murni. |
+| **Perbaikan 5** | Keduanya dipindah ke `calibration_core.cpp` (tanpa `Arduino.h`) dan masuk `[env:native]`. `calibration.cpp` hanya menyisakan I/O: `Preferences` dan `Serial`. |
+| **Temuan 6** | `05_WOKWI_SIMULASI.md` §3.3 menulis nilai potensiometer sebagai ADC mentah (`"value": "2000"`), padahal atribut `value` part `wokwi-potentiometer` hanya menerima 0–1023. Nilai > 1023 tidak menghasilkan ADC yang dimaksud. |
+| **Perbaikan 6** | `diagram.json` memakai `value` dalam skala 0–1023 (624/318/600 untuk Skenario A). Untuk nilai yang harus **tepat** seperti tabel §5.2–5.4, skenario YAML memakai kontrol `position` (float 0–1) dengan `position = ADC / 4095`. |
+| **Keputusan urutan** | HW-5.1 (`diagram.json`) dan HW-5.2 (`wokwi.toml`) ditarik dari FASE 5 ke FASE 2. Alasannya: HW-2.1/2.2/2.6 seluruhnya butuh hardware, jadi tanpa simulator status board mentok 🟨 dan FASE 5 menjadi sesi debug pertama untuk kode yang ditulis 3 hari sebelumnya. Anggarannya **dipindah**, bukan ditambah. |
+| **Konsekuensi 1** | `main.cpp` mendapat dua blok sementara: `SENSOR_PROBE` (sampling + Serial tiap 5 s, tanpa TX/sleep) dan `CAL_NVS_SELFTEST` (tulis–baca NVS sekali di boot). Keduanya hanya aktif di `[env:wokwi]` dan **wajib dihapus** saat HW-4.3 masuk. |
+| **Konsekuensi 2** | DoD HW-2.6 "nilai bertahan setelah reboot" **tidak** bisa dibuktikan di Wokwi CLI: setiap run memakai flash bersih, tidak ada opsi persistensi. Yang terbukti di simulasi adalah round-trip tulis–baca NVS dalam satu boot; persistensi lintas reboot dipindah ke HW-9.2 (hardware). |
+| **Konsekuensi 3** | `wokwi-ds18b20` dan `board-esp32-devkit-c-v4` menghasilkan peringatan `[unsupported-part]` saat lint. Bukan error: Wokwi hanya menandai tipe part yang belum terdokumentasi publik. |
+
 ---
 
 ## Bagian B — Risk Register

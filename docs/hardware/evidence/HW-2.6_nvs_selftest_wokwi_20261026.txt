@@ -10,7 +10,7 @@ Yang dibuktikan:
    from_nvs=1. Nilai selftest sengaja beda dari default (2760/1310/1470/305)
    supaya tertukar nilai langsung kelihatan.
 3. calibration_validate() menolak nilai tidak masuk akal sebelum disimpan
-   maupun sesudah dibaca; diuji di unit test native (6 kasus).
+   maupun sesudah dibaca; diuji di unit test native (7 kasus).
 
 Batas bukti yang jujur:
 Wokwi CLI memakai flash bersih setiap run (tidak ada opsi persistensi flash),

@@ -169,6 +169,9 @@ Nilai injeksi tepat: [`05_WOKWI_SIMULASI.md`](05_WOKWI_SIMULASI.md) §5.
 | 3* | `esp32dev` | 6,8 % (22.188 / 327.680 B) | 22,7 % (296.988 / 1.310.720 B) | 26 Okt 2026 | encoder + fungsi murni nyata, transport masih stub |
 | 3* | `wokwi` | 6,8 % (22.188 / 327.680 B) | 22,7 % (297.132 / 1.310.720 B) | 26 Okt 2026 | idem + PubSubClient |
 | 3* | `native` | — | — | 26 Okt 2026 | env unit test, 16 test PASS (tidak ada batas RAM/Flash) |
+| 2 | `esp32dev` | 6,8 % (22.300 / 327.680 B) | 24,0 % (314.556 / 1.310.720 B) | 26 Okt 2026 | driver sensor + kalibrasi NVS, transport masih stub |
+| 2 | `wokwi` | 6,8 % (22.324 / 327.680 B) | 24,7 % (323.468 / 1.310.720 B) | 26 Okt 2026 | idem + PubSubClient + `SENSOR_PROBE`/`CAL_NVS_SELFTEST` |
+| 2 | `native` | — | — | 26 Okt 2026 | 30 test PASS (payload + sensors_core + calibration_core) |
 | 3 | `esp32dev` | | | | + LoRa + payload |
 | 3 | `wokwi` | | | | + WiFi + PubSubClient |
 | 4 | `esp32dev` | | | | final |
@@ -211,6 +214,12 @@ Semua file disimpan di `docs/hardware/evidence/` (folder ini milik domain IoT, a
 | 2 | Build simulasi sukses | `build_wokwi.txt` | HW-1.2 |
 | 3 | Unit test lulus | `unit_test_<tgl>.txt` | HW-7.1 |
 | 3a | Unit test native (payload + sensors_core) | `unit_test_native_20261026.txt` | HW-3.5 |
+| 3b | Unit test native `calibration_core` | `unit_test_native_20261026.txt` (30 test, bagian `[PASSED]`) | HW-2.6 |
+| 3c | ADC burst + median di simulator | `HW-2.1_adc_burst_wokwi_20261026.txt` | HW-2.1 |
+| 3d | DS18B20 normal + di luar rentang | `HW-2.2_ds18b20_wokwi_20261026.txt` | HW-2.2 |
+| 3e | NVS kosong → default + round-trip tulis/baca | `HW-2.6_nvs_selftest_wokwi_20261026.txt` | HW-2.6 |
+| 3f | Lint `diagram.json` | `HW-5.1_diagram_lint_20261026.txt` | HW-5.1 |
+| 3g | Dua skenario demo jalan di simulator | `HW-5.2_wokwi_scenario_ab_20261026.txt` | HW-5.2 |
 | 4 | Payload sampai broker | `I03_mqtt_rx.txt` | HW-5.4 |
 | 5 | Hex dump payload | `payload_hexdump.txt` | HW-3.2 |
 | 6 | Integrasi ke backend | `I07_backend.png` + `I07_query.txt` | HW-7.2 |

@@ -22,7 +22,7 @@ Menghasilkan firmware ESP32 dan simulasi sirkuit Wokwi yang mampu melakukan akui
 | Tahap | Status |
 |---|---|
 | TAHAP 1 — Struktur Proyek & Pinout | ✅ selesai 26 Okt 2026 |
-| TAHAP 2 — Driver Sensor & Kalibrasi | 🟨 sebagian: konversi VWC/pH/baterai selesai + lulus unit test; driver ADC burst, DS18B20, dan NVS belum |
+| TAHAP 2 — Driver Sensor & Kalibrasi | ✅ selesai 26 Okt 2026 |
 | TAHAP 3 — Protokol Telemetri LoRa | 🟨 sebagian: encoder payload final + 6 unit test; dua transport masih stub |
 | TAHAP 4 — Manajemen Daya & Deep Sleep | ⬜ |
 | TAHAP 5 — Virtual Testbed Wokwi | ⬜ |
@@ -55,11 +55,11 @@ Menghasilkan firmware ESP32 dan simulasi sirkuit Wokwi yang mampu melakukan akui
 
 ---
 
-### TAHAP 2: Driver Sensor & Kalibrasi Fisik
+### TAHAP 2: Driver Sensor & Kalibrasi Fisik — ✅ SELESAI 26 Okt 2026
 
 #### 🟢 HW-1.2: Driver Pembacaan & Filtering Sensor
 - **Deskripsi:** Implementasi pembacaan analog & digital dengan perlindungan noise dan pergeseran nilai.
-- **Target File:** `firmware/src/sensors.cpp`, `firmware/include/sensors.h`
+- **Target File:** `firmware/src/sensors.cpp`, `firmware/src/sensors_core.cpp`, `firmware/include/sensors.h`
 - **Spesifikasi:**
   - `analogSetAttenuation(ADC_11db);` untuk ADC ESP32.
   - **Burst Sampling:** Ambil 5 sampel pembacaan berturut-turut dengan jeda 50 ms, buang nilai min dan max, lalu hitung rata-rata 3 nilai tengah (median-average filter).
@@ -68,9 +68,11 @@ Menghasilkan firmware ESP32 dan simulasi sirkuit Wokwi yang mampu melakukan akui
   - **Kompensasi pH terhadap Kelembaban:**
     `ph_corrected = ph_raw + (0.15 * (50.0 - moisture_pct) / 50.0);`
 - **Checklist:**
-  - [ ] Nilai kelembaban selalu dalam rentang 0.0 – 100.0%.
-  - [ ] Nilai suhu DS18B20 valid (-10°C s.d. 60°C).
-  - [ ] Nilai pH terkoreksi dalam rentang wajar (3.0 – 10.0).
+  - [x] Nilai kelembaban selalu dalam rentang 0.0 – 100.0%.
+  - [x] Nilai suhu DS18B20 valid (-10°C s.d. 60°C); di luar itu dikirim apa adanya dengan status `OUT_OF_RANGE`, putus (-127 °C) jadi `-999`/`DISCONNECTED`.
+  - [x] Nilai pH terkoreksi dalam rentang wajar (3.0 – 10.0).
+- **Bukti:** 30 unit test native PASS; nilai Serial di simulator cocok persis dengan `playbook/05_WOKWI_SIMULASI.md` §5.5–5.6 (`evidence/HW-2.1_adc_burst_wokwi_20261026.txt`, `evidence/HW-2.2_ds18b20_wokwi_20261026.txt`, `evidence/HW-2.6_nvs_selftest_wokwi_20261026.txt`).
+- **Catatan:** DS18B20 memakai konversi blocking 375 ms (resolusi 11-bit), bukan non-blocking seperti bunyi `playbook/03_ROADMAP_TUGAS.md` HW-2.2 — alasannya di `DEC-IOT-17`. Persistensi kalibrasi lintas reboot belum bisa dibuktikan di Wokwi CLI (flash bersih tiap run), diverifikasi di HW-9.2.
 
 ---
 
