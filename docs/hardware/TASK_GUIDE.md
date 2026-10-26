@@ -17,9 +17,24 @@ Menghasilkan firmware ESP32 dan simulasi sirkuit Wokwi yang mampu melakukan akui
 
 ---
 
+## 📈 Status Progres
+
+| Tahap | Status |
+|---|---|
+| TAHAP 1 — Struktur Proyek & Pinout | ✅ selesai 26 Okt 2026 |
+| TAHAP 2 — Driver Sensor & Kalibrasi | ⬜ berikutnya (playbook FASE 2) |
+| TAHAP 3 — Protokol Telemetri LoRa | ⬜ |
+| TAHAP 4 — Manajemen Daya & Deep Sleep | ⬜ |
+| TAHAP 5 — Virtual Testbed Wokwi | ⬜ |
+
+---
+
 ## 📋 Daftar Tugas & Tahapan Implementasi
 
-### TAHAP 1: Struktur Proyek & Konfigurasi Pinout
+### TAHAP 1: Struktur Proyek & Konfigurasi Pinout — ✅ SELESAI 26 Okt 2026
+
+> **Bukti:** `docs/hardware/evidence/build_esp32dev.txt` dan `build_wokwi.txt` (keduanya `SUCCESS`).
+> Detail task atomik ada di [`playbook/03_ROADMAP_TUGAS.md`](playbook/03_ROADMAP_TUGAS.md) FASE 1 (HW-1.1 … HW-1.4), status di [`playbook/00_INDEX.md`](playbook/00_INDEX.md) §4.
 
 #### 🟢 HW-1.1: Setup PlatformIO / Arduino Project
 - **Deskripsi:** Inisialisasi struktur firmware di folder `firmware/` untuk ESP32 NodeMCU V1 (30-pin).
@@ -27,8 +42,9 @@ Menghasilkan firmware ESP32 dan simulasi sirkuit Wokwi yang mampu melakukan akui
   - `firmware/platformio.ini` (board: `esp32dev`, framework: `arduino`, lib_deps: `OneWire`, `DallasTemperature`, `LoRa`, `ArduinoJson`)
   - `firmware/src/main.cpp`
   - `firmware/include/config.h` (pin definitions, konstanta kalibrasi)
+- **Status:** Struktur final ada di [`playbook/04_FIRMWARE_CORE.md`](playbook/04_FIRMWARE_CORE.md) §1. `main.cpp` hanya orkestrasi; 6 modul lain sudah ada sebagai stub bertanda `TODO HW-x.y`.
 - **Checklist:**
-  - [ ] Pinout mengacu ke [`docs/hardware/PINOUT_AND_SCHEMATICS.md`](PINOUT_AND_SCHEMATICS.md):
+  - [x] Pinout mengacu ke [`docs/hardware/PINOUT_AND_SCHEMATICS.md`](PINOUT_AND_SCHEMATICS.md):
     - GPIO 34: Sensor Kelembaban Kapasitif v1.2 (ADC1_CH6)
     - GPIO 32: Sensor pH Tanah Analog (ADC1_CH4)
     - GPIO 4: DS18B20 1-Wire Data (+ 4.7kΩ pull-up)

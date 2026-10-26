@@ -181,6 +181,22 @@
 | **Keputusan** | Build Wokwi memakai tidur 10 detik, dengan **cetakan Serial eksplisit** bahwa ini bukan perilaku produksi. |
 | **Risiko** | Seseorang (termasuk juri) dapat menyimpulkan firmware produksi tidur 10 detik. Mitigasi: peringatan di Serial, di README, dan di narasi video. |
 
+### DEC-IOT-16 — Penyimpangan dari `04_FIRMWARE_CORE.md` saat Implementasi FASE 1
+
+| | |
+|---|---|
+| **Tanggal** | 26 Okt 2026 |
+| **Status** | ✅ Diputuskan |
+| **Konteks** | `00_INDEX.md` §5 aturan 3 mewajibkan setiap penyimpangan dari `04_FIRMWARE_CORE.md` dicatat di sini sebelum kode ditulis. FASE 1 (HW-1.1 … HW-1.4) menyimpang di empat titik. |
+| **Temuan 1** | `04` §8 menulis `transport.h` dengan `#if TRANSPORT_KIND == TRANSPORT_KIND_LORA` tanpa meng-`include` `config.h`. Makro tak dikenal dievaluasi `0`, sehingga kedua cabang mati dan `transport_topic()` tidak pernah dideklarasikan. |
+| **Perbaikan 1** | `transport.h` meng-`include` `config.h`. Ini perbaikan bug, bukan perubahan desain. |
+| **Temuan 2** | `03` HW-1.1 meminta guard `#ifndef NODE_ID` di `config.h`, sedangkan DEC-IOT-03 meminta `#if defined(SIM_NODE)`. Dua instruksi ini bertabrakan. |
+| **Perbaikan 2** | Dipakai `#if defined(SIM_NODE)` sesuai DEC-IOT-03. Guard `#ifndef` tidak diperlukan karena sumber `NODE_ID` hanya satu blok `#if`. |
+| **Perbaikan 3** | `LORA_RETRY_MAX` / `LORA_RETRY_DELAY_MS` dihapus, diganti `TX_RETRY_MAX` / `TX_RETRY_DELAY_MS` (`04` §3). Dua konstanta lama belum dirujuk siapa pun; dibiarkan akan jadi sumber kebenaran ganda untuk angka yang sama. |
+| **Perbaikan 4** | `-D FW_PROFILE="field"` dari `04` §2 tidak dipakai karena tidak dirujuk logika mana pun. Menghindari risiko quoting build flag di Windows. |
+| **Ditunda** | `[env:native]` tidak dibuat di FASE 1, dipindah ke HW-3.5. Alasan: `sensors_core.cpp` belum ada, dan `config.h` masih memakai makro Arduino (`ADC_11db`) sehingga tidak bisa dikompilasi native apa adanya. |
+| **Konsekuensi** | `payload.cpp` dan fungsi murni `sensors.cpp` belum bisa diuji di PC sampai HW-3.5 memisahkan konstanta Arduino keluar dari `config.h`. |
+
 ---
 
 ## Bagian B — Risk Register

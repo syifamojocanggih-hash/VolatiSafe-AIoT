@@ -72,19 +72,19 @@ Update kolom Status dan Bukti setiap menyelesaikan task. Jangan tandai `✅` tan
 ### FASE 0 — Lingkungan & Repo Hygiene
 | ID | Task | Status | Bukti |
 |---|---|---|---|
-| HW-0.1 | Unduh packages ESP32 + library via `pio run` | ⬜ | |
-| HW-0.2 | Aktifkan lisensi Wokwi CLI | ⬜ | |
-| HW-0.3 | Jalankan Mosquitto lokal + uji pub/sub | ⬜ | |
-| HW-0.4 | Eskalasi `.gitignore` untuk `firmware/.pio/` | ⬜ | |
-| HW-0.5 | Kunci versi dependensi + baseline build | ⬜ | |
+| HW-0.1 | Unduh packages ESP32 + library via `pio run` | ✅ | `evidence/build_esp32dev.txt` |
+| HW-0.2 | Aktifkan lisensi Wokwi CLI | ✅ | `~/.wokwi/user.tok` aktif |
+| HW-0.3 | Jalankan Mosquitto lokal + uji pub/sub | ✅ | container `volatisafe-mqtt` di `localhost:1883` |
+| HW-0.4 | Eskalasi `.gitignore` untuk `firmware/.pio/` | ✅ | `firmware/.gitignore` (commit `5d0ce46`) |
+| HW-0.5 | Kunci versi dependensi + baseline build | ✅ | `firmware/package-lock.json`, 07 §5.1, commit `55e01b8` |
 
 ### FASE 1 — Skeleton Firmware & Build Ganda
 | ID | Task | Status | Bukti |
 |---|---|---|---|
-| HW-1.1 | Restrukturisasi `firmware/` multi-modul | ⬜ | |
-| HW-1.2 | Dual env `esp32dev` + `wokwi` di `platformio.ini` | ⬜ | |
-| HW-1.3 | Kontrak internal `TelemetryFrame` | ⬜ | |
-| HW-1.4 | Skrip build matrix kedua env | ⬜ | |
+| HW-1.1 | Restrukturisasi `firmware/` multi-modul | ✅ | `firmware/src/` 7 file, `firmware/include/` 7 header |
+| HW-1.2 | Dual env `esp32dev` + `wokwi` di `platformio.ini` | ✅ | `evidence/build_esp32dev.txt`, `evidence/build_wokwi.txt` |
+| HW-1.3 | Kontrak internal `TelemetryFrame` | ✅ | `firmware/include/types.h` |
+| HW-1.4 | Skrip build matrix kedua env | ✅ | `firmware/build_all.ps1` |
 
 ### FASE 2 — Driver Sensor & Kalibrasi
 | ID | Task | Status | Bukti |
