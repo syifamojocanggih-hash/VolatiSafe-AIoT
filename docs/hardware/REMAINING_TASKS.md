@@ -24,13 +24,13 @@ Aturan:
 ## FASE 5 - Wokwi (sisa checklist)
 
 Catatan: `TASK_GUIDE.md` menamai testbed ini **HW-1.5**; statusnya mengikuti
-HW-5.1..HW-5.4 dan sisa checklist screenshot/link di HW-8.2.
+HW-5.1..HW-5.4. Screenshot sudah selesai; sisa checklist hanya link publik.
 
-- [ ] **HW-8.2** Screenshot rangkaian Wokwi + link publik.
-  Checklist screenshot/link FASE 5 ditutup lewat task ini.
-  Screenshot harus manual dari UI Wokwi; link butuh proyek wokwi.com.
-  Catatan: akses langsung `host.wokwi.internal` belum terbukti karena butuh
-  Private Gateway berbayar; bukti saat ini memakai tunnel TCP.
+- [ ] **HW-8.2** Link publik Wokwi.
+  Screenshot rangkaian sudah ada di `evidence/wokwi_diagram.png`; link publik
+  masih butuh proyek wokwi.com. Catatan: akses langsung
+  `host.wokwi.internal` belum terbukti karena butuh Private Gateway berbayar;
+  bukti saat ini memakai tunnel TCP.
 
 ## FASE 6 - Gateway & MQTT (sisa)
 
@@ -63,7 +63,6 @@ HW-5.1..HW-5.4 dan sisa checklist screenshot/link di HW-8.2.
   Blocker: kuota CI Wokwi gratis habis. `scenario_i06.yaml` sudah siap.
 - [ ] **HW-7.4 #6, #7, #8, #9, #11** Bukti integrasi backend, dashboard E-01/E-02,
   E-03, E-02, dan video.
-  `#10` (screenshot rangkaian) ditutup lewat HW-8.2.
   Blocker: backend/dashboard/kuota/video.
 - [ ] **HW-7.4** lengkapi 12 item dan hapus task ini setelah
   `evidence/HW-7.4_evidence_inventory_20261027.md` tidak punya item ⛔/🟨.

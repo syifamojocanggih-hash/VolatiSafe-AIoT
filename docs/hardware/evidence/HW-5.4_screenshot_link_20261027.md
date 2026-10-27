@@ -2,7 +2,7 @@
 
 ## Screenshot rangkaian
 
-Percobaan otomatis:
+Percobaan CLI:
 
 ```
 wokwi-cli . --timeout 25000 --screenshot-part esp --screenshot-time 6000 \
@@ -11,9 +11,15 @@ wokwi-cli . --timeout 25000 --screenshot-part esp --screenshot-time 6000 \
 
 Hasil: `Error 1: Part does not have a valid framebuffer: esp`.
 Board ESP32 tidak punya framebuffer yang bisa ditangkap `--screenshot-part`.
-Screenshot rangkaian harus diambil manual dari UI Wokwi (VS Code webview atau
-wokwi.com) memakai alat screenshot Windows. File target:
-`docs/hardware/evidence/wokwi_diagram.png`.
+
+Solusi yang dipakai: buka proyek di VS Code, jalankan
+**Wokwi: Start Simulator**, lalu capture window simulator. Hasil:
+
+- `docs/hardware/evidence/wokwi_diagram.png` — crop panel simulator 1270x490
+- `docs/hardware/evidence/wokwi_diagram_full.png` — window penuh 1920x1080
+
+Rangkaian yang terlihat: ESP32 + 3 potensiometer + DS18B20 + resistor pull-up.
+Screenshot diambil 27 Okt 2026.
 
 ## Link publik Wokwi
 
@@ -25,5 +31,7 @@ HW-8.2 (Demo & Handover).
 
 ## Yang sudah ada
 
-- `diagram.json`, `wokwi.toml`, 7 skenario, `README.md`.
+- `diagram.json`, `wokwi.toml`, 9 skenario, `README.md`.
+- Screenshot rangkaian sudah ada (`wokwi_diagram.png` + full).
+- Yang belum: link publik Wokwi.
 - Screenshot tidak menghalangi HW-5.3/HW-5.4; keduanya sudah punya bukti teks.

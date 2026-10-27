@@ -31,7 +31,7 @@ Acuan   : `07_TEST_PLAN.md` 6 (12 item bukti wajib)
 | 7 | Skenario A | 🟨 | `E01_serial.txt`, `E01_mqtt.txt`, `E01_validation.txt`; dashboard PNG belum |
 | 8 | Skenario B | ⛔ | Kuota CI Wokwi gratis habis; log `[SENS]` B lama ada di `HW-4.3_scenario_b_20261027.txt` |
 | 9 | Skenario C | ⛔ | Butuh backend/failover; belum ada data masuk |
-| 10 | Screenshot rangkaian | ⛔ | `wokwi-cli` tidak punya framebuffer board; perlu manual UI |
+| 10 | Screenshot rangkaian | ✅ | `wokwi_diagram.png` (1270x490) + `wokwi_diagram_full.png` (1920x1080) |
 | 11 | Video demo | ⛔ | FASE 8; butuh dashboard/backend |
 | 12 | Baseline RAM/Flash | ✅ | `07_TEST_PLAN.md` 5.1 |
 
