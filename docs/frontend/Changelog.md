@@ -13,8 +13,13 @@ Seluruh catatan kemajuan, keputusan teknis, dan implementasi antarmuka frontend 
     2. **Waspada (31–60%):** Kuning/Amber (`#D97706` / `#CA8A04`), icon `AlertCircle`, rekomendasi metode penaburan tugal/benam 5–7 cm atau tunda ke sore hari.
     3. **Kritis (61–80%):** Oranye (`#EA580C`), icon `AlertTriangle`, peringatan tunda penaburan karena tanah panas-kering memicu hidrolisis enzimatik cepat.
     4. **Bahaya (>80%):** Merah Pekat (`#DC2626`), icon `AlertOctagon`, larangan keras pemupukan karena kehilangan nitrogen >80%.
-- **Penambahan Skala Indikator Tingkat Risiko:**
-  - Menambahkan pill skala 4-tingkat (`● Aman · ● Waspada · ● Kritis · ● Bahaya`) pada header [`RiskStatusBanner.tsx`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/frontend/src/components/dashboard/RiskStatusBanner.tsx) yang secara otomatis menyorot tingkat risiko yang sedang aktif.
+- **Penyederhanaan Header Status Banner:**
+  - Menghapus pill skala panjang (`● Aman · ● Waspada · ● Kritis · ● Bahaya`) dari header [`RiskStatusBanner.tsx`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/frontend/src/components/dashboard/RiskStatusBanner.tsx) dan mempertahankan badge status 4 tingkatan (`STATUS: AMAN`, `STATUS: WASPADA`, `STATUS: KRITIS`, `STATUS: BAHAYA`) dengan tampilan teks bersih tanpa icon gambar agar ringkas dan fokus.
+- **Penyederhanaan Dashboard Utama ([`page.tsx`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/frontend/src/app/page.tsx)):**
+  - Menghapus bar status koneksi backend (`Central API Backend & TimescaleDB Terhubung`) dari bagian atas dashboard agar antarmuka lebih bersih dan langsung menampilkan banner status risiko.
+- **Rotasi Jadwal Jendela Aman Dinamis 5 Detik ([`SafeWindowForecast.tsx`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/frontend/src/components/dashboard/SafeWindowForecast.tsx)):**
+  - Mengimplementasikan algoritma pengelompokan interval kontinu (*contiguous window clustering*) untuk mendeteksi jam-jam aman yang terpisah (misal pagi 06.00–09.00 dan sore 16.00–18.00 dengan jeda terik siang).
+  - Jika satu hari memiliki $\ge 2$ jendela aman terputus, teks ringkasan tetap dalam satu baris bersih (`00.00 – 09.00  Aman 19%`) dan berkedip/berganti halus (*fade ketip-ketip*) setiap **5 detik** tanpa elemen badge tambahan atau indikator berlebih agar antarmuka tetap rapi, simpel, dan elegan.
 - **Penyelarasan Kartu Metrik AVRI ([`MetricCardsGrid.tsx`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/frontend/src/components/dashboard/MetricCardsGrid.tsx)):**
   - Memisahkan status Oranye (Kritis, `#EA580C`) dari Merah Pekat (Bahaya, `#DC2626`) agar kartu AVRI sinkron dengan tingkat risiko pada banner utama.
 - **Dukungan Modal Analisis TreeSHAP & PIML ([`PredictionDetailModal.tsx`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/frontend/src/components/modals/PredictionDetailModal.tsx)):**
@@ -37,9 +42,19 @@ Seluruh catatan kemajuan, keputusan teknis, dan implementasi antarmuka frontend 
 - **Penyelarasan Legenda & Visual Spasial Peta ([`ParcelRiskMap.tsx`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/frontend/src/components/map/ParcelRiskMap.tsx), [`LeafletFieldMap.tsx`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/frontend/src/components/map/LeafletFieldMap.tsx), [`page.tsx (map)`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/frontend/src/app/map/page.tsx)):**
   - Memisahkan legenda peta spasial menjadi 4 zona warna terpisah: Aman (Hijau `#16A34A`), Waspada (Kuning/Amber `#CA8A04`), Kritis (Oranye `#EA580C`), dan Bahaya (Merah `#DC2626`).
   - Memperbarui styling badge kartu detail persil terpilih agar secara visual membedakan `kritis` (oranye) dan `bahaya` (merah).
-  - Mengintegrasikan `currentRiskCategory` dan `handleSelectRiskCategory` pada `SettingsModal` di halaman `/map` agar konsisten dengan halaman dashboard utama.
-- **Validasi Build:**
-  - `npx tsc --noEmit` dan `npm run build` berhasil 100% tanpa error TypeScript/ESLint.
+- **Penyelarasan 4 Tingkat Risiko Jendela Waktu Aman ([`SafeWindowForecast.tsx`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/frontend/src/components/dashboard/SafeWindowForecast.tsx)):**
+  - Menggantikan tampilan biner lama (yang sebelumnya hanya blok hijau vs abu-abu/merah) menjadi **24 blok per jam berwarna dinamis** sesuai kategori risiko:
+    - **Aman (≤30%):** Hijau (`#16A34A`), jendela emas penaburan Urea.
+    - **Waspada (31–60%):** Kuning/Amber (`#D97706`), aplikasi perlu metode tugal/benam.
+    - **Kritis (61–80%):** Oranye (`#EA580C`), hidrolisis enzimatik aktif, tunda penaburan.
+    - **Bahaya (>80%):** Merah (`#DC2626`), dilarang keras menabur Urea.
+  - Menambahkan legenda 4 warna resmi (`■ Aman · ■ Waspada · ■ Kritis · ■ Bahaya`) pada header komponen.
+  - Memperkaya `DayWindowProjection` pada [`dashboard.ts`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/frontend/src/types/dashboard.ts), `transformForecastToDays` pada [`page.tsx`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/frontend/src/app/page.tsx), dan data mock pada [`dashboardMock.ts`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/frontend/src/mocks/dashboardMock.ts) dengan array `hourlyCategories`.
+- **Rekonstruksi & Sinkronisasi Container Docker (`docker/docker-compose.yml`):**
+  - Melakukan rebuild dan recreate container `volatisafe_frontend` dan `volatisafe_backend` sehingga seluruh kode terbaru dan volume mount tersinkronisasi seketika ke port `3000` dan `8000`.
+- **Validasi Visual Browser & Build:**
+  - `npx tsc --noEmit` lulus 100% tanpa error.
+  - Browser subagent memverifikasi langsung di `http://localhost:3000` bahwa banner `RiskStatusBanner`, kartu AVRI, kartu telemetri, dan diagram `SafeWindowForecast` telah aktif menampilkan ke-4 tingkat warna risiko (Aman, Waspada, Kritis, Bahaya).
 
 ---
 

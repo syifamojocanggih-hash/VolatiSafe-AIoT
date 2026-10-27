@@ -8,7 +8,7 @@ Master changelog tingkat sistem yang mencatat rilis dan tonggak integrasi utama 
 ---
 
 ## [Unreleased]
-- **Frontend & Fullstack:** Transformasi sistem peringatan risiko dari skema biner (merah/hijau) menjadi 4 tingkatan status resmi: **Aman (Hijau)**, **Waspada (Amber)**, **Kritis (Oranye)**, dan **Bahaya (Merah)** pada `RiskStatusBanner`, kartu AVRI `MetricCardsGrid`, `PredictionDetailModal`, dan pemilih skenario 4-level di `SettingsModal`.
+- **Frontend & Fullstack:** Transformasi sistem peringatan risiko dari skema biner (merah/hijau) menjadi 4 tingkatan status resmi: **Aman (Hijau)**, **Waspada (Amber)**, **Kritis (Oranye)**, dan **Bahaya (Merah)** pada `RiskStatusBanner`, kartu AVRI `MetricCardsGrid`, `PredictionDetailModal`, pemilih skenario 4-level di `SettingsModal`, dan 24 blok per jam pada `SafeWindowForecast`.
 - **Simulator & Peta Spasial:** Penyediaan **4 Preset Skenario 1-Klik** di `WhatIfPanel` (Aman, Waspada, Kritis, Bahaya) dengan kalkulasi live backend FastAPI, serta pemisahan 4 zona warna terpisah pada legenda dan badge persil di `ParcelRiskMap` dan `LeafletFieldMap`.
 - **Backend Ingestion & API:** Penyelarasan pemetaan warna dan kategori peringatan `alert_banner` pada endpoint `/fields/{field_id}/current-status` untuk memisahkan level kritis (`#EA580C`) dan bahaya (`#DC2626`).
 - Integrasi modul AI Engine, Digital Twin, dan Backend Ingestion.

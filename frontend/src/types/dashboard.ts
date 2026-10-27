@@ -41,13 +41,25 @@ export interface ForecastPoint {
   threshold: number;
 }
 
+export interface SafeWindowSegment {
+  startHour: number;
+  endHour: number;
+  rangeText: string;
+  riskScoreText: string;
+  category: RiskCategory;
+  periodLabel?: string;
+}
+
 export interface DayWindowProjection {
   dayNumber: number;
   dayLabel: string;
-  hourlyBlocks: boolean[]; // 24 items, true = green (safe)
+  hourlyBlocks: boolean[]; // 24 items, true = safe
+  hourlyCategories?: RiskCategory[]; // 24 items: 'aman' | 'waspada' | 'kritis' | 'bahaya'
   safeRangeText: string;
   riskScoreText: string;
+  category?: RiskCategory;
   isSafe: boolean;
+  safeWindows?: SafeWindowSegment[];
 }
 
 export interface DashboardState {

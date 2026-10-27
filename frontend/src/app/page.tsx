@@ -17,7 +17,6 @@ import { WhatIfPanel } from '@/components/simulator/WhatIfPanel';
 import { PredictionDetailModal } from '@/components/modals/PredictionDetailModal';
 import { SettingsModal } from '@/components/modals/SettingsModal';
 import {
-  checkBackendHealth,
   getFieldCurrentStatus,
   getFieldActionStatus,
   recordPostponeAction,
@@ -38,10 +37,11 @@ import {
   StatusBannerData,
   ForecastPoint,
   DayWindowProjection,
+  SafeWindowSegment,
   DashboardState,
   RiskCategory,
 } from '@/types/dashboard';
-import { CheckCircle2, Database } from 'lucide-react';
+import { CheckCircle2 } from 'lucide-react';
 
 function transformBackendStatus(
   status: BackendFieldStatus,
@@ -147,14 +147,18 @@ function transformForecastToDays(
     dayNumber: number;
     dayLabel: string;
     hourlyBlocks: boolean[];
+    hourlyCategories: RiskCategory[];
     safeHours: number[];
     minAvri: number;
+    bestCategory: RiskCategory;
   }> = [1, 2, 3].map((num) => ({
     dayNumber: num,
     dayLabel: `Hari ${num}`,
     hourlyBlocks: new Array(24).fill(false),
+    hourlyCategories: new Array<RiskCategory>(24).fill('kritis'),
     safeHours: [],
     minAvri: 999,
+    bestCategory: 'kritis',
   }));
 
   windows.forEach((win) => {
@@ -175,13 +179,27 @@ function transformForecastToDays(
       let endH = eDate.getUTCHours();
       if (endH <= startH) endH = 24;
 
+      const cat: RiskCategory =
+        (win.risk_category as RiskCategory) ||
+        (win.avri_score <= 30
+          ? 'aman'
+          : win.avri_score <= 60
+            ? 'waspada'
+            : win.avri_score <= 80
+              ? 'kritis'
+              : 'bahaya');
+
       for (let h = startH; h < endH && h < 24; h++) {
         dayTarget.hourlyBlocks[h] = win.is_safe;
+        dayTarget.hourlyCategories[h] = cat;
         if (win.is_safe) {
           dayTarget.safeHours.push(h);
         }
       }
-      if (win.avri_score < dayTarget.minAvri) dayTarget.minAvri = win.avri_score;
+      if (win.avri_score < dayTarget.minAvri) {
+        dayTarget.minAvri = win.avri_score;
+        dayTarget.bestCategory = cat;
+      }
     }
   });
 
@@ -189,23 +207,61 @@ function transformForecastToDays(
     const isSafe = d.safeHours.length > 0;
     let safeRangeText = 'Tidak ada jendela aman';
     let riskScoreText = 'Risiko Tinggi';
+    const safeWindows: SafeWindowSegment[] = [];
 
     if (isSafe) {
-      const minH = Math.min(...d.safeHours);
-      const maxH = Math.max(...d.safeHours) + 1;
-      const minHStr = String(minH).padStart(2, '0') + '.00';
-      const maxHStr = String(maxH).padStart(2, '0') + '.00';
-      safeRangeText = `${minHStr} - ${maxHStr}`;
-      riskScoreText = `Aman ${Math.round(d.minAvri)}%`;
+      // Find contiguous clusters of safe hours
+      const sortedHours = Array.from(new Set(d.safeHours)).sort((a, b) => a - b);
+      const clusters: Array<{ start: number; end: number }> = [];
+      let currentCluster: { start: number; end: number } | null = null;
+
+      for (const h of sortedHours) {
+        if (!currentCluster) {
+          currentCluster = { start: h, end: h + 1 };
+        } else if (h === currentCluster.end) {
+          currentCluster.end = h + 1;
+        } else {
+          clusters.push(currentCluster);
+          currentCluster = { start: h, end: h + 1 };
+        }
+      }
+      if (currentCluster) {
+        clusters.push(currentCluster);
+      }
+
+      clusters.forEach((c) => {
+        const startStr = String(c.start).padStart(2, '0') + '.00';
+        const endStr = String(c.end).padStart(2, '0') + '.00';
+        const rangeText = `${startStr} – ${endStr}`;
+        let periodLabel = 'Pagi';
+        if (c.start >= 11 && c.start < 15) periodLabel = 'Siang';
+        else if (c.start >= 15 && c.start < 18) periodLabel = 'Sore';
+        else if (c.start >= 18 || c.start < 5) periodLabel = 'Malam';
+
+        safeWindows.push({
+          startHour: c.start,
+          endHour: c.end,
+          rangeText,
+          riskScoreText: `${d.bestCategory === 'aman' ? 'Aman' : 'Waspada'} ${Math.round(d.minAvri)}%`,
+          category: d.bestCategory,
+          periodLabel,
+        });
+      });
+
+      safeRangeText = safeWindows.map((w) => w.rangeText).join(' & ');
+      riskScoreText = `${d.bestCategory === 'aman' ? 'Aman' : 'Waspada'} ${Math.round(d.minAvri)}%`;
     }
 
     return {
       dayNumber: d.dayNumber,
       dayLabel: d.dayLabel,
       hourlyBlocks: d.hourlyBlocks,
+      hourlyCategories: d.hourlyCategories,
+      category: isSafe ? d.bestCategory : 'kritis',
       safeRangeText,
       riskScoreText,
       isSafe,
+      safeWindows,
     };
   });
 }
@@ -245,8 +301,6 @@ export default function DashboardPage() {
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   const [isPostponed, setIsPostponed] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
-  const [isBackendConnected, setIsBackendConnected] = useState(false);
-  const [isSyncingAction, setIsSyncingAction] = useState(false);
 
   // Initial data fallback
   const baseData = isSimulatedCritical ? criticalDashboardData : initialDashboardData;
@@ -255,10 +309,7 @@ export default function DashboardPage() {
   // Sync with real FastAPI Backend
   const loadBackendData = useCallback(async () => {
     try {
-      const health = await checkBackendHealth();
-      if (health) {
-        setIsBackendConnected(true);
-      }
+      // Backend is alive, proceed
 
       // 1. Fetch live field status and overwrite metrics + statusBanner
       const fieldStatus = await getFieldCurrentStatus('BLOK-A');
@@ -330,7 +381,6 @@ export default function DashboardPage() {
   // Real Farmer Action Handler connected to FastAPI /api/v1/fields/BLOK-A/postpone-action
   const handlePostpone = async () => {
     const nextAction = isPostponed ? 'cancel' : 'postpone';
-    setIsSyncingAction(true);
 
     try {
       const res = await recordPostponeAction(
@@ -344,7 +394,6 @@ export default function DashboardPage() {
 
       if (res) {
         setIsPostponed(res.is_postponed);
-        setIsBackendConnected(true);
         setCurrentData((prev) => ({
           ...prev,
           statusBanner: {
@@ -369,7 +418,6 @@ export default function DashboardPage() {
       setIsPostponed((prev) => !prev);
       setToastMessage('Aksi dicatat secara lokal.');
     } finally {
-      setIsSyncingAction(false);
       setTimeout(() => setToastMessage(null), 4500);
     }
   };
@@ -441,28 +489,6 @@ export default function DashboardPage() {
           ) : (
             /* Layar 1: Dashboard Utama Petak */
             <div className="space-y-4 sm:space-y-5">
-              {/* Backend & AIoT Integration Status Bar */}
-              <div className="flex flex-wrap items-center justify-between gap-2.5 px-4 py-2.5 rounded-2xl bg-white border border-slate-200/80 shadow-2xs text-xs">
-                <div className="flex items-center gap-2">
-                  <span className={`w-2.5 h-2.5 rounded-full ${isBackendConnected ? 'bg-emerald-500 animate-pulse' : 'bg-amber-400'}`} />
-                  <span className="font-semibold text-slate-800">
-                    {isBackendConnected ? 'Central API Backend & TimescaleDB Terhubung' : 'Mode Offline / Standalone'}
-                  </span>
-                  <span className="hidden sm:inline-block text-3xs font-mono px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 font-bold">
-                    :8000/api/v1
-                  </span>
-                </div>
-
-                <div className="flex items-center gap-3 text-2xs text-slate-500 font-medium">
-                  <span className="flex items-center gap-1">
-                    <Database className="w-3.5 h-3.5 text-emerald-600" />
-                    <span>TimescaleDB Live</span>
-                  </span>
-                  {isSyncingAction && (
-                    <span className="text-emerald-700 font-bold animate-pulse">Menyimpan Aksi ke Backend...</span>
-                  )}
-                </div>
-              </div>
 
               {/* Status Banner */}
               <RiskStatusBanner

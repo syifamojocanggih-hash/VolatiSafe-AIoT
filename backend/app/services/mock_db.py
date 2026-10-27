@@ -63,7 +63,7 @@ class MockDB:
         # 3. Master Fields
         self._fields["BLOK-A"] = {
             "field_id": "BLOK-A",
-            "field_name": "Kebun Jagung Pak Suparman · Blok A",
+            "field_name": "Kebun Jagung Pak Suparman - Blok A",
             "owner_name": "Pak Suparman",
             "owner_phone": "+6281234567890",
             "area_ha": 0.75,
@@ -212,6 +212,20 @@ class MockDB:
                 timestamp_end="2026-10-25T15:00:00Z",
                 avri_score=78.2,
                 risk_category="kritis",
+                is_safe=False
+            ),
+            ForecastWindowItemDTO(
+                timestamp_start="2026-10-25T15:00:00Z",
+                timestamp_end="2026-10-25T18:00:00Z",
+                avri_score=24.5,
+                risk_category="aman",
+                is_safe=True
+            ),
+            ForecastWindowItemDTO(
+                timestamp_start="2026-10-25T18:00:00Z",
+                timestamp_end="2026-10-25T21:00:00Z",
+                avri_score=42.0,
+                risk_category="waspada",
                 is_safe=False
             )
         ]

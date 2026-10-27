@@ -1,4 +1,4 @@
-import { DashboardState } from '@/types/dashboard';
+import { DashboardState, RiskCategory } from '@/types/dashboard';
 
 // Skenario Utama (Sesuai Screenshot Desain yang Diberikan Pengguna)
 export const initialDashboardData: DashboardState = {
@@ -73,38 +73,74 @@ export const initialDashboardData: DashboardState = {
     {
       dayNumber: 1,
       dayLabel: 'Hari 1',
-      // 24 jam (00-23 WIB): jam 6, 7, 8 aman (hijau)
       hourlyBlocks: [
         false, false, false, false, false, false,
         true, true, true, false, false, false,
-        false, false, false, false, false, false,
+        false, false, false, false, true, true,
         false, false, false, false, false, false,
       ],
-      safeRangeText: '06.00 - 09.00',
+      hourlyCategories: [
+        'waspada', 'waspada', 'waspada', 'waspada', 'waspada', 'waspada',
+        'aman', 'aman', 'aman', 'waspada', 'kritis', 'kritis',
+        'bahaya', 'bahaya', 'kritis', 'kritis', 'aman', 'aman',
+        'waspada', 'waspada', 'waspada', 'waspada', 'waspada', 'waspada',
+      ],
+      safeRangeText: '06.00 – 09.00 & 16.00 – 18.00',
       riskScoreText: 'Aman 18%',
+      category: 'aman',
       isSafe: true,
+      safeWindows: [
+        {
+          startHour: 6,
+          endHour: 9,
+          rangeText: '06.00 – 09.00',
+          riskScoreText: 'Aman 18%',
+          category: 'aman',
+          periodLabel: 'Pagi',
+        },
+        {
+          startHour: 16,
+          endHour: 18,
+          rangeText: '16.00 – 18.00',
+          riskScoreText: 'Aman 22%',
+          category: 'aman',
+          periodLabel: 'Sore',
+        },
+      ],
     },
     {
       dayNumber: 2,
       dayLabel: 'Hari 2',
-      // jam 17, 18 aman (hijau)
       hourlyBlocks: [
         false, false, false, false, false, false,
         false, false, false, false, false, false,
         false, false, false, false, false, true,
         true, false, false, false, false, false,
       ],
+      hourlyCategories: [
+        'waspada', 'waspada', 'waspada', 'waspada', 'waspada', 'waspada',
+        'waspada', 'waspada', 'kritis', 'kritis', 'bahaya', 'bahaya',
+        'bahaya', 'kritis', 'kritis', 'waspada', 'waspada', 'aman',
+        'aman', 'waspada', 'waspada', 'waspada', 'waspada', 'waspada',
+      ],
       safeRangeText: '17.00 - 19.00',
       riskScoreText: 'Aman 26%',
+      category: 'aman',
       isSafe: true,
     },
     {
       dayNumber: 3,
       dayLabel: 'Hari 3',
-      // semua terik / tidak ada jendela aman
       hourlyBlocks: new Array(24).fill(false),
+      hourlyCategories: [
+        'waspada', 'waspada', 'waspada', 'waspada', 'waspada', 'waspada',
+        'kritis', 'kritis', 'kritis', 'bahaya', 'bahaya', 'bahaya',
+        'bahaya', 'bahaya', 'bahaya', 'kritis', 'kritis', 'kritis',
+        'waspada', 'waspada', 'waspada', 'waspada', 'waspada', 'waspada',
+      ],
       safeRangeText: 'Tidak ada jendela aman',
       riskScoreText: 'Risiko Tinggi',
+      category: 'kritis',
       isSafe: false,
     },
   ],
@@ -162,6 +198,58 @@ export const waspadaDashboardData: DashboardState = {
       isAvriCard: true,
     },
   ],
+  forecast72h: [
+    {
+      dayNumber: 1,
+      dayLabel: 'Hari 1',
+      hourlyBlocks: [
+        false, false, false, false, false, false,
+        false, false, false, false, false, false,
+        false, false, false, false, true, true,
+        false, false, false, false, false, false,
+      ],
+      hourlyCategories: [
+        'waspada', 'waspada', 'waspada', 'waspada', 'waspada', 'waspada',
+        'waspada', 'waspada', 'kritis', 'kritis', 'kritis', 'kritis',
+        'kritis', 'kritis', 'kritis', 'waspada', 'aman', 'aman',
+        'waspada', 'waspada', 'waspada', 'waspada', 'waspada', 'waspada',
+      ],
+      safeRangeText: '16.00 - 18.00',
+      riskScoreText: 'Waspada 48%',
+      category: 'waspada',
+      isSafe: true,
+    },
+    {
+      dayNumber: 2,
+      dayLabel: 'Hari 2',
+      hourlyBlocks: [
+        false, false, false, false, false, false,
+        true, true, false, false, false, false,
+        false, false, false, false, false, false,
+        false, false, false, false, false, false,
+      ],
+      hourlyCategories: [
+        'waspada', 'waspada', 'waspada', 'waspada', 'waspada', 'waspada',
+        'aman', 'aman', 'waspada', 'kritis', 'kritis', 'bahaya',
+        'bahaya', 'kritis', 'kritis', 'waspada', 'waspada', 'waspada',
+        'waspada', 'waspada', 'waspada', 'waspada', 'waspada', 'waspada',
+      ],
+      safeRangeText: '06.00 - 08.00',
+      riskScoreText: 'Aman 28%',
+      category: 'aman',
+      isSafe: true,
+    },
+    {
+      dayNumber: 3,
+      dayLabel: 'Hari 3',
+      hourlyBlocks: new Array(24).fill(false),
+      hourlyCategories: new Array<RiskCategory>(24).fill('kritis'),
+      safeRangeText: 'Tidak ada jendela aman',
+      riskScoreText: 'Risiko Kritis',
+      category: 'kritis',
+      isSafe: false,
+    },
+  ],
 };
 
 // Skenario 3: Kritis (AVRI 74% - PRD Seksi 3 Demo Juri)
@@ -216,6 +304,53 @@ export const criticalDashboardData: DashboardState = {
       isAvriCard: true,
     },
   ],
+  forecast72h: [
+    {
+      dayNumber: 1,
+      dayLabel: 'Hari 1',
+      hourlyBlocks: new Array(24).fill(false),
+      hourlyCategories: [
+        'waspada', 'waspada', 'waspada', 'waspada', 'kritis', 'kritis',
+        'kritis', 'kritis', 'bahaya', 'bahaya', 'bahaya', 'bahaya',
+        'bahaya', 'bahaya', 'bahaya', 'kritis', 'kritis', 'kritis',
+        'kritis', 'waspada', 'waspada', 'waspada', 'waspada', 'waspada',
+      ],
+      safeRangeText: 'Tidak ada jendela aman',
+      riskScoreText: 'Kritis 74%',
+      category: 'kritis',
+      isSafe: false,
+    },
+    {
+      dayNumber: 2,
+      dayLabel: 'Hari 2',
+      hourlyBlocks: [
+        false, false, false, false, false, false,
+        true, true, true, false, false, false,
+        false, false, false, false, false, false,
+        false, false, false, false, false, false,
+      ],
+      hourlyCategories: [
+        'waspada', 'waspada', 'waspada', 'waspada', 'waspada', 'waspada',
+        'aman', 'aman', 'aman', 'kritis', 'kritis', 'bahaya',
+        'bahaya', 'bahaya', 'kritis', 'kritis', 'waspada', 'waspada',
+        'waspada', 'waspada', 'waspada', 'waspada', 'waspada', 'waspada',
+      ],
+      safeRangeText: '06.00 - 09.00',
+      riskScoreText: 'Aman 22%',
+      category: 'aman',
+      isSafe: true,
+    },
+    {
+      dayNumber: 3,
+      dayLabel: 'Hari 3',
+      hourlyBlocks: new Array(24).fill(false),
+      hourlyCategories: new Array<RiskCategory>(24).fill('kritis'),
+      safeRangeText: 'Tidak ada jendela aman',
+      riskScoreText: 'Risiko Kritis',
+      category: 'kritis',
+      isSafe: false,
+    },
+  ],
 };
 
 // Skenario 4: Bahaya Ekstrem (AVRI 88%)
@@ -268,6 +403,43 @@ export const dangerDashboardData: DashboardState = {
       delta24h: '+26%',
       status: 'danger',
       isAvriCard: true,
+    },
+  ],
+  forecast72h: [
+    {
+      dayNumber: 1,
+      dayLabel: 'Hari 1',
+      hourlyBlocks: new Array(24).fill(false),
+      hourlyCategories: new Array<RiskCategory>(24).fill('bahaya'),
+      safeRangeText: 'Dilarang tabur Urea',
+      riskScoreText: 'Bahaya 88%',
+      category: 'bahaya',
+      isSafe: false,
+    },
+    {
+      dayNumber: 2,
+      dayLabel: 'Hari 2',
+      hourlyBlocks: new Array(24).fill(false),
+      hourlyCategories: [
+        'bahaya', 'bahaya', 'bahaya', 'bahaya', 'bahaya', 'bahaya',
+        'kritis', 'kritis', 'kritis', 'bahaya', 'bahaya', 'bahaya',
+        'bahaya', 'bahaya', 'bahaya', 'bahaya', 'bahaya', 'kritis',
+        'kritis', 'bahaya', 'bahaya', 'bahaya', 'bahaya', 'bahaya',
+      ],
+      safeRangeText: 'Tidak ada jendela aman',
+      riskScoreText: 'Bahaya 82%',
+      category: 'bahaya',
+      isSafe: false,
+    },
+    {
+      dayNumber: 3,
+      dayLabel: 'Hari 3',
+      hourlyBlocks: new Array(24).fill(false),
+      hourlyCategories: new Array<RiskCategory>(24).fill('bahaya'),
+      safeRangeText: 'Dilarang tabur Urea',
+      riskScoreText: 'Bahaya 85%',
+      category: 'bahaya',
+      isSafe: false,
     },
   ],
 };

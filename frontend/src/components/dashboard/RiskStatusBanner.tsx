@@ -94,7 +94,6 @@ export const RiskStatusBanner: React.FC<RiskStatusBannerProps> = ({
 }) => {
   const category: RiskCategory = banner.category || 'aman';
   const config = RISK_CONFIG[category] || RISK_CONFIG.aman;
-  const StatusIcon = config.icon;
 
   return (
     <section
@@ -104,34 +103,13 @@ export const RiskStatusBanner: React.FC<RiskStatusBannerProps> = ({
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5">
         {/* Left Text Content */}
         <div className="flex-1 min-w-0">
-          {/* Header Row: Badge Kategori + Skala 4 Jenis */}
-          <div className="flex flex-wrap items-center gap-2 mb-2">
+          {/* Header Row: Badge Status Kategori (4 Tingkat) */}
+          <div className="flex items-center gap-2 mb-2">
             <span
-              className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-2xs font-extrabold uppercase border ${config.badgePillClass}`}
+              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-2xs font-extrabold uppercase border ${config.badgePillClass}`}
             >
-              <StatusIcon className="w-3.5 h-3.5" />
-              <span>Status: {config.badgeLabel}</span>
+              Status: {config.badgeLabel}
             </span>
-
-            {/* Skala 4 Jenis Risiko: Aman, Waspada, Kritis, Bahaya */}
-            <div className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-white/70 border border-slate-200/80 text-[10.5px] font-semibold text-slate-500 shadow-3xs">
-              <span className="text-[10px] uppercase font-bold text-slate-400 mr-0.5">Tingkat:</span>
-              <span className={category === 'aman' ? 'text-[#16A34A] font-black' : 'text-slate-400'}>
-                ● Aman
-              </span>
-              <span className="text-slate-300">·</span>
-              <span className={category === 'waspada' ? 'text-[#D97706] font-black' : 'text-slate-400'}>
-                ● Waspada
-              </span>
-              <span className="text-slate-300">·</span>
-              <span className={category === 'kritis' ? 'text-[#EA580C] font-black' : 'text-slate-400'}>
-                ● Kritis
-              </span>
-              <span className="text-slate-300">·</span>
-              <span className={category === 'bahaya' ? 'text-[#DC2626] font-black' : 'text-slate-400'}>
-                ● Bahaya
-              </span>
-            </div>
           </div>
 
           <p className={`text-xs font-bold tracking-wider uppercase ${config.tagClass}`}>
