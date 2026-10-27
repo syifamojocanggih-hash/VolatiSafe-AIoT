@@ -125,8 +125,8 @@ Update kolom Status dan Bukti setiap menyelesaikan task. Jangan tandai `✅` tan
 ### FASE 6 — Gateway & MQTT
 | ID | Task | Status | Bukti |
 |---|---|---|---|
-| HW-6.1 | Topik & QoS sesuai kontrak | ⬜ | |
-| HW-6.2 | Uji ACL adapter (koordinasi Syifa) | ⬜ | |
+| HW-6.1 | Topik & QoS sesuai kontrak | ✅ | `evidence/HW-6.1_topic_qos_retain_20261027.txt` + `evidence/HW-6.1_verification_20261027.md` (5 paket, topik persis, q=0, r=0) |
+| HW-6.2 | Uji ACL adapter (koordinasi Syifa) | ✅ | `evidence/HW-6.2_adapter_test_20261027.txt` + `evidence/HW-6.2_backend_findings_20261027.md` (diuji ke `origin/full-stack` 8e77211; re-test setelah merge) |
 | HW-6.3 | Gate LoRa RX fisik | ➖ | |
 
 ### FASE 7 — Uji & Bukti

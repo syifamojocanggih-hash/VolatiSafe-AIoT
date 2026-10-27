@@ -279,6 +279,24 @@
 
 ---
 
+### DEC-IOT-21 - Adapter Backend Belum Menegakkan Batas Baterai dan Timestamp
+
+| | |
+|---|---|
+| **Tanggal** | 27 Okt 2026 |
+| **Status** | Temuan - perlu tindakan Syifa |
+| **Konteks** | HW-6.2 menguji adapter aktual di `origin/full-stack` commit `8e77211`: `IngestionService.process_lora_payload()` di `backend/app/services/ingestion.py`. Tidak ada file `lora_adapter.py` terpisah. |
+| **Yang lulus** | Payload valid A/B diterima dan field normalisasi cocok. `t=-999`, moisture `193.1`, pH `2.0`, dan payload tanpa `n` ditolak. |
+| **Temuan 1** | `b=0.0` diterima dan disimpan sebagai `battery_voltage=0.0`; batas `2.80..4.25` di `INTERFACES.md` 1.3 tidak ditegakkan. `docs/backend/INGESTION_PIPELINE.md` 2 menulis `2.5..4.5`, dan `validate_sensor_bounds()` tidak dipanggil. |
+| **Temuan 2** | `b` yang hilang diisi default `3.87`, padahal `b` wajib di kontrak. Ini menyembunyikan paket tidak lengkap. |
+| **Temuan 3** | `ts=0` atau `ts` tidak ada diterima lalu diganti `datetime.now()`. Kontrak meminta `ts >= 1700000000`; penggantian ini mengaburkan waktu ukur vs waktu terima dan menyentuh DEC-IOT-09. |
+| **Temuan 4** | `rssi_dbm`/`snr_db` tidak ada di output adapter; keputusan tetap di DEC-IOT-11. |
+| **Temuan 5** | Dokumen 06 menyebut `lora_adapter.unpack_lora_payload()`, tetapi implementasinya `IngestionService.process_lora_payload()`. Nama file/method perlu diselaraskan. |
+| **Keputusan** | IoT tidak mengedit backend. Temuan dikirim ke Syifa lewat `evidence/HW-6.2_backend_findings_20261027.md`. Status HW-6.2 dianggap lulus untuk commit `8e77211`, tetapi harus di-re-test setelah merge ke `Development`. |
+| **Konsekuensi** | Paket dengan baterai rusak atau timestamp tidak valid bisa lolos ke database. Backend perlu menolak/menandai, atau gateway menstempel ulang `ts` (butuh keputusan Aris). |
+
+---
+
 ## Bagian B — Risk Register
 
 Probabilitas & dampak: T = Tinggi, S = Sedang, R = Rendah.

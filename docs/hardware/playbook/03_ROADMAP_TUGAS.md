@@ -417,6 +417,14 @@ Catatan implementasi 27 Okt 2026 (FASE 5): HW-5.3 dan HW-5.4 selesai. Bukti: `ev
 
 ---
 
+Catatan implementasi 27 Okt 2026 (FASE 6): HW-6.1 dan HW-6.2 selesai; HW-6.3 tetap TKT 4.
+
+- **HW-6.1:** 5 paket dari Wokwi sampai Mosquitto lokal; topik persis, `q=0`, `r=0`, `ts` monoton. Bukti: `evidence/HW-6.1_topic_qos_retain_20261027.txt`.
+- **HW-6.2:** adapter aktual `IngestionService.process_lora_payload()` diuji dari `origin/full-stack` commit `8e77211` lewat folder temp. Payload valid diterima, nilai rusak utama ditolak, tetapi baterai `0.0`, `b` hilang, dan `ts=0` masih lolos. Temuan: `evidence/HW-6.2_backend_findings_20261027.md`, keputusan `DEC-IOT-21`.
+- **HW-6.3:** gateway LoRa RX fisik dan LWT baru TKT 4. `rssi/snr` tetap DEC-IOT-11.
+
+---
+
 ## 10. FASE 7 — Uji & Bukti
 
 ### HW-7.1 — Unit test lulus

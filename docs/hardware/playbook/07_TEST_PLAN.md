@@ -239,6 +239,8 @@ Semua file disimpan di `docs/hardware/evidence/` (folder ini milik domain IoT, a
 | 3m | Orkestrasi penuh + 6 skenario regresi | `HW-4.3_orchestration_20261027.txt`, `HW-4.3_scenario_*_20261027.txt` | HW-4.3 |
 | 3n | Power budget dari durasi terukur | `HW-4.4_power_budget_20261027.md` | HW-4.4 |
 | 3o | Paritas firmware fisik vs simulasi | `HW-5.3_parity_20261027.txt` | HW-5.3 |
+| 3p | Topik, QoS 0, retain false (5 paket) | `HW-6.1_topic_qos_retain_20261027.txt`, `HW-6.1_verification_20261027.md` | HW-6.1 |
+| 3q | Adapter backend menerima payload valid / menolak yang rusak | `HW-6.2_adapter_test_20261027.txt`, `HW-6.2_backend_findings_20261027.md` | HW-6.2 |
 | 4 | Payload sampai broker | `I03_mqtt_rx.txt` | HW-5.4 |
 | 5 | Hex dump payload | `payload_hexdump.txt` | HW-3.2 |
 | 6 | Integrasi ke backend | `I07_backend.png` + `I07_query.txt` | HW-7.2 |
@@ -295,7 +297,8 @@ Bukti F-06 disimpan sebagai tabel jarak vs RSSI/SNR + screenshot `LoRa.packetRss
 | HW-3.4 | U-46 … U-53 (retry), I-04 | #2, #3j |
 | HW-4.3 | I-01, I-05 | #1, #3 |
 | HW-5.4 | I-03 | #4 |
-| HW-6.1 | I-04 | #4 |
+| HW-6.1 | I-03 (topik/QoS/retain) | #3p |
+| HW-6.2 | Vektor adapter | #3q |
 | HW-7.2 | E2E prasyarat | #6 |
 | HW-7.3 | E-01 … E-03 | #7, #8, #9 |
 | HW-8.2 | — | #10 |

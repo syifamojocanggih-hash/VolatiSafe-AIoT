@@ -94,7 +94,7 @@ Tanpa nomor 5, status tetap `🟨`.
 |---|---|
 | Topik persis | garis miring di depan, `NODE_ID` benar |
 | QoS/retain | 0 / false untuk telemetri |
-| ACL menerima | payload lolos adaptor Syifa tanpa error |
+| ACL menerima | payload lolos adaptor Syifa tanpa error (diuji ke `origin/full-stack` 8e77211; re-test setelah merge) |
 | Validator lokal | `validate_payload.py` → `[OK]` |
 
 ### FASE 7 — Uji

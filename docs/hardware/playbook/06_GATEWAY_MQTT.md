@@ -214,6 +214,12 @@ Catat di [`09_RISIKO_DAN_KEPUTUSAN.md`](09_RISIKO_DAN_KEPUTUSAN.md) bila bridge 
 
 IoT hanya bertanggung jawab memastikan payload yang dikirim **sesuai kontrak**. Setelah itu, penerjemahan adalah milik backend.
 
+> **Koreksi 27 Okt 2026:** implementasi aktual di `origin/full-stack` bukan
+> `backend/app/adapters/lora_adapter.py`, melainkan
+> `IngestionService.process_lora_payload()` di
+> `backend/app/services/ingestion.py`. Nama file di tabel atas perlu
+> diselaraskan atau dibuat wrapper. Uji HW-6.2 memakai method aktual tersebut.
+
 ### 5.2 Kontrak serah terima
 
 Input adapter (dari `TELEMETRY_PAYLOAD.md` §3):
@@ -353,6 +359,8 @@ python simulation\wokwi\validate_payload.py '{"n":"VS-SIM-001","ts":1792934400,"
 
 Validator lokal adalah **alat bantu**, bukan pengganti. Bila hasilnya berbeda dengan backend, backend yang benar — laporkan ke Syifa.
 
+> **Temuan 27 Okt 2026 (DEC-IOT-21):** adapter aktual `IngestionService.process_lora_payload()` belum menegakkan batas `b` `2.80..4.25` dan belum memvalidasi `ts`; `b` hilang diisi default `3.87`, `ts=0` diganti waktu sekarang. Lihat `evidence/HW-6.2_backend_findings_20261027.md`.
+
 ---
 
 ## 6. Gateway Fisik ESP32 LoRa RX (TKT 4, HW-6.3)
@@ -473,11 +481,13 @@ Untuk TKT 3 ini tidak relevan (tidak ada LoRa). Untuk TKT 4, rekomendasi: **Opsi
 
 ## 7. Checklist FASE 6
 
-- [ ] Topik persis `/volatisafe/v1/node/{NODE_ID}/telemetry` (garis miring di depan!)
-- [ ] QoS 0, retain `false` untuk telemetri
-- [ ] `NODE_ID` berbeda untuk node fisik dan simulasi (`VS-A1-003` vs `VS-SIM-001`)
-- [ ] Payload lolos `validate_payload.py`
-- [ ] Adapter Syifa menerima payload tanpa error (HW-6.2)
+- [x] Topik persis `/volatisafe/v1/node/{NODE_ID}/telemetry` (garis miring di depan!)
+- [x] QoS 0, retain `false` untuk telemetri
+- [x] `NODE_ID` berbeda untuk node fisik dan simulasi (`VS-A1-003` vs `VS-SIM-001`)
+- [x] Payload lolos `validate_payload.py`
+- [x] Adapter Syifa menerima payload tanpa error (HW-6.2, diuji ke `origin/full-stack` 8e77211)
 - [ ] Uji broker dengan autentikasi (bila demo memakai WiFi publik)
 - [ ] `rssi_dbm`/`snr_db`: **belum** diimplementasikan, tercatat sebagai `DEC-IOT-11`
 - [ ] Gateway LWT diuji: matikan gateway → broker mempublikasikan `offline`
+
+**Status 27 Okt 2026:** 5 item pertama lulus. Bukti topik/QoS/retain: `evidence/HW-6.1_topic_qos_retain_20261027.txt`. Bukti adapter: `evidence/HW-6.2_adapter_test_20261027.txt` (terhadap `origin/full-stack` commit `8e77211`; re-test setelah merge ke `Development`). Autentikasi broker tidak diuji karena demo lokal memakai Mosquitto tanpa auth; opsi ini hanya relevan bila demo lewat WiFi publik. `rssi_dbm`/`snr_db` tetap DEC-IOT-11. LWT dan HW-6.3 baru TKT 4.
