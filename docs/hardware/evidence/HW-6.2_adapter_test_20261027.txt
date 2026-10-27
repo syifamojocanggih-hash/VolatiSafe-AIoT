@@ -1,0 +1,38 @@
+# HW-6.2 - Uji adapter backend dengan vektor kontrak
+
+Tanggal : 27 Okt 2026
+Sumber  : `origin/full-stack` commit `8e77211`
+File    : `backend/app/services/ingestion.py`
+Metode  : `IngestionService.process_lora_payload()`
+Catatan : tidak ada file `lora_adapter.py` terpisah; method di atas adalah
+          anti-corruption adapter yang dipakai branch full-stack.
+Cara    : backend di-ekstrak ke folder temp (di luar repo), tidak ada file
+          backend yang diubah.
+
+## Output harness
+
+```
+valid_A: ACCEPTED node_id=VS-SIM-001 moisture_pct=21.0 soil_temp_c=34.5 ph=7.85 battery_voltage=3.87 timestamp=2026-10-27T16:04:47Z avri=95.0
+valid_B: ACCEPTED node_id=VS-SIM-001 moisture_pct=42.0 soil_temp_c=26.0 ph=6.8 battery_voltage=3.9 timestamp=2026-10-27T16:05:02Z avri=28.6
+temp_disconnected: REJECTED (None)
+moisture_short: REJECTED (None)
+ph_acidic: REJECTED (None)
+battery_zero: ACCEPTED node_id=VS-SIM-001 moisture_pct=21.0 soil_temp_c=34.5 ph=7.85 battery_voltage=0.0 timestamp=2026-10-27T16:04:47Z avri=95.0
+battery_absent: ACCEPTED node_id=VS-SIM-001 moisture_pct=21.0 soil_temp_c=34.5 ph=7.85 battery_voltage=3.87 timestamp=2026-10-27T16:04:47Z avri=95.0
+ts_zero: ACCEPTED node_id=VS-SIM-001 moisture_pct=21.0 soil_temp_c=34.5 ph=7.85 battery_voltage=3.87 timestamp=2026-10-27T16:08:39Z avri=95.0
+ts_absent: ACCEPTED node_id=VS-SIM-001 moisture_pct=21.0 soil_temp_c=34.5 ph=7.85 battery_voltage=3.87 timestamp=2026-10-27T16:08:39Z avri=95.0
+node_absent: REJECTED (None)
+```
+
+## Kesimpulan
+
+- Payload valid A/B diterima dan field ternormalisasi cocok dengan kiriman.
+- `t=-999`, moisture short, dan pH di luar batas ditolak.
+- **Temuan:** `b=0.0` diterima, `b` yang tidak dikirim diisi default 3.87,
+  dan `ts=0`/tidak dikirim diganti waktu sekarang. Adapter belum menegakkan
+  batas baterai `2.80..4.25` dan `ts >= 1700000000`.
+- `rssi_dbm`/`snr_db` tidak ada di output adapter (DEC-IOT-11).
+- AVRI aktual 95.0 (A) dan 28.6 (B); angka target 78/18 di dokumen adalah
+  target desain, bukan hasil model (sesuai toleransi 07_TEST_PLAN 4).
+
+Temuan lengkap untuk Syifa: `HW-6.2_backend_findings_20261027.md`.
