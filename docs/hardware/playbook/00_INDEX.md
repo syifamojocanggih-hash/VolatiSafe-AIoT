@@ -4,6 +4,7 @@
 > **CABANG GIT:** `iot`
 > **AREA TULIS (R/W):** `firmware/`, `simulation/wokwi/`, `docs/hardware/`
 > **STATUS:** dokumen hidup (*living document*) — diperbarui setiap task selesai
+> **SISA TASK:** [`../REMAINING_TASKS.md`](../REMAINING_TASKS.md)
 
 ---
 
