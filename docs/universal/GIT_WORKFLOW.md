@@ -151,15 +151,15 @@ git commit -m "feat(iot): implement 5x burst sampling with median filter"
 git push origin iot
 ```
 
-### Langkah 3: Integrasi ke Cabang `Development`
-Ketika satu tonggak fitur selesai (misal: simulasi Wokwi selesai atau REST API selesai), buat Pull Request dari cabang role ke `Development`:
-* `iot` $\rightarrow$ `Development`
-* `digittal-twin` $\rightarrow$ `Development`
-* `full-stack` $\rightarrow$ `Development`
-* `ai` $\rightarrow$ `Development`
+### Langkah 3: Integrasi ke Cabang `Development` (Sesuai Urutan Matriks)
+Ketika satu tonggak fitur selesai (misal: simulasi Wokwi selesai atau REST API selesai), lakukan integrasi ke `Development` mengikuti urutan sekuensial yang tertuang dalam [**`docs/universal/INTEGRATION_RUNBOOK.md`**](INTEGRATION_RUNBOOK.md):
+* **Tahap 1:** `iot` $\rightarrow$ `Development` (Fondasi Telemetri & Wokwi)
+* **Tahap 2:** `digittal-twin` $\rightarrow$ `Development` (Fisika FAO-56 & Replay BMKG)
+* **Tahap 3:** `ai` $\rightarrow$ `Development` (Model LightGBM & Inference Service)
+* **Tahap 4:** `full-stack` $\rightarrow$ `Development` (FastAPI Ingestion & Next.js PWA)
 
 ### Langkah 4: Uji Integrasi Sistemik & Rilis ke `main`
-Di cabang `Development`, seluruh modul (Wokwi $\rightarrow$ Ingestion $\rightarrow$ Digital Twin $\rightarrow$ AI Engine $\rightarrow$ PWA Dashboard) diuji bersama. Jika 3 skenario demo juri berjalan mulus, **Aris (Lead)** melakukan merge dari `Development` ke `main`.
+Di cabang `Development`, seluruh modul (Wokwi $\rightarrow$ Ingestion $\rightarrow$ Digital Twin $\rightarrow$ AI Engine $\rightarrow$ PWA Dashboard) diuji bersama menjalankan 3 skenario demo juri (Terik Ekstrem, Hujan Badai, Sensor Putus). Jika seluruh uji lulus, **Aris (Lead)** melakukan merge dari `Development` ke `main` dan membuat tag rilis `v1.0.0`. Prosedur lengkap mengacu pada [**`docs/universal/INTEGRATION_RUNBOOK.md`**](INTEGRATION_RUNBOOK.md).
 
 ---
 

@@ -123,9 +123,9 @@ def train_piml_model(
     r2_piml = float(r2_score(y_test_target, final_avri_pred))
 
     # 2. Metrik Baseline Aturan Statis Petani (If-Else)
-    # Aturan: Jika tanah panas (>30C), kering (<25%), dan basa (>7.5) -> risiko 65%, selain itu 18%
+    # Aturan: Jika tanah panas (>30C), kering (<24%), dan basa Solokuro (>7.4) -> risiko 65%, selain itu 18%
     static_rule_pred = np.where(
-        (test_df['soil_temp_c'] > 30.0) & (test_df['moisture_pct'] < 25.0) & (test_df['ph'] > 7.5),
+        (test_df['soil_temp_c'] > 30.0) & (test_df['moisture_pct'] < 24.0) & (test_df['ph'] > 7.4),
         65.0,
         18.0
     )

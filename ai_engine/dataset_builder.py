@@ -31,14 +31,16 @@ from ai_engine.physics_layer import (
 )
 
 
-# Profil Tanah Karst Lamongan Otoritatif (BBSDLP / SoilGrids 2006)
+# Profil Tanah Karst Lamongan Terkalibrasi Lokal (Solokuro & Paciran Empiris)
+# Sumber: Jurnal Agroteknika (2024), Balittanah Kementan (2006), & FAO-56 Hal. 164
 LAMONGAN_KARST_PROFILE: Dict[str, Any] = {
-    "name": "Mollisol / Rendzina (Tanah Karst Lamongan)",
-    "theta_wp": 13.8,       # Titik layu permanen (% VWC)
-    "theta_fc": 39.5,       # Kapasitas lapang (% VWC)
-    "ph_baseline": 7.85,    # pH alkalin alami tanah kapur
-    "alpha_dry": 0.28,      # Konduktivitas termal kering
-    "alpha_wet": 0.10,      # Konduktivitas termal basah
+    "name": "Mollisol / Rendzina & Alfisol (Tanah Karst Solokuro)",
+    "theta_wp": 14.2,         # Titik layu permanen terkalibrasi (% VWC)
+    "theta_fc": 36.5,         # Kapasitas lapang terkalibrasi (% VWC)
+    "coarse_fragments": 0.12, # Fraksi kerikil kapur lokal (12% volume)
+    "ph_baseline": 7.62,      # Rata-rata lab aktual Solokuro (Agroteknika 2024: 7.31-7.81)
+    "alpha_dry": 0.28,        # Konduktivitas termal kering
+    "alpha_wet": 0.10,        # Konduktivitas termal basah
 }
 
 
@@ -117,11 +119,12 @@ def build_soil_and_feature_matrix(weather_csv_path: str) -> pd.DataFrame:
         curr_soil_temp = np.clip(curr_soil_temp + delta_temp + solar_boost, 15.0, 48.0)
         soil_temp_series[i] = round(curr_soil_temp, 1)
 
-        # 4. Neraca Air Tanah FAO-56 Sederhana
-        # Evapotranspirasi harian dibagi 24 jam
+        # 4. Neraca Air Tanah FAO-56 Terkalibrasi Kerikil Karst (Allen et al. 1998)
+        # Efisiensi simpan air efektif berkurang akibat batuan kasar (1 - coarse_fragments)
         kc = 0.40 if dat <= 14 else (0.80 if dat <= 35 else (1.15 if dat <= 65 else 0.70))
-        # ET kehilangan kadar air (%)
-        et_moist_loss = (kc * (0.12 * vpd + 0.08 * rad + 0.05 * wind)) * 0.15
+        # ET kehilangan kadar air (%) dengan koreksi batuan kapur
+        rock_factor = 1.0 / (1.0 - LAMONGAN_KARST_PROFILE["coarse_fragments"])
+        et_moist_loss = (kc * (0.12 * vpd + 0.08 * rad + 0.05 * wind)) * 0.15 * rock_factor
         rain_gain = rain * 0.65  # Infiltrasi tanah
         
         curr_moisture = np.clip(
@@ -132,9 +135,9 @@ def build_soil_and_feature_matrix(weather_csv_path: str) -> pd.DataFrame:
         moisture_series[i] = round(curr_moisture, 1)
 
         # 5. pH Tanah Dinamis
-        # Sedikit naik saat tanah sangat kering (< 20%) karena konsentrasi garam kalsium
-        ph_drift = 0.15 if curr_moisture < 20.0 else -0.05 if rain > 10.0 else 0.0
-        curr_ph = np.clip(curr_ph + ph_drift, 7.3, 8.4)
+        # Sedikit naik saat tanah sangat kering (< 20%) karena konsentrasi garam kalsium kapur
+        ph_drift = 0.12 if curr_moisture < 20.0 else -0.05 if rain > 10.0 else 0.0
+        curr_ph = np.clip(curr_ph + ph_drift, 7.10, 8.10)
         ph_series[i] = round(curr_ph, 2)
 
     # 6. Hitung Base Physics Loss menggunakan Persamaan Arrhenius

@@ -38,6 +38,7 @@ Membangun model *Physics-Informed Machine Learning (PIML)* yang menggabungkan fo
 - **Aturan Audit Ketat:**
   - **DILARANG KERAS MENGGUNAKAN `train_test_split(shuffle=True)`**.
   - Wajib menggunakan `TimeSeriesSplit(n_splits=5)` atau *Block Out-of-Time Holdout* (8 bulan awal untuk training, 2 bulan akhir untuk testing).
+  - **Penyelarasan Baseline Empiris Solokuro:** Menggunakan batas retensi tanah terkalibrasi lokal ($\theta_{fc} = 36.5\%$, $\theta_{wp} = 14.2\%$, pH baseline $7.62$ hasil uji lab Agroteknika 2024, serta reduksi kapasitas simpan air efektif akibat fraksi kerikil kapur/coarse fragments $12\%$).
 - **Checklist:**
   - [ ] Membaca dataset iklim historis Lamongan (`datasets/bmkg_lamongan.csv`).
   - [ ] Skrip verifikasi kebocoran waktu (`leakage_test`) menghasilkan 0% overlap antara train dan test set.
@@ -87,14 +88,14 @@ pip install lightgbm scikit-learn shap pandas numpy matplotlib
 ```
 
 #### Langkah 2: Ekstraksi & Pembangunan Dataset Latih
-Jalankan skrip generator dataset yang menyerap cuaca Lamongan dan menjalankan rumus fisika tanah:
+Jalankan skrip generator dataset yang menyerap cuaca Lamongan dan menjalankan rumus fisika tanah karst terkalibrasi lokal:
 ```bash
 python ai_engine/dataset_builder.py \
   --weather-source simulations/data_replay/datasets/bmkg_lamongan.csv \
   --soil-profile karst_lamongan \
   --output data/training_dataset_lamongan.csv
 ```
-*Output:* File CSV tabular berisi kolom: `[timestamp, soil_temp_c, moisture_pct, ph, air_temp_c, humidity_rh, wind_speed_ms, solar_rad_mj, dat, base_physics_loss, true_loss_target]`.
+*Output:* File CSV tabular berisi kolom: `[timestamp, soil_temp_c, moisture_pct, ph, air_temp_c, humidity_rh, wind_speed_ms, solar_rad_mj, dat, base_physics_loss, true_loss_target]` dengan batas $\theta_{fc} = 36.5\%$, $\theta_{wp} = 14.2\%$, dan pH baseline $7.62$.
 
 #### Langkah 3: Eksekusi Skrip Pelatihan (Training Execution)
 Jalankan skrip training utama:
@@ -112,7 +113,7 @@ Di dalam `train.py`, model otomatis diuji pada data holdout (20% akhir) dan diba
 2. **Baseline Aturan Statis (*if-else*):**
    ```python
    # Aturan petani konvensional
-   if soil_temp > 30.0 and moisture < 25.0 and ph > 7.5:
+   if soil_temp > 30.0 and moisture < 24.0 and ph > 7.4:
        baseline_pred = 70.0
    else:
        baseline_pred = 20.0
@@ -148,10 +149,17 @@ ls -lh models/avri_model.txt
 - **Target File:** `ai_engine/inference.py`
 - **Formula:**
   $$AVRI = \text{clip}\Big(\text{BaseLoss}_{physics} + \text{Residual}_{LightGBM}, \; 0.0, \; 100.0\Big)$$
-  - `0.0 – 30.0%`: **Aman** (Hijau) $\rightarrow$ Rekomendasi: Sebar pupuk sekarang.
-  - `30.1 – 60.0%`: **Waspada** (Kuning) $\rightarrow$ Rekomendasi: Wajib metode tugal/benam atau siram sebelum tebar.
-  - `60.1 – 80.0%`: **Kritis** (Oranye) $\rightarrow$ Rekomendasi: Tunda aplikasi, tunggu jendela aman sore/besok.
-  - `80.1 – 100.0%`: **Bahaya** (Merah) $\rightarrow$ Rekomendasi: DILARANG TEBAR (kehilangan amonia >80%).
+  - `0.0 – 30.0%`: **Aman** (Hijau) $
+ightarrow$ Rekomendasi: Sebar pupuk sekarang.
+  - `30.1 – 60.0%`: **Waspada** (Kuning) $
+ightarrow$ Rekomendasi: Wajib metode tugal/benam atau siram sebelum tebar.
+  - `60.1 – 80.0%`: **Kritis** (Oranye) $
+ightarrow$ Rekomendasi: Tunda aplikasi, tunggu jendela aman sore/besok.
+  - `80.1 – 100.0%`: **Bahaya** (Merah) $
+ightarrow$ Rekomendasi: DILARANG TEBAR (kehilangan amonia >80%).
+- **Sinkronisasi Skala Waktu Operasional:**
+  - *Jangka Pendek (0–72 Jam):* Peramalan jendela jam aman aplikasi pupuk dievaluasi harian setiap pukul 05:30 WIB.
+  - *Jangka Panjang (0–105 HST):* Estimasi kalender fenologi dan fase panen jagung berbasis akumulasi panas GDD (*Growing Degree Days*).
 - **Checklist:**
   - [ ] Nilai AVRI terbukti tidak pernah keluar dari rentang matematis $[0.0, 100.0]$.
 
@@ -171,7 +179,7 @@ ls -lh models/avri_model.txt
 ### TAHAP 6: Serialisasi Model & Ekspor Service Interface
 
 #### 🟢 AI-1.6: Service Wrapper & DTO Compliance
-- **Deskripsi:** Menyediakan modul pemanggil inferensi terpadu yang siap diimpor oleh backend FastAPI milik Syifa.
+- **Deskripsi:** Menyediakan modul pemanggil inferensi terpadu yang siap diimpor oleh backend FastAPI milik Syifa, terhubung dengan kontrak endpoint 15 parameter Digital Twin (`GET /api/v1/digital-twin/telemetry/{field_id}`).
 - **Target File:** `ai_engine/service.py`, `models/avri_model.txt`
 - **Signature Kontrak:**
   ```python
@@ -180,6 +188,37 @@ ls -lh models/avri_model.txt
 - **Checklist:**
   - [ ] 100% mematuhi DTO di [`docs/universal/INTERFACES.md`](../universal/INTERFACES.md) §2.
   - [ ] Tidak ada dependensi database di dalam `ai_engine/`.
+
+---
+
+## 🚀 Skenario & Prosedur Merge ke Cabang `Development` (Tahap 3)
+
+Cabang `ai` diintegrasikan pada **Tahap 3**, setelah fondasi `iot` dan `digittal-twin` stabil di `Development`. Aris wajib memastikan:
+
+### Checklist Pra-Merge Aris:
+- [ ] Model LightGBM terkompilasi di `models/avri_model.txt` (~719 KB) dan lolos benchmark ($MAE \le 3.5\%$, $R^2 \ge 0.85$, $Latency \le 20\text{ ms}$).
+- [ ] TreeSHAP direction check lolos 100% (VPD +, Angin +, RH -, Suhu +).
+- [ ] Audit bias sistematik dan uji monotoni fisika lulus 100% via `ai_engine/audit.py`.
+- [ ] Service wrapper `ai_engine/service.py` 100% patuh DTO `docs/universal/INTERFACES.md` §2.
+- [ ] Seluruh 23 unit test di `ai_engine/tests/` berstatus **23 passed**.
+- [ ] Tidak ada modifikasi file di luar area `ai_engine/`, `models/`, `docs/ai/`, dan `docs/universal/`.
+
+### Prosedur Git Terminal:
+```bash
+# 1. Pastikan seluruh pekerjaan di commit di cabang ai
+git checkout ai
+git status
+
+# 2. Jalankan test suite & audit komprehensif
+PYTHONPATH=. .venv/bin/pytest ai_engine/tests/
+.venv/bin/python ai_engine/audit.py
+
+# 3. Eksekusi merge ke Development (Tahap 3)
+git checkout Development
+git pull origin Development
+git merge ai --no-ff -m "merge(ai): integrate PIML LightGBM engine, Arrhenius kinetics, TreeSHAP explainer, and avri model"
+git push origin Development
+```
 
 ---
 

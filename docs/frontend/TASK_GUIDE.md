@@ -117,6 +117,19 @@ Membangun antarmuka web modern, responsif, dan ringan berbasis **Next.js 14 (App
 
 ---
 
+## 🚀 Skenario & Prosedur Merge ke Cabang `Development` (Tahap 4 - Frontend)
+
+Cabang `full-stack` dari sisi frontend wajib memastikan:
+
+### Checklist Pra-Merge Syifa (Frontend Next.js):
+- [ ] Next.js 14 lolos kompilasi produksi `npm run build` tanpa error TypeScript/ESLint.
+- [ ] Ukuran bundle awal PWA $\le 500\text{ KB}$ gzipped.
+- [ ] Desain UI Light Mode responsif sempurna di layar smartphone (360px - 414px) dan desktop (1440px).
+- [ ] Komponen peta Leaflet petak sawah dan grafik Recharts 24 jam render normal tanpa hydration error.
+- [ ] Dukungan offline PWA terverifikasi (Service Worker aktif, cache manifest tersimpan).
+
+---
+
 ## 🚫 Zona Terlarang Syifa (Frontend) (DILARANG KERAS)
 1. ❌ DILARANG menjalankan query SQL atau membuka koneksi database langsung dari frontend.
 2. ❌ DILARANG memodifikasi formula kinetika kimia di `ai_engine/`.

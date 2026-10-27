@@ -105,6 +105,31 @@ Menghasilkan firmware ESP32 dan simulasi sirkuit Wokwi yang mampu melakukan akui
 
 ---
 
+## 🚀 Skenario & Prosedur Merge ke Cabang `Development` (Tahap 1)
+
+Cabang `iot` adalah **fondasi awal (Tahap 1)** dari seluruh rantai integrasi sistem. Sebelum meminta merge ke `Development`, Hafiiz wajib memastikan:
+
+### Checklist Pra-Merge Hafiiz:
+- [ ] Kode C++ di `firmware/` lulus kompilasi tanpa warning/error di PlatformIO/Arduino IDE.
+- [ ] Ukuran payload LoRa biner terbukti $\le 52$ byte sesuai kontrak [`docs/universal/INTERFACES.md`](../universal/INTERFACES.md) §1.
+- [ ] Sirkuit virtual Wokwi (`simulation/wokwi/`) berhasil memancarkan data ke broker MQTT lokal `localhost:1883`.
+- [ ] Tidak ada modifikasi file di luar area `firmware/`, `simulation/wokwi/`, dan `docs/hardware/`.
+
+### Prosedur Git Terminal:
+```bash
+# 1. Pastikan seluruh pekerjaan di commit di cabang iot
+git checkout iot
+git status
+
+# 2. Sinkronkan dengan Development terbaru (tanpa menimpa firmware)
+git fetch origin Development
+
+# 3. Lakukan pengujian Wokwi terakhir
+# 4. Laporkan ke Aris (Lead Architect) untuk eksekusi merge Tahap 1 sesuai docs/universal/INTEGRATION_RUNBOOK.md
+```
+
+---
+
 ## 🚫 Zona Terlarang Hafiiz (DILARANG KERAS)
 1. ❌ DILARANG mengubah skema database backend atau kode FastAPI di `backend/`.
 2. ❌ DILARANG mengubah struktur field JSON payload LoRa tanpa membuat issue/RFC di `docs/universal/INTERFACES.md`.
