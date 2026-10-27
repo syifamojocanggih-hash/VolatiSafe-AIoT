@@ -75,8 +75,9 @@ HW-5.1..HW-5.4 dan sisa checklist screenshot/link di HW-8.2.
 - [ ] **HW-8.2** Screenshot rangkaian + link Wokwi.
   Screenshot manual dari UI; link publik butuh proyek wokwi.com. Alternatif:
   lampirkan `diagram.json` + firmware.
-- [ ] **HW-8.3** Paket serah terima ke Syifa.
-  Bisa didraft sekarang; konfirmasi akhir menunggu backend.
+- [ ] **Kirim/konfirmasi HANDOVER.md ke Syifa.**
+  Dokumen siap di `evidence/HANDOVER.md`; konfirmasi checklist
+  `10_DEFINISI_SELESAI.md` 4.3 masih menunggu Syifa.
 - [ ] **HW-8.4** PR `iot` -> `Development`.
   Tunggu integrasi backend/FE dan bukti FASE 7 lengkap.
 
