@@ -1,0 +1,8 @@
+BELUM ADA LINK PUBLIK.
+
+Alasan: proyek berjalan lewat VS Code/CLI dengan akun Wokwi gratis; belum ada
+proyek wokwi.com yang di-save sebagai public. Alternatif: lampirkan
+simulation/wokwi/diagram.json + firmware .bin/.elf, atau buat proyek web
+terpisah untuk demo.
+
+Ditunda ke HW-8.2. Detail: docs/hardware/evidence/HW-5.4_screenshot_link_20261027.md

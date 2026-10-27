@@ -119,8 +119,8 @@ Update kolom Status dan Bukti setiap menyelesaikan task. Jangan tandai `✅` tan
 |---|---|---|---|
 | HW-5.1 | `diagram.json` | ✅ | `simulation/wokwi/diagram.json` (ditarik ke FASE 2, DEC-IOT-17), `evidence/HW-5.1_diagram_lint_20261026.txt` |
 | HW-5.2 | `wokwi.toml` + wiring build | ✅ | `simulation/wokwi/wokwi.toml` + `scenario_a.yaml`, `evidence/HW-5.2_wokwi_scenario_ab_20261026.txt` |
-| HW-5.3 | Verifikasi paritas firmware | ⬜ | |
-| HW-5.4 | Telemetri sampai Mosquitto | ⬜ | |
+| HW-5.3 | Verifikasi paritas firmware | ✅ | `evidence/HW-5.3_parity_20261027.txt` |
+| HW-5.4 | Telemetri sampai Mosquitto | ✅ | `evidence/I03_mqtt_rx.txt` + `evidence/HW-5.4_local_mqtt_20261027.md` (via tunnel TCP; Private Gateway tidak tersedia di akun gratis) |
 
 ### FASE 6 — Gateway & MQTT
 | ID | Task | Status | Bukti |

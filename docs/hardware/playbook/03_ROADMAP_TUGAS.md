@@ -379,6 +379,14 @@ Penyimpangan dan batas bukti (detail di `DEC-IOT-20`):
 
 ---
 
+Catatan implementasi 27 Okt 2026 (FASE 5): HW-5.3 dan HW-5.4 selesai. Bukti: `evidence/HW-5.3_parity_20261027.txt`, `evidence/I03_mqtt_rx.txt`, `evidence/HW-5.4_local_mqtt_20261027.md`.
+
+- **HW-5.3:** modul sensor/kalibrasi/payload/transport_core identik; perbedaan hanya transport, `platformio.ini`, dan cabang `SIM_FAST_CYCLE` (DEC-IOT-20).
+- **HW-5.4:** 5 paket berturut sampai Mosquitto lokal. Akun Wokwi gratis tidak punya Private Gateway, jadi broker lokal diekspos sementara lewat tunnel TCP Serveo; firmware tetap publish sendiri lewat `transport_mqtt.cpp`. Ini bukan bridge.
+- **Belum:** screenshot rangkaian (CLI tidak bisa mengambil framebuffer board; butuh UI Wokwi) dan link publik Wokwi (butuh proyek wokwi.com). Ditunda ke HW-8.2.
+
+---
+
 ## 9. FASE 6 — Gateway & MQTT
 
 ### HW-6.1 — Topik & QoS sesuai kontrak

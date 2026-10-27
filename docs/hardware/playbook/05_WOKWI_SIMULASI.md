@@ -197,8 +197,9 @@ dibuktikan di simulasi (lihat DEC-IOT-17, diverifikasi di HW-9.2).
 | `scenario_fault_range.yaml` | Moisture short/putus dan divider baterai putus → `RANGE` | ✅ lulus |
 | `scenario_mqtt_down.yaml` | Broker tidak terjangkau → `ok=0 attempts=3`, siklus tetap jalan | ✅ lulus |
 | `scenario_cycle.yaml` | Siklus penuh: sensor ON/OFF, TX, tidur 10 s, bangun, siklus berikutnya | lulus |
+| `scenario_i03.yaml` | 5 paket telemetri berturut untuk bukti I-03 | lulus |
 
-**Catatan durasi:** sejak FASE 4 setiap siklus berakhir dengan tidur 10 detik (SIM_FAST_CYCLE), jadi --timeout harus lebih besar dari 30000 ms. Skenario yang menunggu lebih dari satu siklus (mis. scenario_fault_range) butuh --timeout 180000.
+**Catatan durasi:** sejak FASE 4 setiap siklus berakhir dengan tidur 10 detik (SIM_FAST_CYCLE), jadi --timeout harus lebih besar dari 30000 ms. Skenario yang menunggu lebih dari satu siklus (mis. scenario_fault_range) butuh --timeout 180000. `scenario_i03` menunggu 5 siklus, jadi pakai --timeout 180000.
 
 **Yang belum ada: skenario "payload sampai broker".** `wokwi-cli` memakai gateway publik Wokwi
 yang hanya bisa menghubungi internet, bukan jaringan lokal, sehingga Mosquitto di mesin ini
@@ -360,13 +361,15 @@ Semua angka di tabel ini konsisten dengan analisis di [`09_RISIKO_DAN_KEPUTUSAN.
 
 ## 7. Checklist FASE 5
 
-- [ ] `diagram.json` valid, Wokwi membuka tanpa error
-- [ ] Semua sensor analog di pin ADC1 (34, 32, 35)
-- [ ] Pull-up 4,7 kΩ terpasang di DQ DS18B20
-- [ ] `pio run -e wokwi` → `SUCCESS`
-- [ ] `wokwi.toml` menunjuk path yang benar (relatif, bukan absolut)
-- [ ] Serial mencetak `[SIM] Build simulasi ...` dan `[SIM] FAST CYCLE ...`
-- [ ] Payload muncul di `mosquitto_sub`
-- [ ] Tiga skenario dijalankan; nilai payload sesuai tabel §5
+- [x] `diagram.json` valid, Wokwi membuka tanpa error
+- [x] Semua sensor analog di pin ADC1 (34, 32, 35)
+- [x] Pull-up 4,7 kΩ terpasang di DQ DS18B20
+- [x] `pio run -e wokwi` → `SUCCESS`
+- [x] `wokwi.toml` menunjuk path yang benar (relatif, bukan absolut)
+- [x] Serial mencetak `[SIM] Build simulasi ...` dan `[SIM] FAST CYCLE ...`
+- [x] Payload muncul di `mosquitto_sub`
+- [x] Tiga skenario dijalankan; nilai payload sesuai tabel §5
 - [ ] Screenshot rangkaian resolusi tinggi tersimpan
 - [ ] Link Wokwi dapat dibuka orang lain (atau file `.json` + `.ino`/ELF siap unggah)
+
+**Status 27 Okt 2026:** 8 item pertama lulus. Screenshot dan link publik belum ada: `wokwi-cli --screenshot-part esp` gagal karena board tidak punya framebuffer, dan link publik butuh proyek wokwi.com. Detail: `evidence/HW-5.4_screenshot_link_20261027.md`; link ditunda ke HW-8.2.

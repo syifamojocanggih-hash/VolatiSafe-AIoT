@@ -117,7 +117,7 @@ Isi = output lengkap `pio test -e native`. Format akhir harus:
 | I-05 | NVS kosong | `pio run -t erase` lalu jalankan | Serial mencetak `[CAL] NVS kosong ...`, node tetap mengirim data |
 | I-06 | DS18B20 terputus | hapus part DS18B20 di diagram, jalankan | payload berisi `"t":-999.0`; backend menolak (bukan diterima) |
 
-**Status per 26 Okt 2026:** I-01, I-02, I-04, I-05 lulus. I-03 ⛔ **belum bisa dijalankan**: `wokwi-cli` memakai gateway publik Wokwi, yang tidak bisa menghubungi jaringan lokal mesin ini, sehingga Mosquitto di `localhost:1883` tidak terjangkau (`state=-2`, DNS berhasil ke `10.13.37.254`). Private Gateway yang membuat `host.wokwi.internal` bisa dipakai hanya tersedia untuk akun berbayar. I-03 tetap menjadi DoD HW-5.4 dan dicatat sebagai `DEC-IOT-19`; jangan menandainya lulus tanpa `I03_mqtt_rx.txt`.
+**Status per 27 Okt 2026:** I-01, I-02, I-03, I-04, I-05 lulus. I-03 dijalankan dengan Mosquitto lokal di port 1883; karena akun Wokwi gratis tidak punya Private Gateway, broker lokal diekspos sementara lewat tunnel TCP (Serveo) dan firmware diarahkan ke endpoint tunnel. Hasil: 5 paket berturut, topik persis, `ts` monoton 1793115044 -> 1793115103, 5/5 payload lolos `validate_payload.py`. Bukti: `evidence/I03_mqtt_rx.txt`, `evidence/HW-5.4_local_mqtt_20261027.md`. Jalur langsung `host.wokwi.internal` tetap hanya untuk akun berbayar (DEC-IOT-19).
 
 ### 3.1 Bukti I-03 (contoh format yang harus disimpan)
 
@@ -238,6 +238,7 @@ Semua file disimpan di `docs/hardware/evidence/` (folder ini milik domain IoT, a
 | 3l | Tidur, wake reason, siklus berikutnya | `HW-4.2_deep_sleep_20261027.txt` | HW-4.2 |
 | 3m | Orkestrasi penuh + 6 skenario regresi | `HW-4.3_orchestration_20261027.txt`, `HW-4.3_scenario_*_20261027.txt` | HW-4.3 |
 | 3n | Power budget dari durasi terukur | `HW-4.4_power_budget_20261027.md` | HW-4.4 |
+| 3o | Paritas firmware fisik vs simulasi | `HW-5.3_parity_20261027.txt` | HW-5.3 |
 | 4 | Payload sampai broker | `I03_mqtt_rx.txt` | HW-5.4 |
 | 5 | Hex dump payload | `payload_hexdump.txt` | HW-3.2 |
 | 6 | Integrasi ke backend | `I07_backend.png` + `I07_query.txt` | HW-7.2 |

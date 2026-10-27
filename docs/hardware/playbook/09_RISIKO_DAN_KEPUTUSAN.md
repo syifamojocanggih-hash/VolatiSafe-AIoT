@@ -255,6 +255,10 @@
 | **Jalan keluar untuk HW-5.4** | (1) Pakai Wokwi for VS Code atau wokwi.com dengan Private Gateway aktif, lalu jalankan `wokwigw.exe`; (2) jalankan broker di host yang terjangkau gateway publik; (3) rekam bukti I-03 dari mesin yang punya lisensi Wokwi. Pilih satu sebelum FASE 5 dimulai, bukan saat demo. |
 | **Konsekuensi** | R-02 naik dari "sedang" ke "sudah terbukti terjadi". `scenario_mqtt_down.yaml` sekarang menguji jalur gagal (bukan jalur sukses) karena itulah satu-satunya yang bisa dijalankan konsisten di lingkungan ini. |
 
+**Update 27 Okt 2026 (HW-5.4):** I-03 sudah lulus. Karena akun Wokwi yang dipakai gratis (Private Gateway butuh akun berbayar), broker lokal diekspos sementara lewat tunnel TCP Serveo (`ssh -p 443 -R 0:localhost:1883 serveo.net`), lalu firmware build `wokwi` diarahkan ke host/port tunnel. Ini **bukan bridge** dan tidak mengubah firmware: `transport_mqtt.cpp` tetap publish sendiri. Hasil: 5 paket berturut di Mosquitto lokal, `ts` monoton, 5/5 payload valid. Bukti: `evidence/I03_mqtt_rx.txt`, `evidence/HW-5.4_local_mqtt_20261027.md`. Klaim `host.wokwi.internal` langsung tetap belum terbukti dan tetap butuh Private Gateway berbayar.
+
+---
+
 ### DEC-IOT-20 - Penyimpangan FASE 4: Urutan Timestamp, Deep Sleep Wokwi, dan Penghapusan Probe
 
 | | |

@@ -25,7 +25,7 @@ Menghasilkan firmware ESP32 dan simulasi sirkuit Wokwi yang mampu melakukan akui
 | TAHAP 2 — Driver Sensor & Kalibrasi | ✅ selesai 26 Okt 2026 |
 | TAHAP 3 — Protokol Telemetri LoRa | ✅ selesai 26 Okt 2026 (LoRa level build; radio belum memancar → HW-9.3) |
 | TAHAP 4 — Manajemen Daya & Deep Sleep | ✅ selesai 27 Okt 2026 (deep sleep fisik → HW-9.1) |
-| TAHAP 5 — Virtual Testbed Wokwi | 🟨 sebagian: `diagram.json` + 6 skenario jalan; bukti telemetri sampai broker → HW-5.4 |
+| TAHAP 5 — Virtual Testbed Wokwi | 🟨 sebagian: 7 skenario + I-03 lulus via tunnel; screenshot/link → HW-8.2 |
 
 **Unit test:** `pio test -e native` → 45 test PASS (6 payload, 24 sensors_core, 7 calibration_core, 8 transport_core). Bukti: [`evidence/unit_test_native_20261026.txt`](evidence/unit_test_native_20261026.txt).
 
@@ -127,7 +127,9 @@ Menghasilkan firmware ESP32 dan simulasi sirkuit Wokwi yang mampu melakukan akui
 
 ---
 
-### TAHAP 5: Virtual Testbed Wokwi (Untuk Seleksi TKT 3)
+### TAHAP 5: Virtual Testbed Wokwi (Untuk Seleksi TKT 3) — 🟨 sebagian 27 Okt 2026
+
+> **Bukti:** `evidence/HW-5.3_parity_20261027.txt`, `evidence/I03_mqtt_rx.txt`, `evidence/HW-5.4_local_mqtt_20261027.md`, `evidence/HW-5.4_serial_20261027.txt`, `evidence/HW-5.4_validation_20261027.txt`.
 
 #### 🟢 HW-1.5: Simulasi Wokwi ESP32 + MQTT Bridge
 - **Deskripsi:** Membangun simulasi virtual lengkap di browser Wokwi yang memancarkan data ke broker MQTT lokal untuk demo seleksi proposal 31 Oktober.
@@ -140,8 +142,8 @@ Menghasilkan firmware ESP32 dan simulasi sirkuit Wokwi yang mampu melakukan akui
   2. *Skenario Hujan:* Kelembaban diatur ke 42%, suhu 26°C $\rightarrow$ Terkirim ke MQTT.
   3. *Skenario Dropout:* Simulasi node dimatikan selama 30 menit.
 - **Checklist:**
-  - [ ] Wokwi berjalan tanpa error dan terhubung ke MQTT gateway `localhost:1883`.
-  - [ ] Screenshot rangkaian dan link Wokwi siap dilampirkan ke proposal.
+  - [x] Wokwi berjalan tanpa error; 5 paket berturut sampai Mosquitto lokal lewat tunnel TCP sementara (Private Gateway butuh akun berbayar).
+  - [ ] Screenshot rangkaian dan link Wokwi: screenshot CLI gagal karena part `esp` tidak punya framebuffer; link publik butuh proyek wokwi.com. Ditunda ke HW-8.2.
 
 ---
 

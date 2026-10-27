@@ -1,0 +1,57 @@
+# HW-5.3 - Verifikasi paritas firmware fisik vs simulasi
+
+Tanggal : 27 Okt 2026
+Build   : `pio run -e esp32dev` SUCCESS, `pio run -e wokwi` SUCCESS
+Metode  : hash sumber + audit include + audit build_src_filter
+
+## Hash sumber yang dipakai kedua environment
+
+Kedua environment mengompilasi file sumber yang sama dari `firmware/src/`.
+Tidak ada salinan kedua di `simulation/wokwi/`.
+
+```
+c540aebfa0ed3dc76cd2a2ec6a483391f1036137213a7d3171a9e8235016d051  firmware/src/sensors.cpp
+5f28ec3c043bf3345b0e082daa9744c9f047004048d6af97b30ce66e4900f376  firmware/src/sensors_core.cpp
+250f5064bfd8eb0d761f6ffdc46aa9322b245fafd85fc27503440b155d2edaaa  firmware/src/calibration.cpp
+c9c45b871409241763fa7b1c43b923ce8f228c5fc86b0f906a844bfad0ddf084  firmware/src/calibration_core.cpp
+520e4024aaabf30479b285d47951d431ed69d5588a6bd9ee98b0f24c230ab574  firmware/src/payload.cpp
+c0650f3ac34020a61453b9298c9f5eb39facc5d91019b71d43c964c00162b78a  firmware/src/transport_core.cpp
+```
+
+## Audit include terlarang
+
+Tidak ada `<WiFi.h>`, `<LoRa.h>`, atau `<PubSubClient.h>` di file bersama:
+
+```
+sensors.cpp, sensors_core.cpp, calibration.cpp, calibration_core.cpp, payload.cpp
+-> NONE
+```
+
+## Perbedaan build
+
+`platformio.ini`:
+
+```ini
+[env:esp32dev]
+build_src_filter = +<*> -<transport_mqtt.cpp>
+
+[env:wokwi]
+build_src_filter = +<*> -<transport_lora.cpp>
+```
+
+Artinya satu-satunya modul yang diganti adalah transport. Perbedaan perilaku
+lain yang sudah ada:
+
+- `main.cpp` dan `power_mgmt.cpp` punya cabang `SIM_FAST_CYCLE` (tidur 10 detik
+  dan restart simulasi; lihat DEC-IOT-20).
+- `config.h` berbeda `NODE_ID` lewat `SIM_NODE`.
+
+`sensors.cpp`, `sensors_core.cpp`, `calibration.cpp`, `calibration_core.cpp`,
+`payload.cpp`, dan `transport_core.cpp` tetap identik.
+
+## Kesimpulan
+
+Paritas yang diklaim HW-5.3 tercapai untuk modul sensor, kalibrasi, payload, dan
+logika retry. Yang berbeda hanya transport, konfigurasi build, dan cabang
+simulasi tidur. Klaim "hanya transport yang berbeda" di dokumen 04 perlu dibaca
+dengan catatan DEC-IOT-20.
