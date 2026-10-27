@@ -28,8 +28,8 @@ steps:
       name: temperature
       value: 34.5
 
-  - delay: 15s
+  - delay: 2s
   - wait-serial: '[TX] GAGAL ok=0 attempts=3'
 
   # Siklus berikutnya harus tetap berjalan: node tidak berhenti di kegagalan.
-  - wait-serial: '[PROBE] m=21.0%(OK) ph=7.85(OK) t=34.50C(OK) b=3.87V(OK)'
+  - wait-serial: '[SENS] m=21.0%(OK) ph=7.85(OK) t=34.50C(OK) b=3.87V(OK)'

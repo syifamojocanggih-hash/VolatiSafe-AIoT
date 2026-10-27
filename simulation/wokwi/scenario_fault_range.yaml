@@ -27,21 +27,21 @@ steps:
 
   # ADC 0 -> (2800-0)/1450*100 = 193,1 %. pH ikut terkompensasi moisture yang
   # dibatasi ke 100 %, jadi 7,61 bukan 7,85.
-  - delay: 6s
-  - wait-serial: '[PROBE] m=193.1%(RANGE) ph=7.61(OK) t=34.50C(OK) b=3.87V(OK)'
+  - delay: 2s
+  - wait-serial: '[SENS] m=193.1%(RANGE) ph=7.61(OK) t=34.50C(OK) b=3.87V(OK)'
 
   # ADC 4095 -> (2800-4095)/1450*100 = -89,3 %.
   - set-control:
       part-id: pot_moist
       name: position
       value: 1.0
-  - delay: 6s
-  - wait-serial: '[PROBE] m=-89.3%(RANGE) ph=7.91(OK) t=34.50C(OK) b=3.87V(OK)'
+  - delay: 2s
+  - wait-serial: '[SENS] m=-89.3%(RANGE) ph=7.91(OK) t=34.50C(OK) b=3.87V(OK)'
 
   # Divider baterai putus -> 0,00 V, bukan "baterai habis".
   - set-control:
       part-id: pot_batt
       name: position
       value: 0.0
-  - delay: 6s
-  - wait-serial: '[PROBE] m=-89.3%(RANGE) ph=7.91(OK) t=34.50C(OK) b=0.00V(RANGE)'
+  - delay: 2s
+  - wait-serial: '[SENS] m=-89.3%(RANGE) ph=7.91(OK) t=34.50C(OK) b=0.00V(RANGE)'

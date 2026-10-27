@@ -11,7 +11,6 @@
 
 static Calibration g_cal;
 
-#if defined(SENSOR_PROBE)
 static const char* statusName(SensorStatus s) {
   switch (s) {
     case SENSOR_OK:           return "OK";
@@ -21,41 +20,57 @@ static const char* statusName(SensorStatus s) {
   }
   return "?";
 }
+
+// Satu siklus bangun: sampling -> kirim -> tidur. Tidak ada logika sensor,
+// kalibrasi, atau radio di sini; semuanya lewat modul masing-masing.
+static void runCycle(const Calibration& cal) {
+  const uint32_t t_cycle = millis();
+
+  TelemetryFrame f{};
+  strncpy(f.node_id, NODE_ID, sizeof(f.node_id) - 1);
+
+  const uint32_t t_sample = millis();
+  power_sensorOn();
+  sensors_sampleAll(f, cal);
+  power_sensorOff();
+  const uint32_t sample_ms = millis() - t_sample;
+
+  Serial.printf("[SENS] m=%.1f%%(%s) ph=%.2f(%s) t=%.2fC(%s) b=%.2fV(%s)\n",
+                f.moisture.value, statusName(f.moisture.status),
+                f.ph.value, statusName(f.ph.status),
+                f.soil_temp.value, statusName(f.soil_temp.status),
+                f.battery.value, statusName(f.battery.status));
+
+  const bool tx_ready = transport_init();
+#if TRANSPORT_KIND == TRANSPORT_KIND_MQTT
+  // Jam harus valid sebelum encode: ts 0 ditolak backend (DEC-IOT-09).
+  transport_syncClock();
 #endif
-
-#if defined(CAL_NVS_SELFTEST)
-// Membuktikan calibration_save + calibration_begin benar-benar menulis dan
-// membaca NVS, bukan hanya lulus di unit test. Nilai sengaja berbeda dari
-// default compile-time supaya tertukar nilai langsung kelihatan. Wokwi-only,
-// dihapus bersama SENSOR_PROBE saat HW-4.3.
-static void calibrationSelftest(const Calibration& original) {
-  Calibration t = original;
-  t.moist_dry      = 2760;
-  t.moist_wet      = 1310;
-  t.ph_neutral_adc = 1470.0f;
-  t.ph_slope       = 305.0f;
-
-  if (!calibration_save(t)) {
-    Serial.println(F("[CAL] selftest GAGAL: simpan ditolak"));
-    return;
+  f.timestamp = (uint32_t)time(nullptr);
+  if (f.timestamp < 1700000000UL) {
+    Serial.println(F("[TX] peringatan: ts belum valid, paket akan ditolak backend"));
   }
 
-  Calibration back{};
-  if (!calibration_begin(back)) {
-    Serial.println(F("[CAL] selftest GAGAL: NVS tidak terbaca ulang"));
-    return;
+  char buf[PAYLOAD_BUF_SIZE];
+  const size_t len = payload_encode(f, buf, sizeof(buf));
+  if (len == 0) {
+    Serial.println(F("[TX] encode gagal, tidak ada yang dikirim"));
+  } else {
+    Serial.printf("[TX] payload %u byte: %s\n", (unsigned)len, buf);
+    if (!tx_ready) {
+      Serial.println(F("[TX] init gagal, retry tetap dicoba"));
+    }
+    const TxResult r = transport_send(buf, len);
+    Serial.printf("[TX] %s ok=%d attempts=%d\n", r.ok ? "KIRIM" : "GAGAL",
+                  (int)r.ok, (int)r.attempts);
   }
 
-  const bool same = back.from_nvs && back.moist_dry == t.moist_dry &&
-                    back.moist_wet == t.moist_wet &&
-                    back.ph_neutral_adc == t.ph_neutral_adc &&
-                    back.ph_slope == t.ph_slope;
+  transport_shutdown();
 
-  Serial.printf("[CAL] selftest %s: m_dry=%u m_wet=%u ph_n=%.1f ph_s=%.1f from_nvs=%d\n",
-                same ? "OK" : "MISMATCH", back.moist_dry, back.moist_wet,
-                back.ph_neutral_adc, back.ph_slope, (int)back.from_nvs);
+  Serial.printf("[PWR] sampling %lu ms, siklus aktif %lu ms\n",
+                (unsigned long)sample_ms, (unsigned long)(millis() - t_cycle));
+  power_enterDeepSleep();
 }
-#endif
 
 void setup() {
   Serial.begin(115200);
@@ -69,9 +84,6 @@ void setup() {
 #if defined(SIM_FAST_CYCLE)
   Serial.println(F("[SIM] FAST CYCLE: sleep 10s, BUKAN perilaku produksi"));
 #endif
-#if defined(SENSOR_PROBE)
-  Serial.println(F("[SIM] SENSOR_PROBE: siklus probing, TANPA TX dan TANPA sleep"));
-#endif
 
   power_begin();
 
@@ -84,60 +96,19 @@ void setup() {
   }
   calibration_print(g_cal);
 
-#if defined(CAL_NVS_SELFTEST)
-  calibrationSelftest(g_cal);
-#endif
-
   sensors_begin();
-
-#if defined(SENSOR_PROBE)
-  // Blok sementara untuk verifikasi HW-2.1/2.2/3.1/3.4 di Wokwi. Wajib dihapus
-  // saat HW-4.3 (orkestrasi penuh) masuk; #if menjaga build fisik tetap bersih.
-  const bool tx_ready = transport_init();
-  // Jam disinkronkan walau MQTT gagal: log dan payload tetap butuh waktu yang
-  // benar, dan NTP hanya butuh WiFi, bukan broker.
-  transport_syncClock();
-  if (!tx_ready) {
-    Serial.println(F("[SIM] transport tidak siap; siklus tetap jalan, TX akan gagal"));
-  }
-  Serial.println(F("[SIM] probe siap, siklus tiap 5 detik"));
-#else
-  Serial.println(F("[STUB] siklus sampling -> encode -> TX -> sleep belum ada"));
-  Serial.println(F("[STUB] urutan final: HW-2.x sensor, HW-3.x payload/TX, HW-4.3 orkestrasi"));
-#endif
+  runCycle(g_cal);
 }
 
 void loop() {
-#if defined(SENSOR_PROBE)
-  TelemetryFrame f{};
-  strncpy(f.node_id, NODE_ID, sizeof(f.node_id) - 1);
-  f.timestamp = (uint32_t)time(nullptr);   // NTP dari transport_init
-
-  power_sensorOn();
-  delay(SENSOR_WARMUP_MS);
-  sensors_sampleAll(f, g_cal);
-  power_sensorOff();
-
-  Serial.printf("[PROBE] m=%.1f%%(%s) ph=%.2f(%s) t=%.2fC(%s) b=%.2fV(%s)\n",
-                f.moisture.value, statusName(f.moisture.status),
-                f.ph.value, statusName(f.ph.status),
-                f.soil_temp.value, statusName(f.soil_temp.status),
-                f.battery.value, statusName(f.battery.status));
-
-  char buf[PAYLOAD_BUF_SIZE];
-  const size_t len = payload_encode(f, buf, sizeof(buf));
-  if (len == 0) {
-    Serial.println(F("[TX] encode gagal, tidak ada yang dikirim"));
-  } else {
-    Serial.printf("[TX] payload %u byte: %s\n", (unsigned)len, buf);
-    const TxResult r = transport_send(buf, len);
-    Serial.printf("[TX] %s ok=%d attempts=%d\n", r.ok ? "KIRIM" : "GAGAL",
-                  (int)r.ok, (int)r.attempts);
+#if defined(SIM_FAST_CYCLE)
+  // power_enterDeepSleep() pada build simulasi hanya menandai waktu tidur.
+  // Loop tetap berjalan supaya task watchdog di-feed, lalu restart setelah
+  // durasi tidur tercapai (lihat DEC-IOT-20).
+  delay(100);
+  if (power_simSleepDue()) {
+    ESP.restart();
   }
-
-  delay(5000);
-#else
-  Serial.printf("[LOOP] heartbeat %lu ms\n", (unsigned long)millis());
-  delay(5000);
 #endif
+  // Build fisik tidak pernah sampai di sini: runCycle() berakhir di deep sleep.
 }
