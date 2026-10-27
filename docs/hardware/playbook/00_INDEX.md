@@ -109,10 +109,10 @@ Update kolom Status dan Bukti setiap menyelesaikan task. Jangan tandai `✅` tan
 ### FASE 4 — Power Management
 | ID | Task | Status | Bukti |
 |---|---|---|---|
-| HW-4.1 | Sequencing power gate GPIO25 | ⬜ | |
-| HW-4.2 | Deep sleep + radio off | ⬜ | |
-| HW-4.3 | Orkestrasi siklus di `main.cpp` | ⬜ | |
-| HW-4.4 | Verifikasi power budget | ⬜ | |
+| HW-4.1 | Sequencing power gate GPIO25 | ✅ | `power_mgmt.cpp` + urutan log, `evidence/HW-4.1_power_gate_20261027.txt` |
+| HW-4.2 | Deep sleep + radio off | ✅ | `power_mgmt.cpp`, `evidence/HW-4.2_deep_sleep_20261027.txt` (deep sleep fisik → HW-9.1) |
+| HW-4.3 | Orkestrasi siklus di `main.cpp` | ✅ | `main.cpp`, 6 skenario lulus, `evidence/HW-4.3_orchestration_20261027.txt` |
+| HW-4.4 | Verifikasi power budget | ✅ | `evidence/HW-4.4_power_budget_20261027.md` (durasi terukur, arus estimasi) |
 
 ### FASE 5 — Wokwi Testbed
 | ID | Task | Status | Bukti |

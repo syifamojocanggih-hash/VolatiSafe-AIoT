@@ -177,15 +177,21 @@ Nilai injeksi tepat: [`05_WOKWI_SIMULASI.md`](05_WOKWI_SIMULASI.md) §5.
 | 3 | `esp32dev` | 6,9 % (22.452 / 327.680 B) | 24,5 % (320.984 / 1.310.720 B) | 26 Okt 2026 | + transport LoRa nyata (SX1278), payload nyata |
 | 3 | `wokwi` | 14,5 % (47.676 / 327.680 B) | 76,1 % (996.810 / 1.310.720 B) | 26 Okt 2026 | + WiFi + PubSubClient + NTP nyata |
 | 3 | `native` | — | — | 26 Okt 2026 | 45 test PASS (payload + sensors_core + calibration_core + transport_core) |
-| 4 | `esp32dev` | | | | final |
+| 4 | `esp32dev` | 6,9 % (22.572 / 327.680 B) | 26,2 % (343.428 / 1.310.720 B) | 27 Okt 2026 | orkestrasi siklus + deep sleep; probe/selftest dihapus |
+| 4 | `wokwi` | 14,6 % (47.684 / 327.680 B) | 76,0 % (996.618 / 1.310.720 B) | 27 Okt 2026 | SIM sleep via restart, tanpa probe/selftest |
+| 4 | `native` | - | - | 27 Okt 2026 | 45 test PASS (tidak berubah) |
 
-**Catatan lompatan Flash `wokwi` 24,7 % → 76,1 %.** Bukan regresi kode aplikasi: menautkan WiFi + lwIP + mbedTLS untuk NTP memakan ±670 KB. Batas waspada 80 % karena itu **hampir tersentuh**, dan FASE 4 tidak boleh menambah dependensi baru tanpa memeriksa angka ini. Build fisik tetap 24,5 % karena tidak membawa tumpukan jaringan.
+**FASE 4:** Flash fisik naik dari 24,5 % ke 26,2 % karena `esp_sleep`/`esp_system`; build `wokwi` turun tipis ke 76,0 % setelah `SENSOR_PROBE`/`CAL_NVS_SELFTEST` dihapus. Tidak ada dependensi baru.
+
+**Catatan lompatan Flash `wokwi` 24,7 % → 76,1 %.** Bukan regresi kode aplikasi: menautkan WiFi + lwIP + mbedTLS untuk NTP memakan ±670 KB. Batas waspada 80 % karena itu **hampir tersentuh**, dan FASE 4 tidak boleh menambah dependensi baru tanpa memeriksa angka ini. Build fisik 26,2 % setelah FASE 4, tetap jauh di bawah ambang karena tidak membawa tumpukan jaringan.
 
 Ambang waspada: RAM > 60 % atau Flash > 80 % → tinjau dependensi.
 
 ### 5.2 Power budget — estimasi vs terukur
 
 Tabel dari `../FIRMWARE_SPEC.md` §3 adalah **estimasi**, bukan pengukuran. Isi kolom terukur di TKT 4.
+
+**FASE 4:** durasi sampling terukur 1,013-1,015 s (3 siklus, `HW-4.3_scenario_fault_range_20261027.txt`). Budget fisik dihitung ulang dengan durasi itu: **0,05673 mAh/siklus** (81 % dari batas 0,07). Arus sensor/LoRa/MCU masih estimasi; rincian di `evidence/HW-4.4_power_budget_20261027.md`. Siklus aktif simulator (11,7-16,8 s) tidak dipakai karena membawa WiFi/NTP/MQTT yang tidak ada di node LoRa.
 
 | Fase | Estimasi dokumen | Terukur (TKT 4) | Metode |
 |---|---|---|---|
@@ -228,6 +234,10 @@ Semua file disimpan di `docs/hardware/evidence/` (folder ini milik domain IoT, a
 | 3h | Short & putus jadi `OUT_OF_RANGE`, bukan 0/100 | `HW-3.1_no_clamp_wokwi_20261026.txt` | HW-3.1 |
 | 3i | LoRa: build + isolasi modul (radio belum memancar) | `HW-3.3_lora_transport_20261026.txt` | HW-3.3 |
 | 3j | MQTT: topik kontrak, payload 71 B, NTP valid, retry 3× | `HW-3.4_mqtt_transport_20261026.txt` | HW-3.4 |
+| 3k | Urutan power gate ON -> OFF -> TX | `HW-4.1_power_gate_20261027.txt` | HW-4.1 |
+| 3l | Tidur, wake reason, siklus berikutnya | `HW-4.2_deep_sleep_20261027.txt` | HW-4.2 |
+| 3m | Orkestrasi penuh + 6 skenario regresi | `HW-4.3_orchestration_20261027.txt`, `HW-4.3_scenario_*_20261027.txt` | HW-4.3 |
+| 3n | Power budget dari durasi terukur | `HW-4.4_power_budget_20261027.md` | HW-4.4 |
 | 4 | Payload sampai broker | `I03_mqtt_rx.txt` | HW-5.4 |
 | 5 | Hex dump payload | `payload_hexdump.txt` | HW-3.2 |
 | 6 | Integrasi ke backend | `I07_backend.png` + `I07_query.txt` | HW-7.2 |

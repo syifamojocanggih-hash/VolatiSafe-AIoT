@@ -330,6 +330,18 @@ Penyimpangan dari tabel di atas (detail di `DEC-IOT-18` dan `DEC-IOT-19`):
 
 ---
 
+Catatan implementasi 27 Okt 2026 (FASE 4 selesai): HW-4.1, 4.2, 4.3, 4.4 selesai. Bukti: `evidence/HW-4.1_power_gate_20261027.txt`, `evidence/HW-4.2_deep_sleep_20261027.txt`, `evidence/HW-4.3_orchestration_20261027.txt`, `evidence/HW-4.4_power_budget_20261027.md`.
+
+Penyimpangan dan batas bukti (detail di `DEC-IOT-20`):
+
+1. **Urutan timestamp berubah.** `transport_init()` dan `transport_syncClock()` dipanggil sebelum `payload_encode()` supaya `ts` tidak 0 di build MQTT. Urutan spec 04 10 tidak bisa dipakai apa adanya.
+2. **Deep sleep tidak disimulasikan.** `wokwi-cli` 0.29.1 memicu `TG1WDT_SYS_RESET` sebelum timer tidur berbunyi; build `SIM_FAST_CYCLE` menunggu di `loop()` lalu `ESP.restart()`. Jalur `esp_sleep_enable_timer_wakeup()` + `esp_deep_sleep_start()` tetap dikompilasi untuk fisik dan diverifikasi di HW-9.1 (F-04).
+3. **Probe dihapus.** `SENSOR_PROBE` dan `CAL_NVS_SELFTEST` hilang dari `main.cpp`/`platformio.ini`; semua skenario memakai `[SENS]`/`[PWR]`, dan `scenario_cycle.yaml` ditambahkan.
+4. **Budget daya:** durasi sampling terukur 1,013-1,015 s; total 0,05673 mAh/siklus (81 % dari batas 0,07). Arus masih estimasi dokumen, bukan pengukuran.
+5. **Flash wokwi** turun ke 76,0 %, fisik naik ke 26,2 % karena `esp_sleep`/`esp_system`. Tidak ada dependensi baru.
+
+---
+
 ## 8. FASE 5 — Wokwi Testbed
 
 ### HW-5.1 — `diagram.json`

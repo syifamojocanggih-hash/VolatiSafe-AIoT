@@ -24,8 +24,8 @@ Menghasilkan firmware ESP32 dan simulasi sirkuit Wokwi yang mampu melakukan akui
 | TAHAP 1 — Struktur Proyek & Pinout | ✅ selesai 26 Okt 2026 |
 | TAHAP 2 — Driver Sensor & Kalibrasi | ✅ selesai 26 Okt 2026 |
 | TAHAP 3 — Protokol Telemetri LoRa | ✅ selesai 26 Okt 2026 (LoRa level build; radio belum memancar → HW-9.3) |
-| TAHAP 4 — Manajemen Daya & Deep Sleep | ⬜ |
-| TAHAP 5 — Virtual Testbed Wokwi | 🟨 sebagian: `diagram.json` + 4 skenario jalan; bukti telemetri sampai broker → HW-5.4 |
+| TAHAP 4 — Manajemen Daya & Deep Sleep | ✅ selesai 27 Okt 2026 (deep sleep fisik → HW-9.1) |
+| TAHAP 5 — Virtual Testbed Wokwi | 🟨 sebagian: `diagram.json` + 6 skenario jalan; bukti telemetri sampai broker → HW-5.4 |
 
 **Unit test:** `pio test -e native` → 45 test PASS (6 payload, 24 sensors_core, 7 calibration_core, 8 transport_core). Bukti: [`evidence/unit_test_native_20261026.txt`](evidence/unit_test_native_20261026.txt).
 
@@ -103,20 +103,27 @@ Menghasilkan firmware ESP32 dan simulasi sirkuit Wokwi yang mampu melakukan akui
 
 ---
 
-### TAHAP 4: Manajemen Daya & Deep Sleep
+### TAHAP 4: Manajemen Daya & Deep Sleep — ✅ SELESAI 27 Okt 2026
+
+> **Bukti:** `evidence/HW-4.1_power_gate_20261027.txt`, `evidence/HW-4.2_deep_sleep_20261027.txt`, `evidence/HW-4.3_orchestration_20261027.txt`, `evidence/HW-4.4_power_budget_20261027.md`.
+> Detail task atomik ada di [`playbook/03_ROADMAP_TUGAS.md`](playbook/03_ROADMAP_TUGAS.md) FASE 4 (HW-4.1 … HW-4.4), status di [`playbook/00_INDEX.md`](playbook/00_INDEX.md) §4.
 
 #### 🟢 HW-1.4: Siklus Deep Sleep 15 Menit & Power Gating
 - **Deskripsi:** Mengoptimalkan konsumsi daya agar baterai 18650 bertahan minimal 90 hari di lapangan.
-- **Target File:** `firmware/src/power_mgmt.cpp`
+- **Target File:** `firmware/src/power_mgmt.cpp`, `firmware/src/main.cpp`
 - **Spesifikasi:**
   - Sebelum tidur: Tarik GPIO 25 ke `LOW` (memutus catu daya sensor via MOSFET untuk mencegah korosi probe).
-  - Nonaktifkan WiFi & Bluetooth (`WiFi.mode(WIFI_OFF); btStop();`).
-  - Set timer bangun: `esp_sleep_enable_timer_wakeup(15 * 60 * 1000000ULL);` (15 menit).
-  - Panggil `esp_deep_sleep_start();`.
-  - Siklus aktif total per transmisi ≤ 3.5 detik.
+  - Nonaktifkan WiFi & Bluetooth lewat `transport_shutdown()` (MQTT: `mqtt.disconnect()` + `WiFi.disconnect(true)` + `WIFI_OFF`; LoRa: `LoRa.sleep()` + `SPI.end()`).
+  - Set timer bangun: `esp_sleep_enable_timer_wakeup(SLEEP_DURATION_US)` (15 menit; 10 detik saat `SIM_FAST_CYCLE`).
+  - Panggil `esp_deep_sleep_start();` pada build fisik.
+  - Siklus aktif total per transmisi ≤ 3.5 detik (fisik; build simulasi membawa WiFi/NTP sehingga lebih lama).
 - **Checklist:**
-  - [ ] Arus saat deep-sleep terukur/terestimasi ≤ 15 µA.
-  - [ ] Sensor hanya menyala selama siklus sampling (2 detik).
+  - [x] Urutan gate: `power_begin()` LOW sejak boot, sensor ON hanya saat sampling, sensor OFF **sebelum** TX.
+  - [x] Wake reason dicetak (`[PWR] wake: timer` / `power-on/reset`).
+  - [x] Orkestrasi penuh ada di `main.cpp`; `SENSOR_PROBE` dan `CAL_NVS_SELFTEST` sudah dihapus.
+  - [x] Budget dihitung dari durasi sampling terukur: 0,05673 mAh/siklus (≤ 0,07), arus masih estimasi.
+  - [ ] Arus saat deep-sleep terukur ≤ 15 µA — **belum**, butuh hardware (HW-9.1/F-04).
+- **Catatan:** Wokwi tidak menyelesaikan deep sleep timer dengan bersih (task watchdog reset sebelum timer). Build simulasi karena itu menunggu 10 detik di `loop()` lalu restart; jalur `esp_deep_sleep_start()` tetap dikompilasi untuk fisik dan diverifikasi di HW-9.1. Detail di `DEC-IOT-20`.
 
 ---
 

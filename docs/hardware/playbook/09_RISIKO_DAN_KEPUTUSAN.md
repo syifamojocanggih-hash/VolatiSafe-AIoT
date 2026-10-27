@@ -255,6 +255,24 @@
 | **Jalan keluar untuk HW-5.4** | (1) Pakai Wokwi for VS Code atau wokwi.com dengan Private Gateway aktif, lalu jalankan `wokwigw.exe`; (2) jalankan broker di host yang terjangkau gateway publik; (3) rekam bukti I-03 dari mesin yang punya lisensi Wokwi. Pilih satu sebelum FASE 5 dimulai, bukan saat demo. |
 | **Konsekuensi** | R-02 naik dari "sedang" ke "sudah terbukti terjadi". `scenario_mqtt_down.yaml` sekarang menguji jalur gagal (bukan jalur sukses) karena itulah satu-satunya yang bisa dijalankan konsisten di lingkungan ini. |
 
+### DEC-IOT-20 - Penyimpangan FASE 4: Urutan Timestamp, Deep Sleep Wokwi, dan Penghapusan Probe
+
+| | |
+|---|---|
+| **Tanggal** | 27 Okt 2026 |
+| **Status** | Diputuskan |
+| **Konteks** | HW-4.2/HW-4.3 mengubah `power_mgmt.cpp` dan `main.cpp` dari stub menjadi siklus penuh. `04_FIRMWARE_CORE.md` 10 menaruh `payload_encode()` sebelum `transport_init()`, dan `esp_deep_sleep_start()` diasumsikan langsung menghentikan eksekusi. |
+| **Temuan 1** | Build MQTT butuh `ts` valid. `transport_syncClock()` hanya bisa jalan setelah `transport_init()` (WiFi hidup). Kalau urutan spec diikuti, `f.timestamp` masih 0 saat encode dan backend menolak setiap paket (`ts < 1700000000`). |
+| **Keputusan 1** | Urutan final: sampling -> `transport_init()` -> `transport_syncClock()` -> `f.timestamp = time(nullptr)` -> encode -> send -> shutdown -> sleep. Untuk build fisik, `ts` tetap belum terpecahkan (DEC-IOT-09) dan diverifikasi di TKT 4. |
+| **Temuan 2** | `wokwi-cli` 0.29.1 tidak menyelesaikan deep sleep timer dengan bersih. `esp_deep_sleep_start()` memasang timer tetapi CPU memicu `TG1WDT_SYS_RESET` sebelum timer 10 detik, lalu `DEEPSLEEP_RESET` datang di tengah siklus berikutnya. `disableLoopWDT()` dan `disableCore0WDT()` tidak memperbaiki perilaku ini. |
+| **Keputusan 2** | Build `SIM_FAST_CYCLE` tidak memanggil `esp_deep_sleep_start()`. `power_enterDeepSleep()` menandai waktu tidur, `loop()` menunggu durasi yang sama sambil memberi feed watchdog, lalu `ESP.restart()`. Build fisik tetap memakai `esp_sleep_enable_timer_wakeup()` + `esp_deep_sleep_start()`. |
+| **Konsekuensi 2** | Bukti simulator hanya membuktikan durasi tidur, urutan shutdown, dan siklus bangun - bukan `DEEPSLEEP_RESET`/wake timer fisik. Arus deep sleep dan wake timer nyata diverifikasi di HW-9.1 (F-04). Ini dicatat di `evidence/HW-4.2_deep_sleep_20261027.txt`, bukan diklaim sebagai deep sleep terbukti. |
+| **Temuan 3** | `SENSOR_PROBE` dan `CAL_NVS_SELFTEST` adalah blok sementara DEC-IOT-17 yang wajib dihapus saat HW-4.3. Skrip skenario masih menunggu `[PROBE]`. |
+| **Keputusan 3** | Kedua flag dihapus dari `main.cpp` dan `platformio.ini`. Semua skenario memakai `[SENS]`/`[PWR]`, dan `scenario_cycle.yaml` ditambahkan untuk membuktikan siklus tidur -> bangun. |
+| **Temuan 4** | `power_mgmt.cpp` tidak boleh meng-include `<WiFi.h>`/`<LoRa.h>`; itu akan membuat paritas modul rusak dan menambah flash build fisik. |
+| **Keputusan 4** | Radio dimatikan oleh `transport_shutdown()` masing-masing transport (MQTT: disconnect + `WiFi.mode(WIFI_OFF)`; LoRa: `LoRa.sleep()` + `SPI.end()`). `power_mgmt.cpp` hanya mengurus gate sensor, deep sleep, dan wake reason. |
+| **Angka** | Sampling terukur 1,013-1,015 s. Siklus aktif simulator 11,7-16,8 s karena WiFi/NTP/MQTT, bukan angka fisik. Budget fisik 0,05673 mAh/siklus (81 % batas 0,07). Flash `wokwi` 76,0 %, fisik 26,2 %; tidak ada dependensi baru. |
+
 ---
 
 ## Bagian B — Risk Register

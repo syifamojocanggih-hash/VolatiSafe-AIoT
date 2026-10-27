@@ -196,6 +196,9 @@ dibuktikan di simulasi (lihat DEC-IOT-17, diverifikasi di HW-9.2).
 | `scenario_fault.yaml` | DS18B20 70 °C → `RANGE`, nilai tidak di-clamp | ✅ lulus |
 | `scenario_fault_range.yaml` | Moisture short/putus dan divider baterai putus → `RANGE` | ✅ lulus |
 | `scenario_mqtt_down.yaml` | Broker tidak terjangkau → `ok=0 attempts=3`, siklus tetap jalan | ✅ lulus |
+| `scenario_cycle.yaml` | Siklus penuh: sensor ON/OFF, TX, tidur 10 s, bangun, siklus berikutnya | lulus |
+
+**Catatan durasi:** sejak FASE 4 setiap siklus berakhir dengan tidur 10 detik (SIM_FAST_CYCLE), jadi --timeout harus lebih besar dari 30000 ms. Skenario yang menunggu lebih dari satu siklus (mis. scenario_fault_range) butuh --timeout 180000.
 
 **Yang belum ada: skenario "payload sampai broker".** `wokwi-cli` memakai gateway publik Wokwi
 yang hanya bisa menghubungi internet, bukan jaringan lokal, sehingga Mosquitto di mesin ini
