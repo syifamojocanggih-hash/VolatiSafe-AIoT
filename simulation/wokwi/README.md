@@ -32,6 +32,9 @@ Skenario yang menunggu beberapa siklus (mis. `scenario_fault_range` atau
 | `scenario_mqtt_down.yaml` | Broker tidak terjangkau -> `ok=0 attempts=3`, siklus tetap jalan |
 | `scenario_cycle.yaml` | Siklus penuh: sensor ON/OFF, TX, tidur, bangun |
 | `scenario_i03.yaml` | 5 paket berturut untuk bukti I-03 |
+| `scenario_e01.yaml` | Satu paket E-01 (A) + asersi TX |
+| `scenario_e02.yaml` | Satu paket E-02 (B) + asersi TX |
+| `scenario_i06.yaml` | DS18B20 terputus (-127 C) untuk I-06 |
 
 ## Broker lokal
 
@@ -59,3 +62,4 @@ di-override saat build. Ini bukan bridge; firmware tetap publish sendiri.
   `diagram.json` + firmware sebagai alternatif.
 - Wokwi tidak punya part SX1278. Yang diuji di sini adalah payload dan logika,
   bukan radio LoRa fisik.
+- **Kuota Wokwi CI gratis habis 27 Okt 2026** setelah E01; wokwi-cli tidak bisa dijalankan lagi bulan ini. E02 dan I-06 tertunda. Lihat ../../docs/hardware/evidence/HW-7.3_blockers_20261027.md.

@@ -297,6 +297,20 @@
 
 ---
 
+### DEC-IOT-22 - Kuota CI Wokwi Gratis Habis Sebelum E02/I-06
+
+| | |
+|---|---|
+| **Tanggal** | 27 Okt 2026 |
+| **Status** | Terjadi - memblokir E02, I-06, dan demo live |
+| **Konteks** | Setelah E01 selesai, `wokwi-cli` menolak menjalankan simulasi berikutnya: "You have used up your Free plan monthly CI minute quota." |
+| **Dampak** | E02 dan I-06 tidak bisa dijalankan; screenshot/link dan video live juga berisiko. Build firmware dan unit test tetap bisa. |
+| **Keputusan** | Jangan menandai E02/E03/I-06 lulus. E01 dipertahankan sebagai bukti sisi IoT. Log `[SENS]` B lama dipakai sebagai bukti parsial. Demo harus memakai rekaman yang ada atau akun/kuota lain. |
+| **Mitigasi** | Cek apakah VS Code interaktif memakai kuota terpisah; rekam semua segmen H-1; siapkan akun berbayar bila memungkinkan. |
+| **Bukti** | `evidence/HW-7.3_blockers_20261027.md`, `evidence/HW-7.4_evidence_inventory_20261027.md`. |
+
+---
+
 ## Bagian B — Risk Register
 
 Probabilitas & dampak: T = Tinggi, S = Sedang, R = Rendah.
@@ -307,7 +321,7 @@ Probabilitas & dampak: T = Tinggi, S = Sedang, R = Rendah.
 | R-02 | Wokwi tidak bisa menjangkau broker lokal | **T (terbukti)** | T | DEC-IOT-19: gateway publik memblokir TCP ke host; I-03 dipindah ke HW-5.4 dengan Private Gateway / VS Code, diputuskan sebelum FASE 5 | Hafiiz |
 | R-03 | Backend Syifa belum siap saat HW-7.2 | T | S | Bukti integrasi bisa berupa payload di `mosquitto_sub` + validator; jadwalkan HW-7.2 lebih lambat | Hafiiz + Syifa |
 | R-04 | Klaim 52 byte terbukti salah di depan juri | S | T | DEC-IOT-02: koreksi dokumen + jawaban jujur di video | Hafiiz → Aris |
-| R-05 | Kuota simulasi Wokwi habis saat demo | S | T | Uji penuh H-1; rekam semua segmen H-1; jangan simulasi berulang hari-H | Hafiiz |
+| R-05 | Kuota simulasi Wokwi habis saat demo | **T (terjadi 27 Okt 2026)** | T | Kuota CI gratis habis setelah E01; E02/I-06 tertunda. Rekam semua segmen dengan sisa akses interaktif/akun berbayar, jangan simulasi berulang hari-H | Hafiiz |
 | R-06 | Broker tanpa auth di WiFi publik saat demo | S | T | Aktifkan `password_file`; demo di hotspot pribadi | Hafiiz |
 | R-07 | `.pio/` ter-commit (315 MB artefak) | S | S | `git add <path>` eksplisit sampai `.gitignore` ada (HW-0.4) | Hafiiz → Aris |
 | R-08 | Arus deep sleep nyata jauh di atas klaim → klaim daya gugur | T | T | Dek-IOT-05: ganti klaim ke "target desain", tambahkan panel surya | Hafiiz |

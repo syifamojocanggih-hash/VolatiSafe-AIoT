@@ -449,6 +449,14 @@ Catatan implementasi 27 Okt 2026 (FASE 6): HW-6.1 dan HW-6.2 selesai; HW-6.3 tet
 
 ---
 
+Catatan implementasi 27 Okt 2026 (FASE 7, sisi IoT):
+
+- **HW-7.1 ✅:** `pio test -e native` 45 PASS; bukti `evidence/unit_test_native_20261027.txt`.
+- **HW-7.2 ⛔:** backend belum punya MQTT worker/ingestion; API masih `mock_db`. Blocker: `evidence/HW-7.2_backend_blocker_20261027.md`.
+- **HW-7.3 🟨:** E01 lulus (serial + MQTT + validator). E02 dan I-06 tidak bisa dijalankan karena kuota CI Wokwi gratis habis. E03 dan dashboard butuh backend. Bukti: `E01_*`, blocker: `HW-7.3_blockers_20261027.md`.
+- **HW-7.4 🟨:** inventaris 12 bukti di `evidence/HW-7.4_evidence_inventory_20261027.md`; item backend/dashboard/screenshot/video masih kosong.
+
+---
 ## 11. FASE 8 — Demo & Handover
 
 ### HW-8.1 — Video demo 2 menit

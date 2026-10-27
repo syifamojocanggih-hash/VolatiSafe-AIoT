@@ -117,7 +117,7 @@ Isi = output lengkap `pio test -e native`. Format akhir harus:
 | I-05 | NVS kosong | `pio run -t erase` lalu jalankan | Serial mencetak `[CAL] NVS kosong ...`, node tetap mengirim data |
 | I-06 | DS18B20 terputus | hapus part DS18B20 di diagram, jalankan | payload berisi `"t":-999.0`; backend menolak (bukan diterima) |
 
-**Status per 27 Okt 2026:** I-01, I-02, I-03, I-04, I-05 lulus. I-03 dijalankan dengan Mosquitto lokal di port 1883; karena akun Wokwi gratis tidak punya Private Gateway, broker lokal diekspos sementara lewat tunnel TCP (Serveo) dan firmware diarahkan ke endpoint tunnel. Hasil: 5 paket berturut, topik persis, `ts` monoton 1793115044 -> 1793115103, 5/5 payload lolos `validate_payload.py`. Bukti: `evidence/I03_mqtt_rx.txt`, `evidence/HW-5.4_local_mqtt_20261027.md`. Jalur langsung `host.wokwi.internal` tetap hanya untuk akun berbayar (DEC-IOT-19).
+**Status per 27 Okt 2026:** I-01, I-02, I-03, I-04, I-05 lulus; I-06 tertunda karena kuota CI Wokwi gratis habis. I-03 dijalankan dengan Mosquitto lokal di port 1883; karena akun Wokwi gratis tidak punya Private Gateway, broker lokal diekspos sementara lewat tunnel TCP (Serveo) dan firmware diarahkan ke endpoint tunnel. Hasil: 5 paket berturut, topik persis, `ts` monoton 1793115044 -> 1793115103, 5/5 payload lolos `validate_payload.py`. Bukti: `evidence/I03_mqtt_rx.txt`, `evidence/HW-5.4_local_mqtt_20261027.md`. Jalur langsung `host.wokwi.internal` tetap hanya untuk akun berbayar (DEC-IOT-19).
 
 ### 3.1 Bukti I-03 (contoh format yang harus disimpan)
 
@@ -146,6 +146,8 @@ Nilai injeksi tepat: [`05_WOKWI_SIMULASI.md`](05_WOKWI_SIMULASI.md) §5.
 | E-03 | C — Dropout | node dihentikan ≥ 35 menit | tidak ada paket baru | grafik kontinu, label `[Est-Simulated]`, `is_predicted=true`, tidak crash |
 
 **Toleransi:** nilai AVRI E-01 dan E-02 bergantung pada model AI (domain Aris) dan data cuaca BMKG yang aktif. Angka 78 % / 18 % adalah target desain, bukan hasil yang dijamin. Bila model menghasilkan 71 % atau 84 %, skenario tetap **PASS** selama kategori risiko sesuai (Kritis / Aman). Catat nilai aktual, jangan memaksa hasil.
+
+**Status 27 Okt 2026:** E-01 selesai di sisi IoT (`E01_serial.txt`, `E01_mqtt.txt`, `E01_validation.txt`); dashboard PNG belum ada. E-02 dan I-06 tidak bisa dijalankan karena kuota CI Wokwi gratis habis. E-03 dan dashboard butuh backend yang menerima MQTT. Detail: `evidence/HW-7.3_blockers_20261027.md`.
 
 ### 4.1 Bukti E2E
 
@@ -250,6 +252,10 @@ Semua file disimpan di `docs/hardware/evidence/` (folder ini milik domain IoT, a
 | 10 | Screenshot rangkaian Wokwi | `wokwi_diagram.png` | HW-8.2 |
 | 11 | Video demo | tautan (bukan file besar di repo) | HW-8.1 |
 | 12 | Baseline RAM/Flash | terisi di §5.1 | HW-0.5 |
+| 13 | Unit test FASE 7 | `unit_test_native_20261027.txt` (45 PASS) | HW-7.1 |
+| 14 | E01 sisi IoT | `E01_serial.txt`, `E01_mqtt.txt`, `E01_validation.txt` | HW-7.3 |
+| 15 | Inventaris bukti FASE 7 | `HW-7.4_evidence_inventory_20261027.md` | HW-7.4 |
+| 16 | Blocker backend/kuota | `HW-7.2_backend_blocker_20261027.md`, `HW-7.3_blockers_20261027.md` | HW-7.2/7.3 |
 
 **Aturan ukuran:** jangan commit file > 5 MB. Video disimpan di Google Drive/YouTube (unlisted), repo hanya berisi tautan.
 
@@ -299,8 +305,10 @@ Bukti F-06 disimpan sebagai tabel jarak vs RSSI/SNR + screenshot `LoRa.packetRss
 | HW-5.4 | I-03 | #4 |
 | HW-6.1 | I-03 (topik/QoS/retain) | #3p |
 | HW-6.2 | Vektor adapter | #3q |
+| HW-7.1 | U-01 … U-53 (native) | #3, #13 |
 | HW-7.2 | E2E prasyarat | #6 |
-| HW-7.3 | E-01 … E-03 | #7, #8, #9 |
+| HW-7.3 | E-01 … E-03 | #7, #8, #9, #14 |
+| HW-7.4 | Inventaris 12 bukti | #15 |
 | HW-8.2 | — | #10 |
 | HW-8.1 | — | #11 |
 

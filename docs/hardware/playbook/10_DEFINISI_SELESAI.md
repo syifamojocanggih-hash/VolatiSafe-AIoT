@@ -101,10 +101,10 @@ Tanpa nomor 5, status tetap `🟨`.
 
 | Kriteria | Cara verifikasi |
 |---|---|
-| Unit | 33 kasus PASS (U-01 … U-33) |
-| Integrasi | I-01 … I-06 dijalankan, hasil dicatat |
-| E2E | E-01 … E-03 dijalankan, kategori risiko sesuai |
-| Bukti | 12 item di `07_TEST_PLAN.md` §6 lengkap |
+| Unit | 45 kasus PASS (U-01 … U-53; bukti `unit_test_native_20261027.txt`) |
+| Integrasi | I-01 … I-05 lulus; I-06 tertunda karena kuota Wokwi; I-03 lulus |
+| E2E | E-01 sisi IoT lulus; E-02 tertunda kuota; E-03 butuh backend |
+| Bukti | 12 item di `07_TEST_PLAN.md` §6 terisi sebagian; lihat `HW-7.4_evidence_inventory_20261027.md` |
 
 ### FASE 8 — Demo & Handover
 

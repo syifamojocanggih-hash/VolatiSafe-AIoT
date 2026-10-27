@@ -132,10 +132,10 @@ Update kolom Status dan Bukti setiap menyelesaikan task. Jangan tandai `✅` tan
 ### FASE 7 — Uji & Bukti
 | ID | Task | Status | Bukti |
 |---|---|---|---|
-| HW-7.1 | Unit test lulus | ⬜ | |
-| HW-7.2 | Integrasi Wokwi → MQTT → backend | ⬜ | |
-| HW-7.3 | Skenario A/B/C | ⬜ | |
-| HW-7.4 | Arsip bukti | ⬜ | |
+| HW-7.1 | Unit test lulus | ✅ | `evidence/unit_test_native_20261027.txt` (45 PASS) |
+| HW-7.2 | Integrasi Wokwi → MQTT → backend | ⛔ | `evidence/HW-7.2_backend_blocker_20261027.md` (backend belum punya MQTT worker) |
+| HW-7.3 | Skenario A/B/C | 🟨 | `evidence/E01_serial.txt`, `E01_mqtt.txt`, `E01_validation.txt`; E02/I-06 kuota Wokwi habis, E03/dashboard butuh backend (`evidence/HW-7.3_blockers_20261027.md`) |
+| HW-7.4 | Arsip bukti | 🟨 | `evidence/HW-7.4_evidence_inventory_20261027.md` (item 6-11 belum lengkap) |
 
 ### FASE 8 — Demo & Handover
 | ID | Task | Status | Bukti |
