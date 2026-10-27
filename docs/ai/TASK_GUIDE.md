@@ -191,6 +191,37 @@ ightarrow$ Rekomendasi: DILARANG TEBAR (kehilangan amonia >80%).
 
 ---
 
+## 🚀 Skenario & Prosedur Merge ke Cabang `Development` (Tahap 3)
+
+Cabang `ai` diintegrasikan pada **Tahap 3**, setelah fondasi `iot` dan `digittal-twin` stabil di `Development`. Aris wajib memastikan:
+
+### Checklist Pra-Merge Aris:
+- [ ] Model LightGBM terkompilasi di `models/avri_model.txt` (~719 KB) dan lolos benchmark ($MAE \le 3.5\%$, $R^2 \ge 0.85$, $Latency \le 20\text{ ms}$).
+- [ ] TreeSHAP direction check lolos 100% (VPD +, Angin +, RH -, Suhu +).
+- [ ] Audit bias sistematik dan uji monotoni fisika lulus 100% via `ai_engine/audit.py`.
+- [ ] Service wrapper `ai_engine/service.py` 100% patuh DTO `docs/universal/INTERFACES.md` §2.
+- [ ] Seluruh 23 unit test di `ai_engine/tests/` berstatus **23 passed**.
+- [ ] Tidak ada modifikasi file di luar area `ai_engine/`, `models/`, `docs/ai/`, dan `docs/universal/`.
+
+### Prosedur Git Terminal:
+```bash
+# 1. Pastikan seluruh pekerjaan di commit di cabang ai
+git checkout ai
+git status
+
+# 2. Jalankan test suite & audit komprehensif
+PYTHONPATH=. .venv/bin/pytest ai_engine/tests/
+.venv/bin/python ai_engine/audit.py
+
+# 3. Eksekusi merge ke Development (Tahap 3)
+git checkout Development
+git pull origin Development
+git merge ai --no-ff -m "merge(ai): integrate PIML LightGBM engine, Arrhenius kinetics, TreeSHAP explainer, and avri model"
+git push origin Development
+```
+
+---
+
 ## 🚫 Zona Terlarang Aris (AI Domain)
 1. ❌ DILARANG membuka koneksi database langsung (`psycopg2`, `SQLAlchemy`, dsb).
 2. ❌ DILARANG mengubah implementasi internal firmware ESP32 atau styling frontend secara sepihak di luar perjanjian kontrak `INTERFACES.md`.

@@ -132,6 +132,31 @@ Membangun orkestrator sentral berbasis **FastAPI** dan **TimescaleDB** yang mamp
 
 ---
 
+## 🚀 Skenario & Prosedur Merge ke Cabang `Development` (Tahap 4)
+
+Cabang `full-stack` diintegrasikan pada **Tahap 4 (Tahap Final Aplikasi)**, mengonsolidasikan seluruh subsistem yang telah masuk ke `Development`. Syifa wajib memastikan:
+
+### Checklist Pra-Merge Syifa (Backend & Ingestion):
+- [ ] Kontainer Docker Compose (`docker-compose.yml`) untuk PostgreSQL 16 + TimescaleDB dan Mosquitto MQTT berjalan normal.
+- [ ] Skrip migrasi database Alembic berjalan sukses (*upgrade head* tanpa error).
+- [ ] Ingestion adapter berhasil menangkap payload LoRa dan memanggil model AI `predict_avri()`.
+- [ ] Seluruh endpoint REST API mematuhi amplop standar `{ "data": ..., "meta": ... }` sesuai `docs/universal/INTERFACES.md` §3.
+- [ ] Tidak ada modifikasi file di luar area `backend/`, `frontend/`, `docker/`, `migrations/`, `docs/backend/`, dan `docs/frontend/`.
+
+### Prosedur Git Terminal:
+```bash
+# 1. Pastikan seluruh pekerjaan di commit di cabang full-stack
+git checkout full-stack
+git status
+
+# 2. Uji backend FastAPI dan migrasi DB
+pytest backend/tests/ (jika ada)
+
+# 3. Laporkan ke Aris (Lead Architect) untuk eksekusi merge Tahap 4 sesuai docs/universal/INTEGRATION_RUNBOOK.md
+```
+
+---
+
 ## 🚫 Zona Terlarang Syifa (Backend) (DILARANG KERAS)
 1. ❌ DILARANG mengubah formula kinetika urease atau membongkar model AI LightGBM.
 2. ❌ DILARANG mengubah bit-packing payload LoRa di sisi firmware ESP32.

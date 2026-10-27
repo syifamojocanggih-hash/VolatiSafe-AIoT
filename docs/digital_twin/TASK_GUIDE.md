@@ -84,6 +84,31 @@ Membangun mesin biofisika tanah virtual kontinu yang mampu memutakhirkan state t
   
 ---
 
+## 🚀 Skenario & Prosedur Merge ke Cabang `Development` (Tahap 2)
+
+Cabang `digittal-twin` diintegrasikan pada **Tahap 2**, tepat setelah cabang `iot` masuk ke `Development`. Andharu wajib memastikan:
+
+### Checklist Pra-Merge Andharu:
+- [ ] Formula neraca air FAO-56 terbukti membatasi kadar air $\theta$ pada rentang $[\theta_{wp}=14.2\%, \theta_{fc}=36.5\%]$ dengan koreksi *coarse fragments* 12%.
+- [ ] Model difusi panas Fourier 1D menghasilkan *phase lag* puncak suhu tanah 60–90 menit dari suhu udara.
+- [ ] Modul failover imputation (`state_imputer.py`) berhasil menghasilkan `FieldStateDTO` dengan `is_predicted: true`.
+- [ ] Generator streaming replay BMKG Lamongan lolos audit *data provenance* SHA-256 (`test_bmkg_replay.py` passing 100%).
+- [ ] Tidak ada modifikasi file di luar area `digital_twin/`, `simulations/data_replay/`, dan `docs/digital_twin/`.
+
+### Prosedur Git Terminal:
+```bash
+# 1. Pastikan seluruh pekerjaan di commit di cabang digittal-twin
+git checkout digittal-twin
+git status
+
+# 2. Jalankan unit test sebelum lapor merge
+PYTHONPATH=. .venv/bin/pytest simulations/data_replay/test_bmkg_replay.py
+
+# 3. Laporkan ke Aris (Lead Architect) untuk eksekusi merge Tahap 2 sesuai docs/universal/INTEGRATION_RUNBOOK.md
+```
+
+---
+
 ## 🚫 Zona Terlarang Andharu (DILARANG KERAS)
 1. ❌ DILARANG mengubah algoritma machine learning LightGBM atau merombak formula AVRI di `ai_engine/`.
 2. ❌ DILARANG membuka koneksi langsung ke hardware ESP32 atau menulis kode firmware.
