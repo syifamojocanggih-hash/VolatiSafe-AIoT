@@ -528,17 +528,22 @@ export const LeafletFieldMap: React.FC<LeafletFieldMapProps> = ({
               
               <div className="flex items-center gap-2.5">
                 <span className="w-3.5 h-3.5 rounded bg-emerald-500 border border-emerald-700 inline-block"></span>
-                <span className="text-slate-700">Zona Aman (AVRI &lt; 30%) · Aman pupuk</span>
+                <span className="text-slate-700">Zona Aman (AVRI &le; 30%) · Aman pupuk</span>
               </div>
 
               <div className="flex items-center gap-2.5">
                 <span className="w-3.5 h-3.5 rounded bg-amber-500 border border-amber-700 inline-block"></span>
-                <span className="text-slate-700">Zona Waspada (AVRI 30–70%) · Metode benam/tugal</span>
+                <span className="text-slate-700">Zona Waspada (AVRI 31–60%) · Metode benam/tugal</span>
+              </div>
+
+              <div className="flex items-center gap-2.5">
+                <span className="w-3.5 h-3.5 rounded bg-orange-500 border border-orange-700 inline-block"></span>
+                <span className="text-slate-700">Zona Kritis (AVRI 61–80%) · Tunda penaburan</span>
               </div>
 
               <div className="flex items-center gap-2.5">
                 <span className="w-3.5 h-3.5 rounded bg-red-500 border border-red-700 inline-block"></span>
-                <span className="text-slate-700">Zona Kritis / Bahaya (AVRI &gt; 70%) · Tunda tabur!</span>
+                <span className="text-slate-700">Zona Bahaya (AVRI &gt; 80%) · Dilarang tabur!</span>
               </div>
             </div>
 

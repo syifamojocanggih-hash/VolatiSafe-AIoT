@@ -87,7 +87,7 @@ class MockDB:
             },
             "alert_banner": {
                 "level": "kritis",
-                "color": "#DC2626",
+                "color": "#EA580C",
                 "headline": "RISIKO KRITIS — AVRI 74%",
                 "subheadline": "Jangan tabur Urea sekarang. Potensi penguapan amonia tinggi.",
                 "best_window": "Besok Pagi, 06:00 – 09:00 WIB (Risiko 18%)"

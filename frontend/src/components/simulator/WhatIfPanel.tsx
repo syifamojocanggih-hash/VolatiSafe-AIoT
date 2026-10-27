@@ -25,39 +25,59 @@ interface SimulationParams {
 
 const PRESET_SCENARIOS = [
   {
-    id: 'scen-a',
-    title: 'Skenario A : Terik Ekstrem Siang Hari',
-    desc: 'Simulasi tanah kapur panas & kering tanpa hujan (Risiko Kritis).',
-    badge: 'Uji Demo Juri 1',
+    id: 'scen-aman',
+    title: 'Skenario 1 : Pagi Sejuk & Lembap',
+    desc: 'Waktu emas aplikasi Urea pagi hari (06:00-09:00 WIB). Enzim tertekan & amonia cepat terserap.',
+    badge: 'Aman (AVRI 4%)',
+    badgeClass: 'bg-emerald-100 text-emerald-800 border-emerald-300',
+    dotColor: 'bg-[#16A34A]',
     params: {
-      soilTemp: 34.5,
-      soilMoisture: 21.0,
-      soilPh: 7.85,
+      soilTemp: 24.0,
+      soilMoisture: 40.0,
+      soilPh: 6.85,
+      rain6h: 5.0,
+    },
+  },
+  {
+    id: 'scen-waspada',
+    title: 'Skenario 2 : Siang Berawan Suhu Naik',
+    desc: 'Risiko penguapan sedang. Disarankan metode tugal 5–7 cm ke samping perakaran.',
+    badge: 'Waspada (AVRI 48%)',
+    badgeClass: 'bg-amber-100 text-amber-800 border-amber-300',
+    dotColor: 'bg-[#D97706]',
+    params: {
+      soilTemp: 27.0,
+      soilMoisture: 33.0,
+      soilPh: 7.15,
       rain6h: 0.0,
     },
   },
   {
-    id: 'scen-b',
-    title: 'Skenario B : Hujan Sore 15 mm',
-    desc: 'Presipitasi air membasahi tanah & melarutkan urea ke perakaran (Jendela Aman).',
-    badge: 'Uji Demo Juri 2',
+    id: 'scen-kritis',
+    title: 'Skenario 3 : Terik Siang Panas & Kering',
+    desc: 'Aktivasi termal enzim urease tinggi. Tunda penaburan hingga jendela aman terbuka.',
+    badge: 'Kritis (AVRI 73%)',
+    badgeClass: 'bg-orange-100 text-orange-800 border-orange-300',
+    dotColor: 'bg-[#EA580C]',
     params: {
-      soilTemp: 25.5,
-      soilMoisture: 42.0,
-      soilPh: 6.95,
-      rain6h: 15.0,
+      soilTemp: 31.0,
+      soilMoisture: 26.0,
+      soilPh: 7.35,
+      rain6h: 0.0,
     },
   },
   {
-    id: 'scen-c',
-    title: 'Skenario C : Pagi Sejuk & Lembap',
-    desc: 'Waktu emas aplikasi urea pagi hari jam 06:00-09:00 WIB.',
-    badge: 'Kondisi Optimal',
+    id: 'scen-bahaya',
+    title: 'Skenario 4 : Panas Ekstrem & Tanah Berkapur',
+    desc: 'Dilarang tabur! Kehilangan nitrogen >80% akibat penguapan instan ke atmosfer.',
+    badge: 'Bahaya (AVRI 95%)',
+    badgeClass: 'bg-red-100 text-red-800 border-red-300',
+    dotColor: 'bg-[#DC2626]',
     params: {
-      soilTemp: 23.0,
-      soilMoisture: 38.0,
-      soilPh: 6.80,
-      rain6h: 2.0,
+      soilTemp: 36.0,
+      soilMoisture: 18.0,
+      soilPh: 7.95,
+      rain6h: 0.0,
     },
   },
 ];
@@ -139,13 +159,13 @@ const RADIAL_SEGMENTS: RadialSegment[] = Array.from(
 
 export const WhatIfPanel: React.FC = () => {
   const [params, setParams] = useState<SimulationParams>({
-    soilTemp: 34.0,
-    soilMoisture: 20.0,
-    soilPh: 7.8,
+    soilTemp: 31.0,
+    soilMoisture: 26.0,
+    soilPh: 7.35,
     rain6h: 0.0,
   });
 
-  const [activePreset, setActivePreset] = useState<string | null>('scen-a');
+  const [activePreset, setActivePreset] = useState<string | null>('scen-kritis');
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [backendPrediction, setBackendPrediction] = useState<WhatIfSimulationResponse | null>(null);
   const [isSyncingBackend, setIsSyncingBackend] = useState<boolean>(false);
@@ -181,65 +201,81 @@ export const WhatIfPanel: React.FC = () => {
   const calculation = useMemo(() => {
     const { soilTemp, soilMoisture, soilPh, rain6h } = params;
 
-    // 1. Kinetika Suhu Enzim Urease (Arrhenius)
-    // Suhu 20 C = laju rendah (0.15), 35 C = laju tinggi (0.85), 45 C = laju puncak (0.98)
-    const tempK = soilTemp + 273.15;
-    const ea = 51000; // J/mol
-    const r = 8.314;
-    const kRaw = 3.2e8 * Math.exp(-ea / (r * tempK));
-    const kUreaseNorm = Math.min(Math.max((kRaw - 0.05) / (0.6 - 0.05), 0.05), 1.0);
+    const tempDelta = Math.max(0.0, (soilTemp - 20.0) * 2.5);
+    const moisturePenalty = Math.max(0.0, (40.0 - soilMoisture) * 1.8);
+    const phPenalty = Math.max(0.0, (soilPh - 6.5) * 12.0);
+    const rainDiscount = Math.min(45.0, rain6h * 4.0);
+    const rawScore = 10.0 + tempDelta + moisturePenalty + phPenalty - rainDiscount;
+    const fallbackScore = Math.round(Math.max(3.0, Math.min(95.0, rawScore)));
 
-    // 2. Faktor Kering Kelembaban (Michaelis-Menten: tanah kering = penguapan tinggi)
-    const km = 18.0;
-    const fMoistureSaturation = soilMoisture / (soilMoisture + km);
-    const fDrynessVulnerability = Math.max(0.05, 1.0 - fMoistureSaturation);
+    // Prioritaskan hasil komputasi backend FastAPI jika ada, atau rumus analitikal fallback
+    const avriScore =
+      backendPrediction?.avri_score !== undefined
+        ? Math.round(backendPrediction.avri_score)
+        : fallbackScore;
 
-    // 3. Faktor Akselerasi pH Basa (Sigmoidal curve: pH > 7.0 memicu gas NH3 bebas)
-    const phOffset = soilPh - 7.0;
-    const fPhSigmoid = Math.pow(10, phOffset) / (1 + Math.pow(10, phOffset));
-
-    // 4. Efek Penurunan oleh Hujan (Rain Washout ke pori perakaran)
-    const rainMitigationFactor = Math.max(0.15, 1.0 - Math.min(rain6h / 25.0, 0.85));
-
-    // 5. Base Physics AVRI (0 - 100)
-    const rawScore = 100 * kUreaseNorm * fDrynessVulnerability * (0.3 + 0.7 * fPhSigmoid) * rainMitigationFactor;
-
-    // Residual LightGBM (efek turbulensi mikro)
-    const residual = 2.4 * Math.sin(soilTemp / 5.0);
-    const avriScore = Math.round(Math.min(Math.max(rawScore + residual, 2), 98));
-
-    // Kategori Risiko
+    // Kategori Risiko resmi (4 tingkatan: aman, waspada, kritis, bahaya)
     let category: 'aman' | 'waspada' | 'kritis' | 'bahaya' = 'aman';
     let statusColor = '#16A34A';
     let bgBadge = 'bg-emerald-100 text-emerald-800 border-emerald-300';
     let title = 'AMAN : WAKTU OPTIMAL PEMUPUKAN UREA';
-    let prescriptionText = 'Kondisi tanah dingin dan lembap. Enzim urease tertekan dan amonia mudah larut ke perakaran jagung. Lakukan penaburan pupuk sekarang.';
+    let prescriptionText =
+      'Kondisi tanah dingin dan lembap. Enzim urease tertekan dan amonia mudah larut ke perakaran jagung. Lakukan penaburan pupuk sekarang.';
 
     if (avriScore > 80) {
       category = 'bahaya';
       statusColor = '#DC2626';
       bgBadge = 'bg-red-100 text-red-800 border-red-300';
       title = 'BAHAYA : DILARANG MENABUR PUPUK UREA';
-      prescriptionText = 'Tanah sangat panas dan kering kerontang dengan pH basa. Lebih dari 80% nitrogen akan lenyap menguap dalam 12 jam. Tunda aplikasi pupuk.';
+      prescriptionText =
+        'Tanah sangat panas dan kering kerontang dengan pH basa. Lebih dari 80% nitrogen akan lenyap menguap dalam 12 jam. Tunda aplikasi pupuk.';
     } else if (avriScore > 60) {
       category = 'kritis';
       statusColor = '#EA580C';
       bgBadge = 'bg-orange-100 text-orange-800 border-orange-300';
       title = 'KRITIS : TUNDA APLIKASI ATAU SIRAM PRA-TEBAR';
-      prescriptionText = 'Risiko penguapan tinggi (61-80%). Tunda penaburan hingga jendela aman besok pagi atau berikan irigasi pra-aplikasi minimal 2 mm.';
+      prescriptionText =
+        'Risiko penguapan tinggi (61-80%). Tunda penaburan hingga jendela aman besok pagi atau berikan irigasi pra-aplikasi minimal 2 mm.';
     } else if (avriScore > 30) {
       category = 'waspada';
       statusColor = '#CA8A04';
       bgBadge = 'bg-yellow-100 text-yellow-800 border-yellow-300';
       title = 'WASPADA : BUTUH METODE BENAM / TUGAL';
-      prescriptionText = 'Kondisi sedang berisiko penguapan sedang. Disarankan aplikasi dengan metode tugal sedalam 5-7 cm di samping rumpun lalu tutup tanah.';
+      prescriptionText =
+        'Kondisi sedang berisiko penguapan sedang. Disarankan aplikasi dengan metode tugal sedalam 5-7 cm di samping rumpun lalu tutup tanah.';
+    }
+
+    // Jika FastAPI mengembalikan preskripsi resmi, terapkan
+    if (backendPrediction?.prescription) {
+      if (backendPrediction.risk_category) {
+        category = backendPrediction.risk_category;
+        if (category === 'bahaya') {
+          statusColor = '#DC2626';
+          bgBadge = 'bg-red-100 text-red-800 border-red-300';
+        } else if (category === 'kritis') {
+          statusColor = '#EA580C';
+          bgBadge = 'bg-orange-100 text-orange-800 border-orange-300';
+        } else if (category === 'waspada') {
+          statusColor = '#CA8A04';
+          bgBadge = 'bg-yellow-100 text-yellow-800 border-yellow-300';
+        } else {
+          statusColor = '#16A34A';
+          bgBadge = 'bg-emerald-100 text-emerald-800 border-emerald-300';
+        }
+      }
+      if (backendPrediction.prescription.title) {
+        title = backendPrediction.prescription.title;
+      }
+      if (backendPrediction.prescription.immediate_guidance) {
+        prescriptionText = backendPrediction.prescription.immediate_guidance;
+      }
     }
 
     // TreeSHAP Feature Attribution Percentages
-    const totalImpact = (kUreaseNorm * 38) + (fDrynessVulnerability * 32) + (fPhSigmoid * 20) + (rain6h > 0 ? 10 : 0);
-    const shapTemp = Math.round(((kUreaseNorm * 38) / totalImpact) * 100);
-    const shapMoisture = Math.round(((fDrynessVulnerability * 32) / totalImpact) * 100);
-    const shapPh = Math.round(((fPhSigmoid * 20) / totalImpact) * 100);
+    const totalImpact = tempDelta + moisturePenalty + phPenalty + (rain6h > 0 ? rainDiscount : 5);
+    const shapTemp = Math.round((tempDelta / Math.max(1, totalImpact)) * 100);
+    const shapMoisture = Math.round((moisturePenalty / Math.max(1, totalImpact)) * 100);
+    const shapPh = Math.round((phPenalty / Math.max(1, totalImpact)) * 100);
     const shapRain = Math.max(0, 100 - shapTemp - shapMoisture - shapPh);
 
     return {
@@ -256,7 +292,7 @@ export const WhatIfPanel: React.FC = () => {
         rain: shapRain,
       },
     };
-  }, [params]);
+  }, [params, backendPrediction]);
 
   const handleApplyPreset = (preset: typeof PRESET_SCENARIOS[0]) => {
     setParams(preset.params);
@@ -323,13 +359,13 @@ export const WhatIfPanel: React.FC = () => {
           </button>
         </div>
 
-        {/* 3 Preset Skenario Demo Juri */}
+        {/* 4 Preset Skenario Demo Juri (Aman, Waspada, Kritis, Bahaya) */}
         <div className="mt-5 pt-4 border-t border-[#E4D9BC]/80">
           <p className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2.5 flex items-center gap-1.5">
             <Sparkles className="w-3.5 h-3.5 text-amber-600" />
-            Pintasan Skenario Pengujian 1-Klik untuk Presentasi Hackathon :
+            Pintasan Skenario Pengujian 1-Klik untuk 4 Tingkat Risiko :
           </p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             {PRESET_SCENARIOS.map((preset) => {
               const isSelected = activePreset === preset.id;
               return (
@@ -342,18 +378,20 @@ export const WhatIfPanel: React.FC = () => {
                       : 'bg-white/70 border-slate-200 hover:bg-white hover:border-slate-300'
                   }`}
                 >
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span
+                      className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full border ${preset.badgeClass}`}
+                    >
                       {preset.badge}
                     </span>
                     {isSelected && (
                       <CheckCircle2 className="w-4 h-4 text-[#5E9E49]" />
                     )}
                   </div>
-                  <h2 className="text-xs font-bold text-slate-900 mt-1 line-clamp-1">
+                  <h3 className="text-xs font-bold text-slate-900 mt-1 line-clamp-1">
                     {preset.title}
-                  </h2>
-                  <p className="text-[11px] text-slate-500 mt-0.5 line-clamp-2">
+                  </h3>
+                  <p className="text-[11px] text-slate-500 mt-0.5 line-clamp-2 leading-relaxed">
                     {preset.desc}
                   </p>
                 </button>

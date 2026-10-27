@@ -4,6 +4,19 @@ Semua perubahan pada subsistem backend didokumentasikan di sini dengan merujuk p
 
 ---
 
+## [1.0.1] — 2026-10-27
+
+### 🎨 Pemisahan Kode Warna Alert Banner Multilevel (`fields.py` & `mock_db.py`)
+- **Pemisahan Kritis dan Bahaya:**
+  - Mengubah kode warna respons `alert_banner` pada router [`fields.py`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/backend/app/routers/fields.py) dan memori [`mock_db.py`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/backend/app/services/mock_db.py) agar tidak lagi menggabungkan kategori kritis dan bahaya ke satu warna merah (`#DC2626`).
+  - Pemetaan warna resmi:
+    - `aman`: `#16A34A` (Hijau)
+    - `waspada`: `#CA8A04` (Amber)
+    - `kritis`: `#EA580C` (Oranye)
+    - `bahaya`: `#DC2626` (Merah Pekat)
+
+---
+
 ## [1.0.0] — 2026-10-25
 
 ### ✨ Fitur Baru yang Selesai Diimplementasikan (Sesuai PRD & TASK_GUIDE.md)

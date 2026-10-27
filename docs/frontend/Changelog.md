@@ -4,6 +4,45 @@ Seluruh catatan kemajuan, keputusan teknis, dan implementasi antarmuka frontend 
 
 ---
 
+## [2026-10-27] — Implementasi 4 Tingkatan Peringatan Risiko Volatilisasi (Aman, Waspada, Kritis, Bahaya)
+
+### ⚠️ Transformasi Sistem Peringatan Multilevel (`RiskStatusBanner.tsx`, `MetricCardsGrid.tsx`, `SettingsModal.tsx`, `PredictionDetailModal.tsx`)
+- **Dukungan 4 Tingkat Peringatan Dinamis:**
+  - Menggantikan logika biner sebelumnya (hanya Merah vs Hijau) menjadi 4 tingkatan risiko agronomi:
+    1. **Aman (0–30%):** Hijau (`#16A34A` / `#236B32`), icon `CheckCircle2`, rekomendasi waktu optimal pemupukan.
+    2. **Waspada (31–60%):** Kuning/Amber (`#D97706` / `#CA8A04`), icon `AlertCircle`, rekomendasi metode penaburan tugal/benam 5–7 cm atau tunda ke sore hari.
+    3. **Kritis (61–80%):** Oranye (`#EA580C`), icon `AlertTriangle`, peringatan tunda penaburan karena tanah panas-kering memicu hidrolisis enzimatik cepat.
+    4. **Bahaya (>80%):** Merah Pekat (`#DC2626`), icon `AlertOctagon`, larangan keras pemupukan karena kehilangan nitrogen >80%.
+- **Penambahan Skala Indikator Tingkat Risiko:**
+  - Menambahkan pill skala 4-tingkat (`● Aman · ● Waspada · ● Kritis · ● Bahaya`) pada header [`RiskStatusBanner.tsx`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/frontend/src/components/dashboard/RiskStatusBanner.tsx) yang secara otomatis menyorot tingkat risiko yang sedang aktif.
+- **Penyelarasan Kartu Metrik AVRI ([`MetricCardsGrid.tsx`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/frontend/src/components/dashboard/MetricCardsGrid.tsx)):**
+  - Memisahkan status Oranye (Kritis, `#EA580C`) dari Merah Pekat (Bahaya, `#DC2626`) agar kartu AVRI sinkron dengan tingkat risiko pada banner utama.
+- **Dukungan Modal Analisis TreeSHAP & PIML ([`PredictionDetailModal.tsx`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/frontend/src/components/modals/PredictionDetailModal.tsx)):**
+  - Kartu komposit skor prediksi AVRI, badge kategori, dan nilai margin keyakinan kini mengadopsi gradien dan warna spesifik untuk ke-4 kategori.
+- **Selector Skenario Interaktif Demo Juri ([`SettingsModal.tsx`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/frontend/src/components/modals/SettingsModal.tsx)):**
+  - Mengubah tombol toggle biner menjadi panel 4 kartu skenario interaktif (Aman 4%, Waspada 48%, Kritis 74%, Bahaya 88%) sehingga penguji dapat melihat perubahan warna antarmuka seketika dengan 1 klik.
+- **Penyediaan Dataset Mock Komprehensif ([`dashboardMock.ts`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/frontend/src/mocks/dashboardMock.ts) & [`page.tsx`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/frontend/src/app/page.tsx)):**
+  - Menambahkan `waspadaDashboardData` dan `dangerDashboardData` melengkapi skenario awal `initialDashboardData` dan `criticalDashboardData`.
+  - Memperbarui `transformBackendStatus` di `page.tsx` untuk memetakan pesan peringatan default secara akurat untuk ke-4 status.
+- **Sinkronisasi Backend API ([`fields.py`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/backend/app/routers/fields.py) & [`mock_db.py`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/backend/app/services/mock_db.py)):**
+  - Menyesuaikan kode warna respons API `alert_banner` backend agar membedakan level `kritis` (`#EA580C`) dan `bahaya` (`#DC2626`).
+- **Pengembangan 4 Preset Simulator What-If ([`WhatIfPanel.tsx`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/frontend/src/components/simulator/WhatIfPanel.tsx)):**
+  - Mengganti 3 preset lama yang hanya memicu 2 kondisi (Aman dan Kritis) menjadi **4 preset skenario 1-klik** yang merepresentasikan seluruh tingkatan risiko secara presisi:
+    1. Skenario 1: Pagi Sejuk & Lembap (`Aman`, AVRI 4%)
+    2. Skenario 2: Siang Berawan Suhu Naik (`Waspada`, AVRI 48%)
+    3. Skenario 3: Terik Siang Panas & Kering (`Kritis`, AVRI 73%)
+    4. Skenario 4: Panas Ekstrem & Tanah Berkapur (`Bahaya`, AVRI 95%)
+  - Memperbarui layout tombol preset menjadi grid responsif 4 kolom (`grid-cols-1 sm:grid-cols-2 lg:grid-cols-4`).
+  - Menghubungkan kalkulasi live dengan endpoint `/simulation/what-if` FastAPI backend secara asinkron (fallback ke rumus kinetika kimia Arrhenius + Michaelis-Menten).
+- **Penyelarasan Legenda & Visual Spasial Peta ([`ParcelRiskMap.tsx`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/frontend/src/components/map/ParcelRiskMap.tsx), [`LeafletFieldMap.tsx`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/frontend/src/components/map/LeafletFieldMap.tsx), [`page.tsx (map)`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/frontend/src/app/map/page.tsx)):**
+  - Memisahkan legenda peta spasial menjadi 4 zona warna terpisah: Aman (Hijau `#16A34A`), Waspada (Kuning/Amber `#CA8A04`), Kritis (Oranye `#EA580C`), dan Bahaya (Merah `#DC2626`).
+  - Memperbarui styling badge kartu detail persil terpilih agar secara visual membedakan `kritis` (oranye) dan `bahaya` (merah).
+  - Mengintegrasikan `currentRiskCategory` dan `handleSelectRiskCategory` pada `SettingsModal` di halaman `/map` agar konsisten dengan halaman dashboard utama.
+- **Validasi Build:**
+  - `npx tsc --noEmit` dan `npm run build` berhasil 100% tanpa error TypeScript/ESLint.
+
+---
+
 ## [2026-10-26] — Pemantapan Tipografi Plus Jakarta Sans via Direct Google Fonts CDN
 
 ### 🎨 Ketahanan Tipografi Antarmuka (`globals.css`, `layout.tsx`, `tailwind.config.ts`)

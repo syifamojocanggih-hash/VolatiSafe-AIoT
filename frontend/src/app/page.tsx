@@ -27,13 +27,19 @@ import {
   ForecastWindowItem,
   TelemetryPoint,
 } from '@/services/api';
-import { initialDashboardData, criticalDashboardData } from '@/mocks/dashboardMock';
+import {
+  initialDashboardData,
+  waspadaDashboardData,
+  criticalDashboardData,
+  dangerDashboardData,
+} from '@/mocks/dashboardMock';
 import {
   MetricItem,
   StatusBannerData,
   ForecastPoint,
   DayWindowProjection,
   DashboardState,
+  RiskCategory,
 } from '@/types/dashboard';
 import { CheckCircle2, Database } from 'lucide-react';
 
@@ -48,17 +54,22 @@ function transformBackendStatus(
   const m = status.metrics;
   const b = status.alert_banner;
 
+  const defaultTitle =
+    m.avri_category === 'aman'
+      ? 'Aman, waktu optimal pemupukan'
+      : m.avri_category === 'waspada'
+      ? 'Waspada: Gunakan metode benam / tugal'
+      : m.avri_category === 'kritis'
+      ? 'Peringatan Kritis: Tunda penaburan Urea sekarang'
+      : 'Bahaya Ekstrem: Dilarang keras menabur Urea';
+
   const banner: StatusBannerData = {
     category: m.avri_category,
     avriScore: Math.round(m.avri_score),
     tag:
       b?.headline ||
       `STATUS HARI INI - RISIKO ${m.avri_category.toUpperCase()} AVRI ${Math.round(m.avri_score)}%`,
-    title:
-      b?.subheadline ||
-      (m.avri_category === 'aman'
-        ? 'Aman, waktu optimal pemupukan'
-        : 'Peringatan: Tunda penaburan Urea sekarang'),
+    title: b?.subheadline || defaultTitle,
     description: `Suhu tanah ${m.soil_temp_c.toFixed(1).replace('.', ',')}°C, kelembapan ${m.moisture_pct.toFixed(1).replace('.', ',')}%, pH ${m.ph.toFixed(2)}. ${b?.subheadline || ''} Jendela aman: ${b?.best_window || '06:00 – 09:00 WIB'}.`,
     bestWindow: b?.best_window || 'Besok Pagi, 06:00 – 09:00 WIB (Risiko 18%)',
     openDurationText: status.is_postponed ? 'Aplikasi Urea ditunda oleh petani' : '',
@@ -363,14 +374,28 @@ export default function DashboardPage() {
     }
   };
 
-  const handleToggleScenario = () => {
-    setIsSimulatedCritical((prev) => !prev);
+  const handleSelectRiskCategory = (category: RiskCategory) => {
     setIsSettingsModalOpen(false);
-    const msg = !isSimulatedCritical
-      ? 'Mode Pengujian: Skenario Terik Kritis (AVRI 74%) Diaktifkan'
-      : 'Kembali ke Skenario Aman (AVRI 4%) Sesuai Desain Lapangan';
-    setToastMessage(msg);
+    setIsSimulatedCritical(category === 'kritis' || category === 'bahaya');
+    if (category === 'aman') {
+      setCurrentData(initialDashboardData);
+      setToastMessage('Skenario AMAN Diaktifkan — Kondisi Optimal Pemupukan');
+    } else if (category === 'waspada') {
+      setCurrentData(waspadaDashboardData);
+      setToastMessage('Skenario WASPADA Diaktifkan — Gunakan Metode Benam / Tugal');
+    } else if (category === 'kritis') {
+      setCurrentData(criticalDashboardData);
+      setToastMessage('Skenario KRITIS Diaktifkan — Tunda Penaburan Urea');
+    } else if (category === 'bahaya') {
+      setCurrentData(dangerDashboardData);
+      setToastMessage('Skenario BAHAYA EKSTREM Diaktifkan — Dilarang Menabur Urea');
+    }
     setTimeout(() => setToastMessage(null), 3500);
+  };
+
+  const handleToggleScenario = () => {
+    const nextCat = isSimulatedCritical ? 'aman' : 'kritis';
+    handleSelectRiskCategory(nextCat);
   };
 
   return (
@@ -480,6 +505,8 @@ export default function DashboardPage() {
         isOpen={isSettingsModalOpen}
         onClose={() => setIsSettingsModalOpen(false)}
         field={currentData.field}
+        currentRiskCategory={currentData.statusBanner.category}
+        onSelectRiskCategory={handleSelectRiskCategory}
         isSimulatedCritical={isSimulatedCritical}
         onToggleScenario={handleToggleScenario}
         onOpenWhatIf={() => {

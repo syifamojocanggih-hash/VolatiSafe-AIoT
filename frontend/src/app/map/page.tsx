@@ -9,11 +9,12 @@ import { MobileBottomNav } from '@/components/navigation/MobileBottomNav';
 import { ParcelRiskMap } from '@/components/map/ParcelRiskMap';
 import { SettingsModal } from '@/components/modals/SettingsModal';
 import { initialDashboardData } from '@/mocks/dashboardMock';
+import { RiskCategory } from '@/types/dashboard';
 
 export default function MapPage() {
   const router = useRouter();
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
-  const [isSimulatedCritical, setIsSimulatedCritical] = useState(false);
+  const [currentRiskCategory, setCurrentRiskCategory] = useState<RiskCategory>('aman');
 
   const handleNav = (tab: string) => {
     if (tab === 'dashboard') router.push('/');
@@ -22,6 +23,11 @@ export default function MapPage() {
     else if (tab === 'admin') router.push('/admin');
     else if (tab === 'report') router.push('/report');
     else if (tab === 'simulator') router.push('/simulator');
+  };
+
+  const handleSelectRiskCategory = (category: RiskCategory) => {
+    setCurrentRiskCategory(category);
+    setIsSettingsModalOpen(false);
   };
 
   return (
@@ -57,8 +63,14 @@ export default function MapPage() {
         isOpen={isSettingsModalOpen}
         onClose={() => setIsSettingsModalOpen(false)}
         field={initialDashboardData.field}
-        isSimulatedCritical={isSimulatedCritical}
-        onToggleScenario={() => setIsSimulatedCritical((prev) => !prev)}
+        currentRiskCategory={currentRiskCategory}
+        onSelectRiskCategory={handleSelectRiskCategory}
+        isSimulatedCritical={currentRiskCategory === 'kritis' || currentRiskCategory === 'bahaya'}
+        onToggleScenario={() => setCurrentRiskCategory((prev) => prev === 'aman' ? 'kritis' : 'aman')}
+        onOpenWhatIf={() => {
+          setIsSettingsModalOpen(false);
+          router.push('/simulator');
+        }}
       />
     </div>
   );

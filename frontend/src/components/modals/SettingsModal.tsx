@@ -3,14 +3,16 @@
 import React from 'react';
 import Image from 'next/image';
 import { X, Cpu, Wifi, Battery, MapPin, SlidersHorizontal } from 'lucide-react';
-import { FieldInfo } from '@/types/dashboard';
+import { FieldInfo, RiskCategory } from '@/types/dashboard';
 
 interface SettingsModalProps {
   isOpen: boolean;
   onClose: () => void;
   field: FieldInfo;
-  isSimulatedCritical: boolean;
-  onToggleScenario: () => void;
+  currentRiskCategory?: RiskCategory;
+  onSelectRiskCategory?: (category: RiskCategory) => void;
+  isSimulatedCritical?: boolean;
+  onToggleScenario?: () => void;
   onOpenWhatIf?: () => void;
 }
 
@@ -18,11 +20,81 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   isOpen,
   onClose,
   field,
-  isSimulatedCritical,
+  currentRiskCategory = 'aman',
+  onSelectRiskCategory,
+  isSimulatedCritical = false,
   onToggleScenario,
   onOpenWhatIf,
 }) => {
   if (!isOpen) return null;
+
+  const activeCategory: RiskCategory =
+    currentRiskCategory || (isSimulatedCritical ? 'kritis' : 'aman');
+
+  const SCENARIOS: Array<{
+    id: RiskCategory;
+    name: string;
+    scoreText: string;
+    badgeText: string;
+    sublabel: string;
+    color: string;
+    activeBorder: string;
+    activeBg: string;
+    dotColor: string;
+  }> = [
+    {
+      id: 'aman',
+      name: 'Aman',
+      scoreText: '4%',
+      badgeText: 'Optimal',
+      sublabel: 'Penaburan Optimal',
+      color: 'text-[#16A34A]',
+      activeBorder: 'border-[#16A34A] ring-2 ring-[#16A34A]/20',
+      activeBg: 'bg-emerald-50',
+      dotColor: 'bg-[#16A34A]',
+    },
+    {
+      id: 'waspada',
+      name: 'Waspada',
+      scoreText: '48%',
+      badgeText: 'Tugal',
+      sublabel: 'Metode Benam / Tugal',
+      color: 'text-[#D97706]',
+      activeBorder: 'border-[#D97706] ring-2 ring-[#D97706]/20',
+      activeBg: 'bg-amber-50',
+      dotColor: 'bg-[#D97706]',
+    },
+    {
+      id: 'kritis',
+      name: 'Kritis',
+      scoreText: '74%',
+      badgeText: 'Tunda',
+      sublabel: 'Tunda Penaburan',
+      color: 'text-[#EA580C]',
+      activeBorder: 'border-[#EA580C] ring-2 ring-[#EA580C]/20',
+      activeBg: 'bg-orange-50',
+      dotColor: 'bg-[#EA580C]',
+    },
+    {
+      id: 'bahaya',
+      name: 'Bahaya',
+      scoreText: '88%',
+      badgeText: 'Stop',
+      sublabel: 'Dilarang Tabur Urea',
+      color: 'text-[#DC2626]',
+      activeBorder: 'border-[#DC2626] ring-2 ring-[#DC2626]/20',
+      activeBg: 'bg-red-50',
+      dotColor: 'bg-[#DC2626]',
+    },
+  ];
+
+  const handleSelect = (category: RiskCategory) => {
+    if (onSelectRiskCategory) {
+      onSelectRiskCategory(category);
+    } else if (onToggleScenario) {
+      onToggleScenario();
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200">
@@ -93,18 +165,37 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             Pilih skenario pengujian untuk melihat respon instan perubahan warna risiko pada seluruh kartu dan grafik:
           </p>
 
-          <button
-            onClick={onToggleScenario}
-            className={`w-full py-2.5 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 ${
-              isSimulatedCritical
-                ? 'bg-[#DC2626] text-white hover:bg-red-700'
-                : 'bg-[#236B32] text-white hover:bg-emerald-800'
-            }`}
-          >
-            {isSimulatedCritical
-              ? '🔴 Aktif: Skenario Terik Ekstrem (AVRI 74% - Kritis)'
-              : '🟢 Aktif: Skenario Aman Presipitasi (AVRI 4% - Sesuai Desain)'}
-          </button>
+          {/* 4 Pilihan Jenis Status Peringatan Risiko */}
+          <div className="grid grid-cols-2 gap-2 mb-3">
+            {SCENARIOS.map((scen) => {
+              const isSelected = activeCategory === scen.id;
+              return (
+                <button
+                  key={scen.id}
+                  onClick={() => handleSelect(scen.id)}
+                  type="button"
+                  className={`p-2.5 rounded-xl border text-left transition-all active:scale-[0.98] ${
+                    isSelected
+                      ? `${scen.activeBg} ${scen.activeBorder} shadow-2xs`
+                      : 'bg-white border-slate-200/90 hover:bg-slate-50 text-slate-700'
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="flex items-center gap-1.5 text-xs font-bold text-slate-800">
+                      <span className={`w-2 h-2 rounded-full ${scen.dotColor}`} />
+                      {scen.name}
+                    </span>
+                    <span className={`text-[10px] font-black ${scen.color}`}>
+                      {scen.scoreText}
+                    </span>
+                  </div>
+                  <span className="text-[10px] text-slate-500 block leading-tight truncate">
+                    {scen.sublabel}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
 
           {onOpenWhatIf && (
             <button

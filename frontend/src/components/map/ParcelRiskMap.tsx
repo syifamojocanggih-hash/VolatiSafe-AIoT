@@ -178,11 +178,15 @@ export const ParcelRiskMap: React.FC<ParcelRiskMapProps> = () => {
             </div>
             <div className="flex items-center gap-2">
               <span className="w-3 h-3 rounded-full bg-[#CA8A04]" />
-              <span>Waspada (31–60%) / simulasi</span>
+              <span>Waspada (31–60%)</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="w-3 h-3 rounded-full bg-[#EA580C]" />
+              <span>Kritis (61–80%)</span>
             </div>
             <div className="flex items-center gap-2">
               <span className="w-3 h-3 rounded-full bg-[#DC2626]" />
-              <span>Kritis / Bahaya (&gt;60%)</span>
+              <span>Bahaya (&gt;80%)</span>
             </div>
             <div className="flex items-center gap-2 text-slate-500">
               <span className="w-4 h-0.5 border-t-2 border-dashed border-[#CA8A04]" />
@@ -222,7 +226,9 @@ export const ParcelRiskMap: React.FC<ParcelRiskMapProps> = () => {
                 selectedParcel.avriCategory === 'aman'
                   ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
                   : selectedParcel.avriCategory === 'waspada'
-                  ? 'bg-yellow-100 text-yellow-800 border border-yellow-300'
+                  ? 'bg-amber-100 text-amber-800 border border-amber-300'
+                  : selectedParcel.avriCategory === 'kritis'
+                  ? 'bg-orange-100 text-orange-800 border border-orange-300'
                   : 'bg-red-100 text-red-800 border border-red-300'
               }`}
             >

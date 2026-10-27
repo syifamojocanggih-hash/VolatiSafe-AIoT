@@ -53,9 +53,14 @@ def get_field_current_status(field_id: str, session: Session = Depends(get_db)):
             )
             pred_res = AIService.predict_avri(ai_req)
 
-            # Alert banner mapping
+            # Alert banner mapping (4 tingkat: aman, waspada, kritis, bahaya)
             category = pred_res.risk_category
-            color = "#DC2626" if category in ["kritis", "bahaya"] else ("#F59E0B" if category == "waspada" else "#10B981")
+            color = (
+                "#DC2626" if category == "bahaya"
+                else ("#EA580C" if category == "kritis"
+                else ("#CA8A04" if category == "waspada"
+                else "#16A34A"))
+            )
             headline = f"RISIKO {category.upper()} — AVRI {pred_res.avri_score:.0f}%"
 
             return create_envelope(FieldCurrentStatusDTO(

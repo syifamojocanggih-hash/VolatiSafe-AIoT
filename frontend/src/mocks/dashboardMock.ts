@@ -110,14 +110,68 @@ export const initialDashboardData: DashboardState = {
   ],
 };
 
-// Skenario Pembanding: Terik Kritis (untuk demo pengujian juri PRD Seksi 3)
+// Skenario 2: Waspada (AVRI 48%)
+export const waspadaDashboardData: DashboardState = {
+  ...initialDashboardData,
+  statusBanner: {
+    category: 'waspada',
+    avriScore: 48,
+    tag: 'STATUS HARI INI - RISIKO WASPADA AVRI 48%',
+    title: 'Waspada: Gunakan metode benam / tugal',
+    description:
+      'Suhu tanah 30,2°C, kelembapan 28,5%, pH 7,45. Terdeteksi potensi penguapan sedang. Disarankan aplikasi benam ke tanah 5–7 cm atau tunda hingga sore.',
+    bestWindow: 'Sore Hari (16:30 – 18:30 WIB)',
+    openDurationText: 'Suhu permukaan tanah diperkirakan melandai pukul 16:30 WIB.',
+  },
+  metrics: [
+    {
+      id: 'moisture',
+      label: 'Kelembapan Tanah',
+      value: '28,5%',
+      numericValue: 28.5,
+      unit: '%',
+      delta24h: '-1.4%',
+      status: 'warning',
+    },
+    {
+      id: 'temp',
+      label: 'Suhu Tanah',
+      value: '30,2°C',
+      numericValue: 30.2,
+      unit: '°C',
+      delta24h: '+0.8°C',
+      status: 'warning',
+    },
+    {
+      id: 'ph',
+      label: 'pH Tanah',
+      value: '7,45',
+      numericValue: 7.45,
+      unit: '',
+      delta24h: '+0.01',
+      status: 'warning',
+    },
+    {
+      id: 'avri',
+      label: 'AVRI (12 JAM)',
+      value: '48%',
+      numericValue: 48,
+      unit: '%',
+      delta24h: '+6%',
+      status: 'warning',
+      isAvriCard: true,
+    },
+  ],
+};
+
+// Skenario 3: Kritis (AVRI 74% - PRD Seksi 3 Demo Juri)
 export const criticalDashboardData: DashboardState = {
   ...initialDashboardData,
   statusBanner: {
     category: 'kritis',
     avriScore: 74,
     tag: 'STATUS HARI INI - RISIKO KRITIS AVRI 74%',
-    title: 'Peringatan: Tunda penaburan Urea sekarang',
+    title: 'Peringatan Kritis: Tunda penaburan Urea sekarang',
     description:
       'Suhu tanah 34,1°C, kelembapan 22,4%, pH 7,83. Suhu terik memicu penguraian enzimatik cepat amonia ke udara. Jendela aman terdekat: Besok pagi 06:00 WIB.',
     bestWindow: 'Besok Pagi (06:00 – 09:00 WIB)',
@@ -158,6 +212,60 @@ export const criticalDashboardData: DashboardState = {
       numericValue: 74,
       unit: '%',
       delta24h: '+18%',
+      status: 'danger',
+      isAvriCard: true,
+    },
+  ],
+};
+
+// Skenario 4: Bahaya Ekstrem (AVRI 88%)
+export const dangerDashboardData: DashboardState = {
+  ...initialDashboardData,
+  statusBanner: {
+    category: 'bahaya',
+    avriScore: 88,
+    tag: 'STATUS HARI INI - RISIKO BAHAYA EKSTREM AVRI 88%',
+    title: 'Bahaya Ekstrem: Dilarang keras menabur Urea',
+    description:
+      'Suhu tanah 36,8°C, kelembapan 17,5%, pH 8,15. Suhu ekstrem dan kekeringan memicu penguapan amonia >80%. Wajib tunda penaburan hingga hujan turun.',
+    bestWindow: 'Lusa Pagi (06:00 – 08:30 WIB)',
+    openDurationText: 'Kondisi bahaya ekstrem berlangsung sepanjang hari.',
+  },
+  metrics: [
+    {
+      id: 'moisture',
+      label: 'Kelembapan Tanah',
+      value: '17,5%',
+      numericValue: 17.5,
+      unit: '%',
+      delta24h: '-4.6%',
+      status: 'danger',
+    },
+    {
+      id: 'temp',
+      label: 'Suhu Tanah',
+      value: '36,8°C',
+      numericValue: 36.8,
+      unit: '°C',
+      delta24h: '+2.9°C',
+      status: 'danger',
+    },
+    {
+      id: 'ph',
+      label: 'pH Tanah',
+      value: '8,15',
+      numericValue: 8.15,
+      unit: '',
+      delta24h: '+0.05',
+      status: 'danger',
+    },
+    {
+      id: 'avri',
+      label: 'AVRI (12 JAM)',
+      value: '88%',
+      numericValue: 88,
+      unit: '%',
+      delta24h: '+26%',
       status: 'danger',
       isAvriCard: true,
     },

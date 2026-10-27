@@ -12,7 +12,7 @@ import {
   SlidersHorizontal,
   ChevronRight,
 } from 'lucide-react';
-import { StatusBannerData, MetricItem } from '@/types/dashboard';
+import { StatusBannerData, MetricItem, RiskCategory } from '@/types/dashboard';
 
 interface PredictionDetailModalProps {
   isOpen: boolean;
@@ -31,7 +31,8 @@ export const PredictionDetailModal: React.FC<PredictionDetailModalProps> = ({
 }) => {
   if (!isOpen) return null;
 
-  const isAman = statusBanner.category === 'aman';
+  const category: RiskCategory = statusBanner.category || 'aman';
+  const isAman = category === 'aman';
   const score = statusBanner.avriScore;
 
   // Baca nilai aktual dari metrik sensor jika tersedia
@@ -39,10 +40,32 @@ export const PredictionDetailModal: React.FC<PredictionDetailModalProps> = ({
   const currentMoisture = metrics.find((m) => m.id === 'moisture')?.value || '42,0%';
   const currentPh = metrics.find((m) => m.id === 'ph')?.value || '7,10';
 
-  // Nilai Komposit Physics-Informed ML
-  const basePhysics = isAman ? 2.8 : 61.4;
-  const residualAI = isAman ? 1.2 : 12.6;
-  const confidenceMargin = isAman ? '±1,2%' : '±2,4%';
+  // Nilai Komposit Physics-Informed ML sesuai 4 tingkat risiko
+  const basePhysics =
+    category === 'aman' ? 2.8 : category === 'waspada' ? 38.6 : category === 'kritis' ? 61.4 : 72.8;
+  const residualAI =
+    category === 'aman' ? 1.2 : category === 'waspada' ? 9.4 : category === 'kritis' ? 12.6 : 15.2;
+  const confidenceMargin =
+    category === 'aman' ? '±1,2%' : category === 'waspada' ? '±1,8%' : '±2,4%';
+
+  // Dynamic composite styling
+  let compositeBg = 'bg-gradient-to-br from-emerald-50 to-emerald-100/40 border-emerald-200';
+  let scoreColor = 'text-emerald-700';
+  let badgeClass = 'bg-emerald-100 text-emerald-800 border-emerald-300';
+
+  if (category === 'bahaya') {
+    compositeBg = 'bg-gradient-to-br from-red-50 to-red-100/40 border-red-200';
+    scoreColor = 'text-red-700';
+    badgeClass = 'bg-red-100 text-red-800 border-red-300';
+  } else if (category === 'kritis') {
+    compositeBg = 'bg-gradient-to-br from-orange-50 to-orange-100/40 border-orange-200';
+    scoreColor = 'text-orange-700';
+    badgeClass = 'bg-orange-100 text-orange-800 border-orange-300';
+  } else if (category === 'waspada') {
+    compositeBg = 'bg-gradient-to-br from-amber-50 to-amber-100/40 border-amber-200';
+    scoreColor = 'text-amber-700';
+    badgeClass = 'bg-amber-100 text-amber-800 border-amber-300';
+  }
 
   // Data atribusi TreeSHAP Explainable AI sesuai docs/ai/EXPLAINABILITY_SHAP.md
   const shapFactors = isAman
@@ -200,32 +223,18 @@ export const PredictionDetailModal: React.FC<PredictionDetailModalProps> = ({
         </div>
 
         {/* 1. Composite Score Card (Physics vs Machine Learning Breakdown) */}
-        <div
-          className={`rounded-2xl p-4 sm:p-5 border ${
-            isAman
-              ? 'bg-gradient-to-br from-emerald-50 to-emerald-100/40 border-emerald-200'
-              : 'bg-gradient-to-br from-red-50 to-orange-100/40 border-red-200'
-          }`}
-        >
+        <div className={`rounded-2xl p-4 sm:p-5 border ${compositeBg}`}>
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="min-w-0">
               <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block whitespace-nowrap">
                 Skor Prediksi AVRI (12 Jam)
               </span>
               <div className="flex items-baseline gap-2 mt-0.5 whitespace-nowrap">
-                <span
-                  className={`text-3xl sm:text-4xl font-black tracking-tight ${
-                    isAman ? 'text-emerald-700' : 'text-red-700'
-                  }`}
-                >
+                <span className={`text-3xl sm:text-4xl font-black tracking-tight ${scoreColor}`}>
                   {score}%
                 </span>
                 <span
-                  className={`text-xs font-bold uppercase px-2.5 py-0.5 rounded-full border ${
-                    isAman
-                      ? 'bg-emerald-100 text-emerald-800 border-emerald-300'
-                      : 'bg-red-100 text-red-800 border-red-300'
-                  }`}
+                  className={`text-xs font-bold uppercase px-2.5 py-0.5 rounded-full border ${badgeClass}`}
                 >
                   {statusBanner.category}
                 </span>

@@ -14,16 +14,10 @@ export const MetricCardsGrid: React.FC<MetricCardsGridProps> = ({ metrics, riskC
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">
       {metrics.map((item) => {
         if (item.isAvriCard) {
-          // Tentukan warna dan status kartu AVRI sesuai tingkat risiko
-          const isDanger =
-            item.status === 'danger' ||
-            riskCategory === 'kritis' ||
-            riskCategory === 'bahaya' ||
-            item.numericValue > 60;
-
-          const isWarning =
-            !isDanger &&
-            (item.status === 'warning' || riskCategory === 'waspada' || item.numericValue > 30);
+          // Tentukan warna dan status kartu AVRI sesuai 4 tingkat risiko (Aman, Waspada, Kritis, Bahaya)
+          const isBahaya = riskCategory === 'bahaya' || item.numericValue > 80;
+          const isKritis = !isBahaya && (riskCategory === 'kritis' || item.numericValue > 60);
+          const isWaspada = !isBahaya && !isKritis && (riskCategory === 'waspada' || item.numericValue > 30 || item.status === 'warning');
 
           let bgClass = 'bg-[#236B32] border-[#1C5B2A]'; // default aman (hijau tua)
           let labelColor = 'text-emerald-100';
@@ -34,22 +28,31 @@ export const MetricCardsGrid: React.FC<MetricCardsGridProps> = ({ metrics, riskC
           let TrendIcon = TrendingDown;
           let deltaText = item.delta24h || '-14%';
 
-          if (isDanger) {
-            bgClass = 'bg-[#DC2626] border-[#B91C1C]'; // Kritis / Merah pekat
+          if (isBahaya) {
+            bgClass = 'bg-[#DC2626] border-[#B91C1C]'; // Bahaya / Merah pekat
             labelColor = 'text-red-100';
             badgeClass = 'bg-red-950/40 text-red-100 border-red-400/30';
-            badgeText = 'Kritis';
+            badgeText = 'Bahaya';
             subtextColor = 'text-red-100/90';
+            subtext = 'Dilarang Tabur Urea';
+            TrendIcon = TrendingUp;
+            deltaText = item.delta24h || '+24%';
+          } else if (isKritis) {
+            bgClass = 'bg-[#EA580C] border-[#C2410C]'; // Kritis / Oranye
+            labelColor = 'text-orange-100';
+            badgeClass = 'bg-orange-950/40 text-orange-100 border-orange-400/30';
+            badgeText = 'Kritis';
+            subtextColor = 'text-orange-100/90';
             subtext = 'Tunda Pemupukan';
             TrendIcon = TrendingUp;
             deltaText = item.delta24h || '+18%';
-          } else if (isWarning) {
+          } else if (isWaspada) {
             bgClass = 'bg-[#D97706] border-[#B45309]'; // Waspada / Amber
             labelColor = 'text-amber-100';
             badgeClass = 'bg-amber-950/40 text-amber-100 border-amber-400/30';
             badgeText = 'Waspada';
             subtextColor = 'text-amber-100/90';
-            subtext = 'Pantau Mikroklimat';
+            subtext = 'Metode Benam / Tugal';
             TrendIcon = TrendingUp;
             deltaText = item.delta24h || '+6%';
           }
