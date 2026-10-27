@@ -143,7 +143,7 @@ Update kolom Status dan Bukti setiap menyelesaikan task. Jangan tandai `✅` tan
 |---|---|---|---|
 | HW-8.1 | Video demo 2 menit | ⬜ | |
 | HW-8.2 | Screenshot + link Wokwi | 🟨 | `evidence/wokwi_diagram.png` (screenshot 1270x490 + full 1920x1080); link publik belum ada |
-| HW-8.3 | Paket serah terima ke Syifa | ✅ | `evidence/HANDOVER.md` (draft siap; pengiriman/konfirmasi Syifa di luar repo) |
+| HW-8.3 | Paket serah terima ke Syifa | ✅ | `evidence/HANDOVER.md` + `evidence/HANDOVER_MESSAGE.md` (draft siap; pengiriman/konfirmasi Syifa di luar repo) |
 | HW-8.4 | PR `iot` → `Development` | ⬜ | |
 
 ### FASE 9 — TKT 4–6 (pasca-insentif)

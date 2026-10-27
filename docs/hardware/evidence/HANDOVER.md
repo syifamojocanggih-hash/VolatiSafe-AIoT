@@ -4,6 +4,7 @@ Tanggal : 27 Okt 2026
 Dari    : Hadi M. Hafiiz Hilmi (IoT & Embedded Hardware)
 Untuk   : Syifa (Full-Stack / Backend)
 Status  : Draft siap; menunggu pengiriman dan konfirmasi Syifa
+Pesan   : `docs/hardware/evidence/HANDOVER_MESSAGE.md`
 Acuan   : `docs/universal/INTERFACES.md` 1.1-1.3,
           `docs/hardware/playbook/10_DEFINISI_SELESAI.md` 4
 

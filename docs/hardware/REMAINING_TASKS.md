@@ -75,7 +75,8 @@ HW-5.1..HW-5.4. Screenshot sudah selesai; sisa checklist hanya link publik.
   Screenshot manual dari UI; link publik butuh proyek wokwi.com. Alternatif:
   lampirkan `diagram.json` + firmware.
 - [ ] **Kirim/konfirmasi HANDOVER.md ke Syifa.**
-  Dokumen siap di `evidence/HANDOVER.md`; konfirmasi checklist
+  Dokumen siap di `evidence/HANDOVER.md`; teks siap kirim di
+  `evidence/HANDOVER_MESSAGE.md`. Konfirmasi checklist
   `10_DEFINISI_SELESAI.md` 4.3 masih menunggu Syifa.
 - [ ] **HW-8.4** PR `iot` -> `Development`.
   Tunggu integrasi backend/FE dan bukti FASE 7 lengkap.
