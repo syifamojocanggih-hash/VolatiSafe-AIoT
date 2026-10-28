@@ -190,6 +190,7 @@ AI Engine diisolasi sebagai callable service / module. Backend mengemas fitur me
 | Method | Endpoint | Fungsi | Query / Body |
 |---|---|---|---|
 | `GET` | `/api/v1/nodes` | Ringkasan semua node aktif beserta telemetri & sinyal LoRa | `?field_id=BLOK-A` |
+| `POST` | `/api/v1/nodes` | Registrasi node sensor baru (Onboarding QR) ke TimescaleDB | Request Body: `node_id`, `field_id`, `bedeng_location` |
 | `GET` | `/api/v1/nodes/bom` | Rincian Bill of Materials (BoM Rp 449.000) & pinout ESP32 | — |
 | `GET` | `/api/v1/nodes/{id}/telemetry` | Deret waktu telemetri petak | `?hours=24` (default 24 jam) |
 | `GET` | `/api/v1/fields/{id}/current-status` | Status live petak, skor AVRI & banner | — |
@@ -198,6 +199,9 @@ AI Engine diisolasi sebagai callable service / module. Backend mengemas fitur me
 | `POST` | `/api/v1/fields/{id}/parcels/{parcel_id}/simulate-failover` | Memicu/mengembalikan failover Digital Twin FAO-56 pada bedeng | Request Body (opsional) |
 | `POST` | `/api/v1/fertilizer/blend-calculator` | Hitung dosis pupuk majemuk & konversi ember | Request Body: Luas lahan, target tonase |
 | `POST` | `/api/v1/crop-cycles` | Simpan/ubah tanggal tanam & varietas benih | Request Body: Tanggal tanam, varietas |
+| `GET` | `/api/v1/reports/impact-summary` | Ringkasan efisiensi pupuk, penghematan biaya, & jam kritis terhindar | `?field_id=BLOK-A` |
+| `GET` | `/api/v1/reports/provenance-audit` | Log audit data provenance (ESP32 LoRa vs FAO-56 Failover) | `?field_id=BLOK-A&limit=30` |
+| `GET` | `/api/v1/reports/telemetry-csv` | Stream download file CSV audit telemetri lengkap 72–168 jam | `?field_id=BLOK-A&hours=72` |
 | `GET` | `/api/v1/health` | Status gateway, uptime, & sensor status | — |
 
 ---

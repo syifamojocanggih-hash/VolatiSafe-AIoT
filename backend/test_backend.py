@@ -2,6 +2,7 @@ import json
 import urllib.request
 import asyncio
 import websockets
+import time
 
 BASE_URL = "http://127.0.0.1:8000/api/v1"
 WS_URL = "ws://127.0.0.1:8000/ws/v1/live"
@@ -15,8 +16,15 @@ def test_endpoint(name, path, method="GET", body=None):
     try:
         with urllib.request.urlopen(req) as resp:
             status_code = resp.getcode()
-            result = json.loads(resp.read().decode("utf-8"))
-            print(f"[PASS] {name} -> HTTP {status_code}")
+            content_type = resp.headers.get("Content-Type", "")
+            raw_data = resp.read().decode("utf-8")
+            if "text/csv" in content_type:
+                result = raw_data
+                rows_count = len(raw_data.strip().split("\n"))
+                print(f"[PASS] {name} -> HTTP {status_code} (Valid CSV with {rows_count} lines)")
+            else:
+                result = json.loads(raw_data)
+                print(f"[PASS] {name} -> HTTP {status_code}")
             return result
     except Exception as e:
         print(f"[FAIL] {name} -> Error: {e}")
@@ -59,6 +67,17 @@ def run_tests():
     print("=== Testing REST Endpoints ===")
     test_endpoint("Health Check", "/health")
     test_endpoint("List Nodes", "/nodes")
+    test_endpoint(
+        "Register Node (Onboarding QR)",
+        "/nodes",
+        method="POST",
+        body={
+            "node_id": f"VS-TEST-{int(time.time())}",
+            "field_id": "BLOK-A",
+            "bedeng_location": "Blok B3 (Timur Selatan)",
+            "firmware_ver": "v1.0.2-prod"
+        }
+    )
     test_endpoint("Node Telemetry 24h", "/nodes/VS-A1-003/telemetry?hours=24")
     test_endpoint("Field Current Status", "/fields/BLOK-A/current-status")
     test_endpoint("Forecast Window 72h", "/fields/BLOK-A/forecast-window?hours=72")
@@ -118,6 +137,11 @@ def run_tests():
     if res_safe:
         print("  -> What-If AVRI (Safe):", res_safe["data"]["avri_score"], "% | Category:", res_safe["data"]["risk_category"])
         print("  -> Action:", res_safe["data"]["prescription"]["action_id"])
+
+    # Reports & Provenance Endpoints
+    test_endpoint("Report Impact Summary", "/reports/impact-summary?field_id=BLOK-A")
+    test_endpoint("Provenance Audit Logs", "/reports/provenance-audit?field_id=BLOK-A&limit=10")
+    test_endpoint("Telemetry CSV Export", "/reports/telemetry-csv?field_id=BLOK-A&hours=24")
 
     print("\n=== Testing WebSocket Live Stream ===")
     asyncio.run(test_websocket())

@@ -10,7 +10,7 @@
 | No | Komponen / Fitur | Domain | File / Kode Terkait | Status Saat Ini | Dependensi & Alasan Belum Terintegrasi |
 |---|---|:---:|---|:---:|---|
 | **1** | **Kanal WhatsApp Blast Live ke Nomor Petani** | **Komunikasi** | [`backend/app/services/alert_dispatcher.py`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/backend/app/services/alert_dispatcher.py#L96-L105)<br>[`docker/.env`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/docker/.env) | ⚠️ **Non-Aktif (Sandbox)** | Memerlukan API Key Fonnte/Wablas berbayar & nomor bisnis terverifikasi; diisolasi agar petani asli tidak terkena spam saat juri menguji skenario darurat. |
-| **2** | **Ekspor Laporan Audit Agrikultur ke File PDF Resmi** | **Frontend / BE** | [`frontend/src/components/report/ReportAnalytics.tsx`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/frontend/src/components/report/ReportAnalytics.tsx#L10-L52)<br>*(Target BE: `backend/app/routers/reports.py`)* | ⚠️ **Non-Aktif (Client CSV Only)** | Tombol ekspor saat ini hanya mengunduh CSV sintetis dari browser; endpoint backend render PDF formal (WeasyPrint / Headless Chromium) belum dipasang. |
+| **2** | **Ekspor Dokumen PDF Resmi Ber-Tanda Tangan PPL** | **Frontend / BE** | [`frontend/src/components/report/ReportAnalytics.tsx`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/frontend/src/components/report/ReportAnalytics.tsx)<br>*(Target BE: `backend/app/routers/reports.py:pdf`)* | ⚠️ **Non-Aktif (Headless Renderer)** | Ekspor CSV & log audit database kini 100% Live; hanya render server-side dokumen PDF formal yang belum dipasang dependensi WeasyPrint / Puppeteer. |
 | **3** | **PWA Offline Mutation Background Sync** | **Frontend (FE)** | [`frontend/next.config.mjs`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/frontend/next.config.mjs#L1-L4)<br>[`frontend/src/app/page.tsx`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/frontend/src/app/page.tsx#L559-L600) | ⚠️ **Non-Aktif (Direct POST)** | Next.js config belum memasang Workbox Service Worker Background Sync; tombol penundaan pupuk langsung menembak API tanpa antrean IndexedDB offline. |
 | **4** | **Node Sensor IoT Fisik (LoRa SX1278 433 MHz)** | **Hardware / IoT** | [`firmware/`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/firmware)<br>[`simulation/wokwi/`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/simulation/wokwi)<br>[`simulation/telemetry_generator.py`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/simulation/telemetry_generator.py) | ⚠️ **Non-Aktif (Fisik Lapangan)** | Modul mikrokontroler ESP32, probe kapasitif, DS18B20, dan PCB belum dipasang permanen di sawah Solokuro karena menunggu pencairan dana finalis 10 besar (9 Nov 2026). |
 | **5** | **Hardware Basecamp LoRa Gateway di Balai Desa** | **Hardware / IoT** | [`docker/mosquitto.conf`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/docker/mosquitto.conf)<br>[`backend/app/main.py`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/backend/app/main.py#L19-L59) | ⚠️ **Non-Aktif (Fisik Lapangan)** | Tiang antena omni 5.8 dBi dan modul gateway belum terpasang di atap Balai Desa Bluri. Saat ini dijembatani via Mosquitto MQTT broker lokal dan bridge emulator Wokwi. |
@@ -49,15 +49,16 @@
 
 ---
 
-### 2.2 Domain Frontend & Ekspor Laporan PDF Formal
+### 2.2 Domain Frontend & Ekspor Dokumen PDF Resmi Ber-Tanda Tangan PPL
 * **File Terkait:**
-  * [`frontend/src/components/report/ReportAnalytics.tsx`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/frontend/src/components/report/ReportAnalytics.tsx#L10-L52)
-  * *Target Backend Endpoint yang belum dibuat:* `backend/app/routers/reports.py`
+  * [`frontend/src/components/report/ReportAnalytics.tsx`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/frontend/src/components/report/ReportAnalytics.tsx)
+  * *Target Backend Endpoint:* `backend/app/routers/reports.py:pdf`
 * **Status Implementasi di Kode:**
-  Tombol ekspor pada [`ReportAnalytics.tsx`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/frontend/src/components/report/ReportAnalytics.tsx) saat ini mengeksekusi `handleDownloadCsv()` yang membuat data URI CSV sintetis di memori browser pengguna (`data:text/csv;charset=utf-8,...`).
+  * **Yang Sudah Live & Aktif Penuh:** Ekspor CSV data telemetri deret waktu (`GET /api/v1/reports/telemetry-csv`), log riwayat audit provenance (`GET /api/v1/reports/provenance-audit`), dan ringkasan dampak efisiensi pupuk dinamis (`GET /api/v1/reports/impact-summary`) kini 100% aktif dan membaca data dari database TimescaleDB.
+  * **Yang Masih Non-Aktif:** Pembuatan berkas cetak **PDF formal ber-tanda tangan digital penyuluh pertanian lapangan (PPL)** belum dapat di-render langsung karena backend belum diinstal dependensi headless renderer (WeasyPrint / Puppeteer) yang berukuran besar (> 300 MB).
 * **Dependensi & Kebutuhan Aktivasi:**
-  1. Pembuatan endpoint backend `GET /api/v1/reports/{field_id}/pdf` yang merender template HTML ke dokumen PDF formal (menggunakan WeasyPrint atau Puppeteer).
-  2. Penambahan tombol *"Unduh Laporan Audit Formal (PDF)"* pada [`ReportAnalytics.tsx`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/frontend/src/components/report/ReportAnalytics.tsx).
+  1. Penambahan library headless PDF renderer di Docker backend (`apt-get install weasyprint`).
+  2. Pembuatan endpoint backend `GET /api/v1/reports/{field_id}/pdf` dan tombol *"Unduh Berkas PDF Resmi"* di frontend.
 
 ---
 

@@ -8,7 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import paho.mqtt.client as mqtt
 
 from app.core.config import settings
-from app.routers import health, nodes, fields, agronomy, simulation, websocket
+from app.routers import health, nodes, fields, agronomy, simulation, websocket, reports
 
 logging.basicConfig(
     level=logging.INFO,
@@ -155,6 +155,7 @@ app.include_router(nodes.router, prefix=settings.API_V1_STR)
 app.include_router(fields.router, prefix=settings.API_V1_STR)
 app.include_router(agronomy.router, prefix=settings.API_V1_STR)
 app.include_router(simulation.router, prefix=settings.API_V1_STR)
+app.include_router(reports.router, prefix=settings.API_V1_STR)
 
 # Include WebSocket Router
 app.include_router(websocket.router)

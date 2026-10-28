@@ -446,6 +446,53 @@ export async function getHardwareBoM(): Promise<BoMResponse | null> {
   }
 }
 
+// 8d. Register New Field Node (Onboarding QR)
+export async function registerFieldNode(payload: {
+  node_id: string;
+  field_id?: string;
+  bedeng_location?: string;
+  firmware_ver?: string;
+}): Promise<FieldNodeItem | null> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/nodes`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify({
+        node_id: payload.node_id,
+        field_id: payload.field_id || 'BLOK-A',
+        bedeng_location: payload.bedeng_location || 'Blok B3 (Timur Selatan)',
+        firmware_ver: payload.firmware_ver || 'v1.0.2-prod',
+      }),
+    });
+    if (!res.ok) return null;
+    const json: ApiResponse<BackendNodeItem> = await res.json();
+    if (!json.data) return null;
+
+    const n = json.data;
+    return {
+      id: n.node_id,
+      bedengLocation: n.bedeng_location || `${n.field_id || 'Petak'} (Node ${n.node_id})`,
+      transmissionStatus: (n.transmission_status as 'online' | 'offline_simulated') || 'online',
+      sleepIntervalText: n.sleep_interval_text || 'Online · Sleep 15m',
+      moisturePct: n.moisture_pct ?? 35.0,
+      tempC: n.soil_temp_c ?? 27.5,
+      ph: n.ph ?? 7.1,
+      batteryPct: n.battery_pct ?? 98,
+      batteryV: n.battery_v ?? 4.15,
+      consumptionPerCycle: n.consumption_per_cycle || '0,067 mAh/siklus',
+      rssiLoRa: n.rssi_dbm ?? -65,
+      snrDb: n.snr_db ?? 8.5,
+      packetLossPct: n.packet_loss_pct ?? 0.2,
+      timestampEpoch: n.timestamp_epoch ?? Math.floor(Date.now() / 1000),
+    };
+  } catch {
+    return null;
+  }
+}
+
 // 9. Field Cadastral Parcels with UAV/Satellite Polygons
 export interface BackendParcelItem {
   id: string;
@@ -598,6 +645,96 @@ export async function getDigitalTwinTelemetry(
   }
 }
 
+// 13. Reports, Live Provenance & Dynamic CSV Download
+export interface ReportImpactSummary {
+  field_id: string;
+  urea_efficiency_target: string;
+  cost_savings_per_ha_idr: number;
+  nitrogen_loss_reduction: string;
+  total_actions_recorded: number;
+  total_urea_saved_kg: number;
+  critical_hours_prevented: number;
+  last_audit_iso: string;
+}
+
+export interface ProvenanceAuditRecord {
+  timestamp: string;
+  node_id: string;
+  block_name: string;
+  moisture_pct: number;
+  soil_temp_c: number;
+  ph: number;
+  battery_v: number;
+  avri_score: number;
+  risk_class: string;
+  is_predicted: boolean;
+  provenance_source: string;
+}
+
+export interface ProvenanceAuditResponse {
+  field_id: string;
+  total_records: number;
+  direct_telemetry_count: number;
+  failover_imputed_count: number;
+  records: ProvenanceAuditRecord[];
+}
+
+export async function getReportImpactSummary(
+  fieldId: string = 'BLOK-A'
+): Promise<ReportImpactSummary | null> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/reports/impact-summary?field_id=${fieldId}`, {
+      cache: 'no-store',
+      headers: { 'Accept': 'application/json' },
+    });
+    if (!res.ok) return null;
+    const json = await res.json();
+    return json.data || null;
+  } catch {
+    return null;
+  }
+}
+
+export async function getProvenanceAudit(
+  fieldId: string = 'BLOK-A',
+  limit: number = 15
+): Promise<ProvenanceAuditResponse | null> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/reports/provenance-audit?field_id=${fieldId}&limit=${limit}`, {
+      cache: 'no-store',
+      headers: { 'Accept': 'application/json' },
+    });
+    if (!res.ok) return null;
+    const json = await res.json();
+    return json.data || null;
+  } catch {
+    return null;
+  }
+}
+
+export async function downloadReportCsv(
+  fieldId: string = 'BLOK-A',
+  hours: number = 72
+): Promise<boolean> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/reports/telemetry-csv?field_id=${fieldId}&hours=${hours}`);
+    if (!res.ok) return false;
+    const blob = await res.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `volatisafe_audit_telemetri_${fieldId}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+
 export interface DigitalTwinForecastResponse {
   field_id?: string;
   hourly_timeline?: Array<{
@@ -632,18 +769,47 @@ export async function getDigitalTwin72hForecast(
   }
 }
 
-export async function simulateSensorDropout(
-  fieldId: string = 'BLOK-A',
-  elapsedMinutes: number = 180
-): Promise<DigitalTwin15Telemetry | null> {
+// 13. Reports, Live Provenance & Dynamic CSV Download
+export interface ReportImpactSummary {
+  field_id: string;
+  urea_efficiency_target: string;
+  cost_savings_per_ha_idr: number;
+  nitrogen_loss_reduction: string;
+  total_actions_recorded: number;
+  total_urea_saved_kg: number;
+  critical_hours_prevented: number;
+  last_audit_iso: string;
+}
+
+export interface ProvenanceAuditRecord {
+  timestamp: string;
+  node_id: string;
+  block_name: string;
+  moisture_pct: number;
+  soil_temp_c: number;
+  ph: number;
+  battery_v: number;
+  avri_score: number;
+  risk_class: string;
+  is_predicted: boolean;
+  provenance_source: string;
+}
+
+export interface ProvenanceAuditResponse {
+  field_id: string;
+  total_records: number;
+  direct_telemetry_count: number;
+  failover_imputed_count: number;
+  records: ProvenanceAuditRecord[];
+}
+
+export async function getReportImpactSummary(
+  fieldId: string = 'BLOK-A'
+): Promise<ReportImpactSummary | null> {
   try {
-    const res = await fetch(`${API_BASE_URL}/digital-twin/simulate-dropout`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      },
-      body: JSON.stringify({ field_id: fieldId, elapsed_minutes: elapsedMinutes }),
+    const res = await fetch(`${API_BASE_URL}/reports/impact-summary?field_id=${fieldId}`, {
+      cache: 'no-store',
+      headers: { 'Accept': 'application/json' },
     });
     if (!res.ok) return null;
     const json = await res.json();
@@ -652,4 +818,224 @@ export async function simulateSensorDropout(
     return null;
   }
 }
+
+export async function getProvenanceAudit(
+  fieldId: string = 'BLOK-A',
+  limit: number = 15
+): Promise<ProvenanceAuditResponse | null> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/reports/provenance-audit?field_id=${fieldId}&limit=${limit}`, {
+      cache: 'no-store',
+      headers: { 'Accept': 'application/json' },
+    });
+    if (!res.ok) return null;
+    const json = await res.json();
+    return json.data || null;
+  } catch {
+    return null;
+  }
+}
+
+export async function downloadReportCsv(
+  fieldId: string = 'BLOK-A',
+  hours: number = 72
+): Promise<boolean> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/reports/telemetry-csv?field_id=${fieldId}&hours=${hours}`);
+    if (!res.ok) return false;
+    const blob = await res.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `volatisafe_audit_telemetri_${fieldId}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+
+// 13. Reports, Live Provenance & Dynamic CSV Download
+export interface ReportImpactSummary {
+  field_id: string;
+  urea_efficiency_target: string;
+  cost_savings_per_ha_idr: number;
+  nitrogen_loss_reduction: string;
+  total_actions_recorded: number;
+  total_urea_saved_kg: number;
+  critical_hours_prevented: number;
+  last_audit_iso: string;
+}
+
+export interface ProvenanceAuditRecord {
+  timestamp: string;
+  node_id: string;
+  block_name: string;
+  moisture_pct: number;
+  soil_temp_c: number;
+  ph: number;
+  battery_v: number;
+  avri_score: number;
+  risk_class: string;
+  is_predicted: boolean;
+  provenance_source: string;
+}
+
+export interface ProvenanceAuditResponse {
+  field_id: string;
+  total_records: number;
+  direct_telemetry_count: number;
+  failover_imputed_count: number;
+  records: ProvenanceAuditRecord[];
+}
+
+export async function getReportImpactSummary(
+  fieldId: string = 'BLOK-A'
+): Promise<ReportImpactSummary | null> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/reports/impact-summary?field_id=${fieldId}`, {
+      cache: 'no-store',
+      headers: { 'Accept': 'application/json' },
+    });
+    if (!res.ok) return null;
+    const json = await res.json();
+    return json.data || null;
+  } catch {
+    return null;
+  }
+}
+
+export async function getProvenanceAudit(
+  fieldId: string = 'BLOK-A',
+  limit: number = 15
+): Promise<ProvenanceAuditResponse | null> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/reports/provenance-audit?field_id=${fieldId}&limit=${limit}`, {
+      cache: 'no-store',
+      headers: { 'Accept': 'application/json' },
+    });
+    if (!res.ok) return null;
+    const json = await res.json();
+    return json.data || null;
+  } catch {
+    return null;
+  }
+}
+
+export async function downloadReportCsv(
+  fieldId: string = 'BLOK-A',
+  hours: number = 72
+): Promise<boolean> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/reports/telemetry-csv?field_id=${fieldId}&hours=${hours}`);
+    if (!res.ok) return false;
+    const blob = await res.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `volatisafe_audit_telemetri_${fieldId}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+    return true;
+  } catch {
+    return false;
+  }
+}
+// 13. Reports, Live Provenance & Dynamic CSV Download
+export interface ReportImpactSummary {
+  field_id: string;
+  urea_efficiency_target: string;
+  cost_savings_per_ha_idr: number;
+  nitrogen_loss_reduction: string;
+  total_actions_recorded: number;
+  total_urea_saved_kg: number;
+  critical_hours_prevented: number;
+  last_audit_iso: string;
+}
+
+
+
+export interface ProvenanceAuditRecord {
+  timestamp: string;
+  node_id: string;
+  block_name: string;
+  moisture_pct: number;
+  soil_temp_c: number;
+  ph: number;
+  battery_v: number;
+  avri_score: number;
+  risk_class: string;
+  is_predicted: boolean;
+  provenance_source: string;
+}
+
+export interface ProvenanceAuditResponse {
+  field_id: string;
+  total_records: number;
+  direct_telemetry_count: number;
+  failover_imputed_count: number;
+  records: ProvenanceAuditRecord[];
+}
+
+export async function getReportImpactSummary(
+  fieldId: string = 'BLOK-A'
+): Promise<ReportImpactSummary | null> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/reports/impact-summary?field_id=${fieldId}`, {
+      cache: 'no-store',
+      headers: { 'Accept': 'application/json' },
+    });
+    if (!res.ok) return null;
+    const json = await res.json();
+    return json.data || null;
+  } catch {
+    return null;
+  }
+}
+
+export async function getProvenanceAudit(
+  fieldId: string = 'BLOK-A',
+  limit: number = 15
+): Promise<ProvenanceAuditResponse | null> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/reports/provenance-audit?field_id=${fieldId}&limit=${limit}`, {
+      cache: 'no-store',
+      headers: { 'Accept': 'application/json' },
+    });
+    if (!res.ok) return null;
+    const json = await res.json();
+    return json.data || null;
+  } catch {
+    return null;
+  }
+}
+
+export async function downloadReportCsv(
+  fieldId: string = 'BLOK-A',
+  hours: number = 72
+): Promise<boolean> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/reports/telemetry-csv?field_id=${fieldId}&hours=${hours}`);
+    if (!res.ok) return false;
+    const blob = await res.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `volatisafe_audit_telemetri_${fieldId}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 

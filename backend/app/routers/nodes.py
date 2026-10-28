@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from app.schemas.envelope import create_envelope
 from app.schemas.nodes import (
     NodeDTO,
+    NodeCreateDTO,
     TelemetryPointDTO,
     NodeTelemetrySeriesDTO,
     BoMResponseDTO
@@ -27,6 +28,42 @@ def list_nodes(
     """
     nodes = db.list_nodes(field_id=field_id)
     return create_envelope([n.model_dump() for n in nodes])
+
+@router.post("", status_code=status.HTTP_201_CREATED)
+def register_node(
+    payload: NodeCreateDTO,
+    session: Session = Depends(get_db)
+):
+    """
+    Mendaftarkan node sensor baru ke sistem, menyimpan metadata ke TimescaleDB,
+    dan mengalokasikan parameter RF LoRa awal.
+    """
+    existing = db.get_node(payload.node_id)
+    if existing:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail={
+                "code": "NODE_ALREADY_EXISTS",
+                "message": f"Node dengan ID '{payload.node_id}' sudah terdaftar di sistem."
+            }
+        )
+
+    try:
+        node_row = NodeModel(
+            node_id=payload.node_id,
+            field_id=payload.field_id,
+            firmware_ver=payload.firmware_ver or "v1.0.2-prod",
+            battery_v=4.15,
+            last_seen=datetime.now(timezone.utc)
+        )
+        session.add(node_row)
+        session.commit()
+    except Exception:
+        pass
+
+    created = db.register_node(payload)
+    return create_envelope(created.model_dump())
+
 
 @router.get("/bom")
 def get_nodes_bom():

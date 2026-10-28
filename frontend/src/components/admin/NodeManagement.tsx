@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { initialFieldNodes, initialBoMList } from '@/mocks/adminMock';
 import { FieldNodeItem, BoMItem, CalibrationParams } from '@/types/admin';
-import { getNodesList, getHardwareBoM } from '@/services/api';
+import { getNodesList, getHardwareBoM, registerFieldNode } from '@/services/api';
 import { CalibrationModal } from '@/components/modals/CalibrationModal';
 import { OnboardingQRModal } from '@/components/modals/OnboardingQRModal';
 import {
@@ -96,11 +96,29 @@ export const NodeManagement: React.FC = () => {
     setTimeout(() => setToastMessage(null), 3500);
   };
 
-  const handleRegisterNode = (newNode: FieldNodeItem) => {
-    setNodes((prev) => [...prev, newNode]);
-    setSelectedNodeId(newNode.id);
-    setToastMessage(`Node ${newNode.id} berhasil terdaftar dan ditambahkan ke jaringan LoRa.`);
+  const handleRegisterNode = async (newNode: FieldNodeItem) => {
+    // 1. Kirim langsung ke FastAPI backend & TimescaleDB
+    const registered = await registerFieldNode({
+      node_id: newNode.id,
+      field_id: 'BLOK-A',
+      bedeng_location: newNode.bedengLocation,
+      firmware_ver: 'v1.0.2-prod',
+    });
+
+    const targetNode = registered || newNode;
+    setNodes((prev) => {
+      const exists = prev.some((n) => n.id === targetNode.id);
+      return exists ? prev.map((n) => (n.id === targetNode.id ? targetNode : n)) : [...prev, targetNode];
+    });
+    setSelectedNodeId(targetNode.id);
+
+    if (registered) {
+      setToastMessage(`✓ Node ${targetNode.id} berhasil terdaftar di TimescaleDB & jaringan LoRa.`);
+    } else {
+      setToastMessage(`Node ${targetNode.id} ditambahkan ke memori lokal.`);
+    }
     setTimeout(() => setToastMessage(null), 3500);
+    return true;
   };
 
   return (

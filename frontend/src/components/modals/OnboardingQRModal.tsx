@@ -2,13 +2,13 @@
 
 import React, { useState } from 'react';
 import Image from 'next/image';
-import { X, QrCode, CheckCircle } from 'lucide-react';
+import { X, QrCode, CheckCircle, RefreshCw } from 'lucide-react';
 import { FieldNodeItem } from '@/types/admin';
 
 interface OnboardingQRModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onRegister: (newNode: FieldNodeItem) => void;
+  onRegister: (newNode: FieldNodeItem) => Promise<boolean> | void;
 }
 
 export const OnboardingQRModal: React.FC<OnboardingQRModalProps> = ({
@@ -18,11 +18,13 @@ export const OnboardingQRModal: React.FC<OnboardingQRModalProps> = ({
 }) => {
   const [nodeId, setNodeId] = useState('VS-B3-006');
   const [location, setLocation] = useState('Blok B3 (Timur Selatan)');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   if (!isOpen) return null;
 
-  const handleRegister = (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
     const newNode: FieldNodeItem = {
       id: nodeId,
       bedengLocation: location,
@@ -35,11 +37,17 @@ export const OnboardingQRModal: React.FC<OnboardingQRModalProps> = ({
       batteryV: 4.15,
       consumptionPerCycle: '0,067 mAh/siklus',
       rssiLoRa: -65,
+      snrDb: 8.5,
+      packetLossPct: 0.2,
       timestampEpoch: Math.floor(Date.now() / 1000),
     };
 
-    onRegister(newNode);
-    onClose();
+    try {
+      await onRegister(newNode);
+    } finally {
+      setIsSubmitting(false);
+      onClose();
+    }
   };
 
   return (
@@ -115,10 +123,20 @@ export const OnboardingQRModal: React.FC<OnboardingQRModalProps> = ({
           <div className="pt-2">
             <button
               type="submit"
-              className="w-full py-3 rounded-xl bg-[#236B32] hover:bg-[#1C5628] text-white font-bold text-xs transition-all shadow-sm active:scale-[0.98] flex items-center justify-center gap-2"
+              disabled={isSubmitting}
+              className="w-full py-3 rounded-xl bg-[#236B32] hover:bg-[#1C5628] disabled:opacity-50 text-white font-bold text-xs transition-all shadow-sm active:scale-[0.98] flex items-center justify-center gap-2"
             >
-              <CheckCircle className="w-4 h-4" />
-              <span>Daftarkan & Inisialisasi Transmisi LoRa</span>
+              {isSubmitting ? (
+                <>
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                  <span>Menyimpan ke Backend & TimescaleDB...</span>
+                </>
+              ) : (
+                <>
+                  <CheckCircle className="w-4 h-4" />
+                  <span>Daftarkan & Inisialisasi Transmisi LoRa</span>
+                </>
+              )}
             </button>
           </div>
         </form>

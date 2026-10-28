@@ -217,6 +217,37 @@ class MockDB:
             return [n for n in self._nodes.values() if n.field_id == field_id]
         return list(self._nodes.values())
 
+    def get_node(self, node_id: str) -> Optional[NodeDTO]:
+        return self._nodes.get(node_id)
+
+    def register_node(self, payload) -> NodeDTO:
+        now_dt = datetime.now(timezone.utc)
+        now_iso = now_dt.strftime("%Y-%m-%dT%H:%M:%SZ")
+        now_epoch = int(now_dt.timestamp())
+        new_node = NodeDTO(
+            node_id=payload.node_id,
+            field_id=payload.field_id,
+            firmware_ver=payload.firmware_ver or "v1.0.2-prod",
+            battery_v=4.15,
+            battery_pct=98,
+            last_seen=now_iso,
+            status="online",
+            bedeng_location=payload.bedeng_location or "Blok B3 (Timur Selatan)",
+            transmission_status="online",
+            sleep_interval_text="Online · Sleep 15m",
+            moisture_pct=35.0,
+            soil_temp_c=27.5,
+            ph=7.10,
+            consumption_per_cycle="0,067 mAh/siklus",
+            rssi_dbm=-65,
+            snr_db=8.5,
+            packet_loss_pct=0.2,
+            timestamp_epoch=now_epoch
+        )
+        self._nodes[payload.node_id] = new_node
+        return new_node
+
+
 
     def get_hardware_bom(self) -> BoMResponseDTO:
         items = [

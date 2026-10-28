@@ -48,3 +48,10 @@ class NodeTelemetrySeriesDTO(BaseModel):
     hours_requested: int = 24
     points_count: int = 0
     series: List[TelemetryPointDTO] = Field(default_factory=list)
+
+class NodeCreateDTO(BaseModel):
+    node_id: str = Field(..., description="ID unik node, misal VS-B3-006")
+    field_id: str = Field("BLOK-A", description="ID petak asosiasi")
+    bedeng_location: Optional[str] = Field("Blok B3 (Timur Selatan)", description="Lokasi bedeng lahan")
+    firmware_ver: Optional[str] = Field("v1.0.2-prod", description="Versi firmware")
+
