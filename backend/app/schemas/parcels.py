@@ -30,22 +30,22 @@ class BedengParcelDTO(BaseModel):
     polygon: List[List[float]]  # [[lat, lng], ...]
 
 class SatelliteMetadataDTO(BaseModel):
-    source: str = "Sentinel-2 MultiSpectral (Copernicus) & UAV Orthomosaic"
-    resolution: str = "0.2m GSD High-Resolution / 10m Multispectral Bands"
+    source: str = "Google Hybrid Satellite & Sentinel-2 MultiSpectral"
+    resolution: str = "0.3m GSD High-Resolution Aerial Orthophoto"
     crs: str = "EPSG:4326 (WGS84)"
-    last_capture: str = "2026-10-24T08:45:00Z"
+    last_capture: str = "2026-10-25T08:45:00Z"
     ndvi_mean: float = 0.74
     ndwi_mean: float = 0.31
-    cloud_cover_pct: float = 0.0
+    cloud_cover_pct: float = 1.8
     spectral_bands: List[str] = ["B2 (Blue)", "B3 (Green)", "B4 (Red)", "B8 (NIR)", "B11 (SWIR)"]
 
 class ParcelMapSummaryDTO(BaseModel):
-    coordinates_text: str = '6°53\'58"S 112°26\'04"E'
-    soil_type_text: str = 'Tegal Kapur Bluri, Solokuro (Alkalin pH 7.8)'
-    gateway_distance_km: float = 0.35
-    total_area_ha: float = 13.8
-    center_coordinates: List[float] = [-6.89931, 112.43439]
-    gateway_coordinates: List[float] = [-6.89790, 112.43460]
+    coordinates_text: str = '6°54\'54"S 112°25\'19"E'
+    soil_type_text: str = 'Hamparan Persawahan Jagung Desa Bluri (Aluvial Lempung Subur pH 7.2)'
+    gateway_distance_km: float = 0.32
+    total_area_ha: float = 0.96
+    center_coordinates: List[float] = [-6.915000, 112.422000]
+    gateway_coordinates: List[float] = [-6.917200, 112.420000]
     outer_boundary: List[List[float]] = Field(default_factory=list)
     surrounding_parcels: List[SurroundingParcelDTO] = Field(default_factory=list)
     satellite_metadata: SatelliteMetadataDTO = Field(default_factory=SatelliteMetadataDTO)

@@ -72,11 +72,11 @@ export const CockpitFieldMap: React.FC<CockpitFieldMapProps> = ({
   const [selectedSurrounding, setSelectedSurrounding] = useState<SurroundingParcel | null>(null);
 
   const defaultCenter = useMemo<[number, number]>(
-    () => (summary.centerCoordinates as [number, number]) || [-6.89931, 112.43439],
+    () => (summary.centerCoordinates as [number, number]) || [-6.915000, 112.422000],
     [summary.centerCoordinates]
   );
   const gatewayPos = useMemo<[number, number]>(
-    () => (summary.gatewayCoordinates as [number, number]) || [-6.8979, 112.4346],
+    () => (summary.gatewayCoordinates as [number, number]) || [-6.917200, 112.420000],
     [summary.gatewayCoordinates]
   );
   const outerBoundary = summary.outerBoundary || bluriOuterBoundary;
@@ -374,6 +374,19 @@ export const CockpitFieldMap: React.FC<CockpitFieldMapProps> = ({
       map.on('move', updatePinScreenPos);
       map.on('zoom', updatePinScreenPos);
       map.on('resize', updatePinScreenPos);
+
+      // Hide circular badges when zoomed out (< 16) to prevent cluttering/clumping
+      const updateMarkersVisibility = () => {
+        const currentZoom = map.getZoom();
+        const shouldShow = currentZoom >= 16;
+        Object.values(markerLayersRef.current).forEach((m: any) => {
+          if (m && m._icon) {
+            m._icon.style.display = shouldShow ? 'flex' : 'none';
+          }
+        });
+      };
+      map.on('zoomend', updateMarkersVisibility);
+      updateMarkersVisibility();
 
       // Force layout calculation
       map.invalidateSize();

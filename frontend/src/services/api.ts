@@ -645,68 +645,31 @@ export async function getDigitalTwinTelemetry(
   }
 }
 
-// 15. Fertilizer Application Logging (Item G)
-export interface BackendFertilizerLogDTO {
-  log_id: string;
-  field_id: string;
-  applied_at: string;
-  date_str: string;
-  stage_name: string;
-  hst: number;
-  urea_kg: number;
-  npk_phonska_kg: number;
-  za_kg: number;
-  total_kg: number;
-  buckets_count: number;
-  mixture_summary: string;
-  avri_at_time: number;
-  status_text: string;
-  notes?: string;
+// 12. Digital Twin 72h Forecast
+export interface DigitalTwinForecastResponse {
+  field_id?: string;
+  hourly_timeline?: Array<{
+    timestamp_utc: string;
+    avri_score: number;
+    risk_category?: string;
+    [key: string]: unknown;
+  }>;
+  next_safe_window?: {
+    start_time: string;
+    end_time: string;
+    projected_avri: number;
+    confidence_pct?: number;
+  };
+  [key: string]: unknown;
 }
 
-export async function getFertilizerLogs(fieldId: string = 'BLOK-A'): Promise<BackendFertilizerLogDTO[]> {
+export async function getDigitalTwin72hForecast(
+  fieldId: string = 'BLOK-A'
+): Promise<DigitalTwinForecastResponse | null> {
   try {
-    const res = await fetch(`${API_BASE_URL}/fertilizer/logs?field_id=${fieldId}`, {
+    const res = await fetch(`${API_BASE_URL}/digital-twin/forecast-72h/${fieldId}`, {
       cache: 'no-store',
       headers: { 'Accept': 'application/json' },
-    });
-    if (!res.ok) return [];
-    const json = await res.json();
-    return json.data || [];
-  } catch {
-    return [];
-  }
-}
-
-export async function recordFertilizerLog(payload: {
-  field_id?: string;
-  stage_name: string;
-  applied_at?: string;
-  hst?: number;
-  urea_kg: number;
-  npk_phonska_kg: number;
-  za_kg?: number;
-  avri_at_time?: number;
-  notes?: string;
-}): Promise<BackendFertilizerLogDTO | null> {
-  try {
-    const res = await fetch(`${API_BASE_URL}/fertilizer/logs`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      },
-      body: JSON.stringify({
-        field_id: payload.field_id || 'BLOK-A',
-        stage_name: payload.stage_name,
-        applied_at: payload.applied_at,
-        hst: payload.hst,
-        urea_kg: payload.urea_kg,
-        npk_phonska_kg: payload.npk_phonska_kg,
-        za_kg: payload.za_kg || 0.0,
-        avri_at_time: payload.avri_at_time,
-        notes: payload.notes,
-      }),
     });
     if (!res.ok) return null;
     const json = await res.json();
@@ -716,8 +679,7 @@ export async function recordFertilizerLog(payload: {
   }
 }
 
-
-// 13. Reports, Live Provenance & Dynamic CSV Download
+// 13. Reports, Live Provenance & Dynamic CSV Download (Item E)
 export interface ReportImpactSummary {
   field_id: string;
   urea_efficiency_target: string;
@@ -767,78 +729,6 @@ export async function getReportImpactSummary(
   }
 }
 
-// 15. Fertilizer Application Logging (Item G)
-export interface BackendFertilizerLogDTO {
-  log_id: string;
-  field_id: string;
-  applied_at: string;
-  date_str: string;
-  stage_name: string;
-  hst: number;
-  urea_kg: number;
-  npk_phonska_kg: number;
-  za_kg: number;
-  total_kg: number;
-  buckets_count: number;
-  mixture_summary: string;
-  avri_at_time: number;
-  status_text: string;
-  notes?: string;
-}
-
-export async function getFertilizerLogs(fieldId: string = 'BLOK-A'): Promise<BackendFertilizerLogDTO[]> {
-  try {
-    const res = await fetch(`${API_BASE_URL}/fertilizer/logs?field_id=${fieldId}`, {
-      cache: 'no-store',
-      headers: { 'Accept': 'application/json' },
-    });
-    if (!res.ok) return [];
-    const json = await res.json();
-    return json.data || [];
-  } catch {
-    return [];
-  }
-}
-
-export async function recordFertilizerLog(payload: {
-  field_id?: string;
-  stage_name: string;
-  applied_at?: string;
-  hst?: number;
-  urea_kg: number;
-  npk_phonska_kg: number;
-  za_kg?: number;
-  avri_at_time?: number;
-  notes?: string;
-}): Promise<BackendFertilizerLogDTO | null> {
-  try {
-    const res = await fetch(`${API_BASE_URL}/fertilizer/logs`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      },
-      body: JSON.stringify({
-        field_id: payload.field_id || 'BLOK-A',
-        stage_name: payload.stage_name,
-        applied_at: payload.applied_at,
-        hst: payload.hst,
-        urea_kg: payload.urea_kg,
-        npk_phonska_kg: payload.npk_phonska_kg,
-        za_kg: payload.za_kg || 0.0,
-        avri_at_time: payload.avri_at_time,
-        notes: payload.notes,
-      }),
-    });
-    if (!res.ok) return null;
-    const json = await res.json();
-    return json.data || null;
-  } catch {
-    return null;
-  }
-}
-
-
 export async function getProvenanceAudit(
   fieldId: string = 'BLOK-A',
   limit: number = 15
@@ -855,78 +745,6 @@ export async function getProvenanceAudit(
     return null;
   }
 }
-
-// 15. Fertilizer Application Logging (Item G)
-export interface BackendFertilizerLogDTO {
-  log_id: string;
-  field_id: string;
-  applied_at: string;
-  date_str: string;
-  stage_name: string;
-  hst: number;
-  urea_kg: number;
-  npk_phonska_kg: number;
-  za_kg: number;
-  total_kg: number;
-  buckets_count: number;
-  mixture_summary: string;
-  avri_at_time: number;
-  status_text: string;
-  notes?: string;
-}
-
-export async function getFertilizerLogs(fieldId: string = 'BLOK-A'): Promise<BackendFertilizerLogDTO[]> {
-  try {
-    const res = await fetch(`${API_BASE_URL}/fertilizer/logs?field_id=${fieldId}`, {
-      cache: 'no-store',
-      headers: { 'Accept': 'application/json' },
-    });
-    if (!res.ok) return [];
-    const json = await res.json();
-    return json.data || [];
-  } catch {
-    return [];
-  }
-}
-
-export async function recordFertilizerLog(payload: {
-  field_id?: string;
-  stage_name: string;
-  applied_at?: string;
-  hst?: number;
-  urea_kg: number;
-  npk_phonska_kg: number;
-  za_kg?: number;
-  avri_at_time?: number;
-  notes?: string;
-}): Promise<BackendFertilizerLogDTO | null> {
-  try {
-    const res = await fetch(`${API_BASE_URL}/fertilizer/logs`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      },
-      body: JSON.stringify({
-        field_id: payload.field_id || 'BLOK-A',
-        stage_name: payload.stage_name,
-        applied_at: payload.applied_at,
-        hst: payload.hst,
-        urea_kg: payload.urea_kg,
-        npk_phonska_kg: payload.npk_phonska_kg,
-        za_kg: payload.za_kg || 0.0,
-        avri_at_time: payload.avri_at_time,
-        notes: payload.notes,
-      }),
-    });
-    if (!res.ok) return null;
-    const json = await res.json();
-    return json.data || null;
-  } catch {
-    return null;
-  }
-}
-
 
 export async function downloadReportCsv(
   fieldId: string = 'BLOK-A',
@@ -949,113 +767,6 @@ export async function downloadReportCsv(
     return false;
   }
 }
-
-
-export interface DigitalTwinForecastResponse {
-  field_id?: string;
-  hourly_timeline?: Array<{
-    timestamp_utc: string;
-    avri_score: number;
-    risk_category?: string;
-    [key: string]: unknown;
-  }>;
-  next_safe_window?: {
-    start_time: string;
-    end_time: string;
-    projected_avri: number;
-    confidence_pct?: number;
-  };
-  [key: string]: unknown;
-}
-
-// 12. Digital Twin 72h Forecast
-export async function getDigitalTwin72hForecast(
-  fieldId: string = 'BLOK-A'
-): Promise<DigitalTwinForecastResponse | null> {
-  try {
-    const res = await fetch(`${API_BASE_URL}/digital-twin/forecast-72h/${fieldId}`, {
-      cache: 'no-store',
-      headers: { 'Accept': 'application/json' },
-    });
-    if (!res.ok) return null;
-    const json = await res.json();
-    return json.data || null;
-  } catch {
-    return null;
-  }
-}
-
-// 15. Fertilizer Application Logging (Item G)
-export interface BackendFertilizerLogDTO {
-  log_id: string;
-  field_id: string;
-  applied_at: string;
-  date_str: string;
-  stage_name: string;
-  hst: number;
-  urea_kg: number;
-  npk_phonska_kg: number;
-  za_kg: number;
-  total_kg: number;
-  buckets_count: number;
-  mixture_summary: string;
-  avri_at_time: number;
-  status_text: string;
-  notes?: string;
-}
-
-export async function getFertilizerLogs(fieldId: string = 'BLOK-A'): Promise<BackendFertilizerLogDTO[]> {
-  try {
-    const res = await fetch(`${API_BASE_URL}/fertilizer/logs?field_id=${fieldId}`, {
-      cache: 'no-store',
-      headers: { 'Accept': 'application/json' },
-    });
-    if (!res.ok) return [];
-    const json = await res.json();
-    return json.data || [];
-  } catch {
-    return [];
-  }
-}
-
-export async function recordFertilizerLog(payload: {
-  field_id?: string;
-  stage_name: string;
-  applied_at?: string;
-  hst?: number;
-  urea_kg: number;
-  npk_phonska_kg: number;
-  za_kg?: number;
-  avri_at_time?: number;
-  notes?: string;
-}): Promise<BackendFertilizerLogDTO | null> {
-  try {
-    const res = await fetch(`${API_BASE_URL}/fertilizer/logs`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      },
-      body: JSON.stringify({
-        field_id: payload.field_id || 'BLOK-A',
-        stage_name: payload.stage_name,
-        applied_at: payload.applied_at,
-        hst: payload.hst,
-        urea_kg: payload.urea_kg,
-        npk_phonska_kg: payload.npk_phonska_kg,
-        za_kg: payload.za_kg || 0.0,
-        avri_at_time: payload.avri_at_time,
-        notes: payload.notes,
-      }),
-    });
-    if (!res.ok) return null;
-    const json = await res.json();
-    return json.data || null;
-  } catch {
-    return null;
-  }
-}
-
 
 // 14. WhatsApp & Telegram Petani Notification Services (Item F)
 export interface NotificationPreviewResponse {
@@ -1105,78 +816,6 @@ export async function getNotificationPreview(
     return null;
   }
 }
-
-// 15. Fertilizer Application Logging (Item G)
-export interface BackendFertilizerLogDTO {
-  log_id: string;
-  field_id: string;
-  applied_at: string;
-  date_str: string;
-  stage_name: string;
-  hst: number;
-  urea_kg: number;
-  npk_phonska_kg: number;
-  za_kg: number;
-  total_kg: number;
-  buckets_count: number;
-  mixture_summary: string;
-  avri_at_time: number;
-  status_text: string;
-  notes?: string;
-}
-
-export async function getFertilizerLogs(fieldId: string = 'BLOK-A'): Promise<BackendFertilizerLogDTO[]> {
-  try {
-    const res = await fetch(`${API_BASE_URL}/fertilizer/logs?field_id=${fieldId}`, {
-      cache: 'no-store',
-      headers: { 'Accept': 'application/json' },
-    });
-    if (!res.ok) return [];
-    const json = await res.json();
-    return json.data || [];
-  } catch {
-    return [];
-  }
-}
-
-export async function recordFertilizerLog(payload: {
-  field_id?: string;
-  stage_name: string;
-  applied_at?: string;
-  hst?: number;
-  urea_kg: number;
-  npk_phonska_kg: number;
-  za_kg?: number;
-  avri_at_time?: number;
-  notes?: string;
-}): Promise<BackendFertilizerLogDTO | null> {
-  try {
-    const res = await fetch(`${API_BASE_URL}/fertilizer/logs`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      },
-      body: JSON.stringify({
-        field_id: payload.field_id || 'BLOK-A',
-        stage_name: payload.stage_name,
-        applied_at: payload.applied_at,
-        hst: payload.hst,
-        urea_kg: payload.urea_kg,
-        npk_phonska_kg: payload.npk_phonska_kg,
-        za_kg: payload.za_kg || 0.0,
-        avri_at_time: payload.avri_at_time,
-        notes: payload.notes,
-      }),
-    });
-    if (!res.ok) return null;
-    const json = await res.json();
-    return json.data || null;
-  } catch {
-    return null;
-  }
-}
-
 
 export async function dispatchNotificationAlert(
   fieldId: string = 'BLOK-A',
@@ -1274,7 +913,3 @@ export async function recordFertilizerLog(payload: {
     return null;
   }
 }
-
-
-
-

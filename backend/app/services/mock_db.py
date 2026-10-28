@@ -649,17 +649,17 @@ class MockDB:
         Returns full detailed 12 bedeng cadastral parcels, surrounding mosaic parcels,
         and outer field boundaries with GeoJSON FeatureCollection.
         """
-        if field_id not in self._bedeng_parcels or not self._bedeng_parcels[field_id] or self._bedeng_parcels[field_id][0].center[0] < -6.914:
+        if field_id not in self._bedeng_parcels or not self._bedeng_parcels[field_id] or self._bedeng_parcels[field_id][0].center[1] < 112.40:
             self._bedeng_parcels[field_id] = get_initial_12_bedeng_parcels()
         parcels = self._bedeng_parcels[field_id]
 
         summary = ParcelMapSummaryDTO(
-            coordinates_text='6°54\'44"S 112°20\'44"E',
-            soil_type_text='Hamparan Persawahan Jagung Solokuro (Aluvial Lempung Berpasir pH 7.2)',
-            gateway_distance_km=0.065,
+            coordinates_text='6°54\'54"S 112°25\'19"E',
+            soil_type_text='Hamparan Persawahan Jagung Desa Bluri (Aluvial Lempung Subur pH 7.2)',
+            gateway_distance_km=0.32,
             total_area_ha=0.96,
-            center_coordinates=[-6.912350, 112.345680],
-            gateway_coordinates=[-6.911850, 112.346150],
+            center_coordinates=[-6.915000, 112.422000],
+            gateway_coordinates=[-6.917200, 112.420000],
             outer_boundary=BLURI_OUTER_BOUNDARY,
             surrounding_parcels=BLURI_SURROUNDING_PARCELS,
             satellite_metadata=SatelliteMetadataDTO(

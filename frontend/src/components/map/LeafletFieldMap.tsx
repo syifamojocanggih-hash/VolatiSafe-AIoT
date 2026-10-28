@@ -42,9 +42,9 @@ export const LeafletFieldMap: React.FC<LeafletFieldMapProps> = ({
   const [tileType, setTileType] = useState<TileType>('satellite');
   const [showLegend, setShowLegend] = useState<boolean>(false);
 
-  // Center coordinates (Hamparan Persawahan Jagung Solokuro: 6°54'44"S 112°20'44"E)
-  const defaultCenter = summary.centerCoordinates || [-6.912350, 112.345680];
-  const gatewayPos = summary.gatewayCoordinates || [-6.911850, 112.346150];
+  // Center coordinates (Hamparan Persawahan Jagung Desa Bluri, Solokuro: 6°54'54"S 112°25'19"E)
+  const defaultCenter = summary.centerCoordinates || [-6.915000, 112.422000];
+  const gatewayPos = summary.gatewayCoordinates || [-6.917200, 112.420000];
   const outerBoundary = summary.outerBoundary || bluriOuterBoundary;
   const surroundingParcels = summary.surroundingParcels || bluriSurroundingParcels;
 
@@ -210,14 +210,14 @@ export const LeafletFieldMap: React.FC<LeafletFieldMapProps> = ({
         `);
       });
 
-      // 3. DIVIDING ROAD & DRAINAGE DITCH (Jalan Usaha Tani & Saluran Irigasi Solokuro)
+      // 3. DIVIDING ROAD & DRAINAGE DITCH (Jalan Usaha Tani & Saluran Irigasi Bluri)
       const roadLine = L.polyline(
         [
-          [-6.911700, 112.346160],
-          [-6.912000, 112.346160],
-          [-6.912350, 112.346160],
-          [-6.912650, 112.346160],
-          [-6.913000, 112.346160],
+          [-6.914000, 112.422030],
+          [-6.914500, 112.422030],
+          [-6.915000, 112.422030],
+          [-6.915500, 112.422030],
+          [-6.916000, 112.422030],
         ],
         {
           color: '#38BDF8',
@@ -227,7 +227,7 @@ export const LeafletFieldMap: React.FC<LeafletFieldMapProps> = ({
         }
       ).addTo(map);
 
-      roadLine.bindTooltip('Saluran Irigasi & Jalan Usaha Tani Solokuro', {
+      roadLine.bindTooltip('Saluran Irigasi & Jalan Usaha Tani Desa Bluri', {
         permanent: false,
         direction: 'top',
         className: 'bg-sky-950 text-white text-xs px-2.5 py-1 rounded shadow-md font-medium',
@@ -354,6 +354,20 @@ export const LeafletFieldMap: React.FC<LeafletFieldMapProps> = ({
           });
         }
       });
+
+      // Manage marker visibility based on zoom level (hide pins when zoomed out to regional view to avoid clutter)
+      const updateMarkersOnZoom = () => {
+        const currentZoom = map.getZoom();
+        Object.values(markerLayersRef.current).forEach(({ marker }) => {
+          if (currentZoom < 16) {
+            if (map.hasLayer(marker)) map.removeLayer(marker);
+          } else {
+            if (!map.hasLayer(marker)) map.addLayer(marker);
+          }
+        });
+      };
+      map.on('zoomend', updateMarkersOnZoom);
+      updateMarkersOnZoom();
     });
 
     return () => {
