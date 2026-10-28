@@ -44,8 +44,8 @@ class ParcelMapSummaryDTO(BaseModel):
     soil_type_text: str = 'Hamparan Persawahan Jagung Desa Bluri (Aluvial Lempung Subur pH 7.2)'
     gateway_distance_km: float = 0.32
     total_area_ha: float = 0.96
-    center_coordinates: List[float] = [-6.915000, 112.422000]
-    gateway_coordinates: List[float] = [-6.917200, 112.420000]
+    center_coordinates: List[float] = [-6.902683, 112.430223]
+    gateway_coordinates: List[float] = [-6.901850, 112.430500]
     outer_boundary: List[List[float]] = Field(default_factory=list)
     surrounding_parcels: List[SurroundingParcelDTO] = Field(default_factory=list)
     satellite_metadata: SatelliteMetadataDTO = Field(default_factory=SatelliteMetadataDTO)

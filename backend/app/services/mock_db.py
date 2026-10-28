@@ -649,19 +649,19 @@ class MockDB:
         Returns full detailed 12 bedeng cadastral parcels, surrounding mosaic parcels,
         and outer field boundaries with GeoJSON FeatureCollection.
         """
-        if field_id not in self._bedeng_parcels or not self._bedeng_parcels[field_id] or self._bedeng_parcels[field_id][0].center[1] < 112.40:
+        if field_id not in self._bedeng_parcels or not self._bedeng_parcels[field_id] or len(self._bedeng_parcels[field_id][0].polygon) < 10:
             self._bedeng_parcels[field_id] = get_initial_12_bedeng_parcels()
         parcels = self._bedeng_parcels[field_id]
 
         summary = ParcelMapSummaryDTO(
-            coordinates_text='6°54\'54"S 112°25\'19"E',
-            soil_type_text='Hamparan Persawahan Jagung Desa Bluri (Aluvial Lempung Subur pH 7.2)',
-            gateway_distance_km=0.32,
-            total_area_ha=0.96,
-            center_coordinates=[-6.915000, 112.422000],
-            gateway_coordinates=[-6.917200, 112.420000],
+            coordinates_text='6°54\'10"S 112°25\'49"E',
+            soil_type_text='Hamparan Lahan Pertanian Jagung (Delimitasi Poligon KML · Aluvial Karst Subur pH 7.4)',
+            gateway_distance_km=0.08,
+            total_area_ha=2.70,
+            center_coordinates=[-6.902683, 112.430223],
+            gateway_coordinates=[-6.901850, 112.430500],
             outer_boundary=BLURI_OUTER_BOUNDARY,
-            surrounding_parcels=BLURI_SURROUNDING_PARCELS,
+            surrounding_parcels=[],
             satellite_metadata=SatelliteMetadataDTO(
                 source="Sentinel-2 MultiSpectral (Copernicus) & UAV Orthomosaic",
                 resolution="0.2m GSD High-Resolution / 10m Multi-Band",

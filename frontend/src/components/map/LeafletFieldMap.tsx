@@ -3,7 +3,6 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { BedengParcel, ActiveLayer, ParcelMapSummary } from '@/types/parcel';
-import { bluriOuterBoundary, bluriSurroundingParcels } from '@/mocks/parcelsMock';
 import 'leaflet/dist/leaflet.css';
 
 interface LeafletFieldMapProps {
@@ -42,11 +41,9 @@ export const LeafletFieldMap: React.FC<LeafletFieldMapProps> = ({
   const [tileType, setTileType] = useState<TileType>('satellite');
   const [showLegend, setShowLegend] = useState<boolean>(false);
 
-  // Center coordinates (Hamparan Persawahan Jagung Desa Bluri, Solokuro: 6°54'54"S 112°25'19"E)
-  const defaultCenter = summary.centerCoordinates || [-6.915000, 112.422000];
-  const gatewayPos = summary.gatewayCoordinates || [-6.917200, 112.420000];
-  const outerBoundary = summary.outerBoundary || bluriOuterBoundary;
-  const surroundingParcels = summary.surroundingParcels || bluriSurroundingParcels;
+  // Center coordinates (KML Field Delimitation: 6°54'10"S 112°25'49"E)
+  const defaultCenter = summary.centerCoordinates || [-6.902683, 112.430223];
+  const gatewayPos = summary.gatewayCoordinates || [-6.901850, 112.430500];
 
   // Helper colors based on active layer
   const getParcelColor = (p: BedengParcel, isSelected: boolean, currentLayer: ActiveLayer) => {
@@ -156,82 +153,21 @@ export const LeafletFieldMap: React.FC<LeafletFieldMapProps> = ({
       // Default Tile Layer: High-Resolution Satellite
       switchTileLayer('satellite', L, map);
 
-      // 1. OUTER DELIMITATION BOUNDARY: Blue Dashed Polyline (Like the user's reference image)
-      if (outerBoundary && outerBoundary.length > 0) {
-        const outerPolygon = L.polygon(outerBoundary, {
-          color: '#2563EB', // Blue dashed line
+      // 1. KML OFFICIAL FIELD DELIMITATION POLYGON (From User's Google Earth KML)
+      const kmlOuterBoundary = summary.outerBoundary;
+      if (kmlOuterBoundary && kmlOuterBoundary.length > 0) {
+        const kmlPoly = L.polygon(kmlOuterBoundary, {
+          color: '#F59E0B', // Amber gold outer boundary perimeter
           weight: 2.5,
-          dashArray: '8, 8',
-          fillColor: '#3B82F6',
-          fillOpacity: 0.08,
-          interactive: false,
+          fill: false,
         }).addTo(map);
 
-        outerPolygon.bindTooltip('Batas Kawasan Persawahan Jagung Solokuro', {
+        kmlPoly.bindTooltip('Batas Lahan Pertanian Blok A (Delimitasi KML)', {
           permanent: false,
           direction: 'center',
-          className: 'bg-blue-900/90 text-white text-xs px-2.5 py-1 rounded-md shadow-md border border-blue-400 font-medium',
+          className: 'bg-amber-900/90 text-white text-xs px-2.5 py-1 rounded-md shadow-md border border-amber-400 font-medium',
         });
       }
-
-      // 2. SURROUNDING CADASTRAL PARCELS (Tessellation Mosaic covering the whole territory)
-      surroundingParcels.forEach((cp) => {
-        const sPoly = L.polygon(cp.polygon, {
-          color: '#38BDF8', // Light blue cadastral border
-          weight: 1.5,
-          fillColor: '#BAE6FD',
-          fillOpacity: 0.22,
-          opacity: 0.85,
-        }).addTo(map);
-
-        sPoly.on('mouseover', () => {
-          sPoly.setStyle({ weight: 2.5, color: '#0284C7', fillOpacity: 0.4 });
-        });
-
-        sPoly.on('mouseout', () => {
-          sPoly.setStyle({ weight: 1.5, color: '#38BDF8', fillOpacity: 0.22 });
-        });
-
-        sPoly.bindTooltip(
-          `<div class="font-sans text-xs"><b>${cp.id}</b> · ${cp.name}<br><span class="text-slate-500 font-medium">Luas: ${cp.areaHa} Ha (Estimasi Spasial)</span></div>`,
-          {
-            sticky: true,
-            className: 'bg-white text-slate-800 border border-slate-200 px-2 py-1 rounded shadow-md text-xs',
-          }
-        );
-
-        sPoly.bindPopup(`
-          <div class="p-1 font-sans text-xs">
-            <p class="font-bold text-slate-900 text-sm mb-1">${cp.name}</p>
-            <p class="text-slate-600">Kode Persil: <b>${cp.id}</b></p>
-            <p class="text-slate-600">Luas: <b>${cp.areaHa} Hektar</b></p>
-            <p class="text-slate-500 mt-1 italic">Zona Pertanian Sawah & Tegal Bluri Sekitar</p>
-          </div>
-        `);
-      });
-
-      // 3. DIVIDING ROAD & DRAINAGE DITCH (Jalan Usaha Tani & Saluran Irigasi Bluri)
-      const roadLine = L.polyline(
-        [
-          [-6.914000, 112.422030],
-          [-6.914500, 112.422030],
-          [-6.915000, 112.422030],
-          [-6.915500, 112.422030],
-          [-6.916000, 112.422030],
-        ],
-        {
-          color: '#38BDF8',
-          weight: 3.5,
-          dashArray: '6, 6',
-          opacity: 0.95,
-        }
-      ).addTo(map);
-
-      roadLine.bindTooltip('Saluran Irigasi & Jalan Usaha Tani Desa Bluri', {
-        permanent: false,
-        direction: 'top',
-        className: 'bg-sky-950 text-white text-xs px-2.5 py-1 rounded shadow-md font-medium',
-      });
 
       // 4. GATEWAY BASECAMP LORA MARKER
       const gatewayIcon = L.divIcon({
@@ -472,8 +408,8 @@ export const LeafletFieldMap: React.FC<LeafletFieldMapProps> = ({
           <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
           <span className="truncate max-w-[160px] sm:max-w-none">Hamparan Persawahan Jagung · Solokuro, Lamongan</span>
           <span className="hidden sm:inline-block text-slate-300">|</span>
-          <span className="hidden sm:inline-block px-1.5 py-0.5 rounded text-2xs bg-blue-50 text-blue-700 font-bold border border-blue-200">
-            {parcels.length + surroundingParcels.length} Persil Sawah ({summary.totalAreaHa || 0.96} Ha)
+          <span className="hidden sm:inline-block px-1.5 py-0.5 rounded text-2xs bg-emerald-50 text-emerald-700 font-bold border border-emerald-200">
+            {parcels.length} Node Sensor Aktif
           </span>
         </div>
 

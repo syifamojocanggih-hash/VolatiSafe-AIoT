@@ -72,11 +72,11 @@ export const CockpitFieldMap: React.FC<CockpitFieldMapProps> = ({
   const [selectedSurrounding, setSelectedSurrounding] = useState<SurroundingParcel | null>(null);
 
   const defaultCenter = useMemo<[number, number]>(
-    () => (summary.centerCoordinates as [number, number]) || [-6.915000, 112.422000],
+    () => (summary.centerCoordinates as [number, number]) || [-6.902683, 112.430223],
     [summary.centerCoordinates]
   );
   const gatewayPos = useMemo<[number, number]>(
-    () => (summary.gatewayCoordinates as [number, number]) || [-6.917200, 112.420000],
+    () => (summary.gatewayCoordinates as [number, number]) || [-6.901850, 112.430500],
     [summary.gatewayCoordinates]
   );
   const outerBoundary = summary.outerBoundary || bluriOuterBoundary;
