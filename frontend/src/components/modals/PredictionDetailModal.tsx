@@ -11,6 +11,7 @@ import {
   TrendingUp,
   SlidersHorizontal,
   ChevronRight,
+  Smartphone,
 } from 'lucide-react';
 import {
   StatusBannerData,
@@ -30,6 +31,7 @@ interface PredictionDetailModalProps {
   physicsDiagnostics?: PhysicsDiagnosticsData;
   trend24h?: ForecastPoint[];
   onOpenSimulator?: () => void;
+  onOpenWhatsApp?: () => void;
 }
 
 export const PredictionDetailModal: React.FC<PredictionDetailModalProps> = ({
@@ -41,6 +43,7 @@ export const PredictionDetailModal: React.FC<PredictionDetailModalProps> = ({
   physicsDiagnostics,
   trend24h,
   onOpenSimulator,
+  onOpenWhatsApp,
 }) => {
   if (!isOpen) return null;
 
@@ -476,6 +479,16 @@ export const PredictionDetailModal: React.FC<PredictionDetailModalProps> = ({
               <SlidersHorizontal className="w-4 h-4 text-slate-600" />
               <span>Buka What-If Simulator (Uji 4 Slider)</span>
               <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
+            </button>
+          )}
+
+          {onOpenWhatsApp && (
+            <button
+              onClick={onOpenWhatsApp}
+              className="w-full sm:w-auto py-3 px-4 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 text-emerald-800 font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-2xs active:scale-[0.98]"
+            >
+              <Smartphone className="w-4 h-4 text-emerald-600" />
+              <span>Pratinjau Notifikasi WA</span>
             </button>
           )}
 

@@ -51,3 +51,32 @@ class CropCycleResponseDTO(BaseModel):
     current_dat: int
     growth_stage: str
     milestones: List[CropMilestoneDTO] = Field(default_factory=list)
+
+class FertilizationLogCreateDTO(BaseModel):
+    field_id: str = "BLOK-A"
+    stage_name: str = Field(..., description="Contoh: 'Fase V8 (Pemupukan Susulan I)'")
+    applied_at: Optional[str] = Field(None, description="Tanggal/waktu aplikasi ISO atau YYYY-MM-DD")
+    hst: Optional[int] = Field(30, description="Hari Setelah Tanam (HST / DAT)")
+    urea_kg: float = Field(0.0, ge=0.0)
+    npk_phonska_kg: float = Field(0.0, ge=0.0)
+    za_kg: float = Field(0.0, ge=0.0)
+    avri_at_time: Optional[float] = Field(None, description="Skor AVRI saat pemupukan (%)")
+    notes: Optional[str] = None
+
+class FertilizationLogResponseDTO(BaseModel):
+    log_id: str
+    field_id: str
+    applied_at: str
+    date_str: str
+    stage_name: str
+    hst: int
+    urea_kg: float
+    npk_phonska_kg: float
+    za_kg: float
+    total_kg: float
+    buckets_count: int
+    mixture_summary: str
+    avri_at_time: float
+    status_text: str
+    notes: Optional[str] = None
+

@@ -198,10 +198,14 @@ AI Engine diisolasi sebagai callable service / module. Backend mengemas fitur me
 | `GET` | `/api/v1/fields/{id}/parcels` | Poligon kadastral 12 bedeng & GeoJSON batas satelit | — |
 | `POST` | `/api/v1/fields/{id}/parcels/{parcel_id}/simulate-failover` | Memicu/mengembalikan failover Digital Twin FAO-56 pada bedeng | Request Body (opsional) |
 | `POST` | `/api/v1/fertilizer/blend-calculator` | Hitung dosis pupuk majemuk & konversi ember | Request Body: Luas lahan, target tonase |
+| `POST` | `/api/v1/fertilizer/logs` | Catat takaran nyata pemupukan ke TimescaleDB & Digital Twin | Request Body: `field_id`, `urea_kg`, `npk_phonska_kg`, `za_kg`, `notes` |
+| `GET` | `/api/v1/fertilizer/logs` | Ambil riwayat log pemupukan aktual petak | `?field_id=BLOK-A` |
 | `POST` | `/api/v1/crop-cycles` | Simpan/ubah tanggal tanam & varietas benih | Request Body: Tanggal tanam, varietas |
 | `GET` | `/api/v1/reports/impact-summary` | Ringkasan efisiensi pupuk, penghematan biaya, & jam kritis terhindar | `?field_id=BLOK-A` |
 | `GET` | `/api/v1/reports/provenance-audit` | Log audit data provenance (ESP32 LoRa vs FAO-56 Failover) | `?field_id=BLOK-A&limit=30` |
 | `GET` | `/api/v1/reports/telemetry-csv` | Stream download file CSV audit telemetri lengkap 72–168 jam | `?field_id=BLOK-A&hours=72` |
+| `GET` | `/api/v1/fields/{id}/notification-preview` | Pratinjau pesan WhatsApp/Telegram (H-3, Kritis, atau Harian) | `?alert_type=critical` |
+| `POST` | `/api/v1/fields/{id}/dispatch-alert` | Eksekusi dispatch notifikasi gateway & audit log persisten | Request Body: `alert_type`, `override_phone` |
 | `GET` | `/api/v1/health` | Status gateway, uptime, & sensor status | — |
 
 ---
@@ -458,6 +462,128 @@ Memicu simulasi pemutusan node LoRa fisik pada bedeng persil tertentu dan mengal
   }
 }
 ```
+
+#### G. `GET /api/v1/fields/{id}/notification-preview`
+
+Mengambil pesan format WhatsApp/Telegram dinamis yang dirakit oleh `AlertDispatcherService` berdasarkan telemetri sensor riil dan umur tanaman jagung (HST).
+
+**Query Parameter:**
+- `alert_type`: `'critical'` (default), `'h_minus_3'`, atau `'daily_digest'`.
+
+**Respons Sukses (HTTP 200):**
+```json
+{
+  "data": {
+    "field_id": "BLOK-A",
+    "field_name": "Kebun Jagung Pak Suparman · Blok A",
+    "farmer_name": "Pak Suparman",
+    "phone_number": "+6281234567890",
+    "alert_type": "critical",
+    "avri_score": 74.2,
+    "risk_category": "kritis",
+    "title": "Peringatan Risiko Kritis (AVRI 74.2%)",
+    "message_text": "VolatiSafe AIoT · Kebun Jagung Pak Suparman · Blok A\nPenerima: Pak Suparman\n\n🔴 PERINGATAN RISIKO KRITIS: 74.2%\nJangan tabur pupuk Urea sekarang!\n\nKondisi Lahan Terkini:\n• Suhu Tanah : 34.1°C (Sangat Panas)\n• Kelembaban : 22.4% (Kering)\n• pH Tanah   : 7.83 (Basa / Berkapur)\n\n⚠️ Potensi penguapan amonia ke udara mencapai 74.2%...",
+    "scheduled_time": "12:05 WIB",
+    "channel": "WhatsApp Gateway (Fonnte/Wablas API) & Telegram Bot",
+    "simulation_mode": true,
+    "dispatched_at": null
+  },
+  "meta": {
+    "timestamp": "2026-10-28T12:05:37Z",
+    "version": "v1.0"
+  }
+}
+```
+
+#### H. `POST /api/v1/fields/{id}/dispatch-alert`
+
+Memicu pengiriman notifikasi WhatsApp & Telegram petani ke backend `AlertDispatcher`, mencatat audit log persisten ke tabel `fertilization_logs`, dan mengembalikan status pengiriman (Sandbox Mode).
+
+**Request Body:**
+```json
+{
+  "alert_type": "critical",
+  "channel": "whatsapp",
+  "override_phone": null
+}
+```
+
+**Respons Sukses (HTTP 200):**
+```json
+{
+  "data": {
+    "dispatched": true,
+    "field_id": "BLOK-A",
+    "alert_type": "critical",
+    "channels": [
+      "WhatsApp (Wablas/Fonnte API)",
+      "Telegram (@VolatiSafeAlertBot)"
+    ],
+    "recipient": "Pak Suparman (+6281234567890)",
+    "formatted_message": "VolatiSafe AIoT · Kebun Jagung Pak Suparman · Blok A\nPenerima: Pak Suparman...",
+    "status": "DELIVERED_SIMULATED",
+    "note": "Sandbox mode: Pesan berhasil diproses oleh AlertDispatcher. Pengiriman SMS/WhatsApp riil ditangguhkan untuk mencegah spam nomor petani asli.",
+    "timestamp": "2026-10-28T12:05:42.739174+00:00"
+  },
+  "meta": {
+    "timestamp": "2026-10-28T12:05:42Z",
+    "version": "v1.0"
+  }
+}
+```
+
+#### I. `POST /api/v1/fertilizer/logs`
+
+Mencatat data aplikasi pupuk nyata petani ke TimescaleDB (tabel `fertilization_logs`), mengupdate `last_urea_kg`, serta mengkalibrasi model pengasaman tanah Digital Twin: $\text{pH}(t+1) = \text{pH}(t) - 0.002 \times N_{\text{applied}}$.
+
+**Request Body:**
+```json
+{
+  "field_id": "BLOK-A",
+  "stage_name": "Fase V8 (Pemupukan Susulan I)",
+  "applied_at": "2026-10-28",
+  "hst": 33,
+  "urea_kg": 105.0,
+  "npk_phonska_kg": 40.0,
+  "za_kg": 0.0,
+  "avri_at_time": 18.5,
+  "notes": "105 kg Urea + 40 kg NPK Phonska (18 Ember)"
+}
+```
+
+**Respons Sukses (HTTP 201):**
+```json
+{
+  "data": {
+    "log_id": "a573fae6-ecf3-4188-9aa4-0b7aff9ed6b6",
+    "field_id": "BLOK-A",
+    "applied_at": "2026-10-28T00:00:00+00:00",
+    "date_str": "28/10/2026",
+    "stage_name": "Fase V8 (Pemupukan Susulan I)",
+    "hst": 33,
+    "urea_kg": 105.0,
+    "npk_phonska_kg": 40.0,
+    "za_kg": 0.0,
+    "total_kg": 145.0,
+    "buckets_count": 18,
+    "mixture_summary": "105 kg Urea + 40 kg NPK Phonska (18 Ember)",
+    "avri_at_time": 18.5,
+    "status_text": "Optimal (Aman)",
+    "notes": "105 kg Urea + 40 kg NPK Phonska (18 Ember)"
+  },
+  "meta": {
+    "timestamp": "2026-10-28T12:19:36Z",
+    "version": "v1.0"
+  }
+}
+```
+
+#### J. `GET /api/v1/fertilizer/logs`
+
+Mengambil seluruh riwayat log aplikasi pupuk nyata untuk petak tertentu dari database TimescaleDB.
+
+**Query Parameter:**
+- `field_id`: ID petak sawah (default: `BLOK-A`).
 
 ---
 

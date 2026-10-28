@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { initialAgronomyData } from '@/mocks/agronomyMock';
 import { ApplicationLog } from '@/types/agronomy';
-import { calculateFertilizerBlend, BlendCalculationResponse } from '@/services/api';
+import { calculateFertilizerBlend, BlendCalculationResponse, getFertilizerLogs } from '@/services/api';
 import { WhatsAppPreviewModal } from '@/components/modals/WhatsAppPreviewModal';
 import { RecordFertilizerModal } from '@/components/modals/RecordFertilizerModal';
 import {
@@ -90,9 +90,31 @@ export const AgronomyPlanning: React.FC = () => {
     };
   }, [safeArea, safeYield, currentHst]);
 
+  // Load real fertilization history from TimescaleDB on mount
+  useEffect(() => {
+    let isMounted = true;
+    getFertilizerLogs('BLOK-A').then((data) => {
+      if (isMounted && data && data.length > 0) {
+        const mapped: ApplicationLog[] = data.map((d) => ({
+          id: d.log_id,
+          stageName: d.stage_name,
+          hst: d.hst,
+          dateStr: d.date_str,
+          mixtureSummary: d.mixture_summary,
+          avriAtApplication: d.avri_at_time,
+          statusText: d.status_text,
+        }));
+        setLogs(mapped);
+      }
+    });
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   const handleAddLog = (newLog: ApplicationLog) => {
     setLogs((prev) => [newLog, ...prev]);
-    setToastMessage('Catatan pemupukan berhasil disinkronkan ke Digital Twin (F_log).');
+    setToastMessage('✓ Catatan pemupukan berhasil disinkronkan ke Digital Twin (F_log) & TimescaleDB.');
     setTimeout(() => setToastMessage(null), 3500);
   };
 
@@ -434,6 +456,8 @@ export const AgronomyPlanning: React.FC = () => {
       <WhatsAppPreviewModal
         isOpen={isWhatsAppModalOpen}
         onClose={() => setIsWhatsAppModalOpen(false)}
+        fieldId="BLOK-A"
+        defaultAlertType="h_minus_3"
         messageText={`Halo Pak Suparman, 3 hari lagi tanaman jagung Anda memasuki fase V8 (${currentHst} HST). Segera siapkan/tebus ${sacksPhase2} karung pupuk campuran di Kios Pupuk Desa. VolatiSafe sedang memantau cuaca & jam terbaik untuk hari penaburan.`}
       />
 
@@ -443,6 +467,7 @@ export const AgronomyPlanning: React.FC = () => {
         onClose={() => setIsRecordModalOpen(false)}
         onSave={handleAddLog}
         currentHst={currentHst}
+        fieldId="BLOK-A"
       />
 
       {/* Toast Feedback */}

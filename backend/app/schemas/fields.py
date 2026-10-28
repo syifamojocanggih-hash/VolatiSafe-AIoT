@@ -83,3 +83,35 @@ class FarmerActionResponseDTO(BaseModel):
     next_safe_window: Optional[str] = None
     avri_at_action: Optional[float] = None
 
+class NotificationPreviewDTO(BaseModel):
+    field_id: str
+    field_name: str
+    farmer_name: str
+    phone_number: str
+    alert_type: str
+    avri_score: float
+    risk_category: str
+    title: str
+    message_text: str
+    scheduled_time: str
+    channel: str
+    simulation_mode: bool = True
+    dispatched_at: Optional[str] = None
+
+class DispatchAlertRequestDTO(BaseModel):
+    alert_type: str = "critical"
+    channel: Optional[str] = "whatsapp"
+    override_phone: Optional[str] = None
+
+class DispatchAlertResponseDTO(BaseModel):
+    dispatched: bool
+    field_id: str
+    alert_type: str
+    channels: List[str]
+    recipient: str
+    formatted_message: str
+    status: str
+    note: str
+    timestamp: str
+
+

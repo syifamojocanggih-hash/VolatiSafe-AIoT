@@ -143,6 +143,31 @@ def run_tests():
     test_endpoint("Provenance Audit Logs", "/reports/provenance-audit?field_id=BLOK-A&limit=10")
     test_endpoint("Telemetry CSV Export", "/reports/telemetry-csv?field_id=BLOK-A&hours=24")
 
+    # WhatsApp & Telegram Alert Notification Endpoints (Item F)
+    test_endpoint("WhatsApp Notification Preview (H-3)", "/fields/BLOK-A/notification-preview?alert_type=h_minus_3")
+    test_endpoint("WhatsApp Notification Preview (Critical)", "/fields/BLOK-A/notification-preview?alert_type=critical")
+    test_endpoint("WhatsApp Notification Preview (Daily Digest)", "/fields/BLOK-A/notification-preview?alert_type=daily_digest")
+    test_endpoint("Dispatch WhatsApp Alert (Sandbox)", "/fields/BLOK-A/dispatch-alert", method="POST", body={"alert_type": "critical"})
+
+    # Fertilizer Application Logs (Item G)
+    test_endpoint("Get Fertilizer Logs", "/fertilizer/logs?field_id=BLOK-A")
+    test_endpoint(
+        "Record Fertilizer Log",
+        "/fertilizer/logs",
+        method="POST",
+        body={
+            "field_id": "BLOK-A",
+            "stage_name": "Fase V8 (Pemupukan Susulan I)",
+            "applied_at": "2026-10-28",
+            "hst": 33,
+            "urea_kg": 105.0,
+            "npk_phonska_kg": 40.0,
+            "za_kg": 0.0,
+            "avri_at_time": 18.0,
+            "notes": "105 kg Urea + 40 kg NPK Phonska (18 Ember)"
+        }
+    )
+
     print("\n=== Testing WebSocket Live Stream ===")
     asyncio.run(test_websocket())
 

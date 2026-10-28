@@ -9,7 +9,7 @@
 
 | No | Komponen / Fitur | Domain | File / Kode Terkait | Status Saat Ini | Dependensi & Alasan Belum Terintegrasi |
 |---|---|:---:|---|:---:|---|
-| **1** | **Kanal WhatsApp Blast Live ke Nomor Petani** | **Komunikasi** | [`backend/app/services/alert_dispatcher.py`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/backend/app/services/alert_dispatcher.py#L96-L105)<br>[`docker/.env`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/docker/.env) | ⚠️ **Non-Aktif (Sandbox)** | Memerlukan API Key Fonnte/Wablas berbayar & nomor bisnis terverifikasi; diisolasi agar petani asli tidak terkena spam saat juri menguji skenario darurat. |
+| **1** | **Kanal WhatsApp Blast Live ke Nomor GSM Fisik Petani** | **Komunikasi** | [`backend/app/services/alert_dispatcher.py`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/backend/app/services/alert_dispatcher.py)<br>[`frontend/src/components/modals/WhatsAppPreviewModal.tsx`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/frontend/src/components/modals/WhatsAppPreviewModal.tsx)<br>[`docker/.env`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/docker/.env) | ⚠️ **Non-Aktif (Sandbox Gateway)** | Antarmuka modal WhatsApp (`WhatsAppPreviewModal.tsx`), format pesan AI (H-3, Kritis, Harian), dan endpoint backend (`GET notification-preview` & `POST dispatch-alert`) telah **100% aktif dan terintegrasi persisten ke TimescaleDB**. Hanya transmisi fisik HTTP blast ke nomor GSM riil Pak Suparman yang sengaja diisolasi dalam Sandbox Gateway demi mencegah spam nomor petani asli selama demonstrasi juri. |
 | **2** | **Ekspor Dokumen PDF Resmi Ber-Tanda Tangan PPL** | **Frontend / BE** | [`frontend/src/components/report/ReportAnalytics.tsx`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/frontend/src/components/report/ReportAnalytics.tsx)<br>*(Target BE: `backend/app/routers/reports.py:pdf`)* | ⚠️ **Non-Aktif (Headless Renderer)** | Ekspor CSV & log audit database kini 100% Live; hanya render server-side dokumen PDF formal yang belum dipasang dependensi WeasyPrint / Puppeteer. |
 | **3** | **PWA Offline Mutation Background Sync** | **Frontend (FE)** | [`frontend/next.config.mjs`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/frontend/next.config.mjs#L1-L4)<br>[`frontend/src/app/page.tsx`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/frontend/src/app/page.tsx#L559-L600) | ⚠️ **Non-Aktif (Direct POST)** | Next.js config belum memasang Workbox Service Worker Background Sync; tombol penundaan pupuk langsung menembak API tanpa antrean IndexedDB offline. |
 | **4** | **Node Sensor IoT Fisik (LoRa SX1278 433 MHz)** | **Hardware / IoT** | [`firmware/`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/firmware)<br>[`simulation/wokwi/`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/simulation/wokwi)<br>[`simulation/telemetry_generator.py`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/simulation/telemetry_generator.py) | ⚠️ **Non-Aktif (Fisik Lapangan)** | Modul mikrokontroler ESP32, probe kapasitif, DS18B20, dan PCB belum dipasang permanen di sawah Solokuro karena menunggu pencairan dana finalis 10 besar (9 Nov 2026). |
@@ -26,26 +26,33 @@
 
 ### 2.1 Domain Komunikasi & WhatsApp Broadcast
 * **File Terkait:**
-  * [`backend/app/services/alert_dispatcher.py`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/backend/app/services/alert_dispatcher.py#L96-L105)
+  * [`frontend/src/components/modals/WhatsAppPreviewModal.tsx`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/frontend/src/components/modals/WhatsAppPreviewModal.tsx)
+  * [`backend/app/services/alert_dispatcher.py`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/backend/app/services/alert_dispatcher.py)
+  * [`backend/app/routers/fields.py`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/backend/app/routers/fields.py)
   * [`docker/.env`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/docker/.env)
 * **Status Implementasi di Kode:**
-  Di dalam method `AlertDispatcherService.dispatch_critical_alert()`, payload pesan telah diformat lengkap (`format_critical_whatsapp_msg`), namun proses transmisi HTTP POST ke provider eksternal (Fonnte/Wablas) sengaja dimatikan (*sandbox simulation*):
+  * **Yang Sudah Live & Aktif Penuh:**
+    1. Modal interaktif [`WhatsAppPreviewModal.tsx`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/frontend/src/components/modals/WhatsAppPreviewModal.tsx) kini terhubung langsung ke backend via `GET /api/v1/fields/{id}/notification-preview` dan `POST /api/v1/fields/{id}/dispatch-alert`.
+    2. Mendukung 3 jenis pesan dinamis real-time: **🌾 Pengingat H-3 Logistik Pupuk (dihitung dari HST & luas lahan)**, **🔴 Peringatan Risiko Kritis (dihitung dari suhu tanah, kelembaban, pH, & skor AVRI AI)**, dan **☀️ Preskripsi Jendela Aman Harian (Pukul 05:30 WIB)**.
+    3. Tombol *"Kirim Notifikasi Uji Coba"* memicu `AlertDispatcherService.dispatch_alert()` dan mencatat log audit ke tabel `fertilization_logs` di TimescaleDB secara persisten.
+  * **Yang Masih Diisolasi (Sandbox):** Transmisi jaringan fisik ke gateway SMS/WhatsApp eksternal berbayar (Fonnte/Wablas) ke nomor seluler pribadi Pak Suparman (`+6281234567890`) berstatus simulasi aman (*DELIVERED_SIMULATED*) agar petani tidak terganggu saat juri menguji skenario darurat berulang kali:
   ```python
-  # backend/app/services/alert_dispatcher.py:96-104
+  # backend/app/services/alert_dispatcher.py:125-145
   # Simulasi pengiriman sukses ke gateway WhatsApp & Telegram
   return {
       "dispatched": True,
       "field_id": field_id,
-      "avri_score": avri_score,
-      "channels": ["WhatsApp (Wablas/Fonnte)", "Telegram (@VolatiSafeAlertBot)"],
-      "formatted_message": msg,
+      "alert_type": alert_type,
+      "channels": channels or ["WhatsApp (Wablas/Fonnte API)", "Telegram (@VolatiSafeAlertBot)"],
+      "formatted_message": message,
+      "status": "DELIVERED_SIMULATED",
       "timestamp": now.isoformat()
   }
   ```
-* **Dependensi & Kebutuhan Aktivasi:**
+* **Dependensi & Kebutuhan Aktivasi Produksi Lapangan:**
   1. Pembelian kuota API Fonnte/Wablas pasca pencairan dana finalis.
   2. Pengisian variabel `FONNTE_API_TOKEN` pada [`docker/.env`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/docker/.env).
-  3. Mengganti blok return simulasi dengan `httpx.post("https://api.fonnte.com/send", headers=headers, data=payload)`.
+  3. Mengganti blok return simulasi di `AlertDispatcherService.dispatch_alert()` dengan `httpx.post("https://api.fonnte.com/send", headers=headers, data=payload)`.
 
 ---
 

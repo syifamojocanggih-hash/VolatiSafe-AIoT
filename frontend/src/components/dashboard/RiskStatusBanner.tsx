@@ -7,6 +7,7 @@ import {
   AlertCircle,
   AlertTriangle,
   AlertOctagon,
+  Smartphone,
 } from 'lucide-react';
 
 interface RiskStatusBannerProps {
@@ -14,6 +15,7 @@ interface RiskStatusBannerProps {
   onOpenDetails: () => void;
   onPostponeAction: () => void;
   isPostponed?: boolean;
+  onOpenWhatsApp?: () => void;
 }
 
 const RISK_CONFIG: Record<
@@ -91,6 +93,7 @@ export const RiskStatusBanner: React.FC<RiskStatusBannerProps> = ({
   onOpenDetails,
   onPostponeAction,
   isPostponed = false,
+  onOpenWhatsApp,
 }) => {
   const category: RiskCategory = banner.category || 'aman';
   const config = RISK_CONFIG[category] || RISK_CONFIG.aman;
@@ -110,6 +113,16 @@ export const RiskStatusBanner: React.FC<RiskStatusBannerProps> = ({
             >
               Status: {config.badgeLabel}
             </span>
+            {onOpenWhatsApp && (
+              <button
+                onClick={onOpenWhatsApp}
+                className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-3xs font-bold bg-white/80 hover:bg-white text-emerald-800 border border-emerald-300 shadow-2xs transition-all active:scale-95 cursor-pointer"
+                title="Lihat Pratinjau Pesan WhatsApp Petani"
+              >
+                <Smartphone className="w-3 h-3 text-emerald-600" />
+                <span>Simulasi Notifikasi WA Petani</span>
+              </button>
+            )}
           </div>
 
           <p className={`text-xs font-bold tracking-wider uppercase ${config.tagClass}`}>

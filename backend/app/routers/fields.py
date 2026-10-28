@@ -10,7 +10,10 @@ from app.schemas.fields import (
     FieldCurrentStatusDTO,
     FieldMetricsDTO,
     AlertBannerDTO,
-    ShapExplanationDTO
+    ShapExplanationDTO,
+    NotificationPreviewDTO,
+    DispatchAlertRequestDTO,
+    DispatchAlertResponseDTO
 )
 from app.schemas.simulation import WhatIfRequestDTO
 from app.schemas.parcels import SimulateFailoverRequestDTO
@@ -19,8 +22,9 @@ from app.models.field import FieldModel, FieldStateModel
 from app.models.node import NodeModel
 from app.models.telemetry import TelemetryModel
 from app.models.prediction import PredictionModel
-from app.models.crop_cycle import FertilizationLogModel
+from app.models.crop_cycle import FertilizationLogModel, CropCycleModel
 from app.services.ai_service import AIService
+from app.services.alert_dispatcher import alert_dispatcher
 from app.services.mock_db import db
 
 router = APIRouter(prefix="/fields", tags=["Fields"])
@@ -363,5 +367,218 @@ def simulate_node_dropout_alias(
         is_dropout=req.is_dropout
     )
     return create_envelope(updated_parcel.model_dump() if updated_parcel else {})
+
+@router.get("/{field_id}/notification-preview")
+def get_field_notification_preview(
+    field_id: str,
+    alert_type: str = Query("critical", description="Type of alert: 'critical', 'h_minus_3', or 'daily_digest'"),
+    session: Session = Depends(get_db)
+):
+    """
+    Menghasilkan pratinjau pesan notifikasi WhatsApp/Telegram yang dinamis 
+    berdasarkan kondisi telemetri riil dan status siklus jagung petani (WEBSOCKET_AND_ALERTS.md §2).
+    """
+    field_rec = session.query(FieldModel).filter(FieldModel.field_id == field_id).first()
+    state_rec = session.query(FieldStateModel).filter(FieldStateModel.field_id == field_id).first()
+
+    farmer_name = field_rec.owner_name if field_rec else "Pak Suparman"
+    farmer_phone = field_rec.owner_phone if field_rec else "+6281234567890"
+    field_name = field_rec.name if field_rec else "Hamparan Sawah Solokuro · Blok A"
+    area_ha = float(field_rec.area_ha) if field_rec else 0.96
+
+    soil_temp_c = float(state_rec.t_soil) if state_rec else 34.2
+    moisture_pct = float(state_rec.theta) if state_rec else 22.4
+    ph = float(state_rec.ph) if state_rec else 7.82
+    dat = int(state_rec.dat) if state_rec else 27
+
+    # Calculate live AVRI
+    ai_req = WhatIfRequestDTO(
+        soil_temp_c=soil_temp_c,
+        moisture_pct=moisture_pct,
+        ph=ph,
+        rain_mm=0.0
+    )
+    pred_res = AIService.predict_avri(ai_req)
+    avri_score = pred_res.avri_score
+    risk_category = pred_res.risk_category
+
+    # Determine best window text
+    best_window = "Besok Pagi, pukul 06:00 – 09:00 WIB (Risiko 18%)"
+
+    # Calculate sacks for H-3 (Standard agronomy: ~1.5 - 2 sacks per ha)
+    urea_sacks = round(area_ha * 2.0, 1)
+    npk_sacks = round(area_ha * 2.0, 1)
+
+    if alert_type == "h_minus_3":
+        title = "Pengingat H-3 Logistik Pupuk"
+        message_text = alert_dispatcher.format_h3_whatsapp_msg(
+            farmer_name=farmer_name,
+            dat=dat + 3,
+            phase_name="Fase V8 - Pemupukan Susulan I",
+            area_ha=area_ha,
+            urea_sacks=urea_sacks,
+            npk_sacks=npk_sacks,
+            field_id=field_id
+        )
+        scheduled_time = "05:30 WIB"
+    elif alert_type == "daily_digest":
+        title = "Preskripsi Jendela Aman Harian (Pagi 05:30)"
+        message_text = alert_dispatcher.format_daily_digest_msg(
+            field_name=field_name,
+            farmer_name=farmer_name,
+            avri_score=avri_score,
+            risk_category=risk_category,
+            soil_temp_c=soil_temp_c,
+            moisture_pct=moisture_pct,
+            best_window=best_window,
+            field_id=field_id
+        )
+        scheduled_time = "05:30 WIB"
+    else:
+        # critical
+        alert_type = "critical"
+        title = f"Peringatan Risiko Kritis (AVRI {avri_score:.1f}%)"
+        message_text = alert_dispatcher.format_critical_whatsapp_msg(
+            field_name=field_name,
+            avri_score=avri_score,
+            soil_temp_c=soil_temp_c,
+            moisture_pct=moisture_pct,
+            ph=ph,
+            field_id=field_id,
+            farmer_name=farmer_name,
+            best_window=best_window
+        )
+        scheduled_time = datetime.now(timezone.utc).strftime("%H:%M WIB")
+
+    dto = NotificationPreviewDTO(
+        field_id=field_id,
+        field_name=field_name,
+        farmer_name=farmer_name,
+        phone_number=farmer_phone,
+        alert_type=alert_type,
+        avri_score=avri_score,
+        risk_category=risk_category,
+        title=title,
+        message_text=message_text,
+        scheduled_time=scheduled_time,
+        channel="WhatsApp Gateway (Fonnte/Wablas API) & Telegram Bot",
+        simulation_mode=True,
+        dispatched_at=None
+    )
+    return create_envelope(dto.model_dump())
+
+@router.post("/{field_id}/dispatch-alert", status_code=status.HTTP_200_OK)
+def dispatch_field_alert(
+    field_id: str,
+    req: Optional[DispatchAlertRequestDTO] = None,
+    session: Session = Depends(get_db)
+):
+    """
+    Memicu simulasi pengiriman notifikasi WhatsApp/Telegram petani ke AlertDispatcher,
+    mencatat audit ke fertilization_logs, dan mengembalikan status pengiriman (Sandbox Mode).
+    """
+    alert_type = req.alert_type if req and req.alert_type else "critical"
+    field_rec = session.query(FieldModel).filter(FieldModel.field_id == field_id).first()
+    state_rec = session.query(FieldStateModel).filter(FieldStateModel.field_id == field_id).first()
+
+    farmer_name = field_rec.owner_name if field_rec else "Pak Suparman"
+    farmer_phone = req.override_phone if (req and req.override_phone) else (field_rec.owner_phone if field_rec else "+6281234567890")
+    field_name = field_rec.name if field_rec else "Hamparan Sawah Solokuro · Blok A"
+    area_ha = float(field_rec.area_ha) if field_rec else 0.96
+
+    soil_temp_c = float(state_rec.t_soil) if state_rec else 34.2
+    moisture_pct = float(state_rec.theta) if state_rec else 22.4
+    ph = float(state_rec.ph) if state_rec else 7.82
+    dat = int(state_rec.dat) if state_rec else 27
+
+    # Calculate live AVRI
+    ai_req = WhatIfRequestDTO(
+        soil_temp_c=soil_temp_c,
+        moisture_pct=moisture_pct,
+        ph=ph,
+        rain_mm=0.0
+    )
+    pred_res = AIService.predict_avri(ai_req)
+    avri_score = pred_res.avri_score
+    best_window = "Besok Pagi, pukul 06:00 – 09:00 WIB (Risiko 18%)"
+
+    urea_sacks = round(area_ha * 2.0, 1)
+    npk_sacks = round(area_ha * 2.0, 1)
+
+    if alert_type == "h_minus_3":
+        msg = alert_dispatcher.format_h3_whatsapp_msg(
+            farmer_name=farmer_name,
+            dat=dat + 3,
+            phase_name="Fase V8 - Pemupukan Susulan I",
+            area_ha=area_ha,
+            urea_sacks=urea_sacks,
+            npk_sacks=npk_sacks,
+            field_id=field_id
+        )
+    elif alert_type == "daily_digest":
+        msg = alert_dispatcher.format_daily_digest_msg(
+            field_name=field_name,
+            farmer_name=farmer_name,
+            avri_score=avri_score,
+            risk_category=pred_res.risk_category,
+            soil_temp_c=soil_temp_c,
+            moisture_pct=moisture_pct,
+            best_window=best_window,
+            field_id=field_id
+        )
+    else:
+        alert_type = "critical"
+        msg = alert_dispatcher.format_critical_whatsapp_msg(
+            field_name=field_name,
+            avri_score=avri_score,
+            soil_temp_c=soil_temp_c,
+            moisture_pct=moisture_pct,
+            ph=ph,
+            field_id=field_id,
+            farmer_name=farmer_name,
+            best_window=best_window
+        )
+
+    # Dispatch with force=True for testing sandbox
+    dispatch_res = alert_dispatcher.dispatch_alert(
+        field_id=field_id,
+        alert_type=alert_type,
+        message=msg,
+        channels=["WhatsApp (Wablas/Fonnte API)", "Telegram (@VolatiSafeAlertBot)"],
+        force=True
+    )
+
+    # Persist into fertilization_logs for provenance tracking
+    try:
+        now_utc = datetime.now(timezone.utc)
+        log_entry = FertilizationLogModel(
+            log_id=str(uuid.uuid4()),
+            field_id=field_id,
+            applied_at=now_utc,
+            stage_name=f"NOTIF_WA_{alert_type.upper()}",
+            urea_kg=0.0,
+            npk_phonska_kg=0.0,
+            za_kg=0.0,
+            avri_at_time=avri_score,
+            notes=f"Notifikasi {alert_type} dikirim ke {farmer_phone} ({farmer_name}) via AlertDispatcher."
+        )
+        session.add(log_entry)
+        session.commit()
+    except Exception:
+        session.rollback()
+
+    dto = DispatchAlertResponseDTO(
+        dispatched=True,
+        field_id=field_id,
+        alert_type=alert_type,
+        channels=dispatch_res.get("channels", ["WhatsApp (Wablas/Fonnte API)", "Telegram (@VolatiSafeAlertBot)"]),
+        recipient=f"{farmer_name} ({farmer_phone})",
+        formatted_message=msg,
+        status="DELIVERED_SIMULATED",
+        note="Sandbox mode: Pesan berhasil diproses oleh AlertDispatcher. Pengiriman SMS/WhatsApp riil ditangguhkan untuk mencegah spam nomor petani asli.",
+        timestamp=dispatch_res.get("timestamp", datetime.now(timezone.utc).isoformat())
+    )
+    return create_envelope(dto.model_dump())
+
 
 

@@ -645,6 +645,78 @@ export async function getDigitalTwinTelemetry(
   }
 }
 
+// 15. Fertilizer Application Logging (Item G)
+export interface BackendFertilizerLogDTO {
+  log_id: string;
+  field_id: string;
+  applied_at: string;
+  date_str: string;
+  stage_name: string;
+  hst: number;
+  urea_kg: number;
+  npk_phonska_kg: number;
+  za_kg: number;
+  total_kg: number;
+  buckets_count: number;
+  mixture_summary: string;
+  avri_at_time: number;
+  status_text: string;
+  notes?: string;
+}
+
+export async function getFertilizerLogs(fieldId: string = 'BLOK-A'): Promise<BackendFertilizerLogDTO[]> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/fertilizer/logs?field_id=${fieldId}`, {
+      cache: 'no-store',
+      headers: { 'Accept': 'application/json' },
+    });
+    if (!res.ok) return [];
+    const json = await res.json();
+    return json.data || [];
+  } catch {
+    return [];
+  }
+}
+
+export async function recordFertilizerLog(payload: {
+  field_id?: string;
+  stage_name: string;
+  applied_at?: string;
+  hst?: number;
+  urea_kg: number;
+  npk_phonska_kg: number;
+  za_kg?: number;
+  avri_at_time?: number;
+  notes?: string;
+}): Promise<BackendFertilizerLogDTO | null> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/fertilizer/logs`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify({
+        field_id: payload.field_id || 'BLOK-A',
+        stage_name: payload.stage_name,
+        applied_at: payload.applied_at,
+        hst: payload.hst,
+        urea_kg: payload.urea_kg,
+        npk_phonska_kg: payload.npk_phonska_kg,
+        za_kg: payload.za_kg || 0.0,
+        avri_at_time: payload.avri_at_time,
+        notes: payload.notes,
+      }),
+    });
+    if (!res.ok) return null;
+    const json = await res.json();
+    return json.data || null;
+  } catch {
+    return null;
+  }
+}
+
+
 // 13. Reports, Live Provenance & Dynamic CSV Download
 export interface ReportImpactSummary {
   field_id: string;
@@ -695,6 +767,78 @@ export async function getReportImpactSummary(
   }
 }
 
+// 15. Fertilizer Application Logging (Item G)
+export interface BackendFertilizerLogDTO {
+  log_id: string;
+  field_id: string;
+  applied_at: string;
+  date_str: string;
+  stage_name: string;
+  hst: number;
+  urea_kg: number;
+  npk_phonska_kg: number;
+  za_kg: number;
+  total_kg: number;
+  buckets_count: number;
+  mixture_summary: string;
+  avri_at_time: number;
+  status_text: string;
+  notes?: string;
+}
+
+export async function getFertilizerLogs(fieldId: string = 'BLOK-A'): Promise<BackendFertilizerLogDTO[]> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/fertilizer/logs?field_id=${fieldId}`, {
+      cache: 'no-store',
+      headers: { 'Accept': 'application/json' },
+    });
+    if (!res.ok) return [];
+    const json = await res.json();
+    return json.data || [];
+  } catch {
+    return [];
+  }
+}
+
+export async function recordFertilizerLog(payload: {
+  field_id?: string;
+  stage_name: string;
+  applied_at?: string;
+  hst?: number;
+  urea_kg: number;
+  npk_phonska_kg: number;
+  za_kg?: number;
+  avri_at_time?: number;
+  notes?: string;
+}): Promise<BackendFertilizerLogDTO | null> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/fertilizer/logs`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify({
+        field_id: payload.field_id || 'BLOK-A',
+        stage_name: payload.stage_name,
+        applied_at: payload.applied_at,
+        hst: payload.hst,
+        urea_kg: payload.urea_kg,
+        npk_phonska_kg: payload.npk_phonska_kg,
+        za_kg: payload.za_kg || 0.0,
+        avri_at_time: payload.avri_at_time,
+        notes: payload.notes,
+      }),
+    });
+    if (!res.ok) return null;
+    const json = await res.json();
+    return json.data || null;
+  } catch {
+    return null;
+  }
+}
+
+
 export async function getProvenanceAudit(
   fieldId: string = 'BLOK-A',
   limit: number = 15
@@ -711,6 +855,78 @@ export async function getProvenanceAudit(
     return null;
   }
 }
+
+// 15. Fertilizer Application Logging (Item G)
+export interface BackendFertilizerLogDTO {
+  log_id: string;
+  field_id: string;
+  applied_at: string;
+  date_str: string;
+  stage_name: string;
+  hst: number;
+  urea_kg: number;
+  npk_phonska_kg: number;
+  za_kg: number;
+  total_kg: number;
+  buckets_count: number;
+  mixture_summary: string;
+  avri_at_time: number;
+  status_text: string;
+  notes?: string;
+}
+
+export async function getFertilizerLogs(fieldId: string = 'BLOK-A'): Promise<BackendFertilizerLogDTO[]> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/fertilizer/logs?field_id=${fieldId}`, {
+      cache: 'no-store',
+      headers: { 'Accept': 'application/json' },
+    });
+    if (!res.ok) return [];
+    const json = await res.json();
+    return json.data || [];
+  } catch {
+    return [];
+  }
+}
+
+export async function recordFertilizerLog(payload: {
+  field_id?: string;
+  stage_name: string;
+  applied_at?: string;
+  hst?: number;
+  urea_kg: number;
+  npk_phonska_kg: number;
+  za_kg?: number;
+  avri_at_time?: number;
+  notes?: string;
+}): Promise<BackendFertilizerLogDTO | null> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/fertilizer/logs`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify({
+        field_id: payload.field_id || 'BLOK-A',
+        stage_name: payload.stage_name,
+        applied_at: payload.applied_at,
+        hst: payload.hst,
+        urea_kg: payload.urea_kg,
+        npk_phonska_kg: payload.npk_phonska_kg,
+        za_kg: payload.za_kg || 0.0,
+        avri_at_time: payload.avri_at_time,
+        notes: payload.notes,
+      }),
+    });
+    if (!res.ok) return null;
+    const json = await res.json();
+    return json.data || null;
+  } catch {
+    return null;
+  }
+}
+
 
 export async function downloadReportCsv(
   fieldId: string = 'BLOK-A',
@@ -769,137 +985,189 @@ export async function getDigitalTwin72hForecast(
   }
 }
 
-// 13. Reports, Live Provenance & Dynamic CSV Download
-export interface ReportImpactSummary {
+// 15. Fertilizer Application Logging (Item G)
+export interface BackendFertilizerLogDTO {
+  log_id: string;
   field_id: string;
-  urea_efficiency_target: string;
-  cost_savings_per_ha_idr: number;
-  nitrogen_loss_reduction: string;
-  total_actions_recorded: number;
-  total_urea_saved_kg: number;
-  critical_hours_prevented: number;
-  last_audit_iso: string;
+  applied_at: string;
+  date_str: string;
+  stage_name: string;
+  hst: number;
+  urea_kg: number;
+  npk_phonska_kg: number;
+  za_kg: number;
+  total_kg: number;
+  buckets_count: number;
+  mixture_summary: string;
+  avri_at_time: number;
+  status_text: string;
+  notes?: string;
 }
 
-export interface ProvenanceAuditRecord {
-  timestamp: string;
-  node_id: string;
-  block_name: string;
-  moisture_pct: number;
-  soil_temp_c: number;
-  ph: number;
-  battery_v: number;
+export async function getFertilizerLogs(fieldId: string = 'BLOK-A'): Promise<BackendFertilizerLogDTO[]> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/fertilizer/logs?field_id=${fieldId}`, {
+      cache: 'no-store',
+      headers: { 'Accept': 'application/json' },
+    });
+    if (!res.ok) return [];
+    const json = await res.json();
+    return json.data || [];
+  } catch {
+    return [];
+  }
+}
+
+export async function recordFertilizerLog(payload: {
+  field_id?: string;
+  stage_name: string;
+  applied_at?: string;
+  hst?: number;
+  urea_kg: number;
+  npk_phonska_kg: number;
+  za_kg?: number;
+  avri_at_time?: number;
+  notes?: string;
+}): Promise<BackendFertilizerLogDTO | null> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/fertilizer/logs`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify({
+        field_id: payload.field_id || 'BLOK-A',
+        stage_name: payload.stage_name,
+        applied_at: payload.applied_at,
+        hst: payload.hst,
+        urea_kg: payload.urea_kg,
+        npk_phonska_kg: payload.npk_phonska_kg,
+        za_kg: payload.za_kg || 0.0,
+        avri_at_time: payload.avri_at_time,
+        notes: payload.notes,
+      }),
+    });
+    if (!res.ok) return null;
+    const json = await res.json();
+    return json.data || null;
+  } catch {
+    return null;
+  }
+}
+
+
+// 14. WhatsApp & Telegram Petani Notification Services (Item F)
+export interface NotificationPreviewResponse {
+  field_id: string;
+  field_name: string;
+  farmer_name: string;
+  phone_number: string;
+  alert_type: string;
   avri_score: number;
-  risk_class: string;
-  is_predicted: boolean;
-  provenance_source: string;
+  risk_category: string;
+  title: string;
+  message_text: string;
+  scheduled_time: string;
+  channel: string;
+  simulation_mode: boolean;
+  dispatched_at: string | null;
 }
 
-export interface ProvenanceAuditResponse {
+export interface DispatchAlertResponse {
+  dispatched: boolean;
   field_id: string;
-  total_records: number;
-  direct_telemetry_count: number;
-  failover_imputed_count: number;
-  records: ProvenanceAuditRecord[];
-}
-
-export async function getReportImpactSummary(
-  fieldId: string = 'BLOK-A'
-): Promise<ReportImpactSummary | null> {
-  try {
-    const res = await fetch(`${API_BASE_URL}/reports/impact-summary?field_id=${fieldId}`, {
-      cache: 'no-store',
-      headers: { 'Accept': 'application/json' },
-    });
-    if (!res.ok) return null;
-    const json = await res.json();
-    return json.data || null;
-  } catch {
-    return null;
-  }
-}
-
-export async function getProvenanceAudit(
-  fieldId: string = 'BLOK-A',
-  limit: number = 15
-): Promise<ProvenanceAuditResponse | null> {
-  try {
-    const res = await fetch(`${API_BASE_URL}/reports/provenance-audit?field_id=${fieldId}&limit=${limit}`, {
-      cache: 'no-store',
-      headers: { 'Accept': 'application/json' },
-    });
-    if (!res.ok) return null;
-    const json = await res.json();
-    return json.data || null;
-  } catch {
-    return null;
-  }
-}
-
-export async function downloadReportCsv(
-  fieldId: string = 'BLOK-A',
-  hours: number = 72
-): Promise<boolean> {
-  try {
-    const res = await fetch(`${API_BASE_URL}/reports/telemetry-csv?field_id=${fieldId}&hours=${hours}`);
-    if (!res.ok) return false;
-    const blob = await res.blob();
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `volatisafe_audit_telemetri_${fieldId}.csv`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    window.URL.revokeObjectURL(url);
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-
-// 13. Reports, Live Provenance & Dynamic CSV Download
-export interface ReportImpactSummary {
-  field_id: string;
-  urea_efficiency_target: string;
-  cost_savings_per_ha_idr: number;
-  nitrogen_loss_reduction: string;
-  total_actions_recorded: number;
-  total_urea_saved_kg: number;
-  critical_hours_prevented: number;
-  last_audit_iso: string;
-}
-
-export interface ProvenanceAuditRecord {
+  alert_type: string;
+  channels: string[];
+  recipient: string;
+  formatted_message: string;
+  status: string;
+  note: string;
   timestamp: string;
-  node_id: string;
-  block_name: string;
-  moisture_pct: number;
-  soil_temp_c: number;
-  ph: number;
-  battery_v: number;
-  avri_score: number;
-  risk_class: string;
-  is_predicted: boolean;
-  provenance_source: string;
 }
 
-export interface ProvenanceAuditResponse {
+export async function getNotificationPreview(
+  fieldId: string = 'BLOK-A',
+  alertType: 'critical' | 'h_minus_3' | 'daily_digest' = 'critical'
+): Promise<NotificationPreviewResponse | null> {
+  try {
+    const res = await fetch(
+      `${API_BASE_URL}/fields/${fieldId}/notification-preview?alert_type=${alertType}`,
+      {
+        cache: 'no-store',
+        headers: { 'Accept': 'application/json' },
+      }
+    );
+    if (!res.ok) return null;
+    const json = await res.json();
+    return json.data || null;
+  } catch {
+    return null;
+  }
+}
+
+// 15. Fertilizer Application Logging (Item G)
+export interface BackendFertilizerLogDTO {
+  log_id: string;
   field_id: string;
-  total_records: number;
-  direct_telemetry_count: number;
-  failover_imputed_count: number;
-  records: ProvenanceAuditRecord[];
+  applied_at: string;
+  date_str: string;
+  stage_name: string;
+  hst: number;
+  urea_kg: number;
+  npk_phonska_kg: number;
+  za_kg: number;
+  total_kg: number;
+  buckets_count: number;
+  mixture_summary: string;
+  avri_at_time: number;
+  status_text: string;
+  notes?: string;
 }
 
-export async function getReportImpactSummary(
-  fieldId: string = 'BLOK-A'
-): Promise<ReportImpactSummary | null> {
+export async function getFertilizerLogs(fieldId: string = 'BLOK-A'): Promise<BackendFertilizerLogDTO[]> {
   try {
-    const res = await fetch(`${API_BASE_URL}/reports/impact-summary?field_id=${fieldId}`, {
+    const res = await fetch(`${API_BASE_URL}/fertilizer/logs?field_id=${fieldId}`, {
       cache: 'no-store',
       headers: { 'Accept': 'application/json' },
+    });
+    if (!res.ok) return [];
+    const json = await res.json();
+    return json.data || [];
+  } catch {
+    return [];
+  }
+}
+
+export async function recordFertilizerLog(payload: {
+  field_id?: string;
+  stage_name: string;
+  applied_at?: string;
+  hst?: number;
+  urea_kg: number;
+  npk_phonska_kg: number;
+  za_kg?: number;
+  avri_at_time?: number;
+  notes?: string;
+}): Promise<BackendFertilizerLogDTO | null> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/fertilizer/logs`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify({
+        field_id: payload.field_id || 'BLOK-A',
+        stage_name: payload.stage_name,
+        applied_at: payload.applied_at,
+        hst: payload.hst,
+        urea_kg: payload.urea_kg,
+        npk_phonska_kg: payload.npk_phonska_kg,
+        za_kg: payload.za_kg || 0.0,
+        avri_at_time: payload.avri_at_time,
+        notes: payload.notes,
+      }),
     });
     if (!res.ok) return null;
     const json = await res.json();
@@ -909,14 +1177,24 @@ export async function getReportImpactSummary(
   }
 }
 
-export async function getProvenanceAudit(
+
+export async function dispatchNotificationAlert(
   fieldId: string = 'BLOK-A',
-  limit: number = 15
-): Promise<ProvenanceAuditResponse | null> {
+  alertType: 'critical' | 'h_minus_3' | 'daily_digest' = 'critical',
+  overridePhone?: string
+): Promise<DispatchAlertResponse | null> {
   try {
-    const res = await fetch(`${API_BASE_URL}/reports/provenance-audit?field_id=${fieldId}&limit=${limit}`, {
-      cache: 'no-store',
-      headers: { 'Accept': 'application/json' },
+    const res = await fetch(`${API_BASE_URL}/fields/${fieldId}/dispatch-alert`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify({
+        alert_type: alertType,
+        channel: 'whatsapp',
+        override_phone: overridePhone || null,
+      }),
     });
     if (!res.ok) return null;
     const json = await res.json();
@@ -926,70 +1204,68 @@ export async function getProvenanceAudit(
   }
 }
 
-export async function downloadReportCsv(
-  fieldId: string = 'BLOK-A',
-  hours: number = 72
-): Promise<boolean> {
-  try {
-    const res = await fetch(`${API_BASE_URL}/reports/telemetry-csv?field_id=${fieldId}&hours=${hours}`);
-    if (!res.ok) return false;
-    const blob = await res.blob();
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `volatisafe_audit_telemetri_${fieldId}.csv`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    window.URL.revokeObjectURL(url);
-    return true;
-  } catch {
-    return false;
-  }
-}
-// 13. Reports, Live Provenance & Dynamic CSV Download
-export interface ReportImpactSummary {
+// 15. Fertilizer Application Logging (Item G)
+export interface BackendFertilizerLogDTO {
+  log_id: string;
   field_id: string;
-  urea_efficiency_target: string;
-  cost_savings_per_ha_idr: number;
-  nitrogen_loss_reduction: string;
-  total_actions_recorded: number;
-  total_urea_saved_kg: number;
-  critical_hours_prevented: number;
-  last_audit_iso: string;
+  applied_at: string;
+  date_str: string;
+  stage_name: string;
+  hst: number;
+  urea_kg: number;
+  npk_phonska_kg: number;
+  za_kg: number;
+  total_kg: number;
+  buckets_count: number;
+  mixture_summary: string;
+  avri_at_time: number;
+  status_text: string;
+  notes?: string;
 }
 
-
-
-export interface ProvenanceAuditRecord {
-  timestamp: string;
-  node_id: string;
-  block_name: string;
-  moisture_pct: number;
-  soil_temp_c: number;
-  ph: number;
-  battery_v: number;
-  avri_score: number;
-  risk_class: string;
-  is_predicted: boolean;
-  provenance_source: string;
-}
-
-export interface ProvenanceAuditResponse {
-  field_id: string;
-  total_records: number;
-  direct_telemetry_count: number;
-  failover_imputed_count: number;
-  records: ProvenanceAuditRecord[];
-}
-
-export async function getReportImpactSummary(
-  fieldId: string = 'BLOK-A'
-): Promise<ReportImpactSummary | null> {
+export async function getFertilizerLogs(fieldId: string = 'BLOK-A'): Promise<BackendFertilizerLogDTO[]> {
   try {
-    const res = await fetch(`${API_BASE_URL}/reports/impact-summary?field_id=${fieldId}`, {
+    const res = await fetch(`${API_BASE_URL}/fertilizer/logs?field_id=${fieldId}`, {
       cache: 'no-store',
       headers: { 'Accept': 'application/json' },
+    });
+    if (!res.ok) return [];
+    const json = await res.json();
+    return json.data || [];
+  } catch {
+    return [];
+  }
+}
+
+export async function recordFertilizerLog(payload: {
+  field_id?: string;
+  stage_name: string;
+  applied_at?: string;
+  hst?: number;
+  urea_kg: number;
+  npk_phonska_kg: number;
+  za_kg?: number;
+  avri_at_time?: number;
+  notes?: string;
+}): Promise<BackendFertilizerLogDTO | null> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/fertilizer/logs`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify({
+        field_id: payload.field_id || 'BLOK-A',
+        stage_name: payload.stage_name,
+        applied_at: payload.applied_at,
+        hst: payload.hst,
+        urea_kg: payload.urea_kg,
+        npk_phonska_kg: payload.npk_phonska_kg,
+        za_kg: payload.za_kg || 0.0,
+        avri_at_time: payload.avri_at_time,
+        notes: payload.notes,
+      }),
     });
     if (!res.ok) return null;
     const json = await res.json();
@@ -999,43 +1275,6 @@ export async function getReportImpactSummary(
   }
 }
 
-export async function getProvenanceAudit(
-  fieldId: string = 'BLOK-A',
-  limit: number = 15
-): Promise<ProvenanceAuditResponse | null> {
-  try {
-    const res = await fetch(`${API_BASE_URL}/reports/provenance-audit?field_id=${fieldId}&limit=${limit}`, {
-      cache: 'no-store',
-      headers: { 'Accept': 'application/json' },
-    });
-    if (!res.ok) return null;
-    const json = await res.json();
-    return json.data || null;
-  } catch {
-    return null;
-  }
-}
 
-export async function downloadReportCsv(
-  fieldId: string = 'BLOK-A',
-  hours: number = 72
-): Promise<boolean> {
-  try {
-    const res = await fetch(`${API_BASE_URL}/reports/telemetry-csv?field_id=${fieldId}&hours=${hours}`);
-    if (!res.ok) return false;
-    const blob = await res.blob();
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `volatisafe_audit_telemetri_${fieldId}.csv`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    window.URL.revokeObjectURL(url);
-    return true;
-  } catch {
-    return false;
-  }
-}
 
 

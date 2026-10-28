@@ -16,6 +16,7 @@ import { ReportAnalytics } from '@/components/report/ReportAnalytics';
 import { WhatIfPanel } from '@/components/simulator/WhatIfPanel';
 import { PredictionDetailModal } from '@/components/modals/PredictionDetailModal';
 import { SettingsModal } from '@/components/modals/SettingsModal';
+import { WhatsAppPreviewModal } from '@/components/modals/WhatsAppPreviewModal';
 import {
   getFieldCurrentStatus,
   getFieldActionStatus,
@@ -340,6 +341,8 @@ export default function DashboardPage() {
   const [isSimulatedCritical, setIsSimulatedCritical] = useState(false);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
+  const [isWhatsAppModalOpen, setIsWhatsAppModalOpen] = useState(false);
+  const [whatsAppAlertType, setWhatsAppAlertType] = useState<'critical' | 'h_minus_3' | 'daily_digest'>('critical');
   const [isPostponed, setIsPostponed] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
@@ -676,6 +679,10 @@ export default function DashboardPage() {
                 onOpenDetails={() => setIsDetailModalOpen(true)}
                 onPostponeAction={handlePostpone}
                 isPostponed={isPostponed}
+                onOpenWhatsApp={() => {
+                  setWhatsAppAlertType(currentData.statusBanner.category === 'aman' ? 'daily_digest' : 'critical');
+                  setIsWhatsAppModalOpen(true);
+                }}
               />
 
               {/* 4 Metric Telemetry Cards */}
@@ -707,6 +714,11 @@ export default function DashboardPage() {
           setIsDetailModalOpen(false);
           setActiveTab('simulator');
         }}
+        onOpenWhatsApp={() => {
+          setIsDetailModalOpen(false);
+          setWhatsAppAlertType('critical');
+          setIsWhatsAppModalOpen(true);
+        }}
       />
 
       {/* Settings & Hardware Info Modal */}
@@ -721,6 +733,20 @@ export default function DashboardPage() {
         onOpenWhatIf={() => {
           setIsSettingsModalOpen(false);
           setActiveTab('simulator');
+        }}
+      />
+
+      {/* WhatsApp Petani Notification Preview & Simulation Modal */}
+      <WhatsAppPreviewModal
+        isOpen={isWhatsAppModalOpen}
+        onClose={() => setIsWhatsAppModalOpen(false)}
+        fieldId={currentData.field.id}
+        defaultAlertType={whatsAppAlertType}
+        onNavigateWindow={() => {
+          setActiveTab('dashboard');
+        }}
+        onNavigateCalculator={() => {
+          setActiveTab('agronomy');
         }}
       />
 

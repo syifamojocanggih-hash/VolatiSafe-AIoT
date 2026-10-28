@@ -18,7 +18,7 @@ class FertilizationLogModel(Base):
     log_id = Column(String(36), primary_key=True)
     field_id = Column(String(32), ForeignKey("fields.field_id"), nullable=True)
     applied_at = Column(DateTime(timezone=True), nullable=False)
-    stage_name = Column(String(32), nullable=False)
+    stage_name = Column(String(64), nullable=False)
     urea_kg = Column(Numeric(6, 2), nullable=False)
     npk_phonska_kg = Column(Numeric(6, 2), nullable=False)
     za_kg = Column(Numeric(6, 2), default=0.0)
