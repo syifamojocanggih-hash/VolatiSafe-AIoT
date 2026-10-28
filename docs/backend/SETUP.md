@@ -10,18 +10,35 @@
 
 ---
 
-## 2. Menjalankan Layanan Infrastruktur via Docker
+## 2. Menjalankan Layanan Full-Stack via Docker
 
-Jalankan container database TimescaleDB dan broker Mosquitto:
+Seluruh infrastruktur dan aplikasi VolatiSafe AIoT telah terintegrasi dalam Docker Compose:
+- **Frontend Next.js:** Port `${FRONTEND_PORT:-3000}`
+- **Backend FastAPI:** Port `${BACKEND_PORT:-8000}`
+- **TimescaleDB (PostgreSQL 16):** Port `${DB_PORT:-5432}`
+- **Eclipse Mosquitto (MQTT):** Port `${MQTT_PORT:-1883}`
+- **Adminer (Web DB Manager):** Port `${DB_ADMIN_PORT:-8082}`
 
 ```bash
-# Masuk ke direktori docker
-docker-compose up -d
+# Jalankan seluruh stack (frontend, backend, db, mqtt, adminer)
+docker compose -f docker/docker-compose.yml up -d --build
 ```
 
-File `docker-compose.yml` mencakup:
-1. **TimescaleDB:** Port `5432:5432` (image: `timescale/timescaledb:latest-pg15`)
-2. **Eclipse Mosquitto:** Port `1883:1883` (image: `eclipse-mosquitto:2`)
+### Konfigurasi Custom Port (Jika Benturan Port)
+Jika ada port yang bentrok dengan aplikasi lain di laptop Anda:
+1. Buka file `.env` di root atau `docker/.env`.
+2. Ubah port sesuai yang kosong:
+```ini
+FRONTEND_PORT=3001
+BACKEND_PORT=8001
+DB_PORT=5433
+MQTT_PORT=1884
+DB_ADMIN_PORT=8083
+```
+3. Terapkan dengan menjalankan ulang:
+```bash
+docker compose -f docker/docker-compose.yml up -d
+```
 
 ---
 
