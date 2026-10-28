@@ -39,6 +39,7 @@ export interface ForecastPoint {
   moisture: number;
   temperature: number;
   threshold: number;
+  ph?: number;
 }
 
 export interface SafeWindowSegment {

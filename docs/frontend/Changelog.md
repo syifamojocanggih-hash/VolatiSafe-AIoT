@@ -2,6 +2,77 @@
 
 Seluruh catatan kemajuan, keputusan teknis, dan implementasi antarmuka frontend (Next.js 14, Tailwind CSS, PWA) dicatat secara kronologis di sini.
 
+## [2026-10-28] — Penyesuaian Presisi Geospasial Poligon ke Hamparan Sawah Riil Desa Bluri (Balai Desa Bluri)
+
+### 🌾 Realignment Poligon Persil ke Lahan Pertanian Sawah & Tegalan Jagung (`parcels_data.py`, `mock_db.py`, `parcelsMock.ts`, `LeafletFieldMap.tsx`, `ParcelRiskMap.tsx`)
+- **Koreksi Lokasi Topografi (Eliminasi Kawasan Gunung Kapur / Quarry):**
+  - Mengoreksi penempatan poligon sebelumnya di wilayah lereng berbatu utara Paciran (*Bukit Maut / Tambang Galian Kapur*) ke **hamparan lahan pertanian sawah & tegalan jagung riil** di Desa Bluri, Solokuro (`6°54'58"S 112°25'20"E` / `-6.916213, 112.422270`).
+  - Lokasi lahan terverifikasi berdampingan langsung dengan kompleks **Balai Desa Bluri**, mushollah, dan jaringan Jalan Usaha Tani (JUT) resmi.
+- **Presisi Batas 12 Bedeng Berbasis Citra Satelit Resolusi Tinggi (Zoom 18):**
+  - Memetakan ulang koordinat 12 bedeng persil (`A1` s/d `C4`) mengikuti pola pematang sawah (*galengan*), alur terasering mikro, dan batas kepemilikan petak lahan jagung yang tampak nyata pada citra satelit Google Hybrid / UAV Orthomosaic.
+  - Memperbarui koordinat saluran drainase dan garis jalan tani mengikuti jalur jalan usaha tani beraspal/tatah di sisi timur lahan (`[[-6.915521, 112.422742] ... [-6.916884, 112.422929]]`).
+  - Menempatkan titik *Gateway Basecamp LoRa* di bahu jalan masuk hamparan sawah (`-6.915650, 112.422720`, jarak efektif sensor 0,08 km).
+- **Penyelarasan Komponen Peta & Indikator Lahan:**
+  - Memperbarui chip lokasi peta menjadi `Hamparan Sawah · Balai Desa Bluri, Solokuro | 16 Persil Sawah (0.96 Ha)`.
+  - Memperbarui default zoom menjadi level 18 sehingga 12 bedeng sawah langsung terbingkai rapat dan proporsional saat peta dibuka.
+
+---
+
+## [2026-10-27] — Penambahan Parameter pH Tanah pada Grafik Tren 24 Jam (Forecast)
+
+### 🧪 Integrasi Kurva pH Tanah 24 Jam (`Trend24hChart.tsx`, `page.tsx`, `types/dashboard.ts`, `dashboardMock.ts`)
+- **Visualisasi Multivariat 3-Parameter Telemetri:**
+  - Menambahkan kurva deret waktu **pH Tanah** (skala ungu `#8B5CF6`) berdampingan dengan Kelembapan Tanah (`#2563EB`) dan Suhu Tanah (`#C25E26`).
+  - Mengonfigurasi *Dual Y-Axis* pada ECharts: Sumbu kiri (Y0: 15–50) untuk % Kelembapan dan °C Suhu; Sumbu kanan (Y1: 4–10) untuk pH Tanah sehingga kurva pH berkesetimbangan rapi di atas kurva suhu tanpa tumpang tindih.
+- **Interaktivitas Tooltip & Legend:**
+  - Tooltip interaktif kini menampilkan 3 metrik telemetri sekaligus: `Kelembapan tanah (% VWC)`, `Suhu Tanah (°C)`, dan `pH Tanah (pH)`.
+  - Memperbarui legend chart dengan indikator dot warna ungu solid untuk pH Tanah.
+- **Penyelarasan Data Pipeline:**
+  - Memperbarui `ForecastPoint` interface dan fungsi `transformTelemetryToTrend` agar membaca dan meneruskan data `ph` dari backend API.
+
+---
+
+## [2026-10-27] — Integrasi Peta Zonasi Risiko Persil (12 Bedeng) & Citra Satelit Sentinel-2 / UAV Orthomosaic
+
+### 🛰️ Peta Zonasi Risiko Persil & Simulasi Digital Twin FAO-56 (`ParcelRiskMap.tsx`, `LeafletFieldMap.tsx`, `api.ts`, `parcels.py`, `parcels_data.py`, `mock_db.py`, `fields.py`)
+- **Integrasi Endpoint Citra Satelit & Kadastral 12 Bedeng Persil (`GET /api/v1/fields/{id}/parcels`):**
+  - Menggantikan mock lokal statis dengan endpoint live REST API backend yang mengembalikan poligon presisi 12 bedeng persil kadastral (Bedeng `A1` s/d `C4`) di hamparan jagung Desa Bluri, Solokuro (-6.89931, 112.43439).
+  - Menyertakan *outer boundary perimeter* 16-vertex dan koordinat poligon batas bedeng bersumber dari kombinasi citra multispektral **Sentinel-2 (Copernicus)** dan **UAV Orthomosaic (0.2m GSD High-Resolution / 10m Multi-Band)**.
+  - Menyertakan format standar **RFC 7946 GeoJSON FeatureCollection** (`[lng, lat]`) sekaligus format Leaflet (`[lat, lng]`) untuk interoperabilitas GIS.
+- **Backend Persistent Failover & Dropout Simulation (`POST /api/v1/fields/{id}/parcels/{parcel_id}/simulate-failover`):**
+  - Menggantikan manipulasi state React `useState` lokal pada tombol simulasi dengan integrasi HTTP POST ke backend.
+  - Memfasilitasi toggle pemutusan node LoRa (`online` ↔ `simulated`) dan pengalihan otomatis estimasi telemetri ke model biofisik **Digital Twin FAO-56** (`[Est-Simulated] FAO-56`).
+- **Penyelarasan UI/UX Frontend & Indikator Satelit:**
+  - Menampilkan badge resolusi citra satelit Sentinel-2 & UAV Orthomosaic (`🛰️ Sentinel-2 MultiSpectral (Copernicus) & UAV Orthomosaic (0.2m GSD High-Resolution / 10m Multi-Band)`).
+  - Menambahkan indikator status sinkronisasi backend (`🛡️ Backend Sync 12 Bedeng`).
+  - Menambahkan spinner loading interaktif pada tombol simulasi failover saat request dikirimkan ke backend.
+  - Memperbaiki kartu detail bedeng dan popup peta Leaflet agar menampilkan status sumber data (`LoRa Live Stream` vs `[Est-Simulated] FAO-56`), level risiko AVRI (Aman, Waspada, Kritis, Bahaya), serta telemetri dinamis.
+- **Validasi End-to-End:**
+  - Verifikasi TypeScript `tsc --noEmit` & ESLint `0 error`.
+  - Verifikasi browser agent: ke-12 bedeng ter-render pada peta Leaflet dan tabel, tombol failover berhasil memicu peralihan ke Digital Twin dan memperbarui status bedeng secara real-time.
+
+---
+
+## [2026-10-27] — Standardisasi Integrasi Telemetri & Tren 24 Jam Per Jam (00.00 – 23.00)
+
+### 📈 Integrasi Telemetri & Visualisasi Tren 24 Jam Penuh (`Trend24hChart.tsx`, `page.tsx`, `dashboardMock.ts`, `mock_db.py`, `nodes.py`)
+- **Standardisasi Titik Data 24 Jam Penuh (00.00 – 23.00):**
+  - Mengeliminasi anomali label menit acak (`15.51`, `15.53`, `15.53`) dan rentang yang tidak lengkap pada grafik **Tren 24 Jam (Forecast)**.
+  - Menstandarisasi deret waktu menjadi **24 titik data diskret per jam** dari pukul `00.00` hingga `23.00`.
+- **Resampling & Binning Telemetri Frontend ([`page.tsx`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/frontend/src/app/page.tsx)):**
+  - Memperbarui fungsi `transformTelemetryToTrend` dengan algoritma *hourly bucketing*: incoming payload dari REST API / sensor LoRa dikelompokkan ke dalam slot jam `00.00` – `23.00`. Jika terdapat jam yang terlewat, data diinterpolasi halus dari *baseline diurnal* kelembapan dan suhu tanah.
+- **Penyelarasan Skala & Spacing Sumbu X ECharts ([`Trend24hChart.tsx`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/frontend/src/components/dashboard/Trend24hChart.tsx)):**
+  - Mengonfigurasi `axisLabel.interval` agar menampilkan penanda waktu terdistribusi rapi setiap 3 jam (`00.00`, `03.00`, `06.00`, `09.00`, `12.00`, `15.00`, `18.00`, `21.00`, `23.00`) dengan fitur `hideOverlap: true`.
+  - Mengatur `grid.left: 48` dan `containLabel: false` sehingga label awal `00.00` di ujung kiri grafik tampak utuh tanpa terpotong batas canvas (`)0.00`).
+  - Mengoptimalkan ukuran titik data `symbolSize: 6` agar kurva 24 titik terlihat rapi, modern, dan presisi.
+  - Memperbaiki tooltip interaktif agar menampilkan header waktu yang jelas: `Pukul [XX.00] WIB` beserta indikator warna metrik Kelembapan Tanah (%) dan Suhu Tanah (°C).
+- **Generator Diurnal Biofisika Backend ([`mock_db.py`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/backend/app/services/mock_db.py) & [`nodes.py`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/backend/app/routers/nodes.py)):**
+  - Membuat fungsi `_generate_hourly_24h_telemetry()` yang merefleksikan kurva diurnal realistis lahan jagung tropis (suhu minimum 23.8°C saat subuh 04.00, puncak insolasi surya 35.1°C pada 13.00, kelembapan tanah turun di bawah ambang batas 25% saat terik siang dan pulih pada malam hari).
+  - Memperbarui `record_telemetry` agar pembaruan data telemetri real-time memutakhirkan slot jam terkait tanpa merusak konsistensi 24 jam.
+  - Endpoint `GET /nodes/{node_id}/telemetry?hours=24` kini secara konsisten mengembalikan 24 titik jam penuh (`points_count: 24`).
+- **Verifikasi Browser & Validasi End-to-End:**
+  - Telah diverifikasi via curl dan visual browser agent bahwa grafik Tren 24 Jam menampilkan kurva dari `00.00` sampai `23.00` secara mulus tanpa cacat teks.
+
 ---
 
 ## [2026-10-27] — Implementasi 4 Tingkatan Peringatan Risiko Volatilisasi (Aman, Waspada, Kritis, Bahaya)

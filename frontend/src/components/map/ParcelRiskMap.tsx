@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import { BedengParcel, ActiveLayer, ParcelMapSummary } from '@/types/parcel';
 import { initialParcels, initialMapSummary } from '@/mocks/parcelsMock';
-import { RefreshCw, Radio, Map as MapIcon, LayoutGrid } from 'lucide-react';
+import { getFieldParcels, toggleParcelFailover } from '@/services/api';
+import { RefreshCw, Radio, Map as MapIcon, LayoutGrid, Satellite, ShieldCheck } from 'lucide-react';
 import { SchematicFieldDiagram } from './SchematicFieldDiagram';
 
 // Dynamic import with ssr: false for Leaflet map component
@@ -22,37 +23,145 @@ interface ParcelRiskMapProps {
 
 export const ParcelRiskMap: React.FC<ParcelRiskMapProps> = () => {
   const [parcels, setParcels] = useState<BedengParcel[]>(initialParcels);
+  const [summary, setSummary] = useState<ParcelMapSummary>(initialMapSummary);
   const [selectedId, setSelectedId] = useState<string>('A1');
   const [activeLayer, setActiveLayer] = useState<ActiveLayer>('avri');
   const [mapViewMode, setMapViewMode] = useState<'leaflet' | 'schematic'>('leaflet');
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [isBackendSynced, setIsBackendSynced] = useState<boolean>(false);
+  const [isSyncing, setIsSyncing] = useState<boolean>(false);
 
   const selectedParcel = parcels.find((p) => p.id === selectedId) || parcels[0];
-  const summary: ParcelMapSummary = initialMapSummary;
 
-  // Handler for Digital Twin Failover Simulation
-  const handleToggleFailover = () => {
-    setParcels((prev) =>
-      prev.map((p) => {
-        if (p.id === selectedId) {
-          const isCurrentlySimulated = p.status === 'simulated';
-          const newStatus = isCurrentlySimulated ? 'online' : 'simulated';
-          const newMode = isCurrentlySimulated ? 'LoRa Live Stream' : '[Est-Simulated] FAO-56';
-          const msg = isCurrentlySimulated
-            ? `Node ${p.nodeId} terhubung kembali ke jaringan LoRa.`
-            : `Simulasi Dropout aktif! Digital Twin FAO-56 mengambil alih imputasi data ${p.nodeId}.`;
-          setToastMessage(msg);
-          setTimeout(() => setToastMessage(null), 3500);
+  // Fetch real parcels & high-precision satellite/UAV polygon boundaries from backend
+  useEffect(() => {
+    let isMounted = true;
+    async function loadParcels() {
+      try {
+        const res = await getFieldParcels('BLOK-A');
+        if (res && res.parcels && isMounted) {
+          const mappedParcels: BedengParcel[] = res.parcels.map((p) => ({
+            id: p.id,
+            nodeId: p.node_id,
+            name: p.name,
+            shortName: p.short_name,
+            areaHa: p.area_ha,
+            cropVariety: p.crop_variety,
+            moisturePct: p.moisture_pct,
+            soilTempC: p.soil_temp_c,
+            ph: p.ph,
+            batteryV: p.battery_v,
+            batteryPct: p.battery_pct,
+            loraSignalDbm: p.lora_signal_dbm,
+            avriScore: p.avri_score,
+            avriCategory: p.avri_category,
+            status: p.status,
+            telemetryMode: p.telemetry_mode,
+            prescription: p.prescription,
+            center: p.center,
+            polygon: p.polygon,
+          }));
 
-          return {
-            ...p,
-            status: newStatus,
-            telemetryMode: newMode,
-          };
+          setParcels(mappedParcels);
+          setIsBackendSynced(true);
+
+          if (res.summary) {
+            setSummary({
+              coordinatesText: res.summary.coordinates_text,
+              soilTypeText: res.summary.soil_type_text,
+              gatewayDistanceKm: res.summary.gateway_distance_km,
+              totalAreaHa: res.summary.total_area_ha,
+              centerCoordinates: res.summary.center_coordinates,
+              gatewayCoordinates: res.summary.gateway_coordinates,
+              outerBoundary: res.summary.outer_boundary,
+              surroundingParcels: res.summary.surrounding_parcels.map((sp) => ({
+                id: sp.id,
+                name: sp.name,
+                areaHa: sp.area_ha,
+                center: sp.center,
+                polygon: sp.polygon,
+              })),
+              satelliteMetadata: res.summary.satellite_metadata
+                ? {
+                    source: res.summary.satellite_metadata.source,
+                    resolution: res.summary.satellite_metadata.resolution,
+                    crs: res.summary.satellite_metadata.crs,
+                    lastCapture: res.summary.satellite_metadata.last_capture,
+                    ndviMean: res.summary.satellite_metadata.ndvi_mean,
+                    ndwiMean: res.summary.satellite_metadata.ndwi_mean,
+                    cloudCoverPct: res.summary.satellite_metadata.cloud_cover_pct,
+                    spectralBands: res.summary.satellite_metadata.spectral_bands,
+                  }
+                : undefined,
+            });
+          }
         }
-        return p;
-      })
-    );
+      } catch (err) {
+        console.warn('Backend parcels fetch failed, using local mock fallback:', err);
+      }
+    }
+    loadParcels();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  // Handler for Digital Twin Failover Simulation (calls backend API & updates state)
+  const handleToggleFailover = async () => {
+    const currentParcel = parcels.find((p) => p.id === selectedId);
+    const willBeSimulated = currentParcel?.status !== 'simulated';
+    setIsSyncing(true);
+
+    try {
+      const updated = await toggleParcelFailover('BLOK-A', selectedId, willBeSimulated);
+      if (updated) {
+        setParcels((prev) =>
+          prev.map((p) =>
+            p.id === selectedId
+              ? {
+                  ...p,
+                  status: updated.status,
+                  telemetryMode: updated.telemetry_mode,
+                }
+              : p
+          )
+        );
+      } else {
+        // Fallback local update
+        setParcels((prev) =>
+          prev.map((p) =>
+            p.id === selectedId
+              ? {
+                  ...p,
+                  status: willBeSimulated ? 'simulated' : 'online',
+                  telemetryMode: willBeSimulated ? '[Est-Simulated] FAO-56' : 'LoRa Live Stream',
+                }
+              : p
+          )
+        );
+      }
+    } catch {
+      // Local fallback
+      setParcels((prev) =>
+        prev.map((p) =>
+          p.id === selectedId
+            ? {
+                ...p,
+                status: willBeSimulated ? 'simulated' : 'online',
+                telemetryMode: willBeSimulated ? '[Est-Simulated] FAO-56' : 'LoRa Live Stream',
+              }
+            : p
+        )
+      );
+    } finally {
+      setIsSyncing(false);
+    }
+
+    const msg = willBeSimulated
+      ? `Simulasi Dropout aktif! Digital Twin FAO-56 mengambil alih imputasi data ${currentParcel?.nodeId || selectedId}.`
+      : `Node ${currentParcel?.nodeId || selectedId} terhubung kembali ke jaringan LoRa.`;
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 3500);
   };
 
   return (
@@ -108,10 +217,24 @@ export const ParcelRiskMap: React.FC<ParcelRiskMapProps> = () => {
         {/* Top Info inside Map Canvas */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-2xs sm:text-xs text-slate-600 font-medium pb-4 border-b border-[#EADFC7]/60 mb-5">
           <div>
-            <span className="font-semibold text-slate-800">Koordinat Hamparan:</span> {summary.coordinatesText} · {summary.soilTypeText}
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="font-semibold text-slate-800">Koordinat Hamparan:</span> {summary.coordinatesText} · {summary.soilTypeText}
+              {summary.satelliteMetadata && (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-100/90 text-blue-900 border border-blue-300/80 text-3xs font-bold">
+                  <Satellite className="w-2.5 h-2.5 text-blue-600" />
+                  {summary.satelliteMetadata.source} ({summary.satelliteMetadata.resolution})
+                </span>
+              )}
+              {isBackendSynced && (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 text-3xs font-semibold">
+                  <ShieldCheck className="w-2.5 h-2.5 text-emerald-600" />
+                  Backend Sync 12 Bedeng
+                </span>
+              )}
+            </div>
             <div className="flex items-center gap-1.5 text-slate-800 font-semibold mt-1">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span>Gateway Basecamp Aktif ({summary.gatewayDistanceKm.toString().replace('.', ',')} km)</span>
+              <span>Gateway Basecamp Aktif ({summary.gatewayDistanceKm.toString().replace('.', ',')} km) · {parcels.length} Bedeng Terintegrasi</span>
             </div>
           </div>
 
@@ -238,13 +361,16 @@ export const ParcelRiskMap: React.FC<ParcelRiskMapProps> = () => {
             {/* Action: Failover Simulation Button */}
             <button
               onClick={handleToggleFailover}
-              className="py-2 px-3.5 rounded-xl border border-amber-600/60 bg-amber-50/60 hover:bg-amber-100 text-amber-900 font-bold text-xs transition-all flex items-center gap-2 shadow-2xs active:scale-[0.98]"
+              disabled={isSyncing}
+              className="py-2 px-3.5 rounded-xl border border-amber-600/60 bg-amber-50/60 hover:bg-amber-100 text-amber-900 font-bold text-xs transition-all flex items-center gap-2 shadow-2xs active:scale-[0.98] disabled:opacity-60"
             >
-              <RefreshCw className="w-3.5 h-3.5 text-amber-700" />
+              <RefreshCw className={`w-3.5 h-3.5 text-amber-700 ${isSyncing ? 'animate-spin' : ''}`} />
               <span>
-                {selectedParcel.status === 'simulated'
-                  ? 'Pulihkan Koneksi Node Fisik'
-                  : 'Simulasikan Node Putus (Uji Digital Twin)'}
+                {isSyncing
+                  ? 'Menyinkronkan ke Backend...'
+                  : selectedParcel.status === 'simulated'
+                  ? 'Pulihkan Koneksi Node Fisik (LoRa)'
+                  : 'Simulasikan Node Putus (Uji Digital Twin FAO-56)'}
               </span>
             </button>
           </div>

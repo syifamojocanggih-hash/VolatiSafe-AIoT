@@ -13,6 +13,19 @@ from app.schemas.fields import (
     FarmerActionResponseDTO
 )
 from app.schemas.agronomy import CropCycleResponseDTO
+from app.schemas.parcels import (
+    BedengParcelDTO,
+    SurroundingParcelDTO,
+    ParcelMapSummaryDTO,
+    SatelliteMetadataDTO,
+    FieldParcelsResponseDTO
+)
+from app.services.parcels_data import (
+    BLURI_OUTER_BOUNDARY,
+    BLURI_SURROUNDING_PARCELS,
+    get_initial_12_bedeng_parcels,
+    generate_geojson_feature_collection
+)
 
 class MockDB:
     """
@@ -25,6 +38,7 @@ class MockDB:
         self._telemetry_series: Dict[str, List[TelemetryPointDTO]] = {}
         self._fields: Dict[str, Dict[str, Any]] = {}
         self._crop_cycles: Dict[str, CropCycleResponseDTO] = {}
+        self._bedeng_parcels: Dict[str, List[BedengParcelDTO]] = {}
         self._seed_data()
         
     def _seed_data(self):
@@ -48,17 +62,8 @@ class MockDB:
             status="online"
         )
         
-        # 2. Historical 24h Telemetry for VS-A1-003 (MOCK_DATA.md §2)
-        self._telemetry_series["VS-A1-003"] = [
-            TelemetryPointDTO(timestamp="2026-10-24T00:00:00Z", moisture_pct=25.1, soil_temp_c=26.2, ph=7.81, battery_voltage=3.90, is_predicted=False),
-            TelemetryPointDTO(timestamp="2026-10-24T03:00:00Z", moisture_pct=24.8, soil_temp_c=25.4, ph=7.81, battery_voltage=3.89, is_predicted=False),
-            TelemetryPointDTO(timestamp="2026-10-24T06:00:00Z", moisture_pct=24.5, soil_temp_c=26.8, ph=7.82, battery_voltage=3.89, is_predicted=False),
-            TelemetryPointDTO(timestamp="2026-10-24T09:00:00Z", moisture_pct=23.7, soil_temp_c=31.0, ph=7.82, battery_voltage=3.92, is_predicted=False),
-            TelemetryPointDTO(timestamp="2026-10-24T12:00:00Z", moisture_pct=22.8, soil_temp_c=34.6, ph=7.83, battery_voltage=3.94, is_predicted=False),
-            TelemetryPointDTO(timestamp="2026-10-24T14:00:00Z", moisture_pct=22.5, soil_temp_c=34.8, ph=7.83, battery_voltage=3.91, is_predicted=False),
-            TelemetryPointDTO(timestamp="2026-10-24T15:00:00Z", moisture_pct=22.4, soil_temp_c=34.3, ph=7.83, battery_voltage=3.88, is_predicted=False),
-            TelemetryPointDTO(timestamp="2026-10-24T16:00:00Z", moisture_pct=22.4, soil_temp_c=34.1, ph=7.83, battery_voltage=3.87, is_predicted=False),
-        ]
+        # 2. Historical 24h Hourly Telemetry (00:00 - 23:00) for VS-A1-003 and others
+        self._telemetry_series["VS-A1-003"] = self._generate_hourly_24h_telemetry("2026-10-24")
         
         # 3. Master Fields
         self._fields["BLOK-A"] = {
@@ -117,6 +122,9 @@ class MockDB:
             ]
         }
 
+        # 4. Master 12 Bedeng Cadastral Parcels with UAV & Sentinel-2 Polygons
+        self._bedeng_parcels["BLOK-A"] = get_initial_12_bedeng_parcels()
+
     def list_nodes(self, field_id: Optional[str] = None) -> List[NodeDTO]:
         if field_id:
             return [n for n in self._nodes.values() if n.field_id == field_id]
@@ -125,9 +133,53 @@ class MockDB:
     def get_node(self, node_id: str) -> Optional[NodeDTO]:
         return self._nodes.get(node_id)
 
+    def _generate_hourly_24h_telemetry(self, base_date: str = "2026-10-24") -> List[TelemetryPointDTO]:
+        """
+        Generates 24 discrete hourly points (00:00 to 23:00) with realistic diurnal
+        biophysical soil dynamics (FAO-56 evapotranspiration & Arrhenius thermal lag).
+        """
+        hourly_profiles = [
+            # (hour, moisture_pct, soil_temp_c, ph, battery_v)
+            (0, 26.5, 25.2, 7.81, 3.90),
+            (1, 26.3, 24.8, 7.81, 3.89),
+            (2, 26.0, 24.4, 7.81, 3.89),
+            (3, 25.8, 24.0, 7.81, 3.89),
+            (4, 25.6, 23.8, 7.81, 3.88),
+            (5, 25.5, 24.1, 7.81, 3.88),
+            (6, 25.2, 25.0, 7.82, 3.89),
+            (7, 24.8, 26.8, 7.82, 3.90),
+            (8, 24.2, 28.9, 7.82, 3.91),
+            (9, 23.7, 31.0, 7.82, 3.92),
+            (10, 23.2, 32.8, 7.83, 3.93),
+            (11, 22.9, 34.0, 7.83, 3.94),
+            (12, 22.8, 34.6, 7.83, 3.94),
+            (13, 22.4, 35.1, 7.83, 3.93),
+            (14, 22.5, 34.8, 7.83, 3.91),
+            (15, 22.4, 34.3, 7.83, 3.88),
+            (16, 22.8, 33.2, 7.83, 3.87),
+            (17, 23.4, 30.8, 7.82, 3.87),
+            (18, 24.1, 28.5, 7.82, 3.88),
+            (19, 24.9, 27.2, 7.82, 3.88),
+            (20, 25.4, 26.5, 7.81, 3.89),
+            (21, 25.8, 26.0, 7.81, 3.89),
+            (22, 26.1, 25.6, 7.81, 3.90),
+            (23, 26.3, 25.4, 7.81, 3.90),
+        ]
+        return [
+            TelemetryPointDTO(
+                timestamp=f"{base_date}T{h:02d}:00:00Z",
+                moisture_pct=m,
+                soil_temp_c=t,
+                ph=ph,
+                battery_voltage=bv,
+                is_predicted=False
+            )
+            for h, m, t, ph, bv in hourly_profiles
+        ]
+
     def get_node_telemetry(self, node_id: str, hours: int = 24) -> Optional[NodeTelemetrySeriesDTO]:
         if node_id not in self._telemetry_series:
-            return None
+            self._telemetry_series[node_id] = self._generate_hourly_24h_telemetry()
         series = self._telemetry_series[node_id]
         return NodeTelemetrySeriesDTO(
             node_id=node_id,
@@ -238,8 +290,24 @@ class MockDB:
 
     def record_telemetry(self, node_id: str, point: TelemetryPointDTO):
         if node_id not in self._telemetry_series:
-            self._telemetry_series[node_id] = []
-        self._telemetry_series[node_id].append(point)
+            self._telemetry_series[node_id] = self._generate_hourly_24h_telemetry()
+        
+        # Keep 24-hour hourly structure clean: update matching hour slot
+        try:
+            pt_dt = datetime.fromisoformat(point.timestamp.replace("Z", "+00:00"))
+            hour = pt_dt.hour
+            updated = False
+            for i, p in enumerate(self._telemetry_series[node_id]):
+                p_dt = datetime.fromisoformat(p.timestamp.replace("Z", "+00:00"))
+                if p_dt.hour == hour:
+                    self._telemetry_series[node_id][i] = point
+                    updated = True
+                    break
+            if not updated and len(self._telemetry_series[node_id]) < 24:
+                self._telemetry_series[node_id].append(point)
+        except Exception:
+            pass
+
         # Update node status
         if node_id in self._nodes:
             self._nodes[node_id].last_seen = point.timestamp
@@ -349,4 +417,69 @@ class MockDB:
             "recent_history": field.get("action_history", [])[:5]
         }
 
+    def get_field_parcels(self, field_id: str) -> Optional[FieldParcelsResponseDTO]:
+        """
+        Returns full detailed 12 bedeng cadastral parcels, surrounding mosaic parcels,
+        and outer field boundaries with GeoJSON FeatureCollection.
+        """
+        parcels = self._bedeng_parcels.get(field_id)
+        if not parcels:
+            parcels = get_initial_12_bedeng_parcels()
+            self._bedeng_parcels[field_id] = parcels
+
+        summary = ParcelMapSummaryDTO(
+            coordinates_text='6°54\'58"S 112°25\'20"E',
+            soil_type_text='Hamparan Sawah Tegal Jagung Bluri, Solokuro (Aluvial Lempung Kapur pH 7.8)',
+            gateway_distance_km=0.08,
+            total_area_ha=0.96,
+            center_coordinates=[-6.916213, 112.422270],
+            gateway_coordinates=[-6.915650, 112.422720],
+            outer_boundary=BLURI_OUTER_BOUNDARY,
+            surrounding_parcels=BLURI_SURROUNDING_PARCELS,
+            satellite_metadata=SatelliteMetadataDTO(
+                source="Sentinel-2 MultiSpectral (Copernicus) & UAV Orthomosaic",
+                resolution="0.2m GSD High-Resolution / 10m Multi-Band",
+                crs="EPSG:4326 (WGS84)",
+                last_capture="2026-10-24T08:45:00Z",
+                ndvi_mean=0.74,
+                ndwi_mean=0.31,
+                cloud_cover_pct=0.0
+            )
+        )
+
+        geojson = generate_geojson_feature_collection(parcels)
+
+        return FieldParcelsResponseDTO(
+            field_id=field_id,
+            summary=summary,
+            parcels=parcels,
+            geojson=geojson
+        )
+
+    def toggle_parcel_failover(
+        self, field_id: str, parcel_id: str, is_dropout: Optional[bool] = None
+    ) -> Optional[BedengParcelDTO]:
+        """
+        Simulates Node Dropout & triggers FAO-56 Digital Twin failover on backend.
+        """
+        if field_id not in self._bedeng_parcels:
+            self._bedeng_parcels[field_id] = get_initial_12_bedeng_parcels()
+
+        target: Optional[BedengParcelDTO] = None
+        for i, p in enumerate(self._bedeng_parcels[field_id]):
+            if p.id.lower() == parcel_id.lower() or p.node_id.lower() == parcel_id.lower():
+                if is_dropout is not None:
+                    new_status = "simulated" if is_dropout else "online"
+                else:
+                    new_status = "online" if p.status == "simulated" else "simulated"
+
+                new_mode = "[Est-Simulated] FAO-56" if new_status == "simulated" else "LoRa Live Stream"
+                updated = p.model_copy(update={"status": new_status, "telemetry_mode": new_mode})
+                self._bedeng_parcels[field_id][i] = updated
+                target = updated
+                break
+
+        return target
+
 db = MockDB()
+

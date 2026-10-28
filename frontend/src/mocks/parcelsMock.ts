@@ -1,497 +1,171 @@
 import { BedengParcel, ParcelMapSummary, SurroundingParcel } from '@/types/parcel';
+
 export const bluriOuterBoundary: [number, number][] = [
   [
-    -6.89931,
-    112.43699
+    -6.915584,
+    112.421808
   ],
   [
-    -6.898615,
-    112.436486
+    -6.915584,
+    112.422699
   ],
   [
-    -6.898114,
-    112.43591
+    -6.915989,
+    112.422688
   ],
   [
-    -6.897874,
-    112.435168
+    -6.916399,
+    112.422634
   ],
   [
-    -6.89811,
-    112.43439
+    -6.916841,
+    112.422742
   ],
   [
-    -6.89813,
-    112.433766
-  ],
-  [
-    -6.897964,
-    112.43287
-  ],
-  [
-    -6.898571,
-    112.431925
-  ],
-  [
-    -6.89931,
-    112.43179
-  ],
-  [
-    -6.899801,
-    112.432294
-  ],
-  [
-    -6.900306,
-    112.43287
-  ],
-  [
-    -6.900738,
-    112.433612
-  ],
-  [
-    -6.90121,
-    112.43439
-  ],
-  [
-    -6.900994,
-    112.435014
-  ],
-  [
-    -6.900156,
-    112.43591
-  ],
-  [
-    -6.899757,
-    112.436855
+    -6.916841,
+    112.421808
   ]
 ];
+
 export const bluriSurroundingParcels: SurroundingParcel[] = [
   {
     "id": "C01",
-    "name": "Persil Tegal Bluri Kulon 01 (Barat Laut)",
-    "areaHa": 0.28,
+    "name": "Lahan Sawah Tegal Bluri Utara (Blok 1B)",
+    "areaHa": 0.45,
     "center": [
-      -6.89817,
-      112.433316
+      -6.91535,
+      112.42225
     ],
     "polygon": [
       [
-        -6.898487,
-        112.433394
+        -6.91515,
+        112.421808
       ],
       [
-        -6.89829,
-        112.433749
+        -6.91515,
+        112.422742
       ],
       [
-        -6.898123,
-        112.433728
+        -6.915584,
+        112.422699
       ],
       [
-        -6.897964,
-        112.43287
-      ],
-      [
-        -6.897985,
-        112.432837
+        -6.915584,
+        112.421808
       ]
     ]
   },
   {
     "id": "C02",
-    "name": "Persil Tegal Watutelo Lor 02 (Utara)",
-    "areaHa": 0.18,
+    "name": "Lahan Pertanian Barat (Arah Balai Desa Bluri)",
+    "areaHa": 0.62,
     "center": [
-      -6.898191,
-      112.434094
+      -6.9161,
+      112.4214
     ],
     "polygon": [
       [
-        -6.89829,
-        112.433749
+        -6.915584,
+        112.421
       ],
       [
-        -6.898383,
-        112.434061
+        -6.915584,
+        112.421808
       ],
       [
-        -6.898221,
-        112.434478
+        -6.916841,
+        112.421808
       ],
       [
-        -6.898081,
-        112.434487
-      ],
-      [
-        -6.89811,
-        112.43439
-      ],
-      [
-        -6.89813,
-        112.433766
-      ],
-      [
-        -6.898123,
-        112.433728
+        -6.916841,
+        112.421
       ]
     ]
   },
   {
     "id": "C03",
-    "name": "Persil Tegal Gumuk Karang 03 (Utara-Timur)",
-    "areaHa": 0.4,
+    "name": "Lahan Sawah Tegal Bluri Kidul (Arah Banyubang)",
+    "areaHa": 0.58,
     "center": [
-      -6.898149,
-      112.434945
+      -6.91715,
+      112.42225
     ],
     "polygon": [
       [
-        -6.898221,
-        112.434478
+        -6.916841,
+        112.421808
       ],
       [
-        -6.898445,
-        112.434901
+        -6.916841,
+        112.422742
       ],
       [
-        -6.898336,
-        112.435264
+        -6.91745,
+        112.42285
       ],
       [
-        -6.89794,
-        112.435373
-      ],
-      [
-        -6.897874,
-        112.435168
-      ],
-      [
-        -6.898081,
-        112.434487
+        -6.91745,
+        112.421808
       ]
     ]
   },
   {
     "id": "C04",
-    "name": "Persil Tegal Krajan Wetan 04 (Timur Laut)",
-    "areaHa": 0.45,
+    "name": "Persil Sawah Timur (Seberang Jalan Usaha Tani)",
+    "areaHa": 0.52,
     "center": [
-      -6.898279,
-      112.435678
+      -6.9161,
+      112.4231
     ],
     "polygon": [
       [
-        -6.898336,
-        112.435264
+        -6.915521,
+        112.42278
       ],
       [
-        -6.898648,
-        112.435654
+        -6.915521,
+        112.4234
       ],
       [
-        -6.898359,
-        112.436191
+        -6.916884,
+        112.4234
       ],
       [
-        -6.898114,
-        112.43591
-      ],
-      [
-        -6.89794,
-        112.435373
-      ]
-    ]
-  },
-  {
-    "id": "C05",
-    "name": "Persil Kebun Jagung Bluri Asri 05 (Timur)",
-    "areaHa": 0.95,
-    "center": [
-      -6.898913,
-      112.436333
-    ],
-    "polygon": [
-      [
-        -6.899383,
-        112.436968
-      ],
-      [
-        -6.89931,
-        112.43699
-      ],
-      [
-        -6.898615,
-        112.436486
-      ],
-      [
-        -6.898359,
-        112.436191
-      ],
-      [
-        -6.898648,
-        112.435654
-      ],
-      [
-        -6.89916,
-        112.435708
-      ]
-    ]
-  },
-  {
-    "id": "C06",
-    "name": "Persil Lereng Kapur Wetan 06 (Tenggara)",
-    "areaHa": 1.25,
-    "center": [
-      -6.899625,
-      112.436049
-    ],
-    "polygon": [
-      [
-        -6.899383,
-        112.436968
-      ],
-      [
-        -6.89916,
-        112.435708
-      ],
-      [
-        -6.899454,
-        112.435432
-      ],
-      [
-        -6.899841,
-        112.435416
-      ],
-      [
-        -6.900154,
-        112.435916
-      ],
-      [
-        -6.899757,
-        112.436855
-      ]
-    ]
-  },
-  {
-    "id": "C07",
-    "name": "Persil Terasering Payaman Kidul 07 (Selatan-Tenggara)",
-    "areaHa": 0.6,
-    "center": [
-      -6.900244,
-      112.435469
-    ],
-    "polygon": [
-      [
-        -6.899841,
-        112.435416
-      ],
-      [
-        -6.900166,
-        112.43499
-      ],
-      [
-        -6.900902,
-        112.435113
-      ],
-      [
-        -6.900156,
-        112.43591
-      ],
-      [
-        -6.900154,
-        112.435916
-      ]
-    ]
-  },
-  {
-    "id": "C08",
-    "name": "Persil Tegal Sentul Kidul 08 (Selatan)",
-    "areaHa": 1.13,
-    "center": [
-      -6.900631,
-      112.4346
-    ],
-    "polygon": [
-      [
-        -6.900166,
-        112.43499
-      ],
-      [
-        -6.900024,
-        112.434422
-      ],
-      [
-        -6.900123,
-        112.434234
-      ],
-      [
-        -6.900997,
-        112.434039
-      ],
-      [
-        -6.90121,
-        112.43439
-      ],
-      [
-        -6.900994,
-        112.435014
-      ],
-      [
-        -6.900902,
-        112.435113
-      ]
-    ]
-  },
-  {
-    "id": "C09",
-    "name": "Persil Tegal Irigasi Sumur 09 (Barat Daya)",
-    "areaHa": 0.92,
-    "center": [
-      -6.900424,
-      112.433696
-    ],
-    "polygon": [
-      [
-        -6.900123,
-        112.434234
-      ],
-      [
-        -6.899808,
-        112.433469
-      ],
-      [
-        -6.900455,
-        112.433127
-      ],
-      [
-        -6.900738,
-        112.433612
-      ],
-      [
-        -6.900997,
-        112.434039
-      ]
-    ]
-  },
-  {
-    "id": "C10",
-    "name": "Persil Ladang Jagung Bluri Kidul 10 (Barat Daya Atas)",
-    "areaHa": 0.84,
-    "center": [
-      -6.89992,
-      112.432883
-    ],
-    "polygon": [
-      [
-        -6.899808,
-        112.433469
-      ],
-      [
-        -6.899459,
-        112.433353
-      ],
-      [
-        -6.899693,
-        112.432183
-      ],
-      [
-        -6.899801,
-        112.432294
-      ],
-      [
-        -6.900306,
-        112.43287
-      ],
-      [
-        -6.900455,
-        112.433127
-      ]
-    ]
-  },
-  {
-    "id": "C11",
-    "name": "Persil Tegal Karangrejo Kulon 11 (Barat Tengah)",
-    "areaHa": 1.39,
-    "center": [
-      -6.899238,
-      112.432637
-    ],
-    "polygon": [
-      [
-        -6.899459,
-        112.433353
-      ],
-      [
-        -6.899399,
-        112.433369
-      ],
-      [
-        -6.898913,
-        112.433214
-      ],
-      [
-        -6.898652,
-        112.43191
-      ],
-      [
-        -6.89931,
-        112.43179
-      ],
-      [
-        -6.899693,
-        112.432183
-      ]
-    ]
-  },
-  {
-    "id": "C12",
-    "name": "Persil Tegal Jurang Bluri 12 (Barat Laut Bawah)",
-    "areaHa": 0.92,
-    "center": [
-      -6.898522,
-      112.432656
-    ],
-    "polygon": [
-      [
-        -6.898913,
-        112.433214
-      ],
-      [
-        -6.898487,
-        112.433394
-      ],
-      [
-        -6.897985,
-        112.432837
-      ],
-      [
-        -6.898571,
-        112.431925
-      ],
-      [
-        -6.898652,
-        112.43191
+        -6.916884,
+        112.42295
       ]
     ]
   }
 ];
+
 export const initialMapSummary: ParcelMapSummary = {
-  coordinatesText: '6°53\'58"S 112°26\'04"E',
-  soilTypeText: 'Tegal Kapur Bluri, Solokuro (Alkalin pH 7.8)',
-  gatewayDistanceKm: 0.35,
-  totalAreaHa: 13.8,
-  centerCoordinates: [-6.89931, 112.43439],
-  gatewayCoordinates: [-6.89790, 112.43460],
+  coordinatesText: '6??54\'58"S 112??25\'20"E',
+  soilTypeText: 'Hamparan Sawah Tegal Jagung Bluri, Solokuro (Aluvial Lempung Kapur pH 7.8)',
+  gatewayDistanceKm: 0.08,
+  totalAreaHa: 0.96,
+  centerCoordinates: [-6.916213, 112.422270],
+  gatewayCoordinates: [-6.915650, 112.422720],
   outerBoundary: bluriOuterBoundary,
   surroundingParcels: bluriSurroundingParcels,
+  satelliteMetadata: {
+    source: 'Sentinel-2 MultiSpectral (Copernicus) & UAV Orthomosaic',
+    resolution: '0.2m GSD High-Resolution / 10m Multi-Band',
+    crs: 'EPSG:4326 (WGS84)',
+    lastCapture: '2026-10-24T08:45:00Z',
+    ndviMean: 0.74,
+    ndwiMean: 0.31,
+    cloudCoverPct: 0.0,
+    spectralBands: ['B2 (Blue)', 'B3 (Green)', 'B4 (Red)', 'B8 (NIR)', 'B11 (SWIR)'],
+  },
 };
+
 export const initialParcels: BedengParcel[] = [
   {
     "id": "A1",
     "nodeId": "VS-A1-001",
     "name": "Blok A1 \u00b7 Tegal Bluri Lor (Utara-Barat)",
-    "shortName": "A1 \u00b7 Tegal Bluri Lor",
-    "areaHa": 0.9,
+    "shortName": "A1 \u00b7 Bluri Lor Barat",
+    "areaHa": 0.08,
     "cropVariety": "Bisi-18",
     "moisturePct": 22.4,
     "soilTempC": 34.1,
@@ -503,235 +177,478 @@ export const initialParcels: BedengParcel[] = [
     "avriCategory": "kritis",
     "status": "online",
     "telemetryMode": "LoRa Live Stream",
-    "prescription": "Tunda! Tunggu hujan atau lakukan penyiraman pra-aplikasi 2 mm sebelum menabur Urea.",
+    "prescription": "Tunda! Suhu tanah terik (34,1\u00b0C) dan kelembapan rendah (22,4%). Tunggu hujan atau siram sebelum pemupukan.",
     "center": [
-      -6.898764,
-      112.43366
+      -6.915786,
+      112.421932
     ],
     "polygon": [
       [
-        -6.898913,
-        112.433214
+        -6.9156,
+        112.42183
       ],
       [
-        -6.899399,
-        112.433369
+        -6.9156,
+        112.422034
       ],
       [
-        -6.899111,
-        112.434173
+        -6.915973,
+        112.422034
       ],
       [
-        -6.898383,
-        112.434061
-      ],
-      [
-        -6.89829,
-        112.433749
-      ],
-      [
-        -6.898487,
-        112.433394
+        -6.915973,
+        112.42183
       ]
     ]
   },
   {
     "id": "A2",
-    "nodeId": "VS-A2-002",
-    "name": "Blok A2 \u00b7 Tegal Bluri Tengah",
-    "shortName": "A2 \u00b7 Bluri Tengah",
-    "areaHa": 0.77,
-    "cropVariety": "Bisi-18",
-    "moisturePct": 36.5,
-    "soilTempC": 28.4,
-    "ph": 6.95,
-    "batteryV": 4.05,
-    "batteryPct": 92,
+    "nodeId": "VS-A1-002",
+    "name": "Blok A2 \u00b7 Tegal Bluri Lor (Utara-Tengah 1)",
+    "shortName": "A2 \u00b7 Bluri Lor Tengah",
+    "areaHa": 0.08,
+    "cropVariety": "NK-212",
+    "moisturePct": 36.8,
+    "soilTempC": 26.4,
+    "ph": 7.1,
+    "batteryV": 4.01,
+    "batteryPct": 94,
     "loraSignalDbm": -71,
-    "avriScore": 19,
+    "avriScore": 18,
     "avriCategory": "aman",
     "status": "online",
     "telemetryMode": "LoRa Live Stream",
-    "prescription": "Kondisi optimal. Jendela pemupukan aman terbuka luas selama 4 jam ke depan.",
+    "prescription": "Aman dipupuk! Suhu tanah sejuk (26,4\u00b0C) dan kelembapan prima (36,8%). Manfaatkan jendela waktu sekarang.",
     "center": [
-      -6.898757,
-      112.434475
+      -6.915786,
+      112.422141
     ],
     "polygon": [
       [
-        -6.89926,
-        112.43447
+        -6.9156,
+        112.422034
       ],
       [
-        -6.89912,
-        112.434766
+        -6.9156,
+        112.422248
       ],
       [
-        -6.898445,
-        112.434901
+        -6.915973,
+        112.422248
       ],
       [
-        -6.898221,
-        112.434478
-      ],
-      [
-        -6.898383,
-        112.434061
-      ],
-      [
-        -6.899111,
-        112.434173
+        -6.915973,
+        112.422034
       ]
     ]
   },
   {
     "id": "A3",
-    "nodeId": "VS-A3-003",
-    "name": "Blok A3 \u00b7 Lereng Kapur Bluri Wetan (Timur)",
-    "shortName": "A3 \u00b7 Lereng Bluri Wetan",
-    "areaHa": 0.89,
-    "cropVariety": "NK-212",
-    "moisturePct": 19.8,
-    "soilTempC": 35.2,
-    "ph": 7.95,
-    "batteryV": 3.88,
+    "nodeId": "VS-A1-003",
+    "name": "Blok A3 \u00b7 Tegal Bluri Lor (Utara-Tengah 2)",
+    "shortName": "A3 \u00b7 Bluri Lor Tengah",
+    "areaHa": 0.08,
+    "cropVariety": "Pioneer P35",
+    "moisturePct": 19.2,
+    "soilTempC": 36.0,
+    "ph": 7.89,
+    "batteryV": 3.85,
     "batteryPct": 78,
     "loraSignalDbm": -82,
-    "avriScore": 81,
+    "avriScore": 83,
     "avriCategory": "bahaya",
     "status": "online",
     "telemetryMode": "LoRa Live Stream",
-    "prescription": "BAHAYA PENGUAPAN! Kehilangan nitrogen diperkirakan >80%. Wajib tunda penaburan.",
+    "prescription": "BAHAYA! Risiko penguapan amonia ekstrem (>80%). Jangan lakukan pemupukan permukaan saat ini.",
     "center": [
-      -6.898861,
-      112.435288
+      -6.915786,
+      112.422355
     ],
     "polygon": [
       [
-        -6.89916,
-        112.435708
+        -6.9156,
+        112.422248
       ],
       [
-        -6.898648,
-        112.435654
+        -6.9156,
+        112.422463
       ],
       [
-        -6.898336,
-        112.435264
+        -6.915973,
+        112.422463
       ],
       [
-        -6.898445,
-        112.434901
+        -6.915973,
+        112.422248
+      ]
+    ]
+  },
+  {
+    "id": "A4",
+    "nodeId": "VS-A1-004",
+    "name": "Blok A4 \u00b7 Tegal Bluri Lor (Utara-Timur Jalan)",
+    "shortName": "A4 \u00b7 Bluri Lor Timur",
+    "areaHa": 0.08,
+    "cropVariety": "Bisi-2",
+    "moisturePct": 28.1,
+    "soilTempC": 29.8,
+    "ph": 7.42,
+    "batteryV": 3.96,
+    "batteryPct": 88,
+    "loraSignalDbm": -74,
+    "avriScore": 46,
+    "avriCategory": "waspada",
+    "status": "online",
+    "telemetryMode": "LoRa Live Stream",
+    "prescription": "Waspada! Gunakan metode benam (tugal kedalaman 5-7 cm) bila terpaksa memupuk hari ini.",
+    "center": [
+      -6.915786,
+      112.422566
+    ],
+    "polygon": [
+      [
+        -6.9156,
+        112.422463
       ],
       [
-        -6.89912,
-        112.434766
+        -6.9156,
+        112.422677
       ],
       [
-        -6.899454,
-        112.435432
+        -6.915973,
+        112.422661
+      ],
+      [
+        -6.915973,
+        112.422463
       ]
     ]
   },
   {
     "id": "B1",
-    "nodeId": "VS-B1-004",
-    "name": "Blok B1 \u00b7 Tegal Irigasi Bluri Kidul (Barat Daya)",
-    "shortName": "B1 \u00b7 Irigasi Bluri Kidul",
-    "areaHa": 0.95,
-    "cropVariety": "Pioneer P27",
-    "moisturePct": 41.2,
-    "soilTempC": 26.8,
-    "ph": 6.8,
-    "batteryV": 4.1,
-    "batteryPct": 95,
-    "loraSignalDbm": -68,
-    "avriScore": 12,
+    "nodeId": "VS-B1-001",
+    "name": "Blok B1 \u00b7 Tegal Bluri Madya (Tengah-Barat)",
+    "shortName": "B1 \u00b7 Bluri Madya Barat",
+    "areaHa": 0.08,
+    "cropVariety": "Bisi-18",
+    "moisturePct": 34.2,
+    "soilTempC": 27.1,
+    "ph": 7.15,
+    "batteryV": 3.9,
+    "batteryPct": 82,
+    "loraSignalDbm": -78,
+    "avriScore": 24,
     "avriCategory": "aman",
     "status": "online",
     "telemetryMode": "LoRa Live Stream",
-    "prescription": "Kondisi sangat aman. Larutan Urea segera terikat ke zona perakaran tanpa penguapan amonia.",
+    "prescription": "Kondisi aman. Kelembapan tanah cukup untuk hidrolisis perlahan tanpa penguapan amonia masif.",
     "center": [
-      -6.899598,
-      112.433927
+      -6.916186,
+      112.421932
     ],
     "polygon": [
       [
-        -6.899459,
-        112.433353
+        -6.915973,
+        112.42183
       ],
       [
-        -6.899808,
-        112.433469
+        -6.915973,
+        112.422034
       ],
       [
-        -6.900123,
-        112.434234
+        -6.916399,
+        112.422034
       ],
       [
-        -6.900024,
-        112.434422
-      ],
-      [
-        -6.89926,
-        112.43447
-      ],
-      [
-        -6.899111,
-        112.434173
-      ],
-      [
-        -6.899399,
-        112.433369
+        -6.916399,
+        112.42183
       ]
     ]
   },
   {
     "id": "B2",
-    "nodeId": "VS-B2-005",
-    "name": "Blok B2 \u00b7 Terasering Bluri Payaman (Tenggara)",
-    "shortName": "B2 \u00b7 Terasering Bluri Payaman",
-    "areaHa": 0.96,
-    "cropVariety": "Bisi-18",
-    "moisturePct": 28.5,
-    "soilTempC": 30.2,
-    "ph": 7.45,
-    "batteryV": 3.7,
-    "batteryPct": 45,
-    "loraSignalDbm": -95,
-    "avriScore": 48,
+    "nodeId": "VS-B1-002",
+    "name": "Blok B2 \u00b7 Tegal Bluri Madya (Tengah-Inti)",
+    "shortName": "B2 \u00b7 Bluri Madya Inti",
+    "areaHa": 0.08,
+    "cropVariety": "NK-212",
+    "moisturePct": 26.0,
+    "soilTempC": 31.2,
+    "ph": 7.55,
+    "batteryV": 4.08,
+    "batteryPct": 98,
+    "loraSignalDbm": -68,
+    "avriScore": 52,
     "avriCategory": "waspada",
-    "status": "simulated",
-    "telemetryMode": "[Est-Simulated] FAO-56",
-    "prescription": "Waspada! Gunakan metode benam/tugal berjarak 7\u201310 cm dan hindari tabur permukaan bebas.",
+    "status": "online",
+    "telemetryMode": "LoRa Live Stream",
+    "prescription": "Waspada: Kelembapan 26.0% mendekati batas kritis 25%. Dianjurkan menunda pemupukan hingga sore hari.",
     "center": [
-      -6.899644,
-      112.434916
+      -6.916186,
+      112.422141
     ],
     "polygon": [
       [
-        -6.900166,
-        112.43499
+        -6.915973,
+        112.422034
       ],
       [
-        -6.899841,
-        112.435416
+        -6.915973,
+        112.422248
       ],
       [
-        -6.899454,
-        112.435432
+        -6.916399,
+        112.422248
       ],
       [
-        -6.89912,
-        112.434766
+        -6.916399,
+        112.422034
+      ]
+    ]
+  },
+  {
+    "id": "B3",
+    "nodeId": "VS-B1-003",
+    "name": "Blok B3 \u00b7 Tegal Bluri Madya (Tengah-Timur 1)",
+    "shortName": "B3 \u00b7 Bluri Madya Timur",
+    "areaHa": 0.08,
+    "cropVariety": "Pioneer P35",
+    "moisturePct": 23.1,
+    "soilTempC": 33.5,
+    "ph": 7.75,
+    "batteryV": 3.88,
+    "batteryPct": 80,
+    "loraSignalDbm": -80,
+    "avriScore": 68,
+    "avriCategory": "kritis",
+    "status": "online",
+    "telemetryMode": "LoRa Live Stream",
+    "prescription": "KRITIS! Kehilangan nitrogen diperkirakan mencapai 68%. Jangan sebar urea.",
+    "center": [
+      -6.916186,
+      112.422347
+    ],
+    "polygon": [
+      [
+        -6.915973,
+        112.422248
       ],
       [
-        -6.89926,
-        112.43447
+        -6.915973,
+        112.422447
       ],
       [
-        -6.900024,
-        112.434422
+        -6.916399,
+        112.422447
+      ],
+      [
+        -6.916399,
+        112.422248
+      ]
+    ]
+  },
+  {
+    "id": "B4",
+    "nodeId": "VS-B1-004",
+    "name": "Blok B4 \u00b7 Tegal Bluri Madya (Tengah-Sisi Jalan)",
+    "shortName": "B4 \u00b7 Bluri Madya Jalan",
+    "areaHa": 0.08,
+    "cropVariety": "Bisi-18",
+    "moisturePct": 33.5,
+    "soilTempC": 27.6,
+    "ph": 7.22,
+    "batteryV": 3.98,
+    "batteryPct": 90,
+    "loraSignalDbm": -73,
+    "avriScore": 26,
+    "avriCategory": "aman",
+    "status": "online",
+    "telemetryMode": "LoRa Live Stream",
+    "prescription": "Aman: Kanopi tanaman di dekat jalan cukup menaungi tanah, menekan kenaikan suhu permukaan.",
+    "center": [
+      -6.916186,
+      112.422544
+    ],
+    "polygon": [
+      [
+        -6.915973,
+        112.422447
+      ],
+      [
+        -6.915973,
+        112.422661
+      ],
+      [
+        -6.916399,
+        112.422608
+      ],
+      [
+        -6.916399,
+        112.422447
+      ]
+    ]
+  },
+  {
+    "id": "C1",
+    "nodeId": "VS-C1-001",
+    "name": "Blok C1 \u00b7 Tegal Bluri Kidul (Selatan-Barat)",
+    "shortName": "C1 \u00b7 Bluri Kidul Barat",
+    "areaHa": 0.08,
+    "cropVariety": "NK-212",
+    "moisturePct": 35.0,
+    "soilTempC": 26.8,
+    "ph": 7.12,
+    "batteryV": 3.95,
+    "batteryPct": 88,
+    "loraSignalDbm": -75,
+    "avriScore": 22,
+    "avriCategory": "aman",
+    "status": "online",
+    "telemetryMode": "LoRa Live Stream",
+    "prescription": "Aman dipupuk. Kondisi tanah ideal dengan retensi air optimal.",
+    "center": [
+      -6.916612,
+      112.421932
+    ],
+    "polygon": [
+      [
+        -6.916399,
+        112.42183
+      ],
+      [
+        -6.916399,
+        112.422034
+      ],
+      [
+        -6.916825,
+        112.422034
+      ],
+      [
+        -6.916825,
+        112.42183
+      ]
+    ]
+  },
+  {
+    "id": "C2",
+    "nodeId": "VS-C1-002",
+    "name": "Blok C2 \u00b7 Tegal Bluri Kidul (Selatan-Tengah 1)",
+    "shortName": "C2 \u00b7 Bluri Kidul Tengah",
+    "areaHa": 0.08,
+    "cropVariety": "Bisi-2",
+    "moisturePct": 27.5,
+    "soilTempC": 30.4,
+    "ph": 7.48,
+    "batteryV": 3.91,
+    "batteryPct": 85,
+    "loraSignalDbm": -77,
+    "avriScore": 48,
+    "avriCategory": "waspada",
+    "status": "online",
+    "telemetryMode": "LoRa Live Stream",
+    "prescription": "Waspada: Tanah mulai hangat. Jika memupuk, tutup pupuk dengan tanah segera.",
+    "center": [
+      -6.916612,
+      112.422141
+    ],
+    "polygon": [
+      [
+        -6.916399,
+        112.422034
+      ],
+      [
+        -6.916399,
+        112.422248
+      ],
+      [
+        -6.916825,
+        112.422248
+      ],
+      [
+        -6.916825,
+        112.422034
+      ]
+    ]
+  },
+  {
+    "id": "C3",
+    "nodeId": "VS-C1-003",
+    "name": "Blok C3 \u00b7 Tegal Bluri Kidul (Selatan-Tengah 2)",
+    "shortName": "C3 \u00b7 Bluri Kidul Tengah",
+    "areaHa": 0.08,
+    "cropVariety": "Pioneer P35",
+    "moisturePct": 21.8,
+    "soilTempC": 34.8,
+    "ph": 7.82,
+    "batteryV": 3.87,
+    "batteryPct": 80,
+    "loraSignalDbm": -79,
+    "avriScore": 75,
+    "avriCategory": "kritis",
+    "status": "online",
+    "telemetryMode": "LoRa Live Stream",
+    "prescription": "KRITIS! Panas terik dan penguapan cepat. Rekomendasi: Tunda pemupukan.",
+    "center": [
+      -6.916612,
+      112.422355
+    ],
+    "polygon": [
+      [
+        -6.916399,
+        112.422248
+      ],
+      [
+        -6.916399,
+        112.422463
+      ],
+      [
+        -6.916825,
+        112.422463
+      ],
+      [
+        -6.916825,
+        112.422248
+      ]
+    ]
+  },
+  {
+    "id": "C4",
+    "nodeId": "VS-C1-004",
+    "name": "Blok C4 \u00b7 Tegal Bluri Kidul (Selatan-Kelokan Jalan)",
+    "shortName": "C4 \u00b7 Bluri Kidul Kelokan",
+    "areaHa": 0.08,
+    "cropVariety": "Bisi-18",
+    "moisturePct": 18.5,
+    "soilTempC": 36.4,
+    "ph": 7.92,
+    "batteryV": 3.82,
+    "batteryPct": 74,
+    "loraSignalDbm": -84,
+    "avriScore": 85,
+    "avriCategory": "bahaya",
+    "status": "online",
+    "telemetryMode": "LoRa Live Stream",
+    "prescription": "BAHAYA TINGGI! Pupuk urea akan menguap lebih dari 80%. Dilarang keras melakukan pemupukan sebar.",
+    "center": [
+      -6.916612,
+      112.422578
+    ],
+    "polygon": [
+      [
+        -6.916399,
+        112.422463
+      ],
+      [
+        -6.916399,
+        112.422608
+      ],
+      [
+        -6.916825,
+        112.422715
+      ],
+      [
+        -6.916825,
+        112.422463
       ]
     ]
   }

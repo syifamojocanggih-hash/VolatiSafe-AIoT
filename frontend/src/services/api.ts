@@ -332,3 +332,98 @@ export async function getNodeTelemetry(
     return null;
   }
 }
+
+// 9. Field Cadastral Parcels with UAV/Satellite Polygons
+export interface BackendParcelItem {
+  id: string;
+  node_id: string;
+  name: string;
+  short_name: string;
+  area_ha: number;
+  crop_variety: string;
+  moisture_pct: number;
+  soil_temp_c: number;
+  ph: number;
+  battery_v: number;
+  battery_pct: number;
+  lora_signal_dbm: number;
+  avri_score: number;
+  avri_category: 'aman' | 'waspada' | 'kritis' | 'bahaya';
+  status: 'online' | 'simulated' | 'offline';
+  telemetry_mode: string;
+  prescription: string;
+  center: [number, number];
+  polygon: [number, number][];
+}
+
+export interface FieldParcelsBackendResponse {
+  field_id: string;
+  summary: {
+    coordinates_text: string;
+    soil_type_text: string;
+    gateway_distance_km: number;
+    total_area_ha: number;
+    center_coordinates: [number, number];
+    gateway_coordinates: [number, number];
+    outer_boundary: [number, number][];
+    surrounding_parcels: Array<{
+      id: string;
+      name: string;
+      area_ha: number;
+      center: [number, number];
+      polygon: [number, number][];
+    }>;
+    satellite_metadata?: {
+      source: string;
+      resolution: string;
+      crs: string;
+      last_capture: string;
+      ndvi_mean?: number;
+      ndwi_mean?: number;
+      cloud_cover_pct?: number;
+      spectral_bands?: string[];
+    };
+  };
+  parcels: BackendParcelItem[];
+  geojson?: unknown;
+}
+
+export async function getFieldParcels(
+  fieldId: string = 'BLOK-A'
+): Promise<FieldParcelsBackendResponse | null> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/fields/${fieldId}/parcels`, {
+      cache: 'no-store',
+      headers: { 'Accept': 'application/json' },
+    });
+    if (!res.ok) return null;
+    const json: ApiResponse<FieldParcelsBackendResponse> = await res.json();
+    return json.data;
+  } catch {
+    return null;
+  }
+}
+
+// 10. Simulate Node Dropout & Digital Twin FAO-56 Failover
+export async function toggleParcelFailover(
+  fieldId: string = 'BLOK-A',
+  parcelId: string = 'A1',
+  isDropout?: boolean
+): Promise<BackendParcelItem | null> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/fields/${fieldId}/parcels/${parcelId}/simulate-failover`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify({ is_dropout: isDropout }),
+    });
+    if (!res.ok) return null;
+    const json: ApiResponse<BackendParcelItem> = await res.json();
+    return json.data;
+  } catch {
+    return null;
+  }
+}
+

@@ -193,6 +193,8 @@ AI Engine diisolasi sebagai callable service / module. Backend mengemas fitur me
 | `GET` | `/api/v1/nodes/{id}/telemetry` | Deret waktu telemetri petak | `?hours=24` (default 24 jam) |
 | `GET` | `/api/v1/fields/{id}/current-status` | Status live petak, skor AVRI & banner | — |
 | `GET` | `/api/v1/fields/{id}/forecast-window` | Proyeksi 72 jam jendela pemupukan aman | `?hours=72` |
+| `GET` | `/api/v1/fields/{id}/parcels` | Poligon kadastral 12 bedeng & GeoJSON batas satelit | — |
+| `POST` | `/api/v1/fields/{id}/parcels/{parcel_id}/simulate-failover` | Memicu/mengembalikan failover Digital Twin FAO-56 pada bedeng | Request Body (opsional) |
 | `POST` | `/api/v1/fertilizer/blend-calculator` | Hitung dosis pupuk majemuk & konversi ember | Request Body: Luas lahan, target tonase |
 | `POST` | `/api/v1/crop-cycles` | Simpan/ubah tanggal tanam & varietas benih | Request Body: Tanggal tanam, varietas |
 | `GET` | `/api/v1/health` | Status gateway, uptime, & sensor status | — |
@@ -308,6 +310,111 @@ Endpoint pengujian langsung juri untuk mengubah slider parameter cuaca/tanah sec
 }
 ```
 **Respons:** Mengembalikan `PredictRiskResponseDTO` yang dihitung seketika tanpa mengubah status riil database.
+
+#### E. `GET /api/v1/fields/{id}/parcels`
+Menyediakan poligon batas lahan persil kadastral (12 bedeng), outer boundary 16-vertex, metadata citra satelit (Sentinel-2 & UAV Orthomosaic), dan GeoJSON RFC 7946 untuk visualisasi Leaflet GIS.
+
+**Respons Sukses (HTTP 200):**
+```json
+{
+  "data": {
+    "field_id": "BLOK-A",
+    "field_name": "Hamparan Jagung Blok A - Desa Bluri",
+    "center": [-6.89931, 112.43439],
+    "zoom": 18,
+    "outer_boundary": [
+      [-6.89885, 112.43385],
+      [-6.89878, 112.43415],
+      [-6.89975, 112.43495],
+      [-6.89982, 112.43465]
+    ],
+    "parcels": [
+      {
+        "id": "A1",
+        "name": "Bedeng A1 (Ujung Utara-Barat)",
+        "zone": "Zona Utara",
+        "crop_age_days": 32,
+        "soil_type": "Aluvial Lempung",
+        "polygon": [
+          [-6.89885, 112.43385],
+          [-6.89881, 112.43402],
+          [-6.89912, 112.4341],
+          [-6.89916, 112.43393]
+        ],
+        "telemetry": {
+          "soil_temp_c": 34.6,
+          "moisture_pct": 21.2,
+          "ph": 7.85,
+          "avri_score": 76.5,
+          "risk_category": "kritis",
+          "node_id": "VS-A1-001",
+          "node_status": "online",
+          "signal_rssi_dbm": -81,
+          "battery_pct": 92,
+          "data_source": "LoRa Live Stream"
+        }
+      }
+    ],
+    "surrounding_parcels": [],
+    "satellite_metadata": {
+      "satellite_source": "Sentinel-2 MultiSpectral (Copernicus) & UAV Orthomosaic",
+      "resolution": "0.2m GSD High-Resolution / 10m Multi-Band",
+      "last_capture": "2026-10-26T03:15:00Z",
+      "ndvi_mean": 0.68,
+      "cloud_cover_pct": 2.1,
+      "crs": "EPSG:4326 (WGS84)"
+    },
+    "geojson": {
+      "type": "FeatureCollection",
+      "features": [
+        {
+          "type": "Feature",
+          "properties": { "id": "A1", "name": "Bedeng A1", "risk_category": "kritis" },
+          "geometry": {
+            "type": "Polygon",
+            "coordinates": [[[112.43385, -6.89885], [112.43402, -6.89881], [112.4341, -6.89912], [112.43393, -6.89916], [112.43385, -6.89885]]]
+          }
+        }
+      ]
+    }
+  },
+  "meta": {
+    "timestamp": "2026-10-27T16:55:00Z",
+    "version": "v1.0"
+  }
+}
+```
+
+#### F. `POST /api/v1/fields/{id}/parcels/{parcel_id}/simulate-failover`
+Memicu simulasi pemutusan node LoRa fisik pada bedeng persil tertentu dan mengalihkan estimasi data ke model Digital Twin Biofisik FAO-56. Memanggil endpoint ini kembali akan memulihkan node ke mode `online`.
+
+**Request Body (Opsional):**
+```json
+{
+  "node_id": "VS-A1-001",
+  "force_failover": true
+}
+```
+
+**Respons Sukses (HTTP 200):**
+```json
+{
+  "data": {
+    "parcel_id": "A1",
+    "node_id": "VS-A1-001",
+    "node_status": "simulated",
+    "data_source": "[Est-Simulated] FAO-56",
+    "is_simulated_failover": true,
+    "soil_temp_c": 34.6,
+    "moisture_pct": 21.2,
+    "message": "Node VS-A1-001 dialihkan ke estimasi Digital Twin FAO-56"
+  },
+  "meta": {
+    "timestamp": "2026-10-27T16:55:00Z",
+    "version": "v1.0"
+  }
+}
+```
 
 ---
 

@@ -274,22 +274,37 @@ function transformTelemetryToTrend(
     return fallbackTrend;
   }
 
-  return series.map((pt) => {
-    let timeStr = '00.00';
+  // Resample / bin incoming telemetry into 24 uniform hourly points: 00.00 - 23.00
+  const hourlyBuckets: { [hour: number]: { moisture: number; temperature: number; ph?: number } } = {};
+
+  series.forEach((pt) => {
     try {
       const d = new Date(pt.timestamp);
-      const hh = String(d.getUTCHours()).padStart(2, '0');
-      const mm = String(d.getUTCMinutes()).padStart(2, '0');
-      timeStr = `${hh}.${mm}`;
+      const hour = !isNaN(d.getTime()) ? d.getUTCHours() : parseInt(pt.timestamp.slice(11, 13), 10);
+      if (!isNaN(hour) && hour >= 0 && hour <= 23) {
+        hourlyBuckets[hour] = {
+          moisture: pt.moisture_pct,
+          temperature: pt.soil_temp_c,
+          ph: pt.ph,
+        };
+      }
     } catch {
-      timeStr = pt.timestamp.slice(11, 16).replace(':', '.');
+      // ignore parse error
     }
+  });
+
+  // Always produce a clean 24-point sequence from 00.00 to 23.00
+  return Array.from({ length: 24 }, (_, h) => {
+    const timeStr = `${String(h).padStart(2, '0')}.00`;
+    const bucket = hourlyBuckets[h];
+    const fallback = fallbackTrend[h] || fallbackTrend[fallbackTrend.length - 1];
 
     return {
       time: timeStr,
-      moisture: pt.moisture_pct,
-      temperature: pt.soil_temp_c,
+      moisture: bucket ? Number(bucket.moisture.toFixed(1)) : (fallback?.moisture ?? 25),
+      temperature: bucket ? Number(bucket.temperature.toFixed(1)) : (fallback?.temperature ?? 28),
       threshold: 25,
+      ph: bucket?.ph != null ? Number(bucket.ph.toFixed(2)) : (fallback?.ph ?? 7.82),
     };
   });
 }

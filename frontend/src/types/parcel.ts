@@ -31,6 +31,17 @@ export interface SurroundingParcel {
   polygon: [number, number][];
 }
 
+export interface SatelliteMetadata {
+  source: string;
+  resolution: string;
+  crs: string;
+  lastCapture: string;
+  ndviMean?: number;
+  ndwiMean?: number;
+  cloudCoverPct?: number;
+  spectralBands?: string[];
+}
+
 export interface ParcelMapSummary {
   coordinatesText: string;
   soilTypeText: string;
@@ -40,4 +51,6 @@ export interface ParcelMapSummary {
   gatewayCoordinates?: [number, number];
   outerBoundary?: [number, number][];
   surroundingParcels?: SurroundingParcel[];
+  satelliteMetadata?: SatelliteMetadata;
 }
+

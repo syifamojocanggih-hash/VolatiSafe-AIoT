@@ -56,7 +56,7 @@ def get_node_telemetry(
             .order_by(TelemetryModel.ts.asc())
             .all()
         )
-        if rows:
+        if rows and len(rows) >= 24:
             series = [
                 TelemetryPointDTO(
                     timestamp=r.ts.strftime("%Y-%m-%dT%H:%M:%SZ"),

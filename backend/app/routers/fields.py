@@ -13,6 +13,7 @@ from app.schemas.fields import (
     ShapExplanationDTO
 )
 from app.schemas.simulation import WhatIfRequestDTO
+from app.schemas.parcels import SimulateFailoverRequestDTO
 from app.core.database import get_db
 from app.models.field import FieldModel, FieldStateModel
 from app.models.node import NodeModel
@@ -219,4 +220,63 @@ def get_action_status(field_id: str, session: Session = Depends(get_db)):
             }
         )
     return create_envelope(action_status)
+
+@router.get("/{field_id}/parcels")
+def get_field_parcels(field_id: str):
+    """
+    Returns 12 high-precision bedeng cadastral parcels, surrounding mosaic parcels,
+    and outer boundary with GeoJSON FeatureCollection derived from Sentinel-2 & UAV orthomosaic.
+    """
+    res = db.get_field_parcels(field_id=field_id)
+    if not res:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={
+                "code": "FIELD_PARCELS_NOT_FOUND",
+                "message": f"Data persil untuk petak '{field_id}' tidak ditemukan."
+            }
+        )
+    return create_envelope(res.model_dump())
+
+@router.post("/{field_id}/parcels/{parcel_id}/simulate-failover")
+def simulate_parcel_failover(
+    field_id: str,
+    parcel_id: str,
+    req: Optional[SimulateFailoverRequestDTO] = None
+):
+    """
+    Toggles node dropout and triggers Digital Twin FAO-56 failover on the backend.
+    """
+    is_dropout = req.is_dropout if req else None
+    updated_parcel = db.toggle_parcel_failover(
+        field_id=field_id,
+        parcel_id=parcel_id,
+        is_dropout=is_dropout
+    )
+    if not updated_parcel:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={
+                "code": "PARCEL_NOT_FOUND",
+                "message": f"Persil/Bedeng dengan ID '{parcel_id}' tidak ditemukan pada petak '{field_id}'."
+            }
+        )
+    return create_envelope(updated_parcel.model_dump())
+
+@router.post("/{field_id}/simulate-dropout")
+def simulate_node_dropout_alias(
+    field_id: str,
+    req: SimulateFailoverRequestDTO
+):
+    """
+    Alias endpoint for node dropout simulation.
+    """
+    parcel_id = "A1"
+    updated_parcel = db.toggle_parcel_failover(
+        field_id=field_id,
+        parcel_id=parcel_id,
+        is_dropout=req.is_dropout
+    )
+    return create_envelope(updated_parcel.model_dump() if updated_parcel else {})
+
 
