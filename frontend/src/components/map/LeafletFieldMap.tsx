@@ -167,7 +167,7 @@ export const LeafletFieldMap: React.FC<LeafletFieldMapProps> = ({
           interactive: false,
         }).addTo(map);
 
-        outerPolygon.bindTooltip('Batas Kawasan Lahan Jagung Balai Desa Bluri', {
+        outerPolygon.bindTooltip('Batas Kawasan Persawahan Jagung Solokuro', {
           permanent: false,
           direction: 'center',
           className: 'bg-blue-900/90 text-white text-xs px-2.5 py-1 rounded-md shadow-md border border-blue-400 font-medium',
@@ -307,15 +307,14 @@ export const LeafletFieldMap: React.FC<LeafletFieldMapProps> = ({
           <div class="p-1.5 font-sans min-w-[200px]">
             <div class="flex items-center justify-between gap-2 border-b border-slate-100 pb-1.5 mb-1.5">
               <span class="font-bold text-sm text-slate-900">${p.id} · ${p.name}</span>
-              <span class="px-2 py-0.5 rounded text-2xs font-bold ${
-                p.avriCategory === 'aman'
-                  ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
-                  : p.avriCategory === 'waspada'
-                  ? 'bg-amber-100 text-amber-800 border border-amber-300'
-                  : p.avriCategory === 'kritis'
-                  ? 'bg-orange-100 text-orange-800 border border-orange-300'
-                  : 'bg-red-100 text-red-800 border border-red-300'
-              }">AVRI ${p.avriScore}%</span>
+              <span class="px-2 py-0.5 rounded text-2xs font-bold ${p.avriCategory === 'aman'
+            ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+            : p.avriCategory === 'waspada'
+              ? 'bg-amber-100 text-amber-800 border border-amber-300'
+              : p.avriCategory === 'kritis'
+                ? 'bg-orange-100 text-orange-800 border border-orange-300'
+                : 'bg-red-100 text-red-800 border border-red-300'
+          }">AVRI ${p.avriScore}%</span>
             </div>
             <div class="space-y-1 text-xs text-slate-600">
               <p>Node ID: <b>${p.nodeId}</b></p>
@@ -336,9 +335,8 @@ export const LeafletFieldMap: React.FC<LeafletFieldMapProps> = ({
               className: 'custom-node-icon',
               html: `
                 <div class="relative flex items-center justify-center cursor-pointer">
-                  <div class="w-6 h-6 rounded-full ${
-                    selected ? 'bg-indigo-600 ring-4 ring-indigo-300' : 'bg-slate-900 hover:bg-black'
-                  } border-2 border-white shadow-md flex items-center justify-center text-white font-bold text-3xs transition-transform hover:scale-110">
+                  <div class="w-6 h-6 rounded-full ${selected ? 'bg-indigo-600 ring-4 ring-indigo-300' : 'bg-slate-900 hover:bg-black'
+                } border-2 border-white shadow-md flex items-center justify-center text-white font-bold text-3xs transition-transform hover:scale-110">
                     ${p.id}
                   </div>
                 </div>
@@ -384,6 +382,41 @@ export const LeafletFieldMap: React.FC<LeafletFieldMapProps> = ({
           fillOpacity: color.fillOpacity,
           dashArray: color.dash,
         });
+
+        // Update dynamic popup content with latest telemetry
+        polygon.setPopupContent(`
+          <div class="p-1.5 font-sans min-w-[200px]">
+            <div class="flex items-center justify-between gap-2 border-b border-slate-100 pb-1.5 mb-1.5">
+              <span class="font-bold text-sm text-slate-900">${p.id} · ${p.name}</span>
+              <span class="px-2 py-0.5 rounded text-2xs font-bold ${
+                p.avriCategory === 'aman'
+                  ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                  : p.avriCategory === 'waspada'
+                  ? 'bg-amber-100 text-amber-800 border border-amber-300'
+                  : p.avriCategory === 'kritis'
+                  ? 'bg-orange-100 text-orange-800 border border-orange-300'
+                  : 'bg-red-100 text-red-800 border border-red-300'
+              }">AVRI ${p.avriScore}%</span>
+            </div>
+            <div class="space-y-1 text-xs text-slate-600">
+              <p>Node ID: <b>${p.nodeId}</b></p>
+              <p>Luas Lahan: <b>${p.areaHa} Hektar</b></p>
+              <p>Kelembaban (θ): <b>${p.moisturePct.toString().replace('.', ',')}%</b></p>
+              <p>Suhu Tanah (T): <b>${p.soilTempC.toString().replace('.', ',')}°C</b></p>
+              <p>pH Tanah: <b>${p.ph.toString().replace('.', ',')}</b></p>
+              <p>Baterai: <b>${p.batteryPct}% (${p.batteryV}V)</b></p>
+              <p>Mode: <span class="font-semibold text-slate-800">${p.telemetryMode}</span></p>
+            </div>
+          </div>
+        `);
+
+        // Update dynamic hover tooltip
+        polygon.setTooltipContent(`
+          <div class="font-sans text-xs">
+            <b>${p.id}</b> · ${p.name}<br>
+            <span class="text-slate-600 font-medium">Node: ${p.nodeId} | AVRI: <b>${p.avriScore}%</b> (${p.avriCategory.toUpperCase()})</span>
+          </div>
+        `);
 
         if (isSelected) {
           polygon.bringToFront();
@@ -435,48 +468,44 @@ export const LeafletFieldMap: React.FC<LeafletFieldMapProps> = ({
           {/* Tombol Legenda Dropdown */}
           <button
             onClick={() => setShowLegend(!showLegend)}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-semibold shadow-md transition-all ${
-              showLegend
-                ? 'bg-blue-600 text-white border-blue-600 ring-2 ring-blue-300'
-                : 'bg-white/95 backdrop-blur-md text-slate-700 border-slate-200 hover:bg-slate-50'
-            }`}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-semibold shadow-md transition-all ${showLegend
+              ? 'bg-blue-600 text-white border-blue-600 ring-2 ring-blue-300'
+              : 'bg-white/95 backdrop-blur-md text-slate-700 border-slate-200 hover:bg-slate-50'
+              }`}
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h18v18H3z"/><path d="M21 9H3"/><path d="M21 15H3"/><path d="M9 3v18"/></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h18v18H3z" /><path d="M21 9H3" /><path d="M21 15H3" /><path d="M9 3v18" /></svg>
             <span>Legenda</span>
-            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" className={`transition-transform duration-200 ${showLegend ? 'rotate-180' : ''}`}><path d="m6 9 6 6 6-6"/></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" className={`transition-transform duration-200 ${showLegend ? 'rotate-180' : ''}`}><path d="m6 9 6 6 6-6" /></svg>
           </button>
 
           {/* Layer Switcher (Citra Satelit vs Peta Jalan vs Topo) */}
           <div className="flex items-center bg-white/95 backdrop-blur-md p-0.5 rounded-xl border border-slate-200 shadow-md">
             <button
               onClick={() => handleLayerClick('satellite')}
-              className={`px-2.5 py-1 rounded-lg text-2xs font-bold transition-colors ${
-                tileType === 'satellite'
-                  ? 'bg-slate-900 text-white shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
+              className={`px-2.5 py-1 rounded-lg text-2xs font-bold transition-colors ${tileType === 'satellite'
+                ? 'bg-slate-900 text-white shadow-xs'
+                : 'text-slate-600 hover:text-slate-900'
+                }`}
               title="Citra Satelit Beresolusi Tinggi (Google Hybrid)"
             >
               🛰️ Satelit
             </button>
             <button
               onClick={() => handleLayerClick('streets')}
-              className={`px-2.5 py-1 rounded-lg text-2xs font-bold transition-colors ${
-                tileType === 'streets'
-                  ? 'bg-slate-900 text-white shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
+              className={`px-2.5 py-1 rounded-lg text-2xs font-bold transition-colors ${tileType === 'streets'
+                ? 'bg-slate-900 text-white shadow-xs'
+                : 'text-slate-600 hover:text-slate-900'
+                }`}
               title="Peta Jalan Standar OpenStreetMap"
             >
               🗺️ Jalan
             </button>
             <button
               onClick={() => handleLayerClick('topo')}
-              className={`px-2.5 py-1 rounded-lg text-2xs font-bold transition-colors ${
-                tileType === 'topo'
-                  ? 'bg-slate-900 text-white shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
+              className={`px-2.5 py-1 rounded-lg text-2xs font-bold transition-colors ${tileType === 'topo'
+                ? 'bg-slate-900 text-white shadow-xs'
+                : 'text-slate-600 hover:text-slate-900'
+                }`}
               title="Peta Kontur & Topografi Lereng Kapur"
             >
               ⛰️ Topo
@@ -489,7 +518,7 @@ export const LeafletFieldMap: React.FC<LeafletFieldMapProps> = ({
             className="p-1.5 rounded-xl bg-white/95 backdrop-blur-md border border-slate-200 text-slate-700 hover:bg-slate-100 shadow-md transition-colors"
             title="Pusatkan ke Hamparan Bluri (Zoom Default 16)"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m16 12-4-4-4 4"/><path d="M12 16V8"/></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" /><path d="m16 12-4-4-4 4" /><path d="M12 16V8" /></svg>
           </button>
         </div>
       </div>
@@ -499,7 +528,7 @@ export const LeafletFieldMap: React.FC<LeafletFieldMapProps> = ({
         <div className="absolute top-14 right-3 z-[410] w-72 sm:w-80 bg-white/95 backdrop-blur-md rounded-2xl border border-slate-200 shadow-2xl p-3.5 text-xs font-sans animate-in fade-in slide-in-from-top-2 duration-150">
           <div className="flex items-center justify-between border-b border-slate-100 pb-2 mb-2.5">
             <div className="flex items-center gap-1.5 font-bold text-slate-900">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="text-blue-600"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="text-blue-600"><circle cx="12" cy="12" r="10" /><path d="M12 16v-4" /><path d="M12 8h.01" /></svg>
               <span>Legenda Peta Kadastral Bluri</span>
             </div>
             <button
@@ -526,7 +555,7 @@ export const LeafletFieldMap: React.FC<LeafletFieldMapProps> = ({
             {/* Status AVRI */}
             <div className="pt-1.5 border-t border-slate-100 space-y-1.5">
               <div className="text-2xs font-bold text-slate-400 uppercase tracking-wider">Status Risiko Volatilisasi (AVRI)</div>
-              
+
               <div className="flex items-center gap-2.5">
                 <span className="w-3.5 h-3.5 rounded bg-emerald-500 border border-emerald-700 inline-block"></span>
                 <span className="text-slate-700">Zona Aman (AVRI &le; 30%) · Aman pupuk</span>

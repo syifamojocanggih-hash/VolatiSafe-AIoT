@@ -9,7 +9,9 @@ export interface FieldNodeItem {
   batteryPct: number;
   batteryV: number;
   consumptionPerCycle: string; // '0,067 mAh/siklus'
-  rssiLoRa: number; // e.g. -68 dBm
+  rssiLoRa: number; // e.g. -82 dBm
+  snrDb?: number; // e.g. +8.2 dB
+  packetLossPct?: number; // e.g. 0.4%
   timestampEpoch: number;
 }
 
@@ -18,6 +20,14 @@ export interface BoMItem {
   componentName: string;
   pinMapping: string;
   priceIdr: number;
+  category?: string;
+}
+
+export interface BoMResponse {
+  totalCostIdr: number;
+  currency: string;
+  phaseLabel: string;
+  items: BoMItem[];
 }
 
 export interface CalibrationParams {

@@ -3,6 +3,8 @@
  * Connects directly to FastAPI Central Backend on http://localhost:8000/api/v1
  */
 
+import { FieldNodeItem, BoMResponse } from '@/types/admin';
+
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
 
@@ -343,6 +345,102 @@ export async function getNodeTelemetry(
     if (!res.ok) return null;
     const json: ApiResponse<NodeTelemetryResponse> = await res.json();
     return json.data;
+  } catch {
+    return null;
+  }
+}
+
+export interface BackendNodeItem {
+  node_id: string;
+  field_id?: string;
+  firmware_ver: string;
+  battery_v: number;
+  battery_pct: number;
+  last_seen: string;
+  status: string;
+  bedeng_location?: string;
+  transmission_status?: 'online' | 'offline_simulated';
+  sleep_interval_text?: string;
+  moisture_pct?: number;
+  soil_temp_c?: number;
+  ph?: number;
+  consumption_per_cycle?: string;
+  rssi_dbm?: number;
+  snr_db?: number;
+  packet_loss_pct?: number;
+  timestamp_epoch?: number;
+}
+
+export interface BackendBoMResponse {
+  total_cost_idr: number;
+  currency: string;
+  phase_label: string;
+  items: Array<{
+    id: string;
+    component_name: string;
+    pin_mapping: string;
+    price_idr: number;
+    category?: string;
+  }>;
+}
+
+// 8b. List All Active Field Nodes
+export async function getNodesList(
+  fieldId: string = 'BLOK-A'
+): Promise<FieldNodeItem[] | null> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/nodes?field_id=${fieldId}`, {
+      cache: 'no-store',
+      headers: { 'Accept': 'application/json' },
+    });
+    if (!res.ok) return null;
+    const json: ApiResponse<BackendNodeItem[]> = await res.json();
+    if (!json.data || !Array.isArray(json.data)) return null;
+
+    return json.data.map((n) => ({
+      id: n.node_id,
+      bedengLocation: n.bedeng_location || `${n.field_id || 'Petak'} (Node ${n.node_id})`,
+      transmissionStatus: (n.transmission_status as 'online' | 'offline_simulated') || (n.status === 'online' ? 'online' : 'offline_simulated'),
+      sleepIntervalText: n.sleep_interval_text || (n.status === 'online' ? 'Online · Sleep 15m' : 'Offline → [Est-Simulated]'),
+      moisturePct: n.moisture_pct ?? 25.0,
+      tempC: n.soil_temp_c ?? 28.0,
+      ph: n.ph ?? 7.2,
+      batteryPct: n.battery_pct ?? 84,
+      batteryV: n.battery_v ?? 3.92,
+      consumptionPerCycle: n.consumption_per_cycle || '0,067 mAh/siklus',
+      rssiLoRa: n.rssi_dbm ?? -76,
+      snrDb: n.snr_db ?? 8.2,
+      packetLossPct: n.packet_loss_pct ?? 0.4,
+      timestampEpoch: n.timestamp_epoch ?? Math.floor(Date.now() / 1000),
+    }));
+  } catch {
+    return null;
+  }
+}
+
+// 8c. Hardware Bill of Materials (BoM)
+export async function getHardwareBoM(): Promise<BoMResponse | null> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/nodes/bom`, {
+      cache: 'no-store',
+      headers: { 'Accept': 'application/json' },
+    });
+    if (!res.ok) return null;
+    const json: ApiResponse<BackendBoMResponse> = await res.json();
+    if (!json.data) return null;
+
+    return {
+      totalCostIdr: json.data.total_cost_idr,
+      currency: json.data.currency,
+      phaseLabel: json.data.phase_label,
+      items: (json.data.items || []).map((item) => ({
+        id: item.id,
+        componentName: item.component_name,
+        pinMapping: item.pin_mapping,
+        priceIdr: item.price_idr,
+        category: item.category,
+      })),
+    };
   } catch {
     return null;
   }

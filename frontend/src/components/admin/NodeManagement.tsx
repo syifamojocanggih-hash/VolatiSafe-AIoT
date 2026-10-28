@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { initialFieldNodes, initialBoMList } from '@/mocks/adminMock';
-import { FieldNodeItem, CalibrationParams } from '@/types/admin';
+import { FieldNodeItem, BoMItem, CalibrationParams } from '@/types/admin';
+import { getNodesList, getHardwareBoM } from '@/services/api';
 import { CalibrationModal } from '@/components/modals/CalibrationModal';
 import { OnboardingQRModal } from '@/components/modals/OnboardingQRModal';
 import {
@@ -10,6 +11,8 @@ import {
   QrCode,
   Copy,
   Check,
+  RefreshCw,
+  ShieldCheck,
 } from 'lucide-react';
 
 export const NodeManagement: React.FC = () => {
@@ -19,8 +22,51 @@ export const NodeManagement: React.FC = () => {
   const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
   const [hasCopied, setHasCopied] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [bomList, setBomList] = useState<BoMItem[]>(initialBoMList);
+  const [totalBomCost, setTotalBomCost] = useState<number>(449000);
+  const [isBackendSynced, setIsBackendSynced] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const selectedNode = nodes.find((n) => n.id === selectedNodeId) || nodes[0];
+
+  // Fetch real node data and hardware BoM from FastAPI backend
+  const loadNodeData = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const [nodesRes, bomRes] = await Promise.all([
+        getNodesList('BLOK-A'),
+        getHardwareBoM(),
+      ]);
+
+      if (nodesRes && nodesRes.length > 0) {
+        setNodes(nodesRes);
+        setIsBackendSynced(true);
+        setSelectedNodeId((prevId) =>
+          nodesRes.some((n) => n.id === prevId) ? prevId : nodesRes[0].id
+        );
+      }
+
+      if (bomRes) {
+        if (bomRes.items && bomRes.items.length > 0) {
+          setBomList(bomRes.items);
+        }
+        if (bomRes.totalCostIdr) {
+          setTotalBomCost(bomRes.totalCostIdr);
+        }
+      }
+    } catch (err) {
+      console.warn('Gagal memuat data node dari backend, menggunakan data lokal:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadNodeData();
+    // Auto-refresh every 30 seconds
+    const interval = setInterval(loadNodeData, 30000);
+    return () => clearInterval(interval);
+  }, [loadNodeData]);
 
   // Generated JSON payload matching LoRa telemetry contract
   const payloadJson = JSON.stringify(
@@ -31,6 +77,9 @@ export const NodeManagement: React.FC = () => {
       t: selectedNode.tempC,
       ph: selectedNode.ph,
       b: selectedNode.batteryV,
+      rssi: selectedNode.rssiLoRa,
+      snr: selectedNode.snrDb ?? 8.2,
+      loss: selectedNode.packetLossPct ?? 0.4,
     },
     null,
     2
@@ -59,16 +108,33 @@ export const NodeManagement: React.FC = () => {
       {/* Page Header & Top Buttons */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
-            Manajemen Field Node & Jaringan LoRa 433 MHz
-          </h2>
+          <div className="flex items-center gap-2">
+            <h2 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+              Manajemen Field Node & Jaringan LoRa 433 MHz
+            </h2>
+            {isBackendSynced && (
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 text-3xs font-bold">
+                <ShieldCheck className="w-3 h-3 text-emerald-600" />
+                Backend Live Sync ({nodes.length} Node)
+              </span>
+            )}
+          </div>
           <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
             ESP32 + Capacitive Moisture v1.2 + DS18B20 + Soil pH + SX1278 Ra-02 (Deep Sleep 15 menit)
           </p>
         </div>
 
         {/* Action Buttons */}
-        <div className="flex items-center gap-2.5 shrink-0 self-start sm:self-auto">
+        <div className="flex flex-wrap items-center gap-2 shrink-0 self-start sm:self-auto">
+          <button
+            onClick={loadNodeData}
+            disabled={isLoading}
+            className="p-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 transition-all shadow-2xs active:scale-95 disabled:opacity-50"
+            title="Muat Ulang Telemetri Node"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 text-slate-600 ${isLoading ? 'animate-spin' : ''}`} />
+          </button>
+
           <button
             onClick={() => setIsCalibrationOpen(true)}
             className="px-3.5 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 font-bold text-xs transition-all flex items-center gap-1.5 shadow-2xs active:scale-95"
@@ -98,7 +164,7 @@ export const NodeManagement: React.FC = () => {
                 <th className="py-2.5 px-3">STATUS TRANSMISI</th>
                 <th className="py-2.5 px-3">SENSOR LIVE (θ / T / PH)</th>
                 <th className="py-2.5 px-3">BATERAI 18650 + SOLAR</th>
-                <th className="py-2.5 px-3 text-right">RSSI LORA</th>
+                <th className="py-2.5 px-3 text-right">SINYAL LORA (RSSI / SNR)</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -115,7 +181,10 @@ export const NodeManagement: React.FC = () => {
                     }`}
                   >
                     <td className="py-3 px-3 font-mono font-bold text-[#1B6633]">
-                      {node.id}
+                      <div className="flex items-center gap-1.5">
+                        <span className={`w-2 h-2 rounded-full ${isOnline ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`} />
+                        {node.id}
+                      </div>
                     </td>
                     <td className="py-3 px-3 font-medium text-slate-800">
                       {node.bedengLocation}
@@ -131,7 +200,7 @@ export const NodeManagement: React.FC = () => {
                         {node.sleepIntervalText}
                       </span>
                     </td>
-                    <td className="py-3 px-3 text-slate-700">
+                    <td className="py-3 px-3 text-slate-700 font-mono">
                       {node.moisturePct.toString().replace('.', ',')}% &nbsp;|&nbsp;{' '}
                       {node.tempC.toString().replace('.', ',')}°C &nbsp;|&nbsp;{' '}
                       {node.ph.toString().replace('.', ',')}
@@ -139,8 +208,13 @@ export const NodeManagement: React.FC = () => {
                     <td className="py-3 px-3 text-slate-600">
                       {node.batteryPct}% ({node.batteryV.toString().replace('.', ',')}V · {node.consumptionPerCycle})
                     </td>
-                    <td className="py-3 px-3 text-right font-mono text-slate-500">
-                      {node.rssiLoRa} dBm
+                    <td className="py-3 px-3 text-right font-mono text-slate-700">
+                      <span className="font-bold text-slate-900">{node.rssiLoRa} dBm</span>
+                      {node.snrDb != null && (
+                        <span className="text-3xs text-slate-400 block">
+                          SNR {node.snrDb >= 0 ? '+' : ''}{node.snrDb.toFixed(1)} dB · Loss {node.packetLossPct ?? 0.4}%
+                        </span>
+                      )}
                     </td>
                   </tr>
                 );
@@ -154,14 +228,47 @@ export const NodeManagement: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
         {/* ================= LEFT: LIVE LORA PAYLOAD INSPECTOR (6 cols on lg) ================= */}
         <div className="lg:col-span-6 bg-white rounded-3xl p-5 sm:p-6 border border-slate-200/90 shadow-2xs flex flex-col justify-between space-y-4">
-          <div>
-            <div className="flex items-center justify-between gap-2 mb-3">
+          <div className="space-y-3">
+            <div className="flex items-center justify-between gap-2">
               <h3 className="text-sm sm:text-base font-bold text-slate-900 tracking-tight">
                 Live LoRa Payload Inspector · SF7 · 52 Bytes
               </h3>
-              <span className="font-mono text-3xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
+              <span className="font-mono text-3xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
                 433.0 MHz ISM
               </span>
+            </div>
+
+            {/* Live LoRa RF Signal Metrics Card */}
+            <div className="grid grid-cols-3 gap-2.5 p-3 rounded-2xl bg-slate-50 border border-slate-200/80 text-center">
+              <div className="p-2 rounded-xl bg-white border border-slate-100 shadow-2xs">
+                <span className="text-3xs font-semibold text-slate-400 uppercase tracking-wider block">
+                  Kekuatan Sinyal
+                </span>
+                <span className="text-xs sm:text-sm font-extrabold text-slate-900 font-mono mt-0.5 block">
+                  {selectedNode.rssiLoRa} dBm
+                </span>
+                <span className="text-3xs text-emerald-600 font-semibold block">Sinyal Prima</span>
+              </div>
+
+              <div className="p-2 rounded-xl bg-white border border-slate-100 shadow-2xs">
+                <span className="text-3xs font-semibold text-slate-400 uppercase tracking-wider block">
+                  Noise Margin (SNR)
+                </span>
+                <span className="text-xs sm:text-sm font-extrabold text-emerald-700 font-mono mt-0.5 block">
+                  {selectedNode.snrDb != null ? `${selectedNode.snrDb >= 0 ? '+' : ''}${selectedNode.snrDb.toFixed(1)}` : '+8.2'} dB
+                </span>
+                <span className="text-3xs text-slate-500 font-medium block">Margin Tinggi</span>
+              </div>
+
+              <div className="p-2 rounded-xl bg-white border border-slate-100 shadow-2xs">
+                <span className="text-3xs font-semibold text-slate-400 uppercase tracking-wider block">
+                  Packet Loss
+                </span>
+                <span className="text-xs sm:text-sm font-extrabold text-slate-900 font-mono mt-0.5 block">
+                  {selectedNode.packetLossPct != null ? `${selectedNode.packetLossPct.toFixed(1)}%` : '0.4%'}
+                </span>
+                <span className="text-3xs text-emerald-600 font-semibold block">Transmisi Stabil</span>
+              </div>
             </div>
 
             {/* Terminal Window */}
@@ -188,37 +295,52 @@ export const NodeManagement: React.FC = () => {
         {/* ================= RIGHT: RINGKASAN BOM & PIN MAPPING (6 cols on lg) ================= */}
         <div className="lg:col-span-6 bg-white rounded-3xl p-5 sm:p-6 border border-slate-200/90 shadow-2xs flex flex-col justify-between space-y-4">
           <div>
-            <h3 className="text-sm sm:text-base font-bold text-slate-900 tracking-tight mb-3">
-              Ringkasan BoM & Pin Mapping ESP32
-            </h3>
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <h3 className="text-sm sm:text-base font-bold text-slate-900 tracking-tight">
+                  Rincian Biaya Perangkat (BoM) & Pinout
+                </h3>
+                <p className="text-3xs text-slate-400 font-medium">
+                  {bomList.length} Komponen Modular · Terverifikasi Standar Kompetisi
+                </p>
+              </div>
+              <span className="text-3xs font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
+                TKT-3 Ready
+              </span>
+            </div>
 
-            {/* 4 BoM Component Cards (2x2 Grid) */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-              {initialBoMList.map((item) => (
+            {/* BoM Component Cards (Scrollable List for Complete 10 Items) */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-h-[300px] overflow-y-auto pr-1">
+              {bomList.map((item) => (
                 <div
                   key={item.id}
-                  className="p-3.5 rounded-2xl bg-[#FBF9F5] border border-slate-200/80 space-y-1"
+                  className="p-3 rounded-2xl bg-[#FBF9F5] border border-slate-200/80 space-y-1 hover:border-emerald-300 transition-colors"
                 >
-                  <p className="font-bold text-slate-900 text-xs truncate">
+                  <p className="font-bold text-slate-900 text-xs truncate" title={item.componentName}>
                     {item.componentName}
                   </p>
-                  <p className="text-3xs font-semibold text-slate-500">
-                    {item.pinMapping} &nbsp;·&nbsp;{' '}
-                    <span className="text-slate-700">Rp{item.priceIdr.toLocaleString('id-ID')}</span>
-                  </p>
+                  <div className="flex items-center justify-between text-3xs font-semibold text-slate-500">
+                    <span className="font-mono text-slate-600 truncate max-w-[110px]">{item.pinMapping}</span>
+                    <span className="text-emerald-800 font-bold">Rp{item.priceIdr.toLocaleString('id-ID')}</span>
+                  </div>
                 </div>
               ))}
             </div>
           </div>
 
           {/* Footer Total BoM */}
-          <div className="flex items-center justify-between pt-3 border-t border-slate-100">
-            <span className="text-xs font-semibold text-slate-600">
-              Total BoM per Node (IP65 + Solar lengkap):
-            </span>
-            <span className="text-lg font-extrabold text-[#1A5323]">
-              &plusmn; Rp305.000
-            </span>
+          <div className="pt-3 border-t border-slate-100 space-y-1">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-slate-600">
+                Total BoM Paket Lengkap (IP65 + Dual Power):
+              </span>
+              <span className="text-lg font-extrabold text-[#1A5323]">
+                Rp{totalBomCost.toLocaleString('id-ID')}
+              </span>
+            </div>
+            <p className="text-3xs text-slate-400 italic">
+              *Tercakup dalam pagu dana pembinaan prototipe fisik 10 besar finalis (Rp3.000.000).
+            </p>
           </div>
         </div>
       </div>

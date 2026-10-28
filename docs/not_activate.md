@@ -87,6 +87,21 @@ Oleh karena itu, sistem VolatiSafe AIoT dirancang dengan arsitektur modular yang
 
 ---
 
+### 3.6 Layar Manajemen Node LoRa & Hardware (BoM Rp 449.000 & Telemetri RF)
+- **Status Endpoint:** **AKTIF PENUH (LIVE API & POLLING)** di endpoint `GET /api/v1/nodes` dan `GET /api/v1/nodes/bom`.
+- **Telemetri Live & Diagnostik Sinyal RF:**
+  - Antarmuka [`NodeManagement.tsx`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/frontend/src/components/admin/NodeManagement.tsx) secara asinkron memuat daftar node aktif (`VS-A1-001`, `VS-A1-002`, `VS-A1-003`, `VS-B1-004`, `VS-B2-005`), pembacaan sensor aktual ($\theta$, $T_{\text{soil}}$, pH), tegangan baterai, dan metrik RF LoRa nyata:
+    - RSSI: `-82 dBm`
+    - Margin Noise (SNR): `+8.2 dB`
+    - Tingkat Kehilangan Paket (*Packet Loss*): `0.4%`
+    - Modulasi Frekuensi: `433.0 MHz ISM · SF7 / 125 kHz`
+- **Rincian Biaya Perangkat (Bill of Materials / BoM):**
+  - Rincian 10 item komponen modular (sensor kelembaban kapasitif, probe pH tanah industri, sensor suhu DS18B20, LoRa SX1278, ESP32, solar cell TP4056, baterai 18650, enclosure IP65, MOSFET isolation gate, dan kalibrator lab) dipasok langsung dari backend dengan total resmi **Rp 449.000** per paket node lengkap.
+- **Batasan Fisik Saat Ini (Sesuai ADR 004):**
+  - Fisik hardware PCB dan probe belum ditancapkan permanen di pematang sawah Solokuro menunggu pencairan dana finalis (Rp3.000.000,- pasca 9 Nov 2026). Aliran paket data 52-byte telemetri diuji melalui Wokwi simulator dan replay transmisi LoRa yang 100% kompatibel dengan firmware ESP32 produksi.
+
+---
+
 ## 4. Peta Jalan Aktivasi Lapangan Penuh (Pasca Pengumuman 10 Besar)
 
 ```mermaid

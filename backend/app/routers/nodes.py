@@ -3,7 +3,12 @@ from typing import Optional, List
 from fastapi import APIRouter, HTTPException, Query, status, Depends
 from sqlalchemy.orm import Session
 from app.schemas.envelope import create_envelope
-from app.schemas.nodes import NodeDTO, TelemetryPointDTO, NodeTelemetrySeriesDTO
+from app.schemas.nodes import (
+    NodeDTO,
+    TelemetryPointDTO,
+    NodeTelemetrySeriesDTO,
+    BoMResponseDTO
+)
 from app.core.database import get_db
 from app.models.node import NodeModel
 from app.models.telemetry import TelemetryModel
@@ -16,31 +21,21 @@ def list_nodes(
     field_id: Optional[str] = Query(None, description="Filter berdasarkan ID petak"),
     session: Session = Depends(get_db)
 ):
-    try:
-        query = session.query(NodeModel)
-        if field_id:
-            query = query.filter(NodeModel.field_id == field_id)
-        db_nodes = query.all()
-        if db_nodes:
-            dtos: List[NodeDTO] = []
-            for n in db_nodes:
-                battery_pct = int(max(0, min(100, (float(n.battery_v or 3.0) - 3.0) / (4.2 - 3.0) * 100)))
-                dtos.append(NodeDTO(
-                    node_id=n.node_id,
-                    field_id=n.field_id,
-                    firmware_ver=n.firmware_ver,
-                    battery_v=float(n.battery_v or 3.87),
-                    battery_pct=battery_pct,
-                    last_seen=n.last_seen.strftime("%Y-%m-%dT%H:%M:%SZ") if n.last_seen else "2026-10-24T16:00:00Z",
-                    status="online"
-                ))
-            return create_envelope([d.model_dump() for d in dtos])
-    except Exception:
-        pass
-
-    # Fallback to in-memory state
+    """
+    Mengambil daftar seluruh node sensor LoRa aktif beserta telemetri live,
+    diagnostik sinyal RF (RSSI, SNR, Packet Loss), dan status baterai.
+    """
     nodes = db.list_nodes(field_id=field_id)
     return create_envelope([n.model_dump() for n in nodes])
+
+@router.get("/bom")
+def get_nodes_bom():
+    """
+    Mengambil rincian biaya perangkat (Bill of Materials / BoM Rp 449.000)
+    dan pemetaan pin ESP32 untuk node sensor LoRa.
+    """
+    bom_data = db.get_hardware_bom()
+    return create_envelope(bom_data.model_dump())
 
 @router.get("/{node_id}/telemetry")
 def get_node_telemetry(

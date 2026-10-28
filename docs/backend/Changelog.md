@@ -4,6 +4,17 @@ Semua perubahan pada subsistem backend didokumentasikan di sini dengan merujuk p
 
 ---
 
+## [1.0.5] — 2026-10-28
+
+### 📡 Pengayaan Endpoint Manajemen Node & Penyediaan BoM Rp 449.000 (`nodes.py`, `mock_db.py`, `schemas/nodes.py`, `INTERFACES.md`)
+- **Eksposur Telemetri Node & Diagnostik Sinyal RF (`GET /api/v1/nodes`):**
+  - Memperkaya skema `NodeDTO` dengan atribut diagnostik RF: `bedeng_location`, `transmission_status`, `sleep_interval_text`, `moisture_pct`, `soil_temp_c`, `ph`, `battery_v`, `battery_pct`, `rssi_dbm`, `snr_db`, `packet_loss_pct`, dan `timestamp_epoch`.
+  - Mengembalikan daftar 5 node primer petak secara lengkap dengan data telemetri live.
+- **Penyediaan Endpoint Rincian Biaya Perangkat (`GET /api/v1/nodes/bom`):**
+  - Mengimplementasikan endpoint resmi penyedia Bill of Materials (BoM) yang merinci 10 komponen modular perangkat IoT (sensor kelembaban kapasitif, probe pH tanah industri, sensor suhu DS18B20, LoRa SX1278, ESP32, panel surya TP4056, baterai 18650, enclosure IP65, MOSFET isolation gate, dan kalibrator lab) dengan total biaya resmi **Rp 449.000** per paket node lengkap.
+
+---
+
 ## [1.0.4] — 2026-10-28
 
 ### 🗺️ Relokasi Data Geospasial Poligon ke Hamparan Sawah Murni Solokuro (`parcels_data.py`, `mock_db.py`, `INTERFACES.md`)

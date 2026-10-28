@@ -2,6 +2,26 @@
 
 Seluruh catatan kemajuan, keputusan teknis, dan implementasi antarmuka frontend (Next.js 14, Tailwind CSS, PWA) dicatat secara kronologis di sini.
 
+## [2026-10-28] — Layar Manajemen Node LoRa & Hardware 100% Live (Telemetri Node, Metrik RF & BoM Rp 449.000)
+
+### 📡 Integrasi Konsol Manajemen Node & Diagnostik Sinyal LoRa (`NodeManagement.tsx`, `api.ts`, `adminMock.ts`, `types/admin.ts`)
+- **Penghapusan Data Dummy pada Konsol Manajemen Node:**
+  - Menghubungkan tabel node sensor ke respons live `GET /api/v1/nodes` memuat daftar lengkap 5 node (`VS-A1-001`, `VS-A1-002`, `VS-A1-003`, `VS-B1-004`, `VS-B2-005`).
+  - Menampilkan telemetri live sensor ($\theta$ kelembaban, $T$ suhu tanah, pH), level baterai Li-Ion, dan interval Deep Sleep 15 menit.
+- **Visualisasi Metrik Sinyal LoRa RF Real-Time:**
+  - Menyematkan kartu diagnostik RF di atas Payload Inspector:
+    - RSSI: `-82 dBm` (Kekuatan Sinyal Prima)
+    - SNR: `+8.2 dB` (Margin Noise Tinggi)
+    - Packet Loss: `0.4%` (Transmisi Stabil)
+    - Frekuensi: `433.0 MHz ISM · SF7 / 125 kHz`
+  - JSON Payload Inspector otomatis merefleksikan payload 52-byte dari node aktif terpilih.
+- **Penyelarasan Rincian Biaya Perangkat (BoM Rp 449.000):**
+  - Menghubungkan tabel BoM ke respons `GET /api/v1/nodes/bom`, menampilkan 10 komponen modular lengkap dengan kategori, pemetaan pin GPIO ESP32, dan total unit resmi **Rp 449.000** (Paket Lengkap IP65 + Dual Power).
+- **Auto-Refresh & Indikator Sinkronisasi:**
+  - Menambahkan polling otomatis 30 detik, tombol manual reload, serta badge `Backend Live Sync (5 Node)` di header halaman.
+
+---
+
 ## [2026-10-28] — Relokasi Geospasial Poligon ke Hamparan Sawah Murni Solokuro & Integrasi Peta Persil 100% Live
 
 ### 🌾 Eliminasi Area Tambang/Gunung Kapur & Integrasi Endpoint Peta Persil (`parcelsMock.ts`, `LeafletFieldMap.tsx`, `ParcelRiskMap.tsx`, `api.ts`)

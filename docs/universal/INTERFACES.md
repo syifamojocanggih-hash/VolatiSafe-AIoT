@@ -189,7 +189,8 @@ AI Engine diisolasi sebagai callable service / module. Backend mengemas fitur me
 
 | Method | Endpoint | Fungsi | Query / Body |
 |---|---|---|---|
-| `GET` | `/api/v1/nodes` | Ringkasan semua node aktif | `?field_id=BLOK-A` |
+| `GET` | `/api/v1/nodes` | Ringkasan semua node aktif beserta telemetri & sinyal LoRa | `?field_id=BLOK-A` |
+| `GET` | `/api/v1/nodes/bom` | Rincian Bill of Materials (BoM Rp 449.000) & pinout ESP32 | — |
 | `GET` | `/api/v1/nodes/{id}/telemetry` | Deret waktu telemetri petak | `?hours=24` (default 24 jam) |
 | `GET` | `/api/v1/fields/{id}/current-status` | Status live petak, skor AVRI & banner | — |
 | `GET` | `/api/v1/fields/{id}/forecast-window` | Proyeksi 72 jam jendela pemupukan aman | `?hours=72` |

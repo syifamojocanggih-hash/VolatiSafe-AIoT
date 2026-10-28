@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime, timezone, timedelta
 from typing import Dict, List, Optional, Any
-from app.schemas.nodes import NodeDTO, TelemetryPointDTO, NodeTelemetrySeriesDTO
+from app.schemas.nodes import NodeDTO, TelemetryPointDTO, NodeTelemetrySeriesDTO, BoMItemDTO, BoMResponseDTO
 from app.schemas.fields import (
     FieldCurrentStatusDTO,
     FieldMetricsDTO,
@@ -43,24 +43,106 @@ class MockDB:
         self._seed_data()
         
     def _seed_data(self):
-        # 1. Master Nodes
+        # 1. Master Nodes (Enriched Telemetry & LoRa Diagnostics)
+        self._nodes["VS-A1-001"] = NodeDTO(
+            node_id="VS-A1-001",
+            field_id="BLOK-A",
+            firmware_ver="v1.0.2-prod",
+            battery_v=3.92,
+            battery_pct=88,
+            last_seen="2026-10-28T09:45:00Z",
+            status="online",
+            bedeng_location="Blok A1 (Utara Atas / Barat)",
+            transmission_status="online",
+            sleep_interval_text="Online · Sleep 15m",
+            moisture_pct=22.4,
+            soil_temp_c=34.1,
+            ph=7.83,
+            consumption_per_cycle="0,067 mAh/siklus",
+            rssi_dbm=-82,
+            snr_db=8.2,
+            packet_loss_pct=0.4,
+            timestamp_epoch=1792934400
+        )
+        self._nodes["VS-A1-002"] = NodeDTO(
+            node_id="VS-A1-002",
+            field_id="BLOK-A",
+            firmware_ver="v1.0.2-prod",
+            battery_v=4.01,
+            battery_pct=94,
+            last_seen="2026-10-28T09:45:00Z",
+            status="online",
+            bedeng_location="Blok A2 (Tengah Lembah / Inti 1)",
+            transmission_status="online",
+            sleep_interval_text="Online · Sleep 15m",
+            moisture_pct=36.8,
+            soil_temp_c=26.4,
+            ph=7.10,
+            consumption_per_cycle="0,067 mAh/siklus",
+            rssi_dbm=-71,
+            snr_db=9.5,
+            packet_loss_pct=0.1,
+            timestamp_epoch=1792934400
+        )
         self._nodes["VS-A1-003"] = NodeDTO(
             node_id="VS-A1-003",
             field_id="BLOK-A",
             firmware_ver="v1.0.2-prod",
-            battery_v=3.87,
-            battery_pct=84,
-            last_seen="2026-10-24T16:00:00Z",
-            status="online"
+            battery_v=3.85,
+            battery_pct=78,
+            last_seen="2026-10-28T09:45:00Z",
+            status="online",
+            bedeng_location="Blok A3 (Timur / Sisi Jalan)",
+            transmission_status="online",
+            sleep_interval_text="Online · Sleep 15m",
+            moisture_pct=19.2,
+            soil_temp_c=36.0,
+            ph=7.89,
+            consumption_per_cycle="0,067 mAh/siklus",
+            rssi_dbm=-79,
+            snr_db=7.4,
+            packet_loss_pct=0.8,
+            timestamp_epoch=1792934400
         )
-        self._nodes["VS-A2-001"] = NodeDTO(
-            node_id="VS-A2-001",
-            field_id="BLOK-B",
+        self._nodes["VS-B1-004"] = NodeDTO(
+            node_id="VS-B1-004",
+            field_id="BLOK-A",
             firmware_ver="v1.0.2-prod",
-            battery_v=3.95,
-            battery_pct=92,
-            last_seen="2026-10-24T16:00:00Z",
-            status="online"
+            battery_v=3.98,
+            battery_pct=91,
+            last_seen="2026-10-28T09:45:00Z",
+            status="online",
+            bedeng_location="Blok B1 (Selatan Irigasi)",
+            transmission_status="online",
+            sleep_interval_text="Online · Sleep 15m",
+            moisture_pct=41.2,
+            soil_temp_c=26.8,
+            ph=6.80,
+            consumption_per_cycle="0,067 mAh/siklus",
+            rssi_dbm=-68,
+            snr_db=10.1,
+            packet_loss_pct=0.0,
+            timestamp_epoch=1792934400
+        )
+        self._nodes["VS-B2-005"] = NodeDTO(
+            node_id="VS-B2-005",
+            field_id="BLOK-A",
+            firmware_ver="v1.0.2-prod",
+            battery_v=3.55,
+            battery_pct=62,
+            last_seen="2026-10-28T09:45:00Z",
+            status="offline_simulated",
+            bedeng_location="Blok B2 (Lereng Selatan)",
+            transmission_status="offline_simulated",
+            sleep_interval_text="Offline → [Est-Simulated]",
+            moisture_pct=28.5,
+            soil_temp_c=30.2,
+            ph=7.45,
+            consumption_per_cycle="0,067 mAh/siklus",
+            rssi_dbm=-94,
+            snr_db=5.2,
+            packet_loss_pct=1.2,
+            timestamp_epoch=1792934400
         )
         
         # 2. Historical 24h Hourly Telemetry (00:00 - 23:00) for VS-A1-003 and others
@@ -134,6 +216,87 @@ class MockDB:
         if field_id:
             return [n for n in self._nodes.values() if n.field_id == field_id]
         return list(self._nodes.values())
+
+
+    def get_hardware_bom(self) -> BoMResponseDTO:
+        items = [
+            BoMItemDTO(
+                id="moisture",
+                component_name="Capacitive Moisture Sensor v1.2",
+                pin_mapping="ADC1 GPIO34",
+                price_idr=15000,
+                category="Sensor Tanah"
+            ),
+            BoMItemDTO(
+                id="ph",
+                component_name="Soil pH Probe Industri + Modul Signal Conditioning",
+                pin_mapping="ADC1 GPIO32",
+                price_idr=62000,
+                category="Sensor Tanah"
+            ),
+            BoMItemDTO(
+                id="temp",
+                component_name="Sensor Suhu DS18B20 Stainless Probe Waterproof",
+                pin_mapping="1-Wire GPIO4",
+                price_idr=18000,
+                category="Sensor Tanah"
+            ),
+            BoMItemDTO(
+                id="lora",
+                component_name="Modul Transceiver LoRa SX1278 Ra-02 433 MHz",
+                pin_mapping="SPI 5/18/19/23",
+                price_idr=45000,
+                category="Komunikasi Nirkabel"
+            ),
+            BoMItemDTO(
+                id="esp32",
+                component_name="Mikrokontroler ESP32 NodeMCU 30-Pin Ultra-Low Power",
+                pin_mapping="Dual-Core 240MHz",
+                price_idr=55000,
+                category="Pemrosesan Komputasi"
+            ),
+            BoMItemDTO(
+                id="solar",
+                component_name="Panel Surya Monokristalin 5V 1W + Modul Charger TP4056",
+                pin_mapping="Regulator VBUS",
+                price_idr=45000,
+                category="Sub-sistem Daya"
+            ),
+            BoMItemDTO(
+                id="battery",
+                component_name="Baterai Industri Li-Ion 18650 3.7V 2600mAh (High-Drain)",
+                pin_mapping="JST-PH 2.0mm",
+                price_idr=45000,
+                category="Sub-sistem Daya"
+            ),
+            BoMItemDTO(
+                id="enclosure",
+                component_name="Enclosure Box IP65 Waterproof + Cable Gland PG7",
+                pin_mapping="Weatherproof IP65",
+                price_idr=55000,
+                category="Proteksi Mekanikal"
+            ),
+            BoMItemDTO(
+                id="power_switch",
+                component_name="MOSFET AO3401A Gate Isolation Switch (Cegah Elektrolisis)",
+                pin_mapping="GPIO25 Power Gate",
+                price_idr=25000,
+                category="Proteksi Elektronika"
+            ),
+            BoMItemDTO(
+                id="calibration_kit",
+                component_name="Kit Larutan Penyangga pH 4.00 & pH 7.00 + Kalibrator",
+                pin_mapping="Lab Testing",
+                price_idr=84000,
+                category="Aksesoris & Kalibrasi"
+            ),
+        ]
+        return BoMResponseDTO(
+            total_cost_idr=449000,
+            currency="IDR",
+            phase_label="Paket Lengkap Kit Node Lapangan TKT-3 (IP65 + Dual Power + Kalibrator)",
+            items=items
+        )
 
     def get_node(self, node_id: str) -> Optional[NodeDTO]:
         return self._nodes.get(node_id)
