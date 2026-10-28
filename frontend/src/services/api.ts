@@ -427,3 +427,110 @@ export async function toggleParcelFailover(
   }
 }
 
+// 11. Digital Twin 15-Parameter Bio-Physical Telemetry
+export interface DigitalTwin15Telemetry {
+  field_id: string;
+  timestamp_utc: string;
+  data_provenance: {
+    station_name: string;
+    wmo_id: string;
+    checksum_sha256: string;
+  };
+  atmosphere_bmkg: {
+    air_temp_c: number;
+    humidity_rh: number;
+    wind_speed_ms: number;
+    solar_radiation_mj: number;
+    precipitation_mm: number;
+  };
+  soil_profile_karst: {
+    clay_pct: number;
+    sand_pct: number;
+    silt_pct: number;
+    coarse_fragments_pct: number;
+    bulk_density_g_cm3: number;
+    field_capacity_theta_fc: number;
+    wilting_point_theta_wp: number;
+  };
+  soil_biophysics_dynamic: {
+    moisture_pct: number;
+    soil_temp_c: number;
+    thermal_phase_lag_minutes: number;
+    etc_daily_mm: number;
+    ph: number;
+    is_simulated_failover: boolean;
+    failover_confidence_pct: number;
+  };
+  crop_and_kinetics: {
+    dat: number;
+    crop_stage: string;
+    kc_coefficient: number;
+    k_urease_rate_hr: number;
+  };
+}
+
+export async function getDigitalTwinTelemetry(
+  fieldId: string = 'BLOK-A'
+): Promise<DigitalTwin15Telemetry | null> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/digital-twin/telemetry/${fieldId}`, {
+      cache: 'no-store',
+      headers: { 'Accept': 'application/json' },
+    });
+    if (!res.ok) return null;
+    const json = await res.json();
+    return json.data || null;
+  } catch {
+    return null;
+  }
+}
+
+export interface DigitalTwinForecastResponse {
+  field_id?: string;
+  hourly_timeline?: Array<{
+    timestamp_utc: string;
+    avri_score: number;
+    risk_category?: string;
+    [key: string]: unknown;
+  }>;
+  [key: string]: unknown;
+}
+
+// 12. Digital Twin 72h Forecast
+export async function getDigitalTwin72hForecast(
+  fieldId: string = 'BLOK-A'
+): Promise<DigitalTwinForecastResponse | null> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/digital-twin/forecast-72h/${fieldId}`, {
+      cache: 'no-store',
+      headers: { 'Accept': 'application/json' },
+    });
+    if (!res.ok) return null;
+    const json = await res.json();
+    return json.data || null;
+  } catch {
+    return null;
+  }
+}
+
+export async function simulateSensorDropout(
+  fieldId: string = 'BLOK-A',
+  elapsedMinutes: number = 180
+): Promise<DigitalTwin15Telemetry | null> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/digital-twin/simulate-dropout`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify({ field_id: fieldId, elapsed_minutes: elapsedMinutes }),
+    });
+    if (!res.ok) return null;
+    const json = await res.json();
+    return json.data || null;
+  } catch {
+    return null;
+  }
+}
+
