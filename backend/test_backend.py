@@ -33,6 +33,25 @@ async def test_websocket():
             await ws.send("ping")
             pong = await ws.recv()
             print(f"[PASS] WebSocket Heartbeat: {pong}")
+
+            # 3. Test live telemetry injection & WebSocket broadcast
+            req = urllib.request.Request(
+                f"{BASE_URL}/simulation/inject-telemetry",
+                data=json.dumps({
+                    "node_id": "VS-A1-003",
+                    "moisture_pct": 22.4,
+                    "soil_temp_c": 31.0,
+                    "ph": 7.75
+                }).encode("utf-8"),
+                headers={"Content-Type": "application/json"},
+                method="POST"
+            )
+            with urllib.request.urlopen(req) as resp:
+                assert resp.getcode() == 200
+            broadcast_msg = await asyncio.wait_for(ws.recv(), timeout=3.0)
+            b_data = json.loads(broadcast_msg)
+            assert b_data.get("event") == "TELEMETRY_UPDATE"
+            print(f"[PASS] WebSocket Broadcast Received: {b_data['event']} (Node: {b_data['data']['node_id']} | AVRI: {b_data['data']['avri_score']}%)")
     except Exception as e:
         print(f"[FAIL] WebSocket error: {e}")
 

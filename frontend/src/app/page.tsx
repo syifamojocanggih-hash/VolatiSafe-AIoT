@@ -41,6 +41,8 @@ import {
   DashboardState,
   RiskCategory,
 } from '@/types/dashboard';
+import { useVolatiSafeWebSocket } from '@/services/websocket';
+import { LiveTelemetryPayload } from '@/types/websocket';
 import { CheckCircle2 } from 'lucide-react';
 
 function transformBackendStatus(
@@ -421,6 +423,140 @@ export default function DashboardPage() {
     }
   }, [isSimulatedCritical, loadBackendData]);
 
+  // Handle Instantaneous Live WebSocket Telemetry Update (INTERFACES.md §3.3)
+  const handleLiveTelemetryUpdate = useCallback((data: LiveTelemetryPayload) => {
+    const m = data.moisture_pct;
+    const t = data.soil_temp_c;
+    const ph = data.ph;
+    const avri = Math.round(data.avri_score);
+    const cat = data.risk_category;
+
+    setCurrentData((prev) => {
+      // 1. Update Metrics Cards
+      const updatedMetrics: MetricItem[] = prev.metrics.map((item) => {
+        if (item.id === 'moisture') {
+          return {
+            ...item,
+            value: `${m.toFixed(1).replace('.', ',')}%`,
+            numericValue: m,
+            status: m < 25 ? 'warning' : 'optimal',
+          };
+        }
+        if (item.id === 'temp') {
+          return {
+            ...item,
+            value: `${t.toFixed(1).replace('.', ',')}°C`,
+            numericValue: t,
+            status: t > 32 ? 'danger' : t > 28 ? 'warning' : 'optimal',
+          };
+        }
+        if (item.id === 'ph') {
+          return {
+            ...item,
+            value: ph.toFixed(2).replace('.', ','),
+            numericValue: ph,
+            status: ph > 8.0 ? 'danger' : ph > 7.5 ? 'warning' : 'optimal',
+          };
+        }
+        if (item.id === 'avri') {
+          return {
+            ...item,
+            value: `${avri}%`,
+            numericValue: avri,
+            status: cat === 'aman' ? 'optimal' : cat === 'waspada' ? 'warning' : 'danger',
+          };
+        }
+        return item;
+      });
+
+      // 2. Update Status Banner
+      const defaultTitle =
+        cat === 'aman'
+          ? 'Aman, waktu optimal pemupukan'
+          : cat === 'waspada'
+          ? 'Waspada: Gunakan metode benam / tugal'
+          : cat === 'kritis'
+          ? 'Peringatan Kritis: Tunda penaburan Urea sekarang'
+          : 'Bahaya Ekstrem: Dilarang keras menabur Urea';
+
+      const updatedBanner: StatusBannerData = {
+        ...prev.statusBanner,
+        category: cat,
+        avriScore: avri,
+        tag: `LIVE STREAM — RISIKO ${cat.toUpperCase()} AVRI ${avri}%`,
+        title: data.prediction?.prescription?.headline || defaultTitle,
+        description: `Suhu tanah ${t.toFixed(1).replace('.', ',')}°C, kelembapan ${m.toFixed(1).replace('.', ',')}%, pH ${ph.toFixed(2)}. ${
+          data.prediction?.prescription?.recommendation || ''
+        }`,
+      };
+
+      // 3. Update SHAP Explanations & Physics Diagnostics if present
+      const shapExplanations: DashboardState['shapExplanations'] =
+        data.prediction?.prescription?.shap_explanations
+          ? data.prediction.prescription.shap_explanations.map((s) => ({
+              feature: s.feature || s.factor || 'Fitur',
+              label: s.label || s.impact_label || s.factor || 'Faktor',
+              impact_pct: s.impact_pct ?? (s.attribution_pct != null ? Math.round(s.attribution_pct) : 15),
+              direction: s.direction || 'up',
+              explanation: s.explanation || s.impact_label,
+            }))
+          : prev.shapExplanations;
+
+      const physicsDiagnostics: DashboardState['physicsDiagnostics'] =
+        data.prediction?.physics_diagnostics
+          ? {
+              k_urease_per_hour: data.prediction.physics_diagnostics.k_urease_per_hour ?? 0.042,
+              hydrolysis_rate: data.prediction.physics_diagnostics.hydrolysis_rate ?? 0.038,
+              is_physics_constrained: data.prediction.physics_diagnostics.is_physics_constrained ?? true,
+              base_physics_score:
+                data.prediction.physics_diagnostics.base_physics_score ??
+                data.prediction.physics_diagnostics.arrhenius_kinetics_pct,
+              residual_ai_score:
+                data.prediction.physics_diagnostics.residual_ai_score ??
+                data.prediction.physics_diagnostics.ai_residual_correction_pct,
+              confidence_margin_pct:
+                data.prediction.physics_diagnostics.confidence_margin_pct ??
+                data.prediction.physics_diagnostics.confidence_interval_margin_pct,
+            }
+          : prev.physicsDiagnostics;
+
+      // 4. Update Field State Metadata
+      const updatedField = {
+        ...prev.field,
+        lastUpdatedMinutesAgo: 0,
+      };
+
+      return {
+        ...prev,
+        metrics: updatedMetrics,
+        statusBanner: updatedBanner,
+        shapExplanations,
+        physicsDiagnostics,
+        field: updatedField,
+      };
+    });
+
+    // Quick toast banner
+    setToastMessage(
+      `📡 Live Telemetri Baru [${data.node_id}]: AVRI ${Math.round(data.avri_score)}% (${data.risk_category.toUpperCase()})`
+    );
+    setTimeout(() => setToastMessage(null), 3000);
+  }, []);
+
+  // Hook into WebSocket live stream
+  const { status: wsStatus } = useVolatiSafeWebSocket({
+    enabled: true,
+    clientId: 'dashboard-cockpit',
+    onTelemetryUpdate: handleLiveTelemetryUpdate,
+    onAlertTriggered: (alertData: unknown) => {
+      const alertObj = alertData as Record<string, unknown> | undefined;
+      setToastMessage(
+        `🚨 PERINGATAN KRITIS: ${(alertObj?.headline as string) || 'Risiko volatilisasi melonjak ke zona kritis!'}`
+      );
+      setTimeout(() => setToastMessage(null), 5000);
+    },
+  });
+
   // Real Farmer Action Handler connected to FastAPI /api/v1/fields/BLOK-A/postpone-action
   const handlePostpone = async () => {
     const nextAction = isPostponed ? 'cancel' : 'postpone';
@@ -509,6 +645,7 @@ export default function DashboardPage() {
           <FieldHeader
             field={currentData.field}
             onOpenSettings={() => setIsSettingsModalOpen(true)}
+            wsStatus={wsStatus}
           />
         )}
 

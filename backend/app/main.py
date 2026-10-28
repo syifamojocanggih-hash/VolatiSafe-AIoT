@@ -30,17 +30,34 @@ def start_mqtt_worker():
             from app.services.ingestion import IngestionService
             res = IngestionService.process_lora_payload(payload)
             if res:
-                import asyncio
                 from app.routers.websocket import ws_manager
-                try:
-                    loop = asyncio.get_event_loop()
-                    if loop.is_running():
-                        loop.create_task(ws_manager.broadcast({
-                            "event": "TELEMETRY_UPDATE",
-                            "data": res
-                        }))
-                except Exception:
-                    pass
+                t_data = res.get("telemetry", {})
+                p_data = res.get("prediction", {})
+                ws_payload = {
+                    "node_id": res.get("node_id"),
+                    "field_id": res.get("field_id", "BLOK-A"),
+                    "timestamp": t_data.get("timestamp"),
+                    "moisture_pct": t_data.get("moisture_pct"),
+                    "soil_temp_c": t_data.get("soil_temp_c"),
+                    "ph": t_data.get("ph"),
+                    "avri_score": p_data.get("avri_score"),
+                    "risk_category": p_data.get("risk_category"),
+                    "is_predicted": t_data.get("is_predicted", False),
+                    "telemetry": t_data,
+                    "prediction": p_data,
+                    "alert": res.get("alert")
+                }
+                # Broadcast TELEMETRY_UPDATE via thread-safe scheduler
+                ws_manager.broadcast_threadsafe({
+                    "event": "TELEMETRY_UPDATE",
+                    "data": ws_payload
+                })
+
+                if res.get("alert"):
+                    ws_manager.broadcast_threadsafe({
+                        "event": "ALERT_TRIGGERED",
+                        "data": res.get("alert")
+                    })
         except Exception as e:
             logger.error(f"Error parsing MQTT message: {e}")
 
@@ -63,6 +80,10 @@ def start_mqtt_worker():
 async def lifespan(app: FastAPI):
     logger.info("Initializing VolatiSafe AIoT Central Backend...")
     logger.info("Registered routes: /api/v1/*, /ws/v1/live")
+    import asyncio
+    from app.routers.websocket import ws_manager
+    main_loop = asyncio.get_running_loop()
+    ws_manager.set_loop(main_loop)
     mqtt_client = start_mqtt_worker()
     yield
     logger.info("Shutting down VolatiSafe AIoT Central Backend...")

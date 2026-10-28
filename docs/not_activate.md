@@ -1,123 +1,165 @@
-# NOT_ACTIVATE.md — Inventarisasi Fitur & Subsistem Non-Aktif / Simulasi (Fase TKT-3)
+# NOT_ACTIVATE.md — Daftar Kebutuhan, Fitur & Integrasi Non-Aktif (Pending Dependencies)
 
-> **STATUS DOKUMEN:** INVENTARISASI TRANSPARANSI ARSITEKTUR & PENGUJIAN PROTOTIPE  
-> Dokumen ini mendokumentasikan secara transparan komponen, data feed, dan subsistem yang **belum diaktifkan secara fisik (*not activated live*)** di lapangan riil, disertai justifikasi teknis, status keaktifan query backend, serta peta jalan aktivasinya (*activation roadmap*).
-
----
-
-## 1. Ringkasan Eksekutif & Batasan Regulasi Kompetisi
-
-Berdasarkan **ADR 004** (*Closed-Loop Software Simulation untuk Prototipe TKT 3*) dan ketentuan resmi kompetisi inovasi:
-1. **Batas Pengumpulan Proposal Tahap I (31 Oktober 2026):** Evaluasi difokuskan pada validitas rancangan biofisik, akurasi inferensi PIML (*Physics-Informed Machine Learning*), ketahanan arsitektur anti-korupsi IoT, dan antarmuka Digital Twin Cockpit.
-2. **Skema Pendanaan Fisik:** Insentif pengadaan komponen perangkat keras fisik (Rp3.000.000,- per tim) baru dicairkan panitia kepada tim yang lolos ke **Tahap 10 Besar Finalis (diumumkan 9 November 2026)**.
-
-Oleh karena itu, sistem VolatiSafe AIoT dirancang dengan arsitektur modular yang membedakan secara tegas antara:
-- **Komponen LIVE:** Backend REST API, Database TimescaleDB (termasuk query analitik dinamis deret waktu komparasi $t-24\text{ jam}$), Engine Inferensi LightGBM + TreeSHAP, Digital Twin FAO-56, Frontend Next.js 14 Cockpit, PWA, dan sinkronisasi status agronomis.
-- **Komponen NOT ACTIVATED (Emulated / Cached):** Transmisi LoRa fisik lapangan, continuous satellite streaming, dan SMS/WhatsApp blast gateway.
+> **STATUS DOKUMEN:** INVENTARISASI TRANSPARANSI ARSITEKTUR, PENDING TASKS & DEPENDENSI NON-AKTIF  
+> Dokumen ini **hanya mendokumentasikan fitur, kode, subsistem, dan berkas yang BELUM DIAKTIFKAN (*NOT ACTIVATED*) atau BELUM TERINTEGRASI PENUH** di lapangan riil maupun antarmuka aplikasi. Seluruh daftar di bawah menyertakan tautan langsung ke file kode terkait, alasan teknis, dependensi yang belum terpenuhi (seperti ketiadaan modul fisik, ketiadaan API berbayar, atau belum adanya data lapangan kontinu), serta rencana penyelesaiannya (*activation roadmap*).
 
 ---
 
-## 2. Matriks Status Aktivasi Subsistem
+## 1. Matriks Rekapitulasi Komponen & Berkas Non-Aktif
 
-| No | Komponen / Subsistem | Status Aktivasi | Mekanisme Saat Ini (Fase TKT-3) | Rencana Aktivasi Penuh (Fase Finalis) |
-|---|---|---|---|---|
-| **1** | **Node Sensor Lapangan Fisik (LoRa SX1278 433 MHz)** | ⚠️ **Not Activated (Physical)** | **Wokwi Virtual Testbed + Mosquitto MQTT + Digital Twin FAO-56 Failover** | Perakitan PCB, enclosure IP67 waterproof, dan deployment 3 node sensor fisik di lahan Desa Bluri. |
-| **2** | **Citra Satelit On-Demand Continuous Stream** | ⚠️ **Not Activated (Live API)** | **Geo-Referenced Cached Sentinel-2 (Copernicus) & UAV Orthomosaic (0.2m GSD)** | Integrasi webhook Sentinel Hub Enterprise / Google Earth Engine bila kuota komersial disetujui. |
-| **3** | **Kanal Notifikasi WhatsApp Broadcast Live** | ⚠️ **Not Activated (Sandbox Mode)** | **Mock Gateway (`MOCK_TOKEN`) + Logging Transaksional di TimescaleDB** | Konfigurasi API Key aktif Fonnte / Wablas untuk pengiriman pesan otomatis ke nomor HP petani. |
-| **4** | **Hardware LoRa Gateway Basecamp Fisik** | ⚠️ **Not Activated (Physical)** | **Local Gateway Adapter Bridge (MQTT to REST Ingestion)** | Pemasangan ESP32 LoRa Gateway dengan antena omni 5.8 dBi di atap Balai Desa Bluri. |
-| **5** | **Komparasi Delta Deret Waktu $t-24\text{ jam}$** | ✅ **LIVE & AKTIF PENUH** | **Query SQL Dinamis ke Hypertable `telemetry` & `predictions` TimescaleDB** | Ingestion kontinu 24/7 (96 paket/hari) dari sensor fisik lapangan. |
-
----
-
-## 3. Rincian Teknis Subsistem yang Belum Diaktifkan Fisik
-
-### 3.1 Transmisi Fisik Sensor IoT Lapangan
-- **Kondisi Lapangan:** Modul mikrokontroler ESP32 fisik, sensor kelembaban tanah kapasitif v1.2, sensor suhu DS18B20, dan probe pH tanah belum ditancapkan secara permanen di petak jagung Desa Bluri, Solokuro.
-- **Justifikasi:** Pengadaan modul komersial menunggu pencairan dana pembinaan 10 besar finalis pasca 9 November 2026.
-- **Mekanisme yang Berjalan Sekarang:**
-  1. **Firmware C++ Identik:** Kode program yang diuji di emulator Wokwi adalah kode C++ yang sama persis (100% *drop-in compatible*) dengan yang akan di-flash ke ESP32 fisik via PlatformIO.
-  2. **Data Replay Riil:** Bukan bilangan acak buatan (`random()`), melainkan hasil replay deret waktu agroklimatologi stasiun pengamatan dan data historis tanah alkalin Lamongan.
-  3. **Digital Twin FAO-56 Failover:** Endpoint `POST /api/v1/fields/{id}/parcels/{parcel_id}/simulate-failover` secara aktif memvalidasi skenario jika sensor LoRa terputus/rusak, estimasi telemetri seketika diambil alih oleh model neraca air tanah biofisik FAO-56.
+| No | Komponen / Fitur | Domain | File / Kode Terkait | Status Saat Ini | Dependensi & Alasan Belum Terintegrasi |
+|---|---|:---:|---|:---:|---|
+| **1** | **Kanal WhatsApp Blast Live ke Nomor Petani** | **Komunikasi** | [`backend/app/services/alert_dispatcher.py`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/backend/app/services/alert_dispatcher.py#L96-L105)<br>[`docker/.env`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/docker/.env) | ⚠️ **Non-Aktif (Sandbox)** | Memerlukan API Key Fonnte/Wablas berbayar & nomor bisnis terverifikasi; diisolasi agar petani asli tidak terkena spam saat juri menguji skenario darurat. |
+| **2** | **Ekspor Laporan Audit Agrikultur ke File PDF Resmi** | **Frontend / BE** | [`frontend/src/components/report/ReportAnalytics.tsx`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/frontend/src/components/report/ReportAnalytics.tsx#L10-L52)<br>*(Target BE: `backend/app/routers/reports.py`)* | ⚠️ **Non-Aktif (Client CSV Only)** | Tombol ekspor saat ini hanya mengunduh CSV sintetis dari browser; endpoint backend render PDF formal (WeasyPrint / Headless Chromium) belum dipasang. |
+| **3** | **PWA Offline Mutation Background Sync** | **Frontend (FE)** | [`frontend/next.config.mjs`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/frontend/next.config.mjs#L1-L4)<br>[`frontend/src/app/page.tsx`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/frontend/src/app/page.tsx#L559-L600) | ⚠️ **Non-Aktif (Direct POST)** | Next.js config belum memasang Workbox Service Worker Background Sync; tombol penundaan pupuk langsung menembak API tanpa antrean IndexedDB offline. |
+| **4** | **Node Sensor IoT Fisik (LoRa SX1278 433 MHz)** | **Hardware / IoT** | [`firmware/`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/firmware)<br>[`simulation/wokwi/`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/simulation/wokwi)<br>[`simulation/telemetry_generator.py`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/simulation/telemetry_generator.py) | ⚠️ **Non-Aktif (Fisik Lapangan)** | Modul mikrokontroler ESP32, probe kapasitif, DS18B20, dan PCB belum dipasang permanen di sawah Solokuro karena menunggu pencairan dana finalis 10 besar (9 Nov 2026). |
+| **5** | **Hardware Basecamp LoRa Gateway di Balai Desa** | **Hardware / IoT** | [`docker/mosquitto.conf`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/docker/mosquitto.conf)<br>[`backend/app/main.py`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/backend/app/main.py#L19-L59) | ⚠️ **Non-Aktif (Fisik Lapangan)** | Tiang antena omni 5.8 dBi dan modul gateway belum terpasang di atap Balai Desa Bluri. Saat ini dijembatani via Mosquitto MQTT broker lokal dan bridge emulator Wokwi. |
+| **6** | **Streaming Citra Satelit Real-Time (On-Demand Per Jam)** | **Digital Twin** | [`frontend/src/components/map/LeafletFieldMap.tsx`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/frontend/src/components/map/LeafletFieldMap.tsx#L95-L125)<br>[`backend/app/services/parcels_data.py`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/backend/app/services/parcels_data.py) | ⚠️ **Non-Aktif (Live API)** | Satelit Sentinel-2 memiliki orbit revisit 5 hari di khatulistiwa; API komersial per-jam (PlanetScope) membutuhkan biaya langganan ribuan USD/bulan. |
+| **7** | **Radar Cuaca Mikro Doppler (< 500m) BMKG** | **Digital Twin** | [`simulations/data_replay/datasets/bmkg_lamongan.csv`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/simulations/data_replay/datasets/bmkg_lamongan.csv)<br>*(Target: `simulations/data_replay/bmkg_replay.py`)* | ⚠️ **Non-Aktif (Live API)** | BMKG belum membuka API publik untuk streaming data radar awan mikro konvektif resolusi 100m secara bebas biaya; saat ini memakai deret waktu stasiun agroklimat Lamongan. |
+| **8** | **Online Continuous Auto-Retraining Model AI** | **AI Engine** | [`ai_engine/train.py`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/ai_engine/train.py)<br>[`ai_engine/inference.py`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/ai_engine/inference.py#L25-L65) | ⚠️ **Non-Aktif (Pipeline Cron)** | Retraining otomatis harian di cloud belum diaktifkan karena memerlukan akumulasi telemetri tanah riil minimal $\ge 30$ hari kontinu dari sensor fisik agar tidak terjadi overfitting. |
+| **9** | **Kalibrasi Spektroskopi Laboratorium Enzim Urease** | **AI & Biofisika** | [`ai_engine/physics_layer.py`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/ai_engine/physics_layer.py#L24-L35) | ⚠️ **Non-Aktif (Lab Calibration)** | Parameter energi aktivasi ($E_a = 51.0\text{ kJ/mol}$) dan faktor frekuensi ($A = 3.2 \times 10^8$) masih menggunakan konstanta literatur universal (Kissel & Cabrera), belum diuji lab kimia tanah lokal. |
+| **10** | **Computer Vision Deteksi Defisiensi N Daun Jagung (LCC)** | **PRD Roadmap** | [`PRD_VolatiSafe_AIoT_v1.md`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/PRD_VolatiSafe_AIoT_v1.md#L518-L530)<br>*(Target FE: `frontend/src/components/vision/`)* | ⚠️ **Non-Aktif (Roadmap TKT-5)** | Fitur kamera pemindai warna daun jagung dijadwalkan pada roadmap tahap lanjut (TKT-5); fase TKT-3 difokuskan pada pencegahan volatilisasi urea di lapisan tanah. |
 
 ---
 
-### 3.2 Live On-Demand Satelit Multispektral (Sentinel-2)
-- **Kondisi Satelit:** Satelit Sentinel-2 (Copernicus ESA) tidak menyediakan streaming video/citra per menit atau per jam. Satelit tersebut memiliki periode edar ulang (*revisit time*) **5 hari** untuk lokasi geografis Indonesia (-6.916°S).
-- **Justifikasi:** 
-  - Layanan satelit real-time per jam komersial (seperti PlanetScope Dove constellation) berbiaya ribuan USD per bulan, berada di luar jangkauan prototipe kompetisi mahasiswa.
-  - Untuk fenologi tanaman jagung, siklus pembaruan citra vegetasi (NDVI) setiap 5–7 hari sudah sangat memadai secara agronomis.
-- **Mekanisme yang Berjalan Sekarang:**
-  - Menggunakan snapshot multispektral presisi Sentinel-2 tanggal 26 Oktober 2026 (`NDVI = 0.68`, tutupan awan 2.1%) yang dipadukan dengan peta ortomosaik ortorektifikasi UAV (*drone orthomosaic*) beresolusi 0.2m GSD.
-  - Poligon kadastral 12 bedeng persil (`A1` s/d `C4`) dipetakan secara presisi mengikuti pematang sawah dan saluran irigasi di hamparan persawahan jagung Solokuro, Lamongan (-6.912350, 112.345680).
+## 2. Rincian Teknis & Kode Berkas Non-Aktif per Domain
+
+### 2.1 Domain Komunikasi & WhatsApp Broadcast
+* **File Terkait:**
+  * [`backend/app/services/alert_dispatcher.py`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/backend/app/services/alert_dispatcher.py#L96-L105)
+  * [`docker/.env`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/docker/.env)
+* **Status Implementasi di Kode:**
+  Di dalam method `AlertDispatcherService.dispatch_critical_alert()`, payload pesan telah diformat lengkap (`format_critical_whatsapp_msg`), namun proses transmisi HTTP POST ke provider eksternal (Fonnte/Wablas) sengaja dimatikan (*sandbox simulation*):
+  ```python
+  # backend/app/services/alert_dispatcher.py:96-104
+  # Simulasi pengiriman sukses ke gateway WhatsApp & Telegram
+  return {
+      "dispatched": True,
+      "field_id": field_id,
+      "avri_score": avri_score,
+      "channels": ["WhatsApp (Wablas/Fonnte)", "Telegram (@VolatiSafeAlertBot)"],
+      "formatted_message": msg,
+      "timestamp": now.isoformat()
+  }
+  ```
+* **Dependensi & Kebutuhan Aktivasi:**
+  1. Pembelian kuota API Fonnte/Wablas pasca pencairan dana finalis.
+  2. Pengisian variabel `FONNTE_API_TOKEN` pada [`docker/.env`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/docker/.env).
+  3. Mengganti blok return simulasi dengan `httpx.post("https://api.fonnte.com/send", headers=headers, data=payload)`.
 
 ---
 
-### 3.3 Kanal Pengiriman Pesan WhatsApp Petani (Fonnte/Wablas)
-- **Kondisi Pesan:** Pesan teks WhatsApp preskriptif harian tidak ditembakkan langsung ke nomor WhatsApp riil petani Pak Suparman saat pengujian juri.
-- **Justifikasi:** Menghindari *spamming* dan kepanikan petani asli selama proses demonstrasi simulasi skenario ekstrem (misalnya saat juri menguji tombol simulasi Bahaya AVRI 88%).
-- **Mekanisme yang Berjalan Sekarang:**
-  - Endpoint backend `/api/v1/fields/{id}/postpone-action` mengeksekusi penyimpanan aksi penundaan ke TimescaleDB (`fertilization_logs`).
-  - Payload notifikasi diformat lengkap sesuai standar preskripsi agronomis dan ditampilkan seketika pada antarmuka *Action Banner* dan *Status Toast*.
+### 2.2 Domain Frontend & Ekspor Laporan PDF Formal
+* **File Terkait:**
+  * [`frontend/src/components/report/ReportAnalytics.tsx`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/frontend/src/components/report/ReportAnalytics.tsx#L10-L52)
+  * *Target Backend Endpoint yang belum dibuat:* `backend/app/routers/reports.py`
+* **Status Implementasi di Kode:**
+  Tombol ekspor pada [`ReportAnalytics.tsx`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/frontend/src/components/report/ReportAnalytics.tsx) saat ini mengeksekusi `handleDownloadCsv()` yang membuat data URI CSV sintetis di memori browser pengguna (`data:text/csv;charset=utf-8,...`).
+* **Dependensi & Kebutuhan Aktivasi:**
+  1. Pembuatan endpoint backend `GET /api/v1/reports/{field_id}/pdf` yang merender template HTML ke dokumen PDF formal (menggunakan WeasyPrint atau Puppeteer).
+  2. Penambahan tombol *"Unduh Laporan Audit Formal (PDF)"* pada [`ReportAnalytics.tsx`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/frontend/src/components/report/ReportAnalytics.tsx).
 
 ---
 
-### 3.4 Kerapatan Data Deret Waktu 24 Jam & Query Komparasi Dinamis
-- **Status Komparasi:** **AKTIF PENUH (LIVE DYNAMIC QUERY)** di backend FastAPI dan TimescaleDB.
-- **Formulasi Query:** Endpoint `GET /api/v1/fields/{id}/current-status` mengeksekusi perbandingan dinamis:
-  $$\Delta \text{Moisture} = \theta_{\text{now}} - \theta_{t-24\text{h}}$$
-  $$\Delta \text{Soil Temp} = T_{\text{soil, now}} - T_{\text{soil}, t-24\text{h}}$$
-  $$\Delta \text{pH} = \text{pH}_{\text{now}} - \text{pH}_{t-24\text{h}}$$
-  $$\Delta \text{AVRI} = \text{AVRI}_{\text{now}} - \text{AVRI}_{t-24\text{h}}$$
-- **Kondisi Ingestion:**
-  - Pada fase operasional penuh lapangan (pasca 9 Nov 2026), node LoRa akan memancarkan data setiap 15 menit secara terus-menerus (96 paket/hari) ke hypertable TimescaleDB `telemetry`.
-  - Pada fase seleksi prototipe (sebelum 31 Okt 2026), tabel telemetri dipasok melalui sesi uji coba emulator Wokwi dan replay BMKG. Jika terdapat jeda waktu antar-sesi uji coba, backend secara cerdas membandingkan state terkini dengan titik telemetri historis terdekat sebelumnya atau baseline diurnal sehingga angka delta **selalu mencerminkan dinamika biofisika tanah aktual dan tidak pernah menggunakan nilai konstan dummy statis**.
+### 2.3 Domain Frontend PWA Offline Mutation Background Sync
+* **File Terkait:**
+  * [`frontend/next.config.mjs`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/frontend/next.config.mjs#L1-L4)
+  * [`frontend/src/app/page.tsx`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/frontend/src/app/page.tsx#L559-L600)
+* **Status Implementasi di Kode:**
+  * [`frontend/next.config.mjs`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/frontend/next.config.mjs) saat ini berupa konfigurasi kosong (`export default nextConfig;`) tanpa integrasi Workbox Background Sync plugin.
+  * Aksi penundaan pemupukan oleh petani pada `handlePostpone()` di [`page.tsx`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/frontend/src/app/page.tsx) langsung memanggil API `recordPostponeAction()` secara asinkron. Jika ponsel petani *offline* total di tengah sawah, aksi akan gagal dan belum tersimpan di antrean IndexedDB lokal untuk sinkronisasi otomatis (*background sync*).
+* **Dependensi & Kebutuhan Aktivasi:**
+  1. Konfigurasi `@ducanh2912/next-pwa` atau Workbox Service Worker dengan `workbox-background-sync`.
+  2. Implementasi antrean mutasi lokal via IndexedDB / `idb-keyval` sebelum ditembakkan ke backend.
 
 ---
 
-### 3.5 Inferensi PIML Arrhenius vs LightGBM & Atribusi Fitur TreeSHAP Real-Time
-- **Status Inferensi:** **AKTIF PENUH (LIVE INFERENCE ON-THE-FLY)** di `ai_engine.inference.AVRIInferenceEngine` dan backend FastAPI.
-- **Dekomposisi Fisika & Margin Keyakinan:**
-  - Komponen biofisika Arrhenius ($L_{\text{Arrhenius}}$) dihitung secara riil dari kinetika reaksi hidrolisis urea enzimatis tanah:
-    $$k_{\text{urease}} = A \exp\left(-\frac{E_a}{R \cdot T_{\text{soil}}}\right) \cdot f(\theta) \cdot f(\text{pH})$$
-  - Residual Machine Learning ($R_{\text{AI}}$) diprediksi oleh LightGBM booster dengan batasan monotonik (*monotone constraints*) untuk mengoreksi interaksi non-linear mikroklimat.
-  - Nilai margin keyakinan ($\pm 1.2\%$) dan faktor TreeSHAP dihitung per request inferensi dan dipasok langsung ke modal dashboard tanpa tabel statis `if-else`.
-- **Rencana Retraining Kontinu Lapangan:**
-  - Bobot model yang berjalan saat ini adalah model *pre-trained* hasil kalibrasi dataset agroklimat Lamongan dan pustaka kinetika tanah FAO.
-  - Fitur *continuous online fine-tuning* (retraining otomatis harian di edge/cloud) akan diaktifkan secara terjadwal setelah node sensor fisik terpasang dan mengumpulkan data kontinu $\ge 30$ hari di lapangan.
+### 2.4 Domain IoT & Hardware Lapangan
+* **File Terkait:**
+  * [`firmware/`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/firmware) (direktori firmware fisik)
+  * [`simulation/wokwi/`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/simulation/wokwi) (lingkungan uji firmware virtual)
+  * [`simulation/telemetry_generator.py`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/simulation/telemetry_generator.py)
+* **Status Implementasi di Kode:**
+  * Seluruh pengujian paket telemetri 52-byte LoRa saat ini di-generate melalui skrip generator simulasi [`simulation/telemetry_generator.py`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/simulation/telemetry_generator.py) dan diuji di lingkungan Wokwi simulator.
+  * Modul fisik mikrokontroler ESP32, sensor kelembaban tanah kapasitif v1.2, sensor suhu DS18B20, dan probe pH tanah industri belum di-flash dan belum ditancapkan di lahan nyata.
+* **Dependensi & Kebutuhan Aktivasi:**
+  1. Pencairan insentif dana hibah Rp3.000.000,- pasca pengumuman 10 besar finalis (9 November 2026).
+  2. Fabrikasi PCB dan perakitan enclosure IP67 waterproof untuk 3 node sensor fisik.
+  3. Flashing kode C++ PlatformIO ke ESP32 fisik dan pemasangan di petak sawah Solokuro.
 
 ---
 
-### 3.6 Layar Manajemen Node LoRa & Hardware (BoM Rp 449.000 & Telemetri RF)
-- **Status Endpoint:** **AKTIF PENUH (LIVE API & POLLING)** di endpoint `GET /api/v1/nodes` dan `GET /api/v1/nodes/bom`.
-- **Telemetri Live & Diagnostik Sinyal RF:**
-  - Antarmuka [`NodeManagement.tsx`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/frontend/src/components/admin/NodeManagement.tsx) secara asinkron memuat daftar node aktif (`VS-A1-001`, `VS-A1-002`, `VS-A1-003`, `VS-B1-004`, `VS-B2-005`), pembacaan sensor aktual ($\theta$, $T_{\text{soil}}$, pH), tegangan baterai, dan metrik RF LoRa nyata:
-    - RSSI: `-82 dBm`
-    - Margin Noise (SNR): `+8.2 dB`
-    - Tingkat Kehilangan Paket (*Packet Loss*): `0.4%`
-    - Modulasi Frekuensi: `433.0 MHz ISM · SF7 / 125 kHz`
-- **Rincian Biaya Perangkat (Bill of Materials / BoM):**
-  - Rincian 10 item komponen modular (sensor kelembaban kapasitif, probe pH tanah industri, sensor suhu DS18B20, LoRa SX1278, ESP32, solar cell TP4056, baterai 18650, enclosure IP65, MOSFET isolation gate, dan kalibrator lab) dipasok langsung dari backend dengan total resmi **Rp 449.000** per paket node lengkap.
-- **Batasan Fisik Saat Ini (Sesuai ADR 004):**
-  - Fisik hardware PCB dan probe belum ditancapkan permanen di pematang sawah Solokuro menunggu pencairan dana finalis (Rp3.000.000,- pasca 9 Nov 2026). Aliran paket data 52-byte telemetri diuji melalui Wokwi simulator dan replay transmisi LoRa yang 100% kompatibel dengan firmware ESP32 produksi.
+### 2.5 Domain Hardware Basecamp LoRa Gateway di Balai Desa
+* **File Terkait:**
+  * [`docker/mosquitto.conf`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/docker/mosquitto.conf)
+  * [`backend/app/main.py`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/backend/app/main.py#L19-L59)
+* **Status Implementasi di Kode:**
+  * Fungsi `start_mqtt_worker()` di [`backend/app/main.py`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/backend/app/main.py) mendengarkan broker Mosquitto pada port 1883 lokal yang dijalankan melalui Docker Compose.
+  * Perangkat keras stasiun penerima LoRa Gateway fisik (ESP32 Gateway + antena omni 5.8 dBi) belum terpasang di atap Balai Desa Bluri.
+* **Dependensi & Kebutuhan Aktivasi:**
+  1. Pembelian modul gateway LoRa SX1278 to WiFi/Ethernet.
+  2. Pemasangan tiang antena omni 5.8 dBi di atap Balai Desa Bluri untuk menjangkau radius 2–5 km *line-of-sight*.
 
 ---
 
-## 4. Peta Jalan Aktivasi Lapangan Penuh (Pasca Pengumuman 10 Besar)
+### 2.6 Domain Digital Twin (Citra Satelit & Radar Cuaca BMKG)
+* **File Terkait:**
+  * [`frontend/src/components/map/LeafletFieldMap.tsx`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/frontend/src/components/map/LeafletFieldMap.tsx#L95-L125)
+  * [`backend/app/services/parcels_data.py`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/backend/app/services/parcels_data.py)
+  * [`simulations/data_replay/datasets/bmkg_lamongan.csv`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/simulations/data_replay/datasets/bmkg_lamongan.csv)
+  * *Target skrip Digital Twin:* `simulations/data_replay/bmkg_replay.py` (spesifikasi di [`docs/digital_twin/TASK_GUIDE.md`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/docs/digital_twin/TASK_GUIDE.md#L20-L28))
+* **Status Implementasi di Kode:**
+  * Peta persil kadastral pada [`LeafletFieldMap.tsx`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/frontend/src/components/map/LeafletFieldMap.tsx) menggunakan raster tile satelit Esri World Imagery dan OpenStreetMap statis, bukan live stream satelit per-jam.
+  * Suplai data cuaca pada Digital Twin di-load dari berkas historis [`simulations/data_replay/datasets/bmkg_lamongan.csv`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/simulations/data_replay/datasets/bmkg_lamongan.csv) karena ketiadaan API terbuka radar cuaca mikro BMKG.
+* **Dependensi & Kebutuhan Aktivasi:**
+  1. Langganan komersial Sentinel Hub Enterprise / PlanetScope jika disetujui sponsor/dinas pertanian.
+  2. Nota kesepahaman (MoU) integrasi data feed radar BMKG Stasiun Meteorologi Tuban/Lamongan.
+
+---
+
+### 2.7 Domain AI Engine (Continuous Auto-Retraining & Kalibrasi Lab)
+* **File Terkait:**
+  * [`ai_engine/train.py`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/ai_engine/train.py) (skrip training batch manual)
+  * [`ai_engine/inference.py`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/ai_engine/inference.py#L25-L65)
+  * [`ai_engine/physics_layer.py`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/ai_engine/physics_layer.py#L24-L35)
+* **Status Implementasi di Kode:**
+  * [`ai_engine/physics_layer.py`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/ai_engine/physics_layer.py) menggunakan konstanta literatur universal (Kissel & Cabrera 2005): $A_{\text{urease}} = 3.2 \times 10^8\text{ jam}^{-1}$ dan $E_a = 51.0\text{ kJ/mol}$, belum dikalibrasi dengan spektroskopi tanah alkalin Lamongan.
+  * Skrip [`ai_engine/train.py`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/ai_engine/train.py) dieksekusi secara manual, belum dipasang cron scheduler otomatis harian karena menunggu pengumpulan data sensor fisik $\ge 30$ hari kontinu di lapangan.
+* **Dependensi & Kebutuhan Aktivasi:**
+  1. Pengiriman sampel tanah persil Solokuro ke laboratorium Balittanah/BPTP untuk kalibrasi kinetika urease spesifik.
+  2. Akumulasi data telemetri lapangan minimal 1 musim tanam (30 hari) sebelum mengaktifkan pipeline retraining otomatis.
+
+---
+
+### 2.8 Domain PRD Roadmap (Computer Vision Daun Jagung / LCC)
+* **File Terkait:**
+  * [`PRD_VolatiSafe_AIoT_v1.md`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/PRD_VolatiSafe_AIoT_v1.md#L518-L530)
+  * *Target Komponen Frontend:* `frontend/src/components/vision/LeafColorScanner.tsx` (belum dibuat)
+* **Status Implementasi di Kode:**
+  Fitur ini tercantum pada roadmap PRD tahap lanjut (TKT-5) dan sengaja belum dibuat pada repositori saat ini agar seluruh sumber daya rekayasa difokuskan pada validitas biofisika tanah dan sistem anti-korupsi IoT TKT-3.
+* **Dependensi & Kebutuhan Aktivasi:**
+  Pengembangan dataset citra daun jagung teranotasi dan model MobileNetV3 / YOLOv8-nano pada fase pengembangan purnakompetisi.
+
+---
+
+## 3. Peta Jalan Aktivasi Lapangan (Fase 10 Besar Finalis)
 
 ```mermaid
 flowchart TD
     A["9 November 2026: Pengumuman 10 Besar Finalis"] --> B["Pencairan Dana Hibah Rp3.000.000"]
     B --> C["Aktivasi Hardware IoT: Flashing Firmware ke 3 ESP32 & Fabrikasi Enclosure IP67"]
-    B --> D["Aktivasi Gateway: Pemasangan LoRa SX1278 di Balai Desa Bluri"]
+    B --> D["Aktivasi Gateway: Pemasangan LoRa SX1278 di Atap Balai Desa Bluri"]
     B --> E["Aktivasi WhatsApp Gateway: Pembelian Kuota API Fonnte untuk Nomor Petani"]
-    C --> F["Deployment Fisik di Hamparan Sawah Desa Bluri"]
+    B --> H["Uji Lab Sampel Tanah: Kalibrasi Parameter Enzim Urease Spesifik Petak"]
+    C --> F["Deployment Fisik di Hamparan Sawah Solokuro"]
     D --> F
     E --> F
+    H --> F
     F --> G["100% Live Field Data Stream & Uji Lapangan Evaluasi Finalis"]
 ```
 
 ---
 
-## 5. Kesimpulan Kesiapan Sistem
+## 4. Kesimpulan Kesiapan
 
-Arsitektur sistem VolatiSafe AIoT telah memenuhi standar **TKT 3 (Technology Readiness Level 3 — Pembuktian Konsep Analitis & Eksperimental)**. Seluruh lapisan perangkat lunak (Backend FastAPI, Database TimescaleDB, AI Engine PIML, dan Frontend Next.js Cockpit) telah beroperasi secara **100% fungsional, terhubung secara dinamis, dan siap menerima aliran data sensor fisik tanpa memerlukan refactoring kode tambahan**.
+Seluruh daftar berkas di atas adalah **kode dan modul yang secara sadar ditangguhkan (*by design*) karena ketergantungan perangkat keras fisik, biaya API komersial, atau pengujian laboratorium lapangan**. Seluruh perangkat lunak inti (Backend REST API, WebSocket stream, TimescaleDB, AI Engine PIML, dan Next.js Cockpit) telah **100% selesai dibangun dan siap menerima integrasi fisik tersebut tanpa perombakan arsitektur**.

@@ -1,5 +1,6 @@
 import json
 import logging
+import asyncio
 from typing import List, Optional
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Query
 
@@ -11,9 +12,14 @@ class ConnectionManager:
     """
     Mengelola koneksi aktif WebSocket untuk siaran telemetri real-time
     (WEBSOCKET_AND_ALERTS.md §1 & INTERFACES.md §3.3).
+    Mendukung broadcast asinkron dan thread-safe dari background thread (seperti MQTT consumer).
     """
     def __init__(self):
         self.active_connections: List[WebSocket] = []
+        self.main_loop: Optional[asyncio.AbstractEventLoop] = None
+
+    def set_loop(self, loop: asyncio.AbstractEventLoop):
+        self.main_loop = loop
 
     async def connect(self, websocket: WebSocket):
         await websocket.accept()
@@ -39,6 +45,21 @@ class ConnectionManager:
         for dead in dead_connections:
             self.disconnect(dead)
 
+    def broadcast_threadsafe(self, message: dict):
+        """
+        Menjadwalkan broadcast secara aman dari worker/background thread
+        ke FastAPI main event loop tanpa konflik loop concurrency.
+        """
+        if self.main_loop and self.main_loop.is_running():
+            asyncio.run_coroutine_threadsafe(self.broadcast(message), self.main_loop)
+        else:
+            try:
+                loop = asyncio.get_event_loop()
+                if loop.is_running():
+                    loop.create_task(self.broadcast(message))
+            except Exception as e:
+                logger.warning(f"Could not broadcast message threadsafe: {e}")
+
 ws_manager = ConnectionManager()
 
 @router.websocket("/ws/v1/live")
@@ -48,7 +69,7 @@ async def websocket_live_stream(
 ):
     await ws_manager.connect(websocket)
     try:
-        # Kirim salam pembuka status koneksi
+        # Kirim salam pembuka status koneksi (INTERFACES.md §3.3)
         await websocket.send_json({
             "event": "CONNECTED",
             "message": "Connected to VolatiSafe AIoT live stream",
@@ -62,7 +83,7 @@ async def websocket_live_stream(
             else:
                 try:
                     parsed = json.loads(data)
-                    # Jika klien mengirimkan simulasi pesan
+                    # Jika klien mengirimkan simulasi pesan echo
                     if parsed.get("action") == "echo":
                         await websocket.send_json({"event": "ECHO", "payload": parsed})
                 except json.JSONDecodeError:
@@ -72,3 +93,4 @@ async def websocket_live_stream(
     except Exception as e:
         logger.error(f"WebSocket error: {e}")
         ws_manager.disconnect(websocket)
+
