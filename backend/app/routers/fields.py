@@ -64,9 +64,36 @@ def get_field_current_status(field_id: str, session: Session = Depends(get_db)):
             )
             headline = f"RISIKO {category.upper()} — AVRI {pred_res.avri_score:.0f}%"
 
+            # Phenology / crop cycle mapping
+            dat = int(state_rec.dat or 32)
+            if dat <= 7:
+                crop_phase = "Fase Perkecambahan (VE)"
+            elif dat <= 20:
+                crop_phase = "Fase Daun Tiga (V3)"
+            elif dat <= 40:
+                crop_phase = "Fase 8 Vegetatif"
+            elif dat <= 65:
+                crop_phase = "Fase Daun Dua Belas / Bunting (V12)"
+            elif dat <= 90:
+                crop_phase = "Fase Pengisian Biji (R3)"
+            else:
+                crop_phase = "Fase Masak Fisiologis (R6)"
+
+            block_name = "Blok A"
+            if "Blok B" in field_rec.name:
+                block_name = "Blok B"
+            elif "Blok C" in field_rec.name:
+                block_name = "Blok C"
+
             return create_envelope(FieldCurrentStatusDTO(
                 field_id=field_rec.field_id,
                 field_name=field_rec.name,
+                farmer_name=field_rec.owner_name or "Pak Suparman",
+                block=block_name,
+                area_ha=float(field_rec.area_ha or 0.75),
+                crop_age_days=dat,
+                crop_phase=crop_phase,
+                corn_variety="BISI-18",
                 last_updated=state_rec.updated_at.strftime("%Y-%m-%dT%H:%M:%SZ") if state_rec.updated_at else datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
                 battery_pct=battery_pct,
                 is_simulated_failover=False,

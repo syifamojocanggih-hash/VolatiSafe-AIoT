@@ -2,6 +2,25 @@
 
 Seluruh catatan kemajuan, keputusan teknis, dan implementasi antarmuka frontend (Next.js 14, Tailwind CSS, PWA) dicatat secara kronologis di sini.
 
+## [2026-10-28] — Integrasi Header Informasi Lahan 100% Live & Auto-Refresh Telemetri
+
+### 🌽 Header Informasi Lahan Live & Sinkronisasi Siklus Tanam (FieldHeader.tsx, page.tsx, pi.ts, INTERFACES.md)
+- **Eliminasi Data Dummy pada Header Lahan:**
+  - Menghubungkan Nama Petani (armerName), Luas Baku (reaHa), Blok (lock), dan Fase Pertumbuhan Jagung (datDays HST, phaseName) langsung ke respons live API backend GET /api/v1/fields/{id}/current-status.
+  - Header [FieldHeader.tsx](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/frontend/src/components/header/FieldHeader.tsx) kini 100% dinamis menampilkan:
+    - Judul: Kebun Jagung Pak Suparman - Blok A
+    - Subjudul: Blok A - 0,75 ha - 32 HST (Fase 8 Vegetatif)
+    - Indikator Update: Dihitung secara real-time dari timestamp last_updated.
+    - Persentase Baterai: Live dari node gateway / sensor.
+- **Auto-Refresh Siklus Telemetri 30 Detik:**
+  - Mengonfigurasi interval polling 30 detik pada [page.tsx](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/frontend/src/app/page.tsx) untuk menjaga kesegaran data telemetri, kurva tren, dan jendela aman pemupukan.
+- **Pembersihan Linting & Type Safety:**
+  - Memperbaiki tipe DigitalTwinForecastResponse dan membersihkan variabel tidak terpakai pada komponen cockpit untuk menjamin zero-error pada 	sc --noEmit, 
+ext lint, dan 
+ext build.
+
+---
+
 ## [2026-10-28] — Penyesuaian Presisi Geospasial Poligon ke Hamparan Sawah Riil Desa Bluri (Balai Desa Bluri)
 
 ### 🌾 Realignment Poligon Persil ke Lahan Pertanian Sawah & Tegalan Jagung (`parcels_data.py`, `mock_db.py`, `parcelsMock.ts`, `LeafletFieldMap.tsx`, `ParcelRiskMap.tsx`)

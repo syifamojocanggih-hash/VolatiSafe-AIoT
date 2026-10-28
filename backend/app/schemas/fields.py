@@ -28,6 +28,12 @@ class ShapExplanationDTO(BaseModel):
 class FieldCurrentStatusDTO(BaseModel):
     field_id: str
     field_name: str
+    farmer_name: Optional[str] = "Pak Suparman"
+    block: Optional[str] = "Blok A"
+    area_ha: Optional[float] = 0.75
+    crop_age_days: Optional[int] = 32
+    crop_phase: Optional[str] = "Fase 8 Vegetatif"
+    corn_variety: Optional[str] = "BISI-18"
     last_updated: str
     battery_pct: int
     is_simulated_failover: bool = False

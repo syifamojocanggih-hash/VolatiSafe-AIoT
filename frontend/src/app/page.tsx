@@ -120,10 +120,23 @@ function transformBackendStatus(
     },
   ];
 
-  const field = {
+  const minutesAgo = status.last_updated
+    ? Math.max(1, Math.round((Date.now() - new Date(status.last_updated).getTime()) / (60 * 1000)))
+    : prevField.lastUpdatedMinutesAgo;
+
+  const field: DashboardState['field'] = {
     ...prevField,
     name: status.field_name || prevField.name,
+    farmerName: status.farmer_name || prevField.farmerName,
+    areaHa: status.area_ha ?? prevField.areaHa,
+    block: status.block || prevField.block,
+    datDays: status.crop_age_days ?? prevField.datDays,
+    phaseName: status.crop_phase || prevField.phaseName,
     batteryPct: status.battery_pct ?? prevField.batteryPct,
+    lastUpdatedMinutesAgo:
+      !isNaN(minutesAgo) && minutesAgo > 0 && minutesAgo < 1440
+        ? minutesAgo
+        : prevField.lastUpdatedMinutesAgo,
   };
 
   return { banner, metrics, field };
@@ -379,9 +392,11 @@ export default function DashboardPage() {
     }
   }, []);
 
-  // Initial load on mount
+  // Initial load on mount and auto-refresh telemetry every 30 seconds
   useEffect(() => {
     loadBackendData();
+    const interval = setInterval(loadBackendData, 30000);
+    return () => clearInterval(interval);
   }, [loadBackendData]);
 
   // Update data when toggle scenario changes

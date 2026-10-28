@@ -7,7 +7,6 @@ import {
   faLocationDot,
   faSliders,
   faChevronLeft,
-  faClockRotateLeft,
   faTowerBroadcast,
   faXmark,
 } from '@fortawesome/free-solid-svg-icons';
@@ -54,9 +53,8 @@ interface CockpitDashboardViewProps {
 export const CockpitDashboardView: React.FC<CockpitDashboardViewProps> = () => {
   const [parcels, setParcels] = useState<BedengParcel[]>(initialParcels);
   const [selectedId, setSelectedId] = useState<string>('A1');
+  const [, setPinScreenPos] = useState<{ x: number; y: number } | null>(null);
   const [isSimulatedCritical, setIsSimulatedCritical] = useState<boolean>(false);
-  const [showPinCard, setShowPinCard] = useState<boolean>(true);
-  const [pinScreenPos, setPinScreenPos] = useState<{ x: number; y: number } | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [dtTelemetry, setDtTelemetry] = useState<DigitalTwin15Telemetry | null>(null);
   const [isFullScreenMap, setIsFullScreenMap] = useState<boolean>(false);
@@ -387,7 +385,6 @@ export const CockpitDashboardView: React.FC<CockpitDashboardViewProps> = () => {
   // When parcel selection changes, ensure the pin card opens
   const handleSelectParcel = (id: string) => {
     setSelectedId(id);
-    setShowPinCard(true);
     setDismissedEmergency(false);
   };
 

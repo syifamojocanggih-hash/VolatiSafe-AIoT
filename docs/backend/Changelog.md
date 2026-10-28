@@ -4,6 +4,19 @@ Semua perubahan pada subsistem backend didokumentasikan di sini dengan merujuk p
 
 ---
 
+## [1.0.2] — 2026-10-28
+
+### 🌾 Pengayaan DTO Status Petak & Live Metadata Agronomi (ields.py, mock_db.py, INTERFACES.md)
+- **Penyelarasan Kontrak & Skema DTO (FieldCurrentStatusDTO):**
+  - Memperkaya skema respons endpoint GET /api/v1/fields/{id}/current-status dengan atribut agronomis dinamis: armer_name ('Pak Suparman'), lock ('Blok A'), rea_ha (0.75), crop_age_days (32), crop_phase ('Fase 8 Vegetatif'), dan corn_variety ('BISI-18').
+  - Mengintegrasikan kalkulator siklus fenologi tanaman jagung otomatis berdasarkan umur tanam (dat).
+- **Resiliensi Konfigurasi Backend (config.py):**
+  - Menambahkan extra = 'ignore' pada konfigurasi Pydantic Settings BaseSettings agar toleran terhadap variabel environment docker-compose.
+- **Transparansi Arsitektur Sistem (docs/not_activate.md):**
+  - Membuat inventarisasi resmi subsistem non-aktif/simulasi TKT-3 (LoRa Hardware Lapangan, Sentinel-2 On-Demand continuous API, dan WhatsApp live blast) sesuai batas kompetisi dan ADR 004.
+
+---
+
 ## [1.0.1] — 2026-10-27
 
 ### 🎨 Pemisahan Kode Warna Alert Banner Multilevel (`fields.py` & `mock_db.py`)

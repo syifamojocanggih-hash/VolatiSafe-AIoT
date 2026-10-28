@@ -210,6 +210,12 @@ Respons:
   "data": {
     "field_id": "BLOK-A",
     "field_name": "Kebun Jagung Pak Suparman · Blok A",
+    "farmer_name": "Pak Suparman",
+    "block": "Blok A",
+    "area_ha": 0.75,
+    "crop_age_days": 32,
+    "crop_phase": "Fase 8 Vegetatif",
+    "corn_variety": "BISI-18",
     "last_updated": "2026-10-24T16:00:00Z",
     "battery_pct": 84,
     "is_simulated_failover": false,

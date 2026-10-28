@@ -22,6 +22,12 @@ export interface ApiResponse<T> {
 export interface BackendFieldStatus {
   field_id: string;
   field_name: string;
+  farmer_name?: string;
+  block?: string;
+  area_ha?: number;
+  crop_age_days?: number;
+  crop_phase?: string;
+  corn_variety?: string;
   last_updated: string;
   battery_pct: number;
   is_simulated_failover: boolean;
@@ -493,6 +499,12 @@ export interface DigitalTwinForecastResponse {
     risk_category?: string;
     [key: string]: unknown;
   }>;
+  next_safe_window?: {
+    start_time: string;
+    end_time: string;
+    projected_avri: number;
+    confidence_pct?: number;
+  };
   [key: string]: unknown;
 }
 

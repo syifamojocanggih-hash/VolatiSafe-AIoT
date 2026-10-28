@@ -197,7 +197,8 @@ export const FieldDetailPanel: React.FC<FieldDetailPanelProps> = ({
         const res = await getDigitalTwin72hForecast(parcel.id || 'BLOK-A');
         if (res && mounted) {
           if (res.hourly_timeline && res.hourly_timeline.length >= 72) {
-            const mapped: DetailedForecastPoint[] = res.hourly_timeline.map((item: any, idx: number) => {
+            const mapped: DetailedForecastPoint[] = res.hourly_timeline.map(
+              (item: { timestamp_utc: string; avri_score: number; risk_category?: string; [key: string]: unknown }, idx: number) => {
               const dt = new Date(item.timestamp_utc);
               const dayOffset = Math.floor(idx / 24);
               const dayName =
@@ -212,7 +213,7 @@ export const FieldDetailPanel: React.FC<FieldDetailPanelProps> = ({
               const timeStr = dt.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
 
               const avri = Math.round(item.avri_score);
-              const cat = item.risk_category || (avri >= 70 ? 'kritis' : avri >= 30 ? 'waspada' : 'aman');
+              const cat: 'aman' | 'waspada' | 'kritis' | 'bahaya' = (item.risk_category as 'aman' | 'waspada' | 'kritis' | 'bahaya') || (avri >= 70 ? 'kritis' : avri >= 30 ? 'waspada' : 'aman');
 
               return {
                 hour: idx,
@@ -224,13 +225,13 @@ export const FieldDetailPanel: React.FC<FieldDetailPanelProps> = ({
                 avri,
                 status: cat,
                 isSafe: cat === 'aman',
-                soilTemp: round(item.projected_soil_temp_c, 1),
-                airTemp: round(item.temp_air_c || 28.0, 1),
-                moisture: round(item.projected_theta_pct, 1),
+                soilTemp: round(Number(item.projected_soil_temp_c || 28.0), 1),
+                airTemp: round(Number(item.temp_air_c || 28.0), 1),
+                moisture: round(Number(item.projected_theta_pct || 25.0), 1),
                 rh: 75,
                 windSpeed: 2.0,
                 solarRad: 2.1,
-                ureaseRate: round(item.k_urease_rate_hr || 0.2, 2),
+                ureaseRate: round(Number(item.k_urease_rate_hr || 0.2), 2),
                 nitrogenLossEst: Math.round(avri * 0.52),
                 recommendation:
                   cat === 'aman'

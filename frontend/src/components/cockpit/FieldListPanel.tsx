@@ -45,7 +45,6 @@ export const FieldListPanel: React.FC<FieldListPanelProps> = ({
   onUpdateSandbox,
   onApplyPreset,
   onResetSandbox,
-  isSimulatedCritical = false,
   activeTab: controlledTab,
   onTabChange,
 }) => {
