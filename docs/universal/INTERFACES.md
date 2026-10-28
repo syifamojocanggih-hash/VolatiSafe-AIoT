@@ -227,7 +227,8 @@ Respons:
       "ph": 7.83,
       "ph_delta_24h": -0.02,
       "avri_score": 74,
-      "avri_category": "kritis"
+      "avri_category": "kritis",
+      "avri_delta_24h": -14.0
     },
     "alert_banner": {
       "level": "kritis",

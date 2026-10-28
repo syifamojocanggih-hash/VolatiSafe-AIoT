@@ -10,6 +10,7 @@ class FieldMetricsDTO(BaseModel):
     ph_delta_24h: float
     avri_score: float
     avri_category: str
+    avri_delta_24h: Optional[float] = None
 
 class AlertBannerDTO(BaseModel):
     level: str

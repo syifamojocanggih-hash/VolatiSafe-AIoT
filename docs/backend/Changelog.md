@@ -12,6 +12,9 @@ Semua perubahan pada subsistem backend didokumentasikan di sini dengan merujuk p
   - Mengintegrasikan kalkulator siklus fenologi tanaman jagung otomatis berdasarkan umur tanam (dat).
 - **Resiliensi Konfigurasi Backend (config.py):**
   - Menambahkan extra = 'ignore' pada konfigurasi Pydantic Settings BaseSettings agar toleran terhadap variabel environment docker-compose.
+- **Query Komparasi Dinamis 24 Jam (Delta Calculation):**
+  - Mengimplementasikan query SQL dinamis pada ields.py dan mock_db.py yang membandingkan state terkini dengan rekaman telemetri dan prediksi AVRI pada  - 24\text{ jam}$ di TimescaleDB (moisture_delta_24h, soil_temp_delta_24h, ph_delta_24h, dan vri_delta_24h).
+  - Mengeliminasi nilai konstanta statis (-3.2, 1.8, -0.02) sehingga seluruh kartu metrik bereaksi dinamis terhadap fluktuasi data.
 - **Transparansi Arsitektur Sistem (docs/not_activate.md):**
   - Membuat inventarisasi resmi subsistem non-aktif/simulasi TKT-3 (LoRa Hardware Lapangan, Sentinel-2 On-Demand continuous API, dan WhatsApp live blast) sesuai batas kompetisi dan ADR 004.
 

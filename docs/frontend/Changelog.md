@@ -12,6 +12,8 @@ Seluruh catatan kemajuan, keputusan teknis, dan implementasi antarmuka frontend 
     - Subjudul: Blok A - 0,75 ha - 32 HST (Fase 8 Vegetatif)
     - Indikator Update: Dihitung secara real-time dari timestamp last_updated.
     - Persentase Baterai: Live dari node gateway / sensor.
+- **Dukungan Delta Komparasi 24 Jam Dinamis:**
+  - Menghubungkan perhitungan delta 24 jam pada MetricCardsGrid.tsx dan page.tsx langsung ke properti vri_delta_24h serta delta telemetri dari backend tanpa konstanta statis.
 - **Auto-Refresh Siklus Telemetri 30 Detik:**
   - Mengonfigurasi interval polling 30 detik pada [page.tsx](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/frontend/src/app/page.tsx) untuk menjaga kesegaran data telemetri, kurva tren, dan jendela aman pemupukan.
 - **Pembersihan Linting & Type Safety:**

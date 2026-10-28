@@ -43,6 +43,7 @@ export interface BackendFieldStatus {
     ph_delta_24h: number;
     avri_score: number;
     avri_category: 'aman' | 'waspada' | 'kritis' | 'bahaya';
+    avri_delta_24h?: number | null;
   };
   alert_banner: {
     level: string;

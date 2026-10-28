@@ -109,7 +109,10 @@ function transformBackendStatus(
       value: `${Math.round(m.avri_score)}%`,
       numericValue: Math.round(m.avri_score),
       unit: '%',
-      delta24h: m.avri_category === 'kritis' ? '+18%' : '-14%',
+      delta24h:
+        m.avri_delta_24h != null
+          ? `${m.avri_delta_24h >= 0 ? '+' : ''}${Math.round(m.avri_delta_24h)}%`
+          : (m.avri_category === 'kritis' ? '+18%' : '-14%'),
       status:
         m.avri_category === 'aman'
           ? 'optimal'

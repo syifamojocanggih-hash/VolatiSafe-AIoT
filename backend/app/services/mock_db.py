@@ -202,6 +202,20 @@ class MockDB:
 
         shap_dtos = [ShapExplanationDTO(**s) for s in field["shap_explanations"]]
 
+        # Dynamic 24-hour delta calculation from telemetry series
+        primary_node = field.get("primary_node_id", "VS-A1-003")
+        series = self._telemetry_series.get(primary_node, [])
+        metrics_dict = dict(field["metrics"])
+        if len(series) >= 2:
+            latest_pt = series[-1]
+            ref_pt = series[0]
+            metrics_dict["moisture_pct"] = latest_pt.moisture_pct
+            metrics_dict["soil_temp_c"] = latest_pt.soil_temp_c
+            metrics_dict["ph"] = latest_pt.ph
+            metrics_dict["moisture_delta_24h"] = round(latest_pt.moisture_pct - ref_pt.moisture_pct, 1)
+            metrics_dict["soil_temp_delta_24h"] = round(latest_pt.soil_temp_c - ref_pt.soil_temp_c, 1)
+            metrics_dict["ph_delta_24h"] = round(latest_pt.ph - ref_pt.ph, 2)
+
         return FieldCurrentStatusDTO(
             field_id=field["field_id"],
             field_name=field["field_name"],
@@ -217,7 +231,7 @@ class MockDB:
             is_postponed=field.get("is_postponed", False),
             postponed_at=field.get("postponed_at"),
             last_action=field.get("last_action"),
-            metrics=FieldMetricsDTO(**field["metrics"]),
+            metrics=FieldMetricsDTO(**metrics_dict),
             alert_banner=AlertBannerDTO(**field["alert_banner"]),
             shap_explanations=shap_dtos
         )

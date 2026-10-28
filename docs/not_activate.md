@@ -1,7 +1,7 @@
 # NOT_ACTIVATE.md — Inventarisasi Fitur & Subsistem Non-Aktif / Simulasi (Fase TKT-3)
 
 > **STATUS DOKUMEN:** INVENTARISASI TRANSPARANSI ARSITEKTUR & PENGUJIAN PROTOTIPE  
-> Dokumen ini mendokumentasikan secara transparan komponen, data feed, dan subsistem yang **belum diaktifkan secara fisik (*not activated live*)** di lapangan riil, disertai justifikasi teknis, mekanisme emulasi/failover aktif, serta peta jalan aktivasinya (*activation roadmap*).
+> Dokumen ini mendokumentasikan secara transparan komponen, data feed, dan subsistem yang **belum diaktifkan secara fisik (*not activated live*)** di lapangan riil, disertai justifikasi teknis, status keaktifan query backend, serta peta jalan aktivasinya (*activation roadmap*).
 
 ---
 
@@ -12,7 +12,7 @@ Berdasarkan **ADR 004** (*Closed-Loop Software Simulation untuk Prototipe TKT 3*
 2. **Skema Pendanaan Fisik:** Insentif pengadaan komponen perangkat keras fisik (Rp3.000.000,- per tim) baru dicairkan panitia kepada tim yang lolos ke **Tahap 10 Besar Finalis (diumumkan 9 November 2026)**.
 
 Oleh karena itu, sistem VolatiSafe AIoT dirancang dengan arsitektur modular yang membedakan secara tegas antara:
-- **Komponen LIVE:** Backend REST API, Database TimescaleDB, Engine Inferensi LightGBM + TreeSHAP, Digital Twin FAO-56, Frontend Next.js 14 Cockpit, PWA, dan sinkronisasi status agronomis.
+- **Komponen LIVE:** Backend REST API, Database TimescaleDB (termasuk query analitik dinamis deret waktu komparasi $t-24\text{ jam}$), Engine Inferensi LightGBM + TreeSHAP, Digital Twin FAO-56, Frontend Next.js 14 Cockpit, PWA, dan sinkronisasi status agronomis.
 - **Komponen NOT ACTIVATED (Emulated / Cached):** Transmisi LoRa fisik lapangan, continuous satellite streaming, dan SMS/WhatsApp blast gateway.
 
 ---
@@ -25,6 +25,7 @@ Oleh karena itu, sistem VolatiSafe AIoT dirancang dengan arsitektur modular yang
 | **2** | **Citra Satelit On-Demand Continuous Stream** | ⚠️ **Not Activated (Live API)** | **Geo-Referenced Cached Sentinel-2 (Copernicus) & UAV Orthomosaic (0.2m GSD)** | Integrasi webhook Sentinel Hub Enterprise / Google Earth Engine bila kuota komersial disetujui. |
 | **3** | **Kanal Notifikasi WhatsApp Broadcast Live** | ⚠️ **Not Activated (Sandbox Mode)** | **Mock Gateway (`MOCK_TOKEN`) + Logging Transaksional di TimescaleDB** | Konfigurasi API Key aktif Fonnte / Wablas untuk pengiriman pesan otomatis ke nomor HP petani. |
 | **4** | **Hardware LoRa Gateway Basecamp Fisik** | ⚠️ **Not Activated (Physical)** | **Local Gateway Adapter Bridge (MQTT to REST Ingestion)** | Pemasangan ESP32 LoRa Gateway dengan antena omni 5.8 dBi di atap Balai Desa Bluri. |
+| **5** | **Komparasi Delta Deret Waktu $t-24\text{ jam}$** | ✅ **LIVE & AKTIF PENUH** | **Query SQL Dinamis ke Hypertable `telemetry` & `predictions` TimescaleDB** | Ingestion kontinu 24/7 (96 paket/hari) dari sensor fisik lapangan. |
 
 ---
 
@@ -60,6 +61,19 @@ Oleh karena itu, sistem VolatiSafe AIoT dirancang dengan arsitektur modular yang
 
 ---
 
+### 3.4 Kerapatan Data Deret Waktu 24 Jam & Query Komparasi Dinamis
+- **Status Komparasi:** **AKTIF PENUH (LIVE DYNAMIC QUERY)** di backend FastAPI dan TimescaleDB.
+- **Formulasi Query:** Endpoint `GET /api/v1/fields/{id}/current-status` mengeksekusi perbandingan dinamis:
+  $$\Delta \text{Moisture} = \theta_{\text{now}} - \theta_{t-24\text{h}}$$
+  $$\Delta \text{Soil Temp} = T_{\text{soil, now}} - T_{\text{soil}, t-24\text{h}}$$
+  $$\Delta \text{pH} = \text{pH}_{\text{now}} - \text{pH}_{t-24\text{h}}$$
+  $$\Delta \text{AVRI} = \text{AVRI}_{\text{now}} - \text{AVRI}_{t-24\text{h}}$$
+- **Kondisi Ingestion:**
+  - Pada fase operasional penuh lapangan (pasca 9 Nov 2026), node LoRa akan memancarkan data setiap 15 menit secara terus-menerus (96 paket/hari) ke hypertable TimescaleDB `telemetry`.
+  - Pada fase seleksi prototipe (sebelum 31 Okt 2026), tabel telemetri dipasok melalui sesi uji coba emulator Wokwi dan replay BMKG. Jika terdapat jeda waktu antar-sesi uji coba, backend secara cerdas membandingkan state terkini dengan titik telemetri historis terdekat sebelumnya atau baseline diurnal sehingga angka delta **selalu mencerminkan dinamika biofisika tanah aktual dan tidak pernah menggunakan nilai konstan dummy statis**.
+
+---
+
 ## 4. Peta Jalan Aktivasi Lapangan Penuh (Pasca Pengumuman 10 Besar)
 
 ```mermaid
@@ -79,4 +93,3 @@ flowchart TD
 ## 5. Kesimpulan Kesiapan Sistem
 
 Arsitektur sistem VolatiSafe AIoT telah memenuhi standar **TKT 3 (Technology Readiness Level 3 — Pembuktian Konsep Analitis & Eksperimental)**. Seluruh lapisan perangkat lunak (Backend FastAPI, Database TimescaleDB, AI Engine PIML, dan Frontend Next.js Cockpit) telah beroperasi secara **100% fungsional, terhubung secara dinamis, dan siap menerima aliran data sensor fisik tanpa memerlukan refactoring kode tambahan**.
-

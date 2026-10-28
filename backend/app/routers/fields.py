@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from typing import Optional, List
 from fastapi import APIRouter, HTTPException, Query, status, Depends
 from sqlalchemy.orm import Session
@@ -17,6 +17,8 @@ from app.schemas.parcels import SimulateFailoverRequestDTO
 from app.core.database import get_db
 from app.models.field import FieldModel, FieldStateModel
 from app.models.node import NodeModel
+from app.models.telemetry import TelemetryModel
+from app.models.prediction import PredictionModel
 from app.models.crop_cycle import FertilizationLogModel
 from app.services.ai_service import AIService
 from app.services.mock_db import db
@@ -85,6 +87,60 @@ def get_field_current_status(field_id: str, session: Session = Depends(get_db)):
             elif "Blok C" in field_rec.name:
                 block_name = "Blok C"
 
+            # Dynamic 24-hour Telemetry Delta Comparison
+            curr_ts = state_rec.updated_at if state_rec.updated_at else datetime.now(timezone.utc)
+            target_24h_ts = curr_ts - timedelta(hours=24)
+            primary_node_id = node_rec.node_id if node_rec else "VS-A1-003"
+
+            t24_telemetry = (
+                session.query(TelemetryModel)
+                .filter(TelemetryModel.node_id == primary_node_id)
+                .filter(TelemetryModel.ts <= target_24h_ts)
+                .order_by(TelemetryModel.ts.desc())
+                .first()
+            )
+            if not t24_telemetry:
+                # If no telemetry at or before target_24h_ts, look for earliest available record before curr_ts
+                t24_telemetry = (
+                    session.query(TelemetryModel)
+                    .filter(TelemetryModel.node_id == primary_node_id)
+                    .filter(TelemetryModel.ts < curr_ts)
+                    .order_by(TelemetryModel.ts.asc())
+                    .first()
+                )
+
+            if t24_telemetry and t24_telemetry.ts != curr_ts:
+                moisture_delta_24h = round(float(state_rec.theta) - float(t24_telemetry.moisture or state_rec.theta), 1)
+                soil_temp_delta_24h = round(float(state_rec.t_soil) - float(t24_telemetry.soil_temp or state_rec.t_soil), 1)
+                ph_delta_24h = round(float(state_rec.ph) - float(t24_telemetry.ph or state_rec.ph), 2)
+            else:
+                moisture_delta_24h = 0.0
+                soil_temp_delta_24h = 0.0
+                ph_delta_24h = 0.0
+
+            # Dynamic 24-hour AVRI Delta Comparison
+            t24_pred = (
+                session.query(PredictionModel)
+                .filter(PredictionModel.field_id == field_id)
+                .filter(PredictionModel.ts <= target_24h_ts)
+                .order_by(PredictionModel.ts.desc())
+                .first()
+            )
+            if not t24_pred:
+                t24_pred = (
+                    session.query(PredictionModel)
+                    .filter(PredictionModel.field_id == field_id)
+                    .filter(PredictionModel.ts < curr_ts)
+                    .order_by(PredictionModel.ts.asc())
+                    .first()
+                )
+
+            avri_delta_24h = (
+                round(pred_res.avri_score - float(t24_pred.avri_score), 1)
+                if t24_pred and t24_pred.ts != curr_ts
+                else None
+            )
+
             return create_envelope(FieldCurrentStatusDTO(
                 field_id=field_rec.field_id,
                 field_name=field_rec.name,
@@ -102,13 +158,14 @@ def get_field_current_status(field_id: str, session: Session = Depends(get_db)):
                 last_action=last_action_str,
                 metrics=FieldMetricsDTO(
                     moisture_pct=float(state_rec.theta),
-                    moisture_delta_24h=-3.2,
+                    moisture_delta_24h=moisture_delta_24h,
                     soil_temp_c=float(state_rec.t_soil),
-                    soil_temp_delta_24h=1.8,
+                    soil_temp_delta_24h=soil_temp_delta_24h,
                     ph=float(state_rec.ph),
-                    ph_delta_24h=-0.02,
+                    ph_delta_24h=ph_delta_24h,
                     avri_score=pred_res.avri_score,
-                    avri_category=category
+                    avri_category=category,
+                    avri_delta_24h=avri_delta_24h
                 ),
                 alert_banner=AlertBannerDTO(
                     level=category,
