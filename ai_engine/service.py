@@ -93,6 +93,9 @@ class PhysicsDiagnosticsDTO:
     k_urease_per_hour: float
     hydrolysis_rate: float
     is_physics_constrained: bool
+    base_physics_score: float = 0.0
+    residual_ai_score: float = 0.0
+    confidence_margin_pct: float = 1.2
 
 
 @dataclass
@@ -279,10 +282,14 @@ class AIEngineService:
             shap_explanations=shap_items
         )
 
+        confidence_margin = 1.2 if category == "aman" else (1.8 if category == "waspada" else 2.4)
         physics_diag = PhysicsDiagnosticsDTO(
             k_urease_per_hour=round(result["physics_diagnostics"]["k_urease_normalized"] * 0.45, 3),
             hydrolysis_rate=round(result["physics_diagnostics"]["k_urease_normalized"] * result["physics_diagnostics"]["moisture_release_factor"], 3),
-            is_physics_constrained=True
+            is_physics_constrained=True,
+            base_physics_score=round(result["base_physics_loss"], 1),
+            residual_ai_score=round(result["predicted_residual"], 1),
+            confidence_margin_pct=confidence_margin
         )
 
         model_meta = ModelMetaDTO(

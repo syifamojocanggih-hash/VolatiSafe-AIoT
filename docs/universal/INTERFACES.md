@@ -236,6 +236,37 @@ Respons:
       "headline": "RISIKO KRITIS — AVRI 74%",
       "subheadline": "Jangan tabur Urea sekarang. Potensi penguapan tinggi.",
       "best_window": "Besok 06:00 – 09:00 WIB"
+    },
+    "shap_explanations": [
+      {
+        "feature": "soil_temp_c",
+        "label": "Suhu Tanah Kritis (34.1°C)",
+        "impact_pct": 28.4,
+        "direction": "increases_risk",
+        "explanation": "Fitur Suhu Tanah Kritis (34.1°C) meningkatkan risiko penguapan amonia sebesar 28.4%."
+      },
+      {
+        "feature": "ph",
+        "label": "pH Tanah Basa (7.83)",
+        "impact_pct": 19.2,
+        "direction": "increases_risk",
+        "explanation": "Fitur pH Tanah Basa (7.83) meningkatkan risiko penguapan amonia sebesar 19.2%."
+      },
+      {
+        "feature": "moisture_pct",
+        "label": "Kelembaban Kering (22.4%)",
+        "impact_pct": 11.5,
+        "direction": "increases_risk",
+        "explanation": "Fitur Kelembaban Kering (22.4%) meningkatkan risiko penguapan amonia sebesar 11.5%."
+      }
+    ],
+    "physics_diagnostics": {
+      "k_urease_per_hour": 0.143,
+      "hydrolysis_rate": 0.141,
+      "is_physics_constrained": true,
+      "base_physics_score": 61.4,
+      "residual_ai_score": 12.6,
+      "confidence_margin_pct": 2.4
     }
   }
 }

@@ -26,6 +26,14 @@ class ShapExplanationDTO(BaseModel):
     direction: str  # "increases_risk", "decreases_risk", "neutral"
     explanation: Optional[str] = None
 
+class PhysicsDiagnosticsDTO(BaseModel):
+    k_urease_per_hour: float
+    hydrolysis_rate: float
+    is_physics_constrained: bool = True
+    base_physics_score: Optional[float] = None
+    residual_ai_score: Optional[float] = None
+    confidence_margin_pct: Optional[float] = None
+
 class FieldCurrentStatusDTO(BaseModel):
     field_id: str
     field_name: str
@@ -44,6 +52,7 @@ class FieldCurrentStatusDTO(BaseModel):
     metrics: FieldMetricsDTO
     alert_banner: AlertBannerDTO
     shap_explanations: Optional[List[ShapExplanationDTO]] = None
+    physics_diagnostics: Optional[PhysicsDiagnosticsDTO] = None
 
 class ForecastWindowItemDTO(BaseModel):
     timestamp_start: str

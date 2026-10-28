@@ -63,10 +63,29 @@ export interface DayWindowProjection {
   safeWindows?: SafeWindowSegment[];
 }
 
+export interface ShapExplanationItem {
+  feature: string;
+  label: string;
+  impact_pct: number;
+  direction: string;
+  explanation?: string;
+}
+
+export interface PhysicsDiagnosticsData {
+  k_urease_per_hour: number;
+  hydrolysis_rate: number;
+  is_physics_constrained: boolean;
+  base_physics_score?: number;
+  residual_ai_score?: number;
+  confidence_margin_pct?: number;
+}
+
 export interface DashboardState {
   field: FieldInfo;
   statusBanner: StatusBannerData;
   metrics: MetricItem[];
   trend24h: ForecastPoint[];
   forecast72h: DayWindowProjection[];
+  shapExplanations?: ShapExplanationItem[];
+  physicsDiagnostics?: PhysicsDiagnosticsData;
 }

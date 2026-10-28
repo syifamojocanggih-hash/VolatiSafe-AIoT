@@ -4,6 +4,30 @@ Semua perubahan pada subsistem backend didokumentasikan di sini dengan merujuk p
 
 ---
 
+## [1.0.4] — 2026-10-28
+
+### 🗺️ Relokasi Data Geospasial Poligon ke Hamparan Sawah Murni Solokuro (`parcels_data.py`, `mock_db.py`, `INTERFACES.md`)
+- **Penyelarasan Koordinat Sawah Bebas Tambang Kapur:**
+  - Memperbarui koordinat batas kadastral 12 bedeng persil (`SOLOKURO_OUTER_BOUNDARY`), surrounding buffer parcels, dan titik pusat menjadi `[-6.912350, 112.345680]` (`6°54'44"S 112°20'44"E`) di hamparan persawahan jagung Solokuro.
+  - Memposisikan titik Gateway Basecamp LoRa di koordinat `[-6.911850, 112.346150]` di samping jalan usaha tani dan saluran irigasi.
+- **Dukungan Failover Asinkron:**
+  - Endpoint `POST /api/v1/fields/{id}/parcels/{parcel_id}/simulate-failover` terverifikasi aktif mengubah state node dropout dan mengembalikan estimasi FAO-56.
+
+---
+
+## [1.0.3] — 2026-10-28
+
+### 🧠 Integrasi Diagnostik Fisika PIML Arrhenius & TreeSHAP Real-Time (`fields.py`, `ai_service.py`, `INTERFACES.md`)
+- **Penyediaan Metrik Dekomposisi Fisika & Residual AI:**
+  - Menambahkan atribut `base_physics_score`, `residual_ai_score`, dan `confidence_margin_pct` ke `PhysicsDiagnosticsDTO` di [`backend/app/schemas/fields.py`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/backend/app/schemas/fields.py).
+  - Menyematkan objek `physics_diagnostics` ke dalam `FieldCurrentStatusDTO` agar antarmuka modal dapat mengakses rasio kinetika Arrhenius vs koreksi non-linear Machine Learning secara langsung dari inferensi model real-time.
+- **Eksposur Atribusi Fitur TreeSHAP Real-Time:**
+  - Menyertakan daftar kontribusi fitur lokal `shap_explanations` (`impact_pct`, `direction`, `explanation`) pada endpoint `GET /api/v1/fields/{id}/current-status` untuk menggantikan tabel statis *if-else*.
+- **Penyelesaian Dependensi Siklik Skema:**
+  - Menata ulang referensi antar-skema pydantic antara `fields.py` dan `simulation.py` untuk menjamin konsistensi serialisasi saat kompilasi model pydantic.
+
+---
+
 ## [1.0.2] — 2026-10-28
 
 ### 🌾 Pengayaan DTO Status Petak & Live Metadata Agronomi (ields.py, mock_db.py, INTERFACES.md)

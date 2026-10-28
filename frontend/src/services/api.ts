@@ -59,6 +59,14 @@ export interface BackendFieldStatus {
     direction: string;
     explanation?: string;
   }>;
+  physics_diagnostics?: {
+    k_urease_per_hour: number;
+    hydrolysis_rate: number;
+    is_physics_constrained: boolean;
+    base_physics_score?: number;
+    residual_ai_score?: number;
+    confidence_margin_pct?: number;
+  };
 }
 
 export interface PostponeActionResponse {

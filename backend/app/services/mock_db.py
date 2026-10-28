@@ -12,6 +12,7 @@ from app.schemas.fields import (
     FarmerActionRequestDTO,
     FarmerActionResponseDTO
 )
+from app.schemas.simulation import PhysicsDiagnosticsDTO
 from app.schemas.agronomy import CropCycleResponseDTO
 from app.schemas.parcels import (
     BedengParcelDTO,
@@ -233,7 +234,15 @@ class MockDB:
             last_action=field.get("last_action"),
             metrics=FieldMetricsDTO(**metrics_dict),
             alert_banner=AlertBannerDTO(**field["alert_banner"]),
-            shap_explanations=shap_dtos
+            shap_explanations=shap_dtos,
+            physics_diagnostics=PhysicsDiagnosticsDTO(**field["physics_diagnostics"]) if field.get("physics_diagnostics") else PhysicsDiagnosticsDTO(
+                k_urease_per_hour=0.143,
+                hydrolysis_rate=0.141,
+                is_physics_constrained=True,
+                base_physics_score=24.6,
+                residual_ai_score=-1.1,
+                confidence_margin_pct=1.2
+            )
         )
 
     def get_forecast_window(self, field_id: str, hours: int = 72) -> Optional[ForecastWindowDTO]:
@@ -446,18 +455,17 @@ class MockDB:
         Returns full detailed 12 bedeng cadastral parcels, surrounding mosaic parcels,
         and outer field boundaries with GeoJSON FeatureCollection.
         """
-        parcels = self._bedeng_parcels.get(field_id)
-        if not parcels:
-            parcels = get_initial_12_bedeng_parcels()
-            self._bedeng_parcels[field_id] = parcels
+        if field_id not in self._bedeng_parcels or not self._bedeng_parcels[field_id] or self._bedeng_parcels[field_id][0].center[0] < -6.914:
+            self._bedeng_parcels[field_id] = get_initial_12_bedeng_parcels()
+        parcels = self._bedeng_parcels[field_id]
 
         summary = ParcelMapSummaryDTO(
-            coordinates_text='6°54\'58"S 112°25\'20"E',
-            soil_type_text='Hamparan Sawah Tegal Jagung Bluri, Solokuro (Aluvial Lempung Kapur pH 7.8)',
-            gateway_distance_km=0.08,
+            coordinates_text='6°54\'44"S 112°20\'44"E',
+            soil_type_text='Hamparan Persawahan Jagung Solokuro (Aluvial Lempung Berpasir pH 7.2)',
+            gateway_distance_km=0.065,
             total_area_ha=0.96,
-            center_coordinates=[-6.916213, 112.422270],
-            gateway_coordinates=[-6.915650, 112.422720],
+            center_coordinates=[-6.912350, 112.345680],
+            gateway_coordinates=[-6.911850, 112.346150],
             outer_boundary=BLURI_OUTER_BOUNDARY,
             surrounding_parcels=BLURI_SURROUNDING_PARCELS,
             satellite_metadata=SatelliteMetadataDTO(

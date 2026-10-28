@@ -1,6 +1,6 @@
 from typing import List, Optional
 from pydantic import BaseModel, Field
-from app.schemas.fields import ShapExplanationDTO
+from app.schemas.fields import ShapExplanationDTO, PhysicsDiagnosticsDTO
 
 class WhatIfRequestDTO(BaseModel):
     soil_temp_c: float = Field(..., ge=-10.0, le=60.0, description="Suhu tanah (°C)")
@@ -23,10 +23,6 @@ class PrescriptionDTO(BaseModel):
     immediate_guidance: str
     shap_explanations: List[ShapExplanationDTO] = Field(default_factory=list)
 
-class PhysicsDiagnosticsDTO(BaseModel):
-    k_urease_per_hour: float
-    hydrolysis_rate: float
-    is_physics_constrained: bool = True
 
 class ModelMetaDTO(BaseModel):
     version: str = "piml-lgbm-v1.2"

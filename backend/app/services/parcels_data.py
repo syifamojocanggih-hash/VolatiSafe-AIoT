@@ -1,82 +1,82 @@
 from typing import List, Dict, Any
 from app.schemas.parcels import BedengParcelDTO, SurroundingParcelDTO, ParcelMapSummaryDTO, SatelliteMetadataDTO
 
-# Real agricultural parcel perimeter (Hamparan Sawah Tegal Jagung Blok A - Balai Desa Bluri, Solokuro)
-# Coordinates centered around real agricultural cropland: -6.916213, 112.422270
-BLURI_OUTER_BOUNDARY: List[List[float]] = [
-    [-6.915584, 112.421808],
-    [-6.915584, 112.422699],
-    [-6.915989, 112.422688],
-    [-6.916399, 112.422634],
-    [-6.916841, 112.422742],
-    [-6.916841, 112.421808]
+# Real agricultural parcel perimeter (Hamparan Sawah Tegal Jagung Blok A - Solokuro, Lamongan)
+# Coordinates centered around real agricultural cropland: -6.912350, 112.345680
+SOLOKURO_OUTER_BOUNDARY: List[List[float]] = [
+    [-6.911750, 112.345200],
+    [-6.911750, 112.346160],
+    [-6.912960, 112.346160],
+    [-6.912960, 112.345200]
 ]
+BLURI_OUTER_BOUNDARY = SOLOKURO_OUTER_BOUNDARY
 
 # Surrounding real agricultural fields and buffer zones
-BLURI_SURROUNDING_PARCELS: List[SurroundingParcelDTO] = [
+SOLOKURO_SURROUNDING_PARCELS: List[SurroundingParcelDTO] = [
     SurroundingParcelDTO(
         id="C01",
-        name="Lahan Sawah Tegal Bluri Utara (Blok 1B)",
+        name="Lahan Sawah Solokuro Lor (Blok 1B)",
         area_ha=0.45,
-        center=[-6.915350, 112.422250],
+        center=[-6.911450, 112.345680],
         polygon=[
-            [-6.915150, 112.421808],
-            [-6.915150, 112.422742],
-            [-6.915584, 112.422699],
-            [-6.915584, 112.421808]
+            [-6.911150, 112.345200],
+            [-6.911150, 112.346160],
+            [-6.911750, 112.346160],
+            [-6.911750, 112.345200]
         ]
     ),
     SurroundingParcelDTO(
         id="C02",
-        name="Lahan Pertanian Barat (Arah Balai Desa Bluri)",
+        name="Lahan Pertanian Kulon (Arah Solokuro Kulon)",
         area_ha=0.62,
-        center=[-6.916100, 112.421400],
+        center=[-6.912355, 112.344750],
         polygon=[
-            [-6.915584, 112.421000],
-            [-6.915584, 112.421808],
-            [-6.916841, 112.421808],
-            [-6.916841, 112.421000]
+            [-6.911750, 112.344300],
+            [-6.911750, 112.345200],
+            [-6.912960, 112.345200],
+            [-6.912960, 112.344300]
         ]
     ),
     SurroundingParcelDTO(
         id="C03",
-        name="Lahan Sawah Tegal Bluri Kidul (Arah Banyubang)",
+        name="Lahan Sawah Solokuro Kidul (Arah Banyubang)",
         area_ha=0.58,
-        center=[-6.917150, 112.422250],
+        center=[-6.913250, 112.345680],
         polygon=[
-            [-6.916841, 112.421808],
-            [-6.916841, 112.422742],
-            [-6.917450, 112.422850],
-            [-6.917450, 112.421808]
+            [-6.912960, 112.345200],
+            [-6.912960, 112.346160],
+            [-6.913550, 112.346160],
+            [-6.913550, 112.345200]
         ]
     ),
     SurroundingParcelDTO(
         id="C04",
-        name="Persil Sawah Timur (Seberang Jalan Usaha Tani)",
+        name="Persil Sawah Wetan (Seberang Jalan Usaha Tani)",
         area_ha=0.52,
-        center=[-6.916100, 112.423100],
+        center=[-6.912355, 112.346600],
         polygon=[
-            [-6.915521, 112.422780],
-            [-6.915521, 112.423400],
-            [-6.916884, 112.423400],
-            [-6.916884, 112.422950]
+            [-6.911750, 112.346200],
+            [-6.911750, 112.347000],
+            [-6.912960, 112.347000],
+            [-6.912960, 112.346200]
         ]
     )
 ]
+BLURI_SURROUNDING_PARCELS = SOLOKURO_SURROUNDING_PARCELS
 
 def get_initial_12_bedeng_parcels() -> List[BedengParcelDTO]:
     """
     Returns 12 high-precision agricultural bedeng parcels across Blok A, B, and C
-    in true cropland of Desa Bluri, Solokuro, Lamongan (-6.916213, 112.422270).
-    Derived from actual satellite imagery of agricultural plots adjacent to Balai Desa Bluri.
+    in true cropland of Solokuro, Lamongan (-6.912350, 112.345680).
+    Derived from actual satellite imagery of agricultural plots in Solokuro.
     """
     return [
         # === TIER A: UTARA (North Agricultural Strips) ===
         BedengParcelDTO(
             id="A1",
             node_id="VS-A1-001",
-            name="Blok A1 · Tegal Bluri Lor (Utara-Barat)",
-            short_name="A1 · Bluri Lor Barat",
+            name="Blok A1 · Sawah Solokuro Lor (Utara-Barat)",
+            short_name="A1 · Solokuro Lor Barat",
             area_ha=0.08,
             crop_variety="Bisi-18",
             moisture_pct=22.4,
@@ -90,19 +90,19 @@ def get_initial_12_bedeng_parcels() -> List[BedengParcelDTO]:
             status="online",
             telemetry_mode="LoRa Live Stream",
             prescription="Tunda! Suhu tanah terik (34,1°C) dan kelembapan rendah (22,4%). Tunggu hujan atau siram sebelum pemupukan.",
-            center=[-6.915786, 112.421932],
+            center=[-6.911985, 112.345358],
             polygon=[
-                [-6.915600, 112.421830],
-                [-6.915600, 112.422034],
-                [-6.915973, 112.422034],
-                [-6.915973, 112.421830],
+                [-6.911800, 112.345250],
+                [-6.911800, 112.345465],
+                [-6.912170, 112.345465],
+                [-6.912170, 112.345250],
             ],
         ),
         BedengParcelDTO(
             id="A2",
             node_id="VS-A1-002",
-            name="Blok A2 · Tegal Bluri Lor (Utara-Tengah 1)",
-            short_name="A2 · Bluri Lor Tengah",
+            name="Blok A2 · Sawah Solokuro Lor (Utara-Tengah 1)",
+            short_name="A2 · Solokuro Lor Tengah",
             area_ha=0.08,
             crop_variety="NK-212",
             moisture_pct=36.8,
@@ -116,19 +116,19 @@ def get_initial_12_bedeng_parcels() -> List[BedengParcelDTO]:
             status="online",
             telemetry_mode="LoRa Live Stream",
             prescription="Aman dipupuk! Suhu tanah sejuk (26,4°C) dan kelembapan prima (36,8%). Manfaatkan jendela waktu sekarang.",
-            center=[-6.915786, 112.422141],
+            center=[-6.911985, 112.345573],
             polygon=[
-                [-6.915600, 112.422034],
-                [-6.915600, 112.422248],
-                [-6.915973, 112.422248],
-                [-6.915973, 112.422034],
+                [-6.911800, 112.345465],
+                [-6.911800, 112.345680],
+                [-6.912170, 112.345680],
+                [-6.912170, 112.345465],
             ],
         ),
         BedengParcelDTO(
             id="A3",
             node_id="VS-A1-003",
-            name="Blok A3 · Tegal Bluri Lor (Utara-Tengah 2)",
-            short_name="A3 · Bluri Lor Tengah",
+            name="Blok A3 · Sawah Solokuro Lor (Utara-Tengah 2)",
+            short_name="A3 · Solokuro Lor Tengah",
             area_ha=0.08,
             crop_variety="Pioneer P35",
             moisture_pct=19.2,
@@ -142,19 +142,19 @@ def get_initial_12_bedeng_parcels() -> List[BedengParcelDTO]:
             status="online",
             telemetry_mode="LoRa Live Stream",
             prescription="BAHAYA! Risiko penguapan amonia ekstrem (>80%). Jangan lakukan pemupukan permukaan saat ini.",
-            center=[-6.915786, 112.422355],
+            center=[-6.911985, 112.345788],
             polygon=[
-                [-6.915600, 112.422248],
-                [-6.915600, 112.422463],
-                [-6.915973, 112.422463],
-                [-6.915973, 112.422248],
+                [-6.911800, 112.345680],
+                [-6.911800, 112.345895],
+                [-6.912170, 112.345895],
+                [-6.912170, 112.345680],
             ],
         ),
         BedengParcelDTO(
             id="A4",
             node_id="VS-A1-004",
-            name="Blok A4 · Tegal Bluri Lor (Utara-Timur Jalan)",
-            short_name="A4 · Bluri Lor Timur",
+            name="Blok A4 · Sawah Solokuro Lor (Utara-Timur Jalan)",
+            short_name="A4 · Solokuro Lor Timur",
             area_ha=0.08,
             crop_variety="Bisi-2",
             moisture_pct=28.1,
@@ -168,20 +168,21 @@ def get_initial_12_bedeng_parcels() -> List[BedengParcelDTO]:
             status="online",
             telemetry_mode="LoRa Live Stream",
             prescription="Waspada! Gunakan metode benam (tugal kedalaman 5-7 cm) bila terpaksa memupuk hari ini.",
-            center=[-6.915786, 112.422566],
+            center=[-6.911985, 112.346003],
             polygon=[
-                [-6.915600, 112.422463],
-                [-6.915600, 112.422677],
-                [-6.915973, 112.422661],
-                [-6.915973, 112.422463],
+                [-6.911800, 112.345895],
+                [-6.911800, 112.346110],
+                [-6.912170, 112.346110],
+                [-6.912170, 112.345895],
             ],
         ),
-        # === TIER B: TENGAH (Central Core Parcels) ===
+
+        # === TIER B: MADYA (Middle Core Cultivation Strips) ===
         BedengParcelDTO(
             id="B1",
             node_id="VS-B1-001",
-            name="Blok B1 · Tegal Bluri Madya (Tengah-Barat)",
-            short_name="B1 · Bluri Madya Barat",
+            name="Blok B1 · Sawah Solokuro Madya (Tengah-Barat)",
+            short_name="B1 · Solokuro Madya Barat",
             area_ha=0.08,
             crop_variety="Bisi-18",
             moisture_pct=34.2,
@@ -195,19 +196,19 @@ def get_initial_12_bedeng_parcels() -> List[BedengParcelDTO]:
             status="online",
             telemetry_mode="LoRa Live Stream",
             prescription="Kondisi aman. Kelembapan tanah cukup untuk hidrolisis perlahan tanpa penguapan amonia masif.",
-            center=[-6.916186, 112.421932],
+            center=[-6.912355, 112.345358],
             polygon=[
-                [-6.915973, 112.421830],
-                [-6.915973, 112.422034],
-                [-6.916399, 112.422034],
-                [-6.916399, 112.421830],
+                [-6.912170, 112.345250],
+                [-6.912170, 112.345465],
+                [-6.912540, 112.345465],
+                [-6.912540, 112.345250],
             ],
         ),
         BedengParcelDTO(
             id="B2",
             node_id="VS-B1-002",
-            name="Blok B2 · Tegal Bluri Madya (Tengah-Inti)",
-            short_name="B2 · Bluri Madya Inti",
+            name="Blok B2 · Sawah Solokuro Madya (Tengah-Inti)",
+            short_name="B2 · Solokuro Madya Inti",
             area_ha=0.08,
             crop_variety="NK-212",
             moisture_pct=26.0,
@@ -221,19 +222,19 @@ def get_initial_12_bedeng_parcels() -> List[BedengParcelDTO]:
             status="online",
             telemetry_mode="LoRa Live Stream",
             prescription="Waspada: Kelembapan 26.0% mendekati batas kritis 25%. Dianjurkan menunda pemupukan hingga sore hari.",
-            center=[-6.916186, 112.422141],
+            center=[-6.912355, 112.345573],
             polygon=[
-                [-6.915973, 112.422034],
-                [-6.915973, 112.422248],
-                [-6.916399, 112.422248],
-                [-6.916399, 112.422034],
+                [-6.912170, 112.345465],
+                [-6.912170, 112.345680],
+                [-6.912540, 112.345680],
+                [-6.912540, 112.345465],
             ],
         ),
         BedengParcelDTO(
             id="B3",
             node_id="VS-B1-003",
-            name="Blok B3 · Tegal Bluri Madya (Tengah-Timur 1)",
-            short_name="B3 · Bluri Madya Timur",
+            name="Blok B3 · Sawah Solokuro Madya (Tengah-Timur 1)",
+            short_name="B3 · Solokuro Madya Timur",
             area_ha=0.08,
             crop_variety="Pioneer P35",
             moisture_pct=23.1,
@@ -247,19 +248,19 @@ def get_initial_12_bedeng_parcels() -> List[BedengParcelDTO]:
             status="online",
             telemetry_mode="LoRa Live Stream",
             prescription="KRITIS! Kehilangan nitrogen diperkirakan mencapai 68%. Jangan sebar urea.",
-            center=[-6.916186, 112.422347],
+            center=[-6.912355, 112.345788],
             polygon=[
-                [-6.915973, 112.422248],
-                [-6.915973, 112.422447],
-                [-6.916399, 112.422447],
-                [-6.916399, 112.422248],
+                [-6.912170, 112.345680],
+                [-6.912170, 112.345895],
+                [-6.912540, 112.345895],
+                [-6.912540, 112.345680],
             ],
         ),
         BedengParcelDTO(
             id="B4",
             node_id="VS-B1-004",
-            name="Blok B4 · Tegal Bluri Madya (Tengah-Sisi Jalan)",
-            short_name="B4 · Bluri Madya Jalan",
+            name="Blok B4 · Sawah Solokuro Madya (Tengah-Sisi Jalan)",
+            short_name="B4 · Solokuro Madya Jalan",
             area_ha=0.08,
             crop_variety="Bisi-18",
             moisture_pct=33.5,
@@ -273,20 +274,21 @@ def get_initial_12_bedeng_parcels() -> List[BedengParcelDTO]:
             status="online",
             telemetry_mode="LoRa Live Stream",
             prescription="Aman: Kanopi tanaman di dekat jalan cukup menaungi tanah, menekan kenaikan suhu permukaan.",
-            center=[-6.916186, 112.422544],
+            center=[-6.912355, 112.346003],
             polygon=[
-                [-6.915973, 112.422447],
-                [-6.915973, 112.422661],
-                [-6.916399, 112.422608],
-                [-6.916399, 112.422447],
+                [-6.912170, 112.345895],
+                [-6.912170, 112.346110],
+                [-6.912540, 112.346110],
+                [-6.912540, 112.345895],
             ],
         ),
-        # === TIER C: SELATAN (South Agricultural Strips) ===
+
+        # === TIER C: KIDUL (South Cropland Strips) ===
         BedengParcelDTO(
             id="C1",
             node_id="VS-C1-001",
-            name="Blok C1 · Tegal Bluri Kidul (Selatan-Barat)",
-            short_name="C1 · Bluri Kidul Barat",
+            name="Blok C1 · Sawah Solokuro Kidul (Selatan-Barat)",
+            short_name="C1 · Solokuro Kidul Barat",
             area_ha=0.08,
             crop_variety="NK-212",
             moisture_pct=35.0,
@@ -300,19 +302,19 @@ def get_initial_12_bedeng_parcels() -> List[BedengParcelDTO]:
             status="online",
             telemetry_mode="LoRa Live Stream",
             prescription="Aman dipupuk. Kondisi tanah ideal dengan retensi air optimal.",
-            center=[-6.916612, 112.421932],
+            center=[-6.912725, 112.345358],
             polygon=[
-                [-6.916399, 112.421830],
-                [-6.916399, 112.422034],
-                [-6.916825, 112.422034],
-                [-6.916825, 112.421830],
+                [-6.912540, 112.345250],
+                [-6.912540, 112.345465],
+                [-6.912910, 112.345465],
+                [-6.912910, 112.345250],
             ],
         ),
         BedengParcelDTO(
             id="C2",
             node_id="VS-C1-002",
-            name="Blok C2 · Tegal Bluri Kidul (Selatan-Tengah 1)",
-            short_name="C2 · Bluri Kidul Tengah",
+            name="Blok C2 · Sawah Solokuro Kidul (Selatan-Tengah 1)",
+            short_name="C2 · Solokuro Kidul Tengah",
             area_ha=0.08,
             crop_variety="Bisi-2",
             moisture_pct=27.5,
@@ -326,19 +328,19 @@ def get_initial_12_bedeng_parcels() -> List[BedengParcelDTO]:
             status="online",
             telemetry_mode="LoRa Live Stream",
             prescription="Waspada: Tanah mulai hangat. Jika memupuk, tutup pupuk dengan tanah segera.",
-            center=[-6.916612, 112.422141],
+            center=[-6.912725, 112.345573],
             polygon=[
-                [-6.916399, 112.422034],
-                [-6.916399, 112.422248],
-                [-6.916825, 112.422248],
-                [-6.916825, 112.422034],
+                [-6.912540, 112.345465],
+                [-6.912540, 112.345680],
+                [-6.912910, 112.345680],
+                [-6.912910, 112.345465],
             ],
         ),
         BedengParcelDTO(
             id="C3",
             node_id="VS-C1-003",
-            name="Blok C3 · Tegal Bluri Kidul (Selatan-Tengah 2)",
-            short_name="C3 · Bluri Kidul Tengah",
+            name="Blok C3 · Sawah Solokuro Kidul (Selatan-Tengah 2)",
+            short_name="C3 · Solokuro Kidul Tengah",
             area_ha=0.08,
             crop_variety="Pioneer P35",
             moisture_pct=21.8,
@@ -352,19 +354,19 @@ def get_initial_12_bedeng_parcels() -> List[BedengParcelDTO]:
             status="online",
             telemetry_mode="LoRa Live Stream",
             prescription="KRITIS! Panas terik dan penguapan cepat. Rekomendasi: Tunda pemupukan.",
-            center=[-6.916612, 112.422355],
+            center=[-6.912725, 112.345788],
             polygon=[
-                [-6.916399, 112.422248],
-                [-6.916399, 112.422463],
-                [-6.916825, 112.422463],
-                [-6.916825, 112.422248],
+                [-6.912540, 112.345680],
+                [-6.912540, 112.345895],
+                [-6.912910, 112.345895],
+                [-6.912910, 112.345680],
             ],
         ),
         BedengParcelDTO(
             id="C4",
             node_id="VS-C1-004",
-            name="Blok C4 · Tegal Bluri Kidul (Selatan-Kelokan Jalan)",
-            short_name="C4 · Bluri Kidul Kelokan",
+            name="Blok C4 · Sawah Solokuro Kidul (Selatan-Kelokan Jalan)",
+            short_name="C4 · Solokuro Kidul Kelokan",
             area_ha=0.08,
             crop_variety="Bisi-18",
             moisture_pct=18.5,
@@ -378,12 +380,12 @@ def get_initial_12_bedeng_parcels() -> List[BedengParcelDTO]:
             status="online",
             telemetry_mode="LoRa Live Stream",
             prescription="BAHAYA TINGGI! Pupuk urea akan menguap lebih dari 80%. Dilarang keras melakukan pemupukan sebar.",
-            center=[-6.916612, 112.422578],
+            center=[-6.912725, 112.346003],
             polygon=[
-                [-6.916399, 112.422463],
-                [-6.916399, 112.422608],
-                [-6.916825, 112.422715],
-                [-6.916825, 112.422463],
+                [-6.912540, 112.345895],
+                [-6.912540, 112.346110],
+                [-6.912910, 112.346110],
+                [-6.912910, 112.345895],
             ],
         ),
     ]

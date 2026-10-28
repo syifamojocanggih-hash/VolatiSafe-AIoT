@@ -174,7 +174,8 @@ def get_field_current_status(field_id: str, session: Session = Depends(get_db)):
                     subheadline=pred_res.prescription.immediate_guidance,
                     best_window=pred_res.next_safe_window.start_time if pred_res.next_safe_window else "06:00 – 09:00 WIB"
                 ),
-                shap_explanations=pred_res.prescription.shap_explanations
+                shap_explanations=pred_res.prescription.shap_explanations,
+                physics_diagnostics=pred_res.physics_diagnostics
             ).model_dump())
     except Exception:
         pass

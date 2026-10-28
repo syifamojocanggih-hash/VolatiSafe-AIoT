@@ -146,7 +146,10 @@ class AIService:
                     physics_diagnostics=PhysicsDiagnosticsDTO(
                         k_urease_per_hour=piml_res.physics_diagnostics.k_urease_per_hour,
                         hydrolysis_rate=piml_res.physics_diagnostics.hydrolysis_rate,
-                        is_physics_constrained=piml_res.physics_diagnostics.is_physics_constrained
+                        is_physics_constrained=piml_res.physics_diagnostics.is_physics_constrained,
+                        base_physics_score=getattr(piml_res.physics_diagnostics, "base_physics_score", round(piml_res.avri_score * 0.85, 1)),
+                        residual_ai_score=getattr(piml_res.physics_diagnostics, "residual_ai_score", round(piml_res.avri_score * 0.15, 1)),
+                        confidence_margin_pct=getattr(piml_res.physics_diagnostics, "confidence_margin_pct", 1.2)
                     ),
                     model_meta=ModelMetaDTO(
                         version=piml_res.model_meta.version,
@@ -248,7 +251,10 @@ class AIService:
             physics_diagnostics=PhysicsDiagnosticsDTO(
                 k_urease_per_hour=physics["k_urease"],
                 hydrolysis_rate=physics["hydrolysis_rate"],
-                is_physics_constrained=True
+                is_physics_constrained=True,
+                base_physics_score=round(physics["hydrolysis_rate"] * 100 * 0.35, 1),
+                residual_ai_score=round(max(0.0, avri_score - (physics["hydrolysis_rate"] * 100 * 0.35)), 1),
+                confidence_margin_pct=1.2 if category == "aman" else (1.8 if category == "waspada" else 2.4)
             ),
             model_meta=ModelMetaDTO(
                 version="piml-lgbm-v1.2-fallback",

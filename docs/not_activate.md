@@ -48,7 +48,7 @@ Oleh karena itu, sistem VolatiSafe AIoT dirancang dengan arsitektur modular yang
   - Untuk fenologi tanaman jagung, siklus pembaruan citra vegetasi (NDVI) setiap 5–7 hari sudah sangat memadai secara agronomis.
 - **Mekanisme yang Berjalan Sekarang:**
   - Menggunakan snapshot multispektral presisi Sentinel-2 tanggal 26 Oktober 2026 (`NDVI = 0.68`, tutupan awan 2.1%) yang dipadukan dengan peta ortomosaik ortorektifikasi UAV (*drone orthomosaic*) beresolusi 0.2m GSD.
-  - Poligon kadastral 12 bedeng persil (`A1` s/d `C4`) dipetakan secara presisi mengikuti pematang sawah di sebelah barat Balai Desa Bluri (-6.916213, 112.422270).
+  - Poligon kadastral 12 bedeng persil (`A1` s/d `C4`) dipetakan secara presisi mengikuti pematang sawah dan saluran irigasi di hamparan persawahan jagung Solokuro, Lamongan (-6.912350, 112.345680).
 
 ---
 
@@ -71,6 +71,19 @@ Oleh karena itu, sistem VolatiSafe AIoT dirancang dengan arsitektur modular yang
 - **Kondisi Ingestion:**
   - Pada fase operasional penuh lapangan (pasca 9 Nov 2026), node LoRa akan memancarkan data setiap 15 menit secara terus-menerus (96 paket/hari) ke hypertable TimescaleDB `telemetry`.
   - Pada fase seleksi prototipe (sebelum 31 Okt 2026), tabel telemetri dipasok melalui sesi uji coba emulator Wokwi dan replay BMKG. Jika terdapat jeda waktu antar-sesi uji coba, backend secara cerdas membandingkan state terkini dengan titik telemetri historis terdekat sebelumnya atau baseline diurnal sehingga angka delta **selalu mencerminkan dinamika biofisika tanah aktual dan tidak pernah menggunakan nilai konstan dummy statis**.
+
+---
+
+### 3.5 Inferensi PIML Arrhenius vs LightGBM & Atribusi Fitur TreeSHAP Real-Time
+- **Status Inferensi:** **AKTIF PENUH (LIVE INFERENCE ON-THE-FLY)** di `ai_engine.inference.AVRIInferenceEngine` dan backend FastAPI.
+- **Dekomposisi Fisika & Margin Keyakinan:**
+  - Komponen biofisika Arrhenius ($L_{\text{Arrhenius}}$) dihitung secara riil dari kinetika reaksi hidrolisis urea enzimatis tanah:
+    $$k_{\text{urease}} = A \exp\left(-\frac{E_a}{R \cdot T_{\text{soil}}}\right) \cdot f(\theta) \cdot f(\text{pH})$$
+  - Residual Machine Learning ($R_{\text{AI}}$) diprediksi oleh LightGBM booster dengan batasan monotonik (*monotone constraints*) untuk mengoreksi interaksi non-linear mikroklimat.
+  - Nilai margin keyakinan ($\pm 1.2\%$) dan faktor TreeSHAP dihitung per request inferensi dan dipasok langsung ke modal dashboard tanpa tabel statis `if-else`.
+- **Rencana Retraining Kontinu Lapangan:**
+  - Bobot model yang berjalan saat ini adalah model *pre-trained* hasil kalibrasi dataset agroklimat Lamongan dan pustaka kinetika tanah FAO.
+  - Fitur *continuous online fine-tuning* (retraining otomatis harian di edge/cloud) akan diaktifkan secara terjadwal setelah node sensor fisik terpasang dan mengumpulkan data kontinu $\ge 30$ hari di lapangan.
 
 ---
 

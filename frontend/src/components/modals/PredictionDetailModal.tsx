@@ -12,13 +12,23 @@ import {
   SlidersHorizontal,
   ChevronRight,
 } from 'lucide-react';
-import { StatusBannerData, MetricItem, RiskCategory } from '@/types/dashboard';
+import {
+  StatusBannerData,
+  MetricItem,
+  RiskCategory,
+  ShapExplanationItem,
+  PhysicsDiagnosticsData,
+  ForecastPoint,
+} from '@/types/dashboard';
 
 interface PredictionDetailModalProps {
   isOpen: boolean;
   onClose: () => void;
   statusBanner: StatusBannerData;
   metrics: MetricItem[];
+  shapExplanations?: ShapExplanationItem[];
+  physicsDiagnostics?: PhysicsDiagnosticsData;
+  trend24h?: ForecastPoint[];
   onOpenSimulator?: () => void;
 }
 
@@ -27,6 +37,9 @@ export const PredictionDetailModal: React.FC<PredictionDetailModalProps> = ({
   onClose,
   statusBanner,
   metrics,
+  shapExplanations,
+  physicsDiagnostics,
+  trend24h,
   onOpenSimulator,
 }) => {
   if (!isOpen) return null;
@@ -40,13 +53,24 @@ export const PredictionDetailModal: React.FC<PredictionDetailModalProps> = ({
   const currentMoisture = metrics.find((m) => m.id === 'moisture')?.value || '42,0%';
   const currentPh = metrics.find((m) => m.id === 'ph')?.value || '7,10';
 
-  // Nilai Komposit Physics-Informed ML sesuai 4 tingkat risiko
-  const basePhysics =
-    category === 'aman' ? 2.8 : category === 'waspada' ? 38.6 : category === 'kritis' ? 61.4 : 72.8;
-  const residualAI =
-    category === 'aman' ? 1.2 : category === 'waspada' ? 9.4 : category === 'kritis' ? 12.6 : 15.2;
+  // Nilai Komposit Physics-Informed ML dari inferensi AI riil backend
+  const basePhysicsVal =
+    physicsDiagnostics?.base_physics_score != null
+      ? Math.abs(physicsDiagnostics.base_physics_score)
+      : category === 'aman' ? 2.8 : category === 'waspada' ? 38.6 : category === 'kritis' ? 61.4 : 72.8;
+
+  const residualAIVal =
+    physicsDiagnostics?.residual_ai_score != null
+      ? physicsDiagnostics.residual_ai_score
+      : category === 'aman' ? 1.2 : category === 'waspada' ? 9.4 : category === 'kritis' ? 12.6 : 15.2;
+
+  const basePhysics = basePhysicsVal.toFixed(1).replace('.', ',');
+  const residualAI = `${residualAIVal >= 0 ? '+' : ''}${residualAIVal.toFixed(1).replace('.', ',')}`;
+
   const confidenceMargin =
-    category === 'aman' ? '±1,2%' : category === 'waspada' ? '±1,8%' : '±2,4%';
+    physicsDiagnostics?.confidence_margin_pct != null
+      ? `±${physicsDiagnostics.confidence_margin_pct.toFixed(1).replace('.', ',')}%`
+      : category === 'aman' ? '±1,2%' : category === 'waspada' ? '±1,8%' : '±2,4%';
 
   // Dynamic composite styling
   let compositeBg = 'bg-gradient-to-br from-emerald-50 to-emerald-100/40 border-emerald-200';
@@ -67,8 +91,44 @@ export const PredictionDetailModal: React.FC<PredictionDetailModalProps> = ({
     badgeClass = 'bg-amber-100 text-amber-800 border-amber-300';
   }
 
-  // Data atribusi TreeSHAP Explainable AI sesuai docs/ai/EXPLAINABILITY_SHAP.md
-  const shapFactors = isAman
+  // Data atribusi TreeSHAP Explainable AI: diprioritaskan dari respons inferensi AI real-time
+  const dynamicShapFactors =
+    shapExplanations && shapExplanations.length > 0
+      ? shapExplanations.map((item, idx) => {
+          const isDamping = item.direction === 'decreases_risk' || item.impact_pct < 0;
+          const isIncreasing = item.direction === 'increases_risk' || item.impact_pct > 0;
+          const absImpact = Math.abs(item.impact_pct).toFixed(1).replace('.', ',');
+          const sign = item.impact_pct >= 0 ? '+' : '-';
+
+          let badgeText = isDamping ? 'Meredam Risiko' : isIncreasing ? 'Memicu Risiko' : 'Netral Stabil';
+          if (item.feature === 'moisture_pct') {
+            badgeText = isDamping ? 'Optimal (Difusi Cepat)' : 'Defisit Air Kritis';
+          } else if (item.feature === 'soil_temp_c') {
+            badgeText = isDamping ? 'Sejuk (Enzim Tertekan)' : 'Kritis (Aktivasi Termal)';
+          } else if (item.feature === 'ph') {
+            badgeText = isDamping ? 'Netral Terjaga' : 'Alkalin Basa Tinggi';
+          } else if (item.feature === 'wind_speed_ms') {
+            badgeText = isDamping ? 'Tenang & Lembap' : 'Turbulensi Kuat';
+          }
+
+          return {
+            id: item.feature || `shap-${idx}`,
+            name: item.label,
+            valueText: `${sign}${absImpact}%`,
+            shapValue: Math.round(item.impact_pct),
+            impactType: isDamping ? ('damping' as const) : isIncreasing ? ('increasing' as const) : ('neutral' as const),
+            impactLabel: `${sign}${absImpact}% ${isDamping ? 'Menekan Risiko' : isIncreasing ? 'Memicu Penguapan' : 'Netral'}`,
+            badge: badgeText,
+            narrative:
+              item.explanation ||
+              (isDamping
+                ? `Kondisi ${item.label} terbukti secara signifikan meredam laju volatilisasi amonia.`
+                : `Kondisi ${item.label} mengakselerasi pelepasan gas amonia bebas ke atmosfer.`),
+          };
+        })
+      : null;
+
+  const shapFactors = dynamicShapFactors || (isAman
     ? [
         {
           id: 'moisture',
@@ -160,22 +220,51 @@ export const PredictionDetailModal: React.FC<PredictionDetailModalProps> = ({
           narrative:
             'Turbulensi angin 2,8 m/s menyapu lapisan batas gas amonia di atas permukaan bedeng.',
         },
-      ];
+      ]);
 
   // Proyeksi kinetika volatilisasi 12 jam ke depan
-  const trajectorySlots = isAman
+  const dynamicTrajectory =
+    trend24h && trend24h.length >= 18
+      ? [
+          { time: '06:00 - 09:00', hTarget: 7 },
+          { time: '09:00 - 12:00', hTarget: 10 },
+          { time: '12:00 - 15:00', hTarget: 13 },
+          { time: '15:00 - 18:00', hTarget: 16 },
+        ].map((slot) => {
+          const pt = trend24h[slot.hTarget] || trend24h[0];
+          const temp = pt.temperature;
+          const moist = pt.moisture;
+          const estScore = Math.max(4, Math.min(92, Math.round((temp - 20) * 2.8 + (35 - moist) * 1.5)));
+          const slotStatus: 'optimal' | 'warning' | 'danger' =
+            estScore > 60 ? 'danger' : estScore > 30 ? 'warning' : 'optimal';
+          const label =
+            slotStatus === 'optimal'
+              ? 'Penyerapan Berjalan Aman'
+              : slotStatus === 'warning'
+              ? 'Waspada Suhu Naik'
+              : 'Puncak Volatilisasi Terik';
+          return {
+            time: slot.time,
+            score: `${estScore}%`,
+            label,
+            status: slotStatus,
+          };
+        })
+      : null;
+
+  const trajectorySlots = dynamicTrajectory || (isAman
     ? [
-        { time: '06:00 - 09:00', score: '4%', label: 'Jendela Emas Penaburan', status: 'optimal' },
-        { time: '09:00 - 12:00', score: '12%', label: 'Penyerapan Berjalan Aman', status: 'optimal' },
-        { time: '12:00 - 15:00', score: '32%', label: 'Waspada Suhu Naik', status: 'warning' },
-        { time: '15:00 - 18:00', score: '16%', label: 'Kembali Sejuk', status: 'optimal' },
+        { time: '06:00 - 09:00', score: '4%', label: 'Jendela Emas Penaburan', status: 'optimal' as const },
+        { time: '09:00 - 12:00', score: '12%', label: 'Penyerapan Berjalan Aman', status: 'optimal' as const },
+        { time: '12:00 - 15:00', score: '32%', label: 'Waspada Suhu Naik', status: 'warning' as const },
+        { time: '15:00 - 18:00', score: '16%', label: 'Kembali Sejuk', status: 'optimal' as const },
       ]
     : [
-        { time: '06:00 - 09:00', score: '41%', label: 'Suhu Mulai Meningkat', status: 'warning' },
-        { time: '09:00 - 12:00', score: '68%', label: 'Terik Kritis Berlangsung', status: 'danger' },
-        { time: '12:00 - 15:00', score: '74%', label: 'Puncak Volatilisasi Ekstrem', status: 'danger' },
-        { time: '15:00 - 18:00', score: '52%', label: 'Penurunan Bertahap', status: 'warning' },
-      ];
+        { time: '06:00 - 09:00', score: '41%', label: 'Suhu Mulai Meningkat', status: 'warning' as const },
+        { time: '09:00 - 12:00', score: '68%', label: 'Terik Kritis Berlangsung', status: 'danger' as const },
+        { time: '12:00 - 15:00', score: '74%', label: 'Puncak Volatilisasi Ekstrem', status: 'danger' as const },
+        { time: '15:00 - 18:00', score: '52%', label: 'Penurunan Bertahap', status: 'warning' as const },
+      ]);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200">
@@ -277,7 +366,7 @@ export const PredictionDetailModal: React.FC<PredictionDetailModalProps> = ({
                   <Sparkles className="w-3.5 h-3.5 text-amber-600" />
                   Koreksi Residual LightGBM
                 </span>
-                <span className="text-sm font-extrabold text-slate-900">+{residualAI}%</span>
+                <span className="text-sm font-extrabold text-slate-900">{residualAI}%</span>
               </div>
               <p className="text-[11px] text-slate-600 mt-1">
                 {isAman

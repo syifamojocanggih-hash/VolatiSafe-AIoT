@@ -2,149 +2,141 @@ import { BedengParcel, ParcelMapSummary, SurroundingParcel } from '@/types/parce
 
 export const bluriOuterBoundary: [number, number][] = [
   [
-    -6.915584,
-    112.421808
+    -6.91175,
+    112.3452
   ],
   [
-    -6.915584,
-    112.422699
+    -6.91175,
+    112.34616
   ],
   [
-    -6.915989,
-    112.422688
+    -6.91296,
+    112.34616
   ],
   [
-    -6.916399,
-    112.422634
-  ],
-  [
-    -6.916841,
-    112.422742
-  ],
-  [
-    -6.916841,
-    112.421808
+    -6.91296,
+    112.3452
   ]
 ];
 
 export const bluriSurroundingParcels: SurroundingParcel[] = [
   {
     "id": "C01",
-    "name": "Lahan Sawah Tegal Bluri Utara (Blok 1B)",
+    "name": "Lahan Sawah Solokuro Lor (Blok 1B)",
     "areaHa": 0.45,
     "center": [
-      -6.91535,
-      112.42225
+      -6.91145,
+      112.34568
     ],
     "polygon": [
       [
-        -6.91515,
-        112.421808
+        -6.91115,
+        112.3452
       ],
       [
-        -6.91515,
-        112.422742
+        -6.91115,
+        112.34616
       ],
       [
-        -6.915584,
-        112.422699
+        -6.91175,
+        112.34616
       ],
       [
-        -6.915584,
-        112.421808
+        -6.91175,
+        112.3452
       ]
     ]
   },
   {
     "id": "C02",
-    "name": "Lahan Pertanian Barat (Arah Balai Desa Bluri)",
+    "name": "Lahan Pertanian Kulon (Arah Solokuro Kulon)",
     "areaHa": 0.62,
     "center": [
-      -6.9161,
-      112.4214
+      -6.912355,
+      112.34475
     ],
     "polygon": [
       [
-        -6.915584,
-        112.421
+        -6.91175,
+        112.3443
       ],
       [
-        -6.915584,
-        112.421808
+        -6.91175,
+        112.3452
       ],
       [
-        -6.916841,
-        112.421808
+        -6.91296,
+        112.3452
       ],
       [
-        -6.916841,
-        112.421
+        -6.91296,
+        112.3443
       ]
     ]
   },
   {
     "id": "C03",
-    "name": "Lahan Sawah Tegal Bluri Kidul (Arah Banyubang)",
+    "name": "Lahan Sawah Solokuro Kidul (Arah Banyubang)",
     "areaHa": 0.58,
     "center": [
-      -6.91715,
-      112.42225
+      -6.91325,
+      112.34568
     ],
     "polygon": [
       [
-        -6.916841,
-        112.421808
+        -6.91296,
+        112.3452
       ],
       [
-        -6.916841,
-        112.422742
+        -6.91296,
+        112.34616
       ],
       [
-        -6.91745,
-        112.42285
+        -6.91355,
+        112.34616
       ],
       [
-        -6.91745,
-        112.421808
+        -6.91355,
+        112.3452
       ]
     ]
   },
   {
     "id": "C04",
-    "name": "Persil Sawah Timur (Seberang Jalan Usaha Tani)",
+    "name": "Persil Sawah Wetan (Seberang Jalan Usaha Tani)",
     "areaHa": 0.52,
     "center": [
-      -6.9161,
-      112.4231
+      -6.912355,
+      112.3466
     ],
     "polygon": [
       [
-        -6.915521,
-        112.42278
+        -6.91175,
+        112.3462
       ],
       [
-        -6.915521,
-        112.4234
+        -6.91175,
+        112.347
       ],
       [
-        -6.916884,
-        112.4234
+        -6.91296,
+        112.347
       ],
       [
-        -6.916884,
-        112.42295
+        -6.91296,
+        112.3462
       ]
     ]
   }
 ];
 
 export const initialMapSummary: ParcelMapSummary = {
-  coordinatesText: '6??54\'58"S 112??25\'20"E',
-  soilTypeText: 'Hamparan Sawah Tegal Jagung Bluri, Solokuro (Aluvial Lempung Kapur pH 7.8)',
-  gatewayDistanceKm: 0.08,
+  coordinatesText: '6°54\'44"S 112°20\'44"E',
+  soilTypeText: 'Hamparan Persawahan Jagung Solokuro (Aluvial Lempung Berpasir pH 7.2)',
+  gatewayDistanceKm: 0.065,
   totalAreaHa: 0.96,
-  centerCoordinates: [-6.916213, 112.422270],
-  gatewayCoordinates: [-6.915650, 112.422720],
+  centerCoordinates: [-6.912350, 112.345680],
+  gatewayCoordinates: [-6.911850, 112.346150],
   outerBoundary: bluriOuterBoundary,
   surroundingParcels: bluriSurroundingParcels,
   satelliteMetadata: {
@@ -163,8 +155,8 @@ export const initialParcels: BedengParcel[] = [
   {
     "id": "A1",
     "nodeId": "VS-A1-001",
-    "name": "Blok A1 \u00b7 Tegal Bluri Lor (Utara-Barat)",
-    "shortName": "A1 \u00b7 Bluri Lor Barat",
+    "name": "Blok A1 \u00b7 Sawah Solokuro Lor (Utara-Barat)",
+    "shortName": "A1 \u00b7 Solokuro Lor Barat",
     "areaHa": 0.08,
     "cropVariety": "Bisi-18",
     "moisturePct": 22.4,
@@ -179,33 +171,33 @@ export const initialParcels: BedengParcel[] = [
     "telemetryMode": "LoRa Live Stream",
     "prescription": "Tunda! Suhu tanah terik (34,1\u00b0C) dan kelembapan rendah (22,4%). Tunggu hujan atau siram sebelum pemupukan.",
     "center": [
-      -6.915786,
-      112.421932
+      -6.911985,
+      112.345358
     ],
     "polygon": [
       [
-        -6.9156,
-        112.42183
+        -6.9118,
+        112.34525
       ],
       [
-        -6.9156,
-        112.422034
+        -6.9118,
+        112.345465
       ],
       [
-        -6.915973,
-        112.422034
+        -6.91217,
+        112.345465
       ],
       [
-        -6.915973,
-        112.42183
+        -6.91217,
+        112.34525
       ]
     ]
   },
   {
     "id": "A2",
     "nodeId": "VS-A1-002",
-    "name": "Blok A2 \u00b7 Tegal Bluri Lor (Utara-Tengah 1)",
-    "shortName": "A2 \u00b7 Bluri Lor Tengah",
+    "name": "Blok A2 \u00b7 Sawah Solokuro Lor (Utara-Tengah 1)",
+    "shortName": "A2 \u00b7 Solokuro Lor Tengah",
     "areaHa": 0.08,
     "cropVariety": "NK-212",
     "moisturePct": 36.8,
@@ -220,33 +212,33 @@ export const initialParcels: BedengParcel[] = [
     "telemetryMode": "LoRa Live Stream",
     "prescription": "Aman dipupuk! Suhu tanah sejuk (26,4\u00b0C) dan kelembapan prima (36,8%). Manfaatkan jendela waktu sekarang.",
     "center": [
-      -6.915786,
-      112.422141
+      -6.911985,
+      112.345573
     ],
     "polygon": [
       [
-        -6.9156,
-        112.422034
+        -6.9118,
+        112.345465
       ],
       [
-        -6.9156,
-        112.422248
+        -6.9118,
+        112.34568
       ],
       [
-        -6.915973,
-        112.422248
+        -6.91217,
+        112.34568
       ],
       [
-        -6.915973,
-        112.422034
+        -6.91217,
+        112.345465
       ]
     ]
   },
   {
     "id": "A3",
     "nodeId": "VS-A1-003",
-    "name": "Blok A3 \u00b7 Tegal Bluri Lor (Utara-Tengah 2)",
-    "shortName": "A3 \u00b7 Bluri Lor Tengah",
+    "name": "Blok A3 \u00b7 Sawah Solokuro Lor (Utara-Tengah 2)",
+    "shortName": "A3 \u00b7 Solokuro Lor Tengah",
     "areaHa": 0.08,
     "cropVariety": "Pioneer P35",
     "moisturePct": 19.2,
@@ -261,33 +253,33 @@ export const initialParcels: BedengParcel[] = [
     "telemetryMode": "LoRa Live Stream",
     "prescription": "BAHAYA! Risiko penguapan amonia ekstrem (>80%). Jangan lakukan pemupukan permukaan saat ini.",
     "center": [
-      -6.915786,
-      112.422355
+      -6.911985,
+      112.345788
     ],
     "polygon": [
       [
-        -6.9156,
-        112.422248
+        -6.9118,
+        112.34568
       ],
       [
-        -6.9156,
-        112.422463
+        -6.9118,
+        112.345895
       ],
       [
-        -6.915973,
-        112.422463
+        -6.91217,
+        112.345895
       ],
       [
-        -6.915973,
-        112.422248
+        -6.91217,
+        112.34568
       ]
     ]
   },
   {
     "id": "A4",
     "nodeId": "VS-A1-004",
-    "name": "Blok A4 \u00b7 Tegal Bluri Lor (Utara-Timur Jalan)",
-    "shortName": "A4 \u00b7 Bluri Lor Timur",
+    "name": "Blok A4 \u00b7 Sawah Solokuro Lor (Utara-Timur Jalan)",
+    "shortName": "A4 \u00b7 Solokuro Lor Timur",
     "areaHa": 0.08,
     "cropVariety": "Bisi-2",
     "moisturePct": 28.1,
@@ -302,33 +294,33 @@ export const initialParcels: BedengParcel[] = [
     "telemetryMode": "LoRa Live Stream",
     "prescription": "Waspada! Gunakan metode benam (tugal kedalaman 5-7 cm) bila terpaksa memupuk hari ini.",
     "center": [
-      -6.915786,
-      112.422566
+      -6.911985,
+      112.346003
     ],
     "polygon": [
       [
-        -6.9156,
-        112.422463
+        -6.9118,
+        112.345895
       ],
       [
-        -6.9156,
-        112.422677
+        -6.9118,
+        112.34611
       ],
       [
-        -6.915973,
-        112.422661
+        -6.91217,
+        112.34611
       ],
       [
-        -6.915973,
-        112.422463
+        -6.91217,
+        112.345895
       ]
     ]
   },
   {
     "id": "B1",
     "nodeId": "VS-B1-001",
-    "name": "Blok B1 \u00b7 Tegal Bluri Madya (Tengah-Barat)",
-    "shortName": "B1 \u00b7 Bluri Madya Barat",
+    "name": "Blok B1 \u00b7 Sawah Solokuro Madya (Tengah-Barat)",
+    "shortName": "B1 \u00b7 Solokuro Madya Barat",
     "areaHa": 0.08,
     "cropVariety": "Bisi-18",
     "moisturePct": 34.2,
@@ -343,33 +335,33 @@ export const initialParcels: BedengParcel[] = [
     "telemetryMode": "LoRa Live Stream",
     "prescription": "Kondisi aman. Kelembapan tanah cukup untuk hidrolisis perlahan tanpa penguapan amonia masif.",
     "center": [
-      -6.916186,
-      112.421932
+      -6.912355,
+      112.345358
     ],
     "polygon": [
       [
-        -6.915973,
-        112.42183
+        -6.91217,
+        112.34525
       ],
       [
-        -6.915973,
-        112.422034
+        -6.91217,
+        112.345465
       ],
       [
-        -6.916399,
-        112.422034
+        -6.91254,
+        112.345465
       ],
       [
-        -6.916399,
-        112.42183
+        -6.91254,
+        112.34525
       ]
     ]
   },
   {
     "id": "B2",
     "nodeId": "VS-B1-002",
-    "name": "Blok B2 \u00b7 Tegal Bluri Madya (Tengah-Inti)",
-    "shortName": "B2 \u00b7 Bluri Madya Inti",
+    "name": "Blok B2 \u00b7 Sawah Solokuro Madya (Tengah-Inti)",
+    "shortName": "B2 \u00b7 Solokuro Madya Inti",
     "areaHa": 0.08,
     "cropVariety": "NK-212",
     "moisturePct": 26.0,
@@ -384,33 +376,33 @@ export const initialParcels: BedengParcel[] = [
     "telemetryMode": "LoRa Live Stream",
     "prescription": "Waspada: Kelembapan 26.0% mendekati batas kritis 25%. Dianjurkan menunda pemupukan hingga sore hari.",
     "center": [
-      -6.916186,
-      112.422141
+      -6.912355,
+      112.345573
     ],
     "polygon": [
       [
-        -6.915973,
-        112.422034
+        -6.91217,
+        112.345465
       ],
       [
-        -6.915973,
-        112.422248
+        -6.91217,
+        112.34568
       ],
       [
-        -6.916399,
-        112.422248
+        -6.91254,
+        112.34568
       ],
       [
-        -6.916399,
-        112.422034
+        -6.91254,
+        112.345465
       ]
     ]
   },
   {
     "id": "B3",
     "nodeId": "VS-B1-003",
-    "name": "Blok B3 \u00b7 Tegal Bluri Madya (Tengah-Timur 1)",
-    "shortName": "B3 \u00b7 Bluri Madya Timur",
+    "name": "Blok B3 \u00b7 Sawah Solokuro Madya (Tengah-Timur 1)",
+    "shortName": "B3 \u00b7 Solokuro Madya Timur",
     "areaHa": 0.08,
     "cropVariety": "Pioneer P35",
     "moisturePct": 23.1,
@@ -425,33 +417,33 @@ export const initialParcels: BedengParcel[] = [
     "telemetryMode": "LoRa Live Stream",
     "prescription": "KRITIS! Kehilangan nitrogen diperkirakan mencapai 68%. Jangan sebar urea.",
     "center": [
-      -6.916186,
-      112.422347
+      -6.912355,
+      112.345788
     ],
     "polygon": [
       [
-        -6.915973,
-        112.422248
+        -6.91217,
+        112.34568
       ],
       [
-        -6.915973,
-        112.422447
+        -6.91217,
+        112.345895
       ],
       [
-        -6.916399,
-        112.422447
+        -6.91254,
+        112.345895
       ],
       [
-        -6.916399,
-        112.422248
+        -6.91254,
+        112.34568
       ]
     ]
   },
   {
     "id": "B4",
     "nodeId": "VS-B1-004",
-    "name": "Blok B4 \u00b7 Tegal Bluri Madya (Tengah-Sisi Jalan)",
-    "shortName": "B4 \u00b7 Bluri Madya Jalan",
+    "name": "Blok B4 \u00b7 Sawah Solokuro Madya (Tengah-Sisi Jalan)",
+    "shortName": "B4 \u00b7 Solokuro Madya Jalan",
     "areaHa": 0.08,
     "cropVariety": "Bisi-18",
     "moisturePct": 33.5,
@@ -466,33 +458,33 @@ export const initialParcels: BedengParcel[] = [
     "telemetryMode": "LoRa Live Stream",
     "prescription": "Aman: Kanopi tanaman di dekat jalan cukup menaungi tanah, menekan kenaikan suhu permukaan.",
     "center": [
-      -6.916186,
-      112.422544
+      -6.912355,
+      112.346003
     ],
     "polygon": [
       [
-        -6.915973,
-        112.422447
+        -6.91217,
+        112.345895
       ],
       [
-        -6.915973,
-        112.422661
+        -6.91217,
+        112.34611
       ],
       [
-        -6.916399,
-        112.422608
+        -6.91254,
+        112.34611
       ],
       [
-        -6.916399,
-        112.422447
+        -6.91254,
+        112.345895
       ]
     ]
   },
   {
     "id": "C1",
     "nodeId": "VS-C1-001",
-    "name": "Blok C1 \u00b7 Tegal Bluri Kidul (Selatan-Barat)",
-    "shortName": "C1 \u00b7 Bluri Kidul Barat",
+    "name": "Blok C1 \u00b7 Sawah Solokuro Kidul (Selatan-Barat)",
+    "shortName": "C1 \u00b7 Solokuro Kidul Barat",
     "areaHa": 0.08,
     "cropVariety": "NK-212",
     "moisturePct": 35.0,
@@ -507,33 +499,33 @@ export const initialParcels: BedengParcel[] = [
     "telemetryMode": "LoRa Live Stream",
     "prescription": "Aman dipupuk. Kondisi tanah ideal dengan retensi air optimal.",
     "center": [
-      -6.916612,
-      112.421932
+      -6.912725,
+      112.345358
     ],
     "polygon": [
       [
-        -6.916399,
-        112.42183
+        -6.91254,
+        112.34525
       ],
       [
-        -6.916399,
-        112.422034
+        -6.91254,
+        112.345465
       ],
       [
-        -6.916825,
-        112.422034
+        -6.91291,
+        112.345465
       ],
       [
-        -6.916825,
-        112.42183
+        -6.91291,
+        112.34525
       ]
     ]
   },
   {
     "id": "C2",
     "nodeId": "VS-C1-002",
-    "name": "Blok C2 \u00b7 Tegal Bluri Kidul (Selatan-Tengah 1)",
-    "shortName": "C2 \u00b7 Bluri Kidul Tengah",
+    "name": "Blok C2 \u00b7 Sawah Solokuro Kidul (Selatan-Tengah 1)",
+    "shortName": "C2 \u00b7 Solokuro Kidul Tengah",
     "areaHa": 0.08,
     "cropVariety": "Bisi-2",
     "moisturePct": 27.5,
@@ -548,33 +540,33 @@ export const initialParcels: BedengParcel[] = [
     "telemetryMode": "LoRa Live Stream",
     "prescription": "Waspada: Tanah mulai hangat. Jika memupuk, tutup pupuk dengan tanah segera.",
     "center": [
-      -6.916612,
-      112.422141
+      -6.912725,
+      112.345573
     ],
     "polygon": [
       [
-        -6.916399,
-        112.422034
+        -6.91254,
+        112.345465
       ],
       [
-        -6.916399,
-        112.422248
+        -6.91254,
+        112.34568
       ],
       [
-        -6.916825,
-        112.422248
+        -6.91291,
+        112.34568
       ],
       [
-        -6.916825,
-        112.422034
+        -6.91291,
+        112.345465
       ]
     ]
   },
   {
     "id": "C3",
     "nodeId": "VS-C1-003",
-    "name": "Blok C3 \u00b7 Tegal Bluri Kidul (Selatan-Tengah 2)",
-    "shortName": "C3 \u00b7 Bluri Kidul Tengah",
+    "name": "Blok C3 \u00b7 Sawah Solokuro Kidul (Selatan-Tengah 2)",
+    "shortName": "C3 \u00b7 Solokuro Kidul Tengah",
     "areaHa": 0.08,
     "cropVariety": "Pioneer P35",
     "moisturePct": 21.8,
@@ -589,33 +581,33 @@ export const initialParcels: BedengParcel[] = [
     "telemetryMode": "LoRa Live Stream",
     "prescription": "KRITIS! Panas terik dan penguapan cepat. Rekomendasi: Tunda pemupukan.",
     "center": [
-      -6.916612,
-      112.422355
+      -6.912725,
+      112.345788
     ],
     "polygon": [
       [
-        -6.916399,
-        112.422248
+        -6.91254,
+        112.34568
       ],
       [
-        -6.916399,
-        112.422463
+        -6.91254,
+        112.345895
       ],
       [
-        -6.916825,
-        112.422463
+        -6.91291,
+        112.345895
       ],
       [
-        -6.916825,
-        112.422248
+        -6.91291,
+        112.34568
       ]
     ]
   },
   {
     "id": "C4",
     "nodeId": "VS-C1-004",
-    "name": "Blok C4 \u00b7 Tegal Bluri Kidul (Selatan-Kelokan Jalan)",
-    "shortName": "C4 \u00b7 Bluri Kidul Kelokan",
+    "name": "Blok C4 \u00b7 Sawah Solokuro Kidul (Selatan-Kelokan Jalan)",
+    "shortName": "C4 \u00b7 Solokuro Kidul Kelokan",
     "areaHa": 0.08,
     "cropVariety": "Bisi-18",
     "moisturePct": 18.5,
@@ -630,25 +622,25 @@ export const initialParcels: BedengParcel[] = [
     "telemetryMode": "LoRa Live Stream",
     "prescription": "BAHAYA TINGGI! Pupuk urea akan menguap lebih dari 80%. Dilarang keras melakukan pemupukan sebar.",
     "center": [
-      -6.916612,
-      112.422578
+      -6.912725,
+      112.346003
     ],
     "polygon": [
       [
-        -6.916399,
-        112.422463
+        -6.91254,
+        112.345895
       ],
       [
-        -6.916399,
-        112.422608
+        -6.91254,
+        112.34611
       ],
       [
-        -6.916825,
-        112.422715
+        -6.91291,
+        112.34611
       ],
       [
-        -6.916825,
-        112.422463
+        -6.91291,
+        112.345895
       ]
     ]
   }

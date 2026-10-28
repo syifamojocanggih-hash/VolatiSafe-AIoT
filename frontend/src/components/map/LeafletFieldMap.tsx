@@ -42,9 +42,9 @@ export const LeafletFieldMap: React.FC<LeafletFieldMapProps> = ({
   const [tileType, setTileType] = useState<TileType>('satellite');
   const [showLegend, setShowLegend] = useState<boolean>(false);
 
-  // Center coordinates (Hamparan Sawah Tegal Jagung Balai Desa Bluri: 6°54'58"S 112°25'20"E)
-  const defaultCenter = summary.centerCoordinates || [-6.916213, 112.422270];
-  const gatewayPos = summary.gatewayCoordinates || [-6.915650, 112.422720];
+  // Center coordinates (Hamparan Persawahan Jagung Solokuro: 6°54'44"S 112°20'44"E)
+  const defaultCenter = summary.centerCoordinates || [-6.912350, 112.345680];
+  const gatewayPos = summary.gatewayCoordinates || [-6.911850, 112.346150];
   const outerBoundary = summary.outerBoundary || bluriOuterBoundary;
   const surroundingParcels = summary.surroundingParcels || bluriSurroundingParcels;
 
@@ -210,15 +210,14 @@ export const LeafletFieldMap: React.FC<LeafletFieldMapProps> = ({
         `);
       });
 
-      // 3. DIVIDING ROAD & DRAINAGE DITCH (Jalan Usaha Tani Desa Bluri)
+      // 3. DIVIDING ROAD & DRAINAGE DITCH (Jalan Usaha Tani & Saluran Irigasi Solokuro)
       const roadLine = L.polyline(
         [
-          [-6.915521, 112.422742],
-          [-6.915787, 112.422699],
-          [-6.916053, 112.422661],
-          [-6.916319, 112.422624],
-          [-6.916586, 112.422768],
-          [-6.916884, 112.422929],
+          [-6.911700, 112.346160],
+          [-6.912000, 112.346160],
+          [-6.912350, 112.346160],
+          [-6.912650, 112.346160],
+          [-6.913000, 112.346160],
         ],
         {
           color: '#38BDF8',
@@ -228,7 +227,7 @@ export const LeafletFieldMap: React.FC<LeafletFieldMapProps> = ({
         }
       ).addTo(map);
 
-      roadLine.bindTooltip('Saluran Drainase & Jalan Usaha Tani Desa Bluri', {
+      roadLine.bindTooltip('Saluran Irigasi & Jalan Usaha Tani Solokuro', {
         permanent: false,
         direction: 'top',
         className: 'bg-sky-950 text-white text-xs px-2.5 py-1 rounded shadow-md font-medium',
@@ -424,7 +423,7 @@ export const LeafletFieldMap: React.FC<LeafletFieldMapProps> = ({
         {/* Left: Location & Project Chip */}
         <div className="pointer-events-auto flex items-center gap-1.5 sm:gap-2 bg-white/95 backdrop-blur-md px-3 py-1.5 rounded-xl border border-slate-200/90 shadow-md text-xs font-semibold text-slate-800">
           <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-          <span className="truncate max-w-[160px] sm:max-w-none">Hamparan Sawah · Balai Desa Bluri, Solokuro</span>
+          <span className="truncate max-w-[160px] sm:max-w-none">Hamparan Persawahan Jagung · Solokuro, Lamongan</span>
           <span className="hidden sm:inline-block text-slate-300">|</span>
           <span className="hidden sm:inline-block px-1.5 py-0.5 rounded text-2xs bg-blue-50 text-blue-700 font-bold border border-blue-200">
             {parcels.length + surroundingParcels.length} Persil Sawah ({summary.totalAreaHa || 0.96} Ha)

@@ -2,6 +2,35 @@
 
 Seluruh catatan kemajuan, keputusan teknis, dan implementasi antarmuka frontend (Next.js 14, Tailwind CSS, PWA) dicatat secara kronologis di sini.
 
+## [2026-10-28] — Relokasi Geospasial Poligon ke Hamparan Sawah Murni Solokuro & Integrasi Peta Persil 100% Live
+
+### 🌾 Eliminasi Area Tambang/Gunung Kapur & Integrasi Endpoint Peta Persil (`parcelsMock.ts`, `LeafletFieldMap.tsx`, `ParcelRiskMap.tsx`, `api.ts`)
+- **Koreksi Geospasial ke Hamparan Sawah Murni Solokuro (`6°54'44"S 112°20'44"E` / `-6.912350, 112.345680`):**
+  - Mengeliminasi penempatan poligon sebelumnya di area bukit kapur tambang galian ("Bukit Kapur Telogo Sadang / CV Hengky Jaya / Bukit Maut") dan memindahkannya ke zona persawahan dan tegalan jagung hijau subur di Kecamatan Solokuro (sesuai data primer database `docker/init.sql`).
+  - Citra satelit kini 100% menampilkan petak-petak sawah hijau, pematang ladang jagung, dan saluran irigasi.
+- **Integrasi Endpoint Backend Live `GET /api/v1/fields/{id}/parcels`:**
+  - Antarmuka peta [`ParcelRiskMap.tsx`](file:///c:/Users/ASUS/Documents/code/VolatiSafe-AIoT/frontend/src/components/map/ParcelRiskMap.tsx) kini secara asinkron memuat 12 bedeng persil kadastral (`A1` s/d `C4`), telemetri sensor per bedeng, dan poligon buffer sekeliling dari backend FastAPI.
+  - Chip informasi hamparan kini menampilkan: `Hamparan Persawahan Jagung · Solokuro, Lamongan | 16 Persil Sawah (0.96 Ha)`.
+- **Integrasi Tombol Failover Digital Twin FAO-56:**
+  - Tombol simulasi "Node Dropout & Failover Digital Twin FAO-56" kini memanggil endpoint backend `POST /api/v1/fields/{id}/parcels/{parcel_id}/simulate-failover` secara asinkron, mengubah status bedeng menjadi `simulated` dan mode telemetri menjadi `[Est-Simulated] FAO-56`.
+- **Verifikasi Build & Tipe:**
+  - Zero errors pada kompilasi TypeScript (`npx tsc --noEmit`) dan build produksi Next.js 14 (`npm run build`).
+
+---
+
+## [2026-10-28] — Modal Detail Prediksi AVRI 100% Live (Arrhenius Physics, Residual AI, Margin Keyakinan & TreeSHAP)
+
+### 🔬 Integrasi Live Inferensi AI & Dekomposisi Fisika Biofisik (`PredictionDetailModal.tsx`, `page.tsx`, `api.ts`, `types/dashboard.ts`)
+- **Eliminasi Tabel Statis *If-Else* pada Modal Detail:**
+  - Menghubungkan visualisasi dekomposisi biofisik Arrhenius (`base_physics_score`), koreksi residual Machine Learning (`residual_ai_score`), dan margin interval keyakinan (`confidence_margin_pct`) langsung dari respons live engine PIML backend.
+  - Memetakan faktor kontribusi Explainable AI TreeSHAP (`shapExplanations`) secara real-time: arah kontribusi (`increases_risk` / `decreases_risk`), besaran persentase dampak (`±%`), badge narasi agronomis, dan dampak terhadap volatilisasi amonia.
+- **Dinamika Slot Trajektori Kinetika 12 Jam:**
+  - Menghubungkan proyeksi slot jam kinetika (06:00-09:00, 09:00-12:00, 12:00-15:00, 15:00-18:00) ke tren multivariat cuaca mikro 24 jam (`trend24h`) aktual dari digital twin.
+- **Type Safety & Build Verification:**
+  - Seluruh antarmuka lolos verifikasi kompilasi TypeScript (`npx tsc --noEmit`) dan build produksi Next.js 14 (`npm run build`) dengan zero error.
+
+---
+
 ## [2026-10-28] — Integrasi Header Informasi Lahan 100% Live & Auto-Refresh Telemetri
 
 ### 🌽 Header Informasi Lahan Live & Sinkronisasi Siklus Tanam (FieldHeader.tsx, page.tsx, pi.ts, INTERFACES.md)

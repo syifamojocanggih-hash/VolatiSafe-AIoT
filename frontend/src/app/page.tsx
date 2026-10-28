@@ -50,6 +50,8 @@ function transformBackendStatus(
   banner: StatusBannerData;
   metrics: MetricItem[];
   field: DashboardState['field'];
+  shapExplanations?: DashboardState['shapExplanations'];
+  physicsDiagnostics?: DashboardState['physicsDiagnostics'];
 } {
   const m = status.metrics;
   const b = status.alert_banner;
@@ -142,7 +144,13 @@ function transformBackendStatus(
         : prevField.lastUpdatedMinutesAgo,
   };
 
-  return { banner, metrics, field };
+  return {
+    banner,
+    metrics,
+    field,
+    shapExplanations: status.shap_explanations,
+    physicsDiagnostics: status.physics_diagnostics,
+  };
 }
 
 function transformForecastToDays(
@@ -346,7 +354,7 @@ export default function DashboardPage() {
       const fieldStatus = await getFieldCurrentStatus('BLOK-A');
       if (fieldStatus) {
         setIsPostponed(fieldStatus.is_postponed);
-        const { banner, metrics, field } = transformBackendStatus(
+        const { banner, metrics, field, shapExplanations, physicsDiagnostics } = transformBackendStatus(
           fieldStatus,
           initialDashboardData.field
         );
@@ -356,6 +364,8 @@ export default function DashboardPage() {
           field,
           statusBanner: banner,
           metrics,
+          shapExplanations,
+          physicsDiagnostics,
         }));
       }
 
@@ -553,6 +563,9 @@ export default function DashboardPage() {
         onClose={() => setIsDetailModalOpen(false)}
         statusBanner={currentData.statusBanner}
         metrics={currentData.metrics}
+        shapExplanations={currentData.shapExplanations}
+        physicsDiagnostics={currentData.physicsDiagnostics}
+        trend24h={currentData.trend24h}
         onOpenSimulator={() => {
           setIsDetailModalOpen(false);
           setActiveTab('simulator');
