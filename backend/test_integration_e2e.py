@@ -155,8 +155,73 @@ def run_e2e_tests():
     assert cancel_res["data"]["is_postponed"] is False
     print(f"      -> Postpone Flag after cancel: {cancel_res['data']['is_postponed']}")
 
+    # 10. Official Scenario 1: Terik Ekstrem Siang Hari (INTEGRATION_RUNBOOK.md §5)
+    print("\n--- Testing Skenario 1: Terik Ekstrem Siang Hari (High Volatilization Spike) ---")
+    scen1_res = api_call(
+        "10. Skenario 1: Terik Ekstrem (36.0°C, 16.0% VWC, pH 7.95, Hujan 0 mm)",
+        "/simulation/what-if",
+        method="POST",
+        payload={
+            "soil_temp_c": 36.0,
+            "moisture_pct": 16.0,
+            "ph": 7.95,
+            "rain_mm": 0.0
+        }
+    )
+    assert scen1_res["data"]["avri_score"] >= 60.0
+    assert scen1_res["data"]["risk_category"] in ["kritis", "bahaya"]
+    assert scen1_res["data"]["safe_window_open"] is False
+    assert scen1_res["data"]["prescription"]["action_id"] in ["DELAY_FERTILIZATION", "PROHIBIT_APPLICATION"]
+    print(f"      -> Inferred AVRI: {scen1_res['data']['avri_score']}% (Kategori: {scen1_res['data']['risk_category'].upper()})")
+    print(f"      -> Preskripsi: {scen1_res['data']['prescription']['title']}")
+    print(f"      -> Safe Window Open: {scen1_res['data']['safe_window_open']}")
+
+    # 11. Official Scenario 2: Presipitasi Hujan Petir (INTEGRATION_RUNBOOK.md §5)
+    print("\n--- Testing Skenario 2: Presipitasi Hujan Petir (Safe Window Triggering) ---")
+    scen2_res = api_call(
+        "11. Skenario 2: Hujan Petir (24.0°C, 42.0% VWC, pH 6.90, Hujan 22 mm)",
+        "/simulation/what-if",
+        method="POST",
+        payload={
+            "soil_temp_c": 24.0,
+            "moisture_pct": 42.0,
+            "ph": 6.90,
+            "rain_mm": 22.0
+        }
+    )
+    assert scen2_res["data"]["avri_score"] <= 20.0
+    assert scen2_res["data"]["risk_category"] == "aman"
+    assert scen2_res["data"]["safe_window_open"] is True
+    assert scen2_res["data"]["prescription"]["action_id"] == "APPLY_NOW"
+    print(f"      -> Inferred AVRI: {scen2_res['data']['avri_score']}% (Kategori: {scen2_res['data']['risk_category'].upper()})")
+    print(f"      -> Preskripsi: {scen2_res['data']['prescription']['title']}")
+    print(f"      -> Safe Window Open: {scen2_res['data']['safe_window_open']}")
+
+    # 12. Official Scenario 3: Sensor Dropout Failover (INTEGRATION_RUNBOOK.md §5)
+    print("\n--- Testing Skenario 3: Sensor Dropout 6 Jam (Failover Digital Twin FAO-56) ---")
+    failover_res = api_call(
+        "12. Skenario 3: Memicu Failover Digital Twin pada Petak A1",
+        "/fields/BLOK-A/parcels/A1/simulate-failover",
+        method="POST",
+        payload={"is_dropout": True}
+    )
+    assert failover_res["data"]["status"] == "simulated"
+    assert "FAO-56" in failover_res["data"]["telemetry_mode"]
+    print(f"      -> Node Parcel Status: {failover_res['data']['status']}")
+    print(f"      -> Telemetry Mode: {failover_res['data']['telemetry_mode']}")
+
+    # Pulihkan kembali node ke mode normal (Online)
+    restore_res = api_call(
+        "12b. Memulihkan Node A1 ke Mode Online Normal",
+        "/fields/BLOK-A/parcels/A1/simulate-failover",
+        method="POST",
+        payload={"is_dropout": False}
+    )
+    assert restore_res["data"]["status"] == "online"
+    print(f"      -> Node Restored: {restore_res['data']['status']}")
+
     print("\n" + "=" * 65)
-    print("  ALL 9 INTEGRATION & BACKEND TESTS PASSED SUCCESSFULLY! ")
+    print("  ALL 12 INTEGRATION, AI ENGINE & SCENARIO TESTS PASSED!")
     print("=" * 65)
 
 if __name__ == "__main__":

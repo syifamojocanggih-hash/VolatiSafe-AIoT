@@ -443,71 +443,48 @@ class MockDB:
         if field_id not in self._fields:
             return None
 
-        windows = [
-            ForecastWindowItemDTO(
-                timestamp_start="2026-10-24T18:00:00Z",
-                timestamp_end="2026-10-24T21:00:00Z",
-                avri_score=45.0,
-                risk_category="waspada",
-                is_safe=False
-            ),
-            ForecastWindowItemDTO(
-                timestamp_start="2026-10-24T21:00:00Z",
-                timestamp_end="2026-10-25T00:00:00Z",
-                avri_score=38.0,
-                risk_category="waspada",
-                is_safe=False
-            ),
-            ForecastWindowItemDTO(
-                timestamp_start="2026-10-25T00:00:00Z",
-                timestamp_end="2026-10-25T03:00:00Z",
-                avri_score=28.0,
-                risk_category="aman",
-                is_safe=True
-            ),
-            ForecastWindowItemDTO(
-                timestamp_start="2026-10-25T03:00:00Z",
-                timestamp_end="2026-10-25T06:00:00Z",
-                avri_score=22.0,
-                risk_category="aman",
-                is_safe=True
-            ),
-            ForecastWindowItemDTO(
-                timestamp_start="2026-10-25T06:00:00Z",
-                timestamp_end="2026-10-25T09:00:00Z",
-                avri_score=18.5,
-                risk_category="aman",
-                is_safe=True
-            ),
-            ForecastWindowItemDTO(
-                timestamp_start="2026-10-25T09:00:00Z",
-                timestamp_end="2026-10-25T12:00:00Z",
-                avri_score=68.0,
-                risk_category="kritis",
-                is_safe=False
-            ),
-            ForecastWindowItemDTO(
-                timestamp_start="2026-10-25T12:00:00Z",
-                timestamp_end="2026-10-25T15:00:00Z",
-                avri_score=78.2,
-                risk_category="kritis",
-                is_safe=False
-            ),
-            ForecastWindowItemDTO(
-                timestamp_start="2026-10-25T15:00:00Z",
-                timestamp_end="2026-10-25T18:00:00Z",
-                avri_score=24.5,
-                risk_category="aman",
-                is_safe=True
-            ),
-            ForecastWindowItemDTO(
-                timestamp_start="2026-10-25T18:00:00Z",
-                timestamp_end="2026-10-25T21:00:00Z",
-                avri_score=42.0,
-                risk_category="waspada",
-                is_safe=False
+        # Proyeksi dinamis jendela pemupukan berbasis siklus diurnal mikroklimat lahan karst Solokuro
+        now_dt = datetime.now(timezone.utc).replace(minute=0, second=0, microsecond=0)
+        windows = []
+        step_hours = 3
+        total_steps = max(1, min(56, hours // step_hours))
+
+        for i in range(total_steps):
+            start_dt = now_dt + timedelta(hours=i * step_hours)
+            end_dt = start_dt + timedelta(hours=step_hours)
+            # Waktu lokal WIB (UTC+7)
+            local_hour = (start_dt.hour + 7) % 24
+
+            if 6 <= local_hour < 10:
+                # Pagi hari sejuk & lembap (Jendela aman emas)
+                avri = round(16.5 + (local_hour - 6) * 3.2, 1)
+                cat = "aman"
+                is_safe = True
+            elif 10 <= local_hour < 15:
+                # Siang terik panas & kering (Risiko kritis penguapan tinggi)
+                avri = round(65.0 + (local_hour - 10) * 2.5, 1)
+                cat = "kritis" if avri <= 75.0 else "bahaya"
+                is_safe = False
+            elif 15 <= local_hour < 18:
+                # Sore hari suhu mulai melandai
+                avri = round(44.0 - (local_hour - 15) * 3.5, 1)
+                cat = "waspada"
+                is_safe = False
+            else:
+                # Malam hingga fajar
+                avri = round(21.0 + (local_hour % 6) * 1.2, 1)
+                cat = "aman"
+                is_safe = True
+
+            windows.append(
+                ForecastWindowItemDTO(
+                    timestamp_start=start_dt.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    timestamp_end=end_dt.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    avri_score=avri,
+                    risk_category=cat,
+                    is_safe=is_safe
+                )
             )
-        ]
 
         return ForecastWindowDTO(
             field_id=field_id,

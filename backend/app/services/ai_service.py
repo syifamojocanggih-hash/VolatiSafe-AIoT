@@ -86,20 +86,47 @@ class AIService:
                     AgronomicContextDTO,
                 )
 
-                air_temp = max(15.0, round(req.soil_temp_c - 2.5, 1))
+                t_soil = float(req.soil_temp_c)
+                moist = float(req.moisture_pct)
+                ph_val = float(req.ph)
+                rain_val = float(req.rain_mm)
+
+                # Estimasi mikroklimat atmosferik realistis sesuai termodinamika lahan karst Solokuro
+                if rain_val > 0.0:
+                    air_temp = max(18.0, round(t_soil - 1.0, 1))
+                    rh_pct = min(98.0, round(85.0 + min(13.0, rain_val * 0.6), 1))
+                    solar_mj = 0.2
+                    wind_ms = 1.2
+                elif t_soil >= 32.0:
+                    air_temp = max(28.0, round(t_soil - 1.0, 1))
+                    # Pada siang terik, kelembaban udara turun drastis dan radiasi surya mencapai puncak
+                    rh_pct = max(25.0, round(55.0 - (t_soil - 28.0) * 4.5, 1))
+                    solar_mj = min(3.8, round(2.2 + (t_soil - 28.0) * 0.22, 2))
+                    wind_ms = min(4.5, round(2.2 + (t_soil - 28.0) * 0.22, 1))
+                elif t_soil <= 25.0:
+                    air_temp = max(18.0, round(t_soil + 0.5, 1))
+                    rh_pct = min(92.0, round(75.0 + (25.0 - t_soil) * 2.5, 1))
+                    solar_mj = max(0.4, round(1.2 - (25.0 - t_soil) * 0.15, 2))
+                    wind_ms = 1.0
+                else:
+                    air_temp = round(t_soil - 0.5, 1)
+                    rh_pct = round(60.0 - (t_soil - 25.0) * 2.0, 1)
+                    solar_mj = round(1.5 + (t_soil - 25.0) * 0.1, 2)
+                    wind_ms = 1.8
+
                 ai_req = PredictRiskRequestDTO(
                     field_id="BLOK-A",
                     soil_state=SoilStateDTO(
-                        moisture_pct=float(req.moisture_pct),
-                        soil_temp_c=float(req.soil_temp_c),
-                        ph=float(req.ph)
+                        moisture_pct=moist,
+                        soil_temp_c=t_soil,
+                        ph=ph_val
                     ),
                     weather_forecast_12h=WeatherForecast12hDTO(
                         air_temp_c=air_temp,
-                        relative_humidity_pct=65.0,
-                        solar_radiation_mj=18.0,
-                        wind_speed_ms=1.5,
-                        rain_forecast_mm=float(req.rain_mm)
+                        relative_humidity_pct=rh_pct,
+                        solar_radiation_mj=solar_mj,
+                        wind_speed_ms=wind_ms,
+                        rain_forecast_mm=rain_val
                     ),
                     agronomic_context=AgronomicContextDTO(dat=30)
                 )
