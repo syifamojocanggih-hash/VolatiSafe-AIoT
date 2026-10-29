@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
@@ -155,6 +156,11 @@ const generateContinuous72hData = (
   return points;
 };
 
+// Helper round
+function round(val: number, dec: number = 1) {
+  return Number(val.toFixed(dec));
+}
+
 interface FieldDetailPanelProps {
   parcel: BedengParcel;
   isSimulatedCritical: boolean;
@@ -308,11 +314,6 @@ export const FieldDetailPanel: React.FC<FieldDetailPanelProps> = ({
     triggerMapSync(timelinePoints[clamped]);
   };
 
-  // Helper round
-  function round(val: number, dec: number = 1) {
-    return Number(val.toFixed(dec));
-  }
-
   // Active AVRI for hero display
   const activeAvri =
     activeTab === '72h'
@@ -321,15 +322,15 @@ export const FieldDetailPanel: React.FC<FieldDetailPanelProps> = ({
       ? 74
       : parcel.avriScore;
 
-  const isCritical = activeAvri >= 50;
-  const isWarning = activeAvri > 25 && activeAvri < 50;
+  const isCritical = activeAvri >= 70;
+  const isWarning = activeAvri >= 30 && activeAvri < 70;
 
   const statusLabel = isCritical ? 'Kritis' : isWarning ? 'Waspada' : 'Aman';
   const statusBadgeClass = isCritical
-    ? 'text-rose-300 bg-rose-500/20 border-rose-500/40'
+    ? 'text-rose-700 bg-rose-50 border-rose-300'
     : isWarning
-    ? 'text-amber-300 bg-amber-500/20 border-amber-500/40'
-    : 'text-emerald-300 bg-emerald-500/20 border-emerald-500/40';
+    ? 'text-amber-700 bg-amber-50 border-amber-300'
+    : 'text-emerald-700 bg-emerald-50 border-emerald-300';
 
   // Live telemetry fallbacks
   const soilTemp = dtTelemetry?.soil_biophysics_dynamic.soil_temp_c ?? parcel.soilTempC;
@@ -370,20 +371,28 @@ export const FieldDetailPanel: React.FC<FieldDetailPanelProps> = ({
   }, [currentPoint.avri]);
 
   return (
-    <div className="w-[370px] bg-slate-950/90 backdrop-blur-2xl border-l border-white/10 flex flex-col h-full shrink-0 select-none z-20 text-slate-200 transition-all">
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+    <div className="w-full h-full flex flex-col shrink-0 select-none text-slate-800">
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 cockpit-scrollbar">
         {/* 1. Nama Petak & Status */}
-        <div className="flex items-start justify-between gap-2 pr-6">
+        <div className="flex items-start justify-between gap-2 pr-8">
           <div>
-            <h2 className="text-sm font-bold text-white leading-tight">
+            <div className="flex items-center gap-1.5 mb-1">
+              <span className="font-mono text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 border border-emerald-300">
+                BLOK {parcel.id}
+              </span>
+              <span className="text-[10px] text-slate-500 font-mono">
+                {parcel.cropVariety} · {parcel.areaHa} ha
+              </span>
+            </div>
+            <h2 className="text-sm font-bold text-[#172B3A] leading-tight">
               {parcel.name}
             </h2>
-            <p className="text-xs text-slate-400 mt-0.5">
-              {parcel.cropVariety} · {parcel.areaHa} ha
+            <p className="text-[11px] text-slate-500 mt-0.5">
+              Solokuro, Lamongan
             </p>
           </div>
           <span
-            className={`px-2.5 py-0.5 rounded-full text-xs font-semibold border flex items-center gap-1.5 ${statusBadgeClass} shrink-0`}
+            className={`px-3 py-1 rounded-xl text-xs font-bold border flex items-center gap-1.5 ${statusBadgeClass} shrink-0 shadow-xs`}
           >
             <FontAwesomeIcon
               icon={isCritical ? faTriangleExclamation : isWarning ? faTriangleExclamation : faCircleCheck}
@@ -393,40 +402,64 @@ export const FieldDetailPanel: React.FC<FieldDetailPanelProps> = ({
           </span>
         </div>
 
-        {/* 2. Kartu Indeks Risiko (AVRI) Google Earth Dark Dynamic */}
-        <div className="p-3.5 rounded-2xl bg-white/5 border border-white/10 space-y-2.5 shadow-xl">
+        {/* 2. Kartu Indeks Risiko (AVRI) Dynamic Cyberpunk Glass HUD */}
+        <div
+          className={`p-4 rounded-3xl border transition-all duration-300 space-y-3 ${
+            isCritical
+              ? 'bg-rose-50 border-rose-200 shadow-sm'
+              : isWarning
+              ? 'bg-amber-50 border-amber-200 shadow-sm'
+              : 'bg-emerald-50 border-emerald-200 shadow-sm'
+          }`}
+        >
           <div className="flex items-center justify-between text-xs">
-            <span className="font-semibold text-slate-400 uppercase tracking-wider text-[11px] flex items-center gap-1.5">
-              <FontAwesomeIcon icon={faBolt} className="text-amber-400 text-xs" />
+            <span className="font-bold text-slate-700 uppercase tracking-wider text-[11px] flex items-center gap-2">
+              <span className="w-5 h-5 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center ring-1 ring-amber-200">
+                <FontAwesomeIcon icon={faBolt} className="text-[10px]" />
+              </span>
               <span>Indeks Risiko Volatilisasi</span>
             </span>
             <span
-              className={`font-bold ${
-                isCritical ? 'text-rose-400' : isWarning ? 'text-amber-300' : 'text-emerald-400'
-              }`}
+              className={`text-xs font-mono font-bold px-2 py-0.5 rounded-lg border ${statusBadgeClass}`}
             >
-              {statusLabel}
+              {statusLabel.toUpperCase()}
             </span>
           </div>
 
-          <div className="flex items-baseline gap-2">
-            <span className="text-3xl font-black text-white tracking-tight leading-none font-mono">
-              {activeAvri}%
+          <div className="flex items-baseline justify-between pt-1">
+            <div className="flex items-baseline gap-2">
+              <span className="text-4xl font-black text-[#172B3A] tracking-tight leading-none font-mono">
+                {activeAvri}%
+              </span>
+              <span className="text-xs text-slate-500 font-bold uppercase tracking-wider">AVRI Score</span>
+            </div>
+            <span className="text-[11px] text-slate-500 font-mono">
+              Ambang Kritis: <span className="text-rose-600 font-bold">≥70%</span>
             </span>
-            <span className="text-xs text-slate-400 font-semibold">AVRI</span>
           </div>
 
-          {/* Bar Risiko Responsif */}
-          <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
-            <div
-              className={`h-full transition-all duration-300 rounded-full ${
-                isCritical ? 'bg-rose-500' : isWarning ? 'bg-amber-400' : 'bg-emerald-400'
-              }`}
-              style={{ width: `${Math.min(100, Math.max(5, activeAvri))}%` }}
-            />
+          {/* Bar Risiko Segmented & Glowing */}
+          <div className="space-y-1">
+            <div className="w-full h-2 bg-slate-200 rounded-full overflow-hidden ring-1 ring-slate-200 relative">
+              <div
+                className={`h-full transition-all duration-300 rounded-full bg-gradient-to-r ${
+                  isCritical
+                    ? 'from-amber-400 via-rose-500 to-red-600 shadow-[0_0_12px_rgba(244,63,94,0.6)]'
+                    : isWarning
+                    ? 'from-emerald-400 to-amber-400 shadow-[0_0_12px_rgba(245,158,11,0.5)]'
+                    : 'from-emerald-500 to-teal-400 shadow-[0_0_12px_rgba(16,185,129,0.5)]'
+                }`}
+                style={{ width: `${Math.min(100, Math.max(5, activeAvri))}%` }}
+              />
+            </div>
+            <div className="flex justify-between text-[9px] font-mono font-bold">
+              <span className="text-emerald-700">0% Aman</span>
+              <span className="text-amber-700">30% Waspada</span>
+              <span className="text-rose-700">70% Kritis</span>
+            </div>
           </div>
 
-          <p className="text-xs text-slate-300 leading-relaxed pt-0.5">
+          <div className="p-2.5 rounded-xl bg-white/90 border border-slate-200/90 text-xs text-slate-700 leading-relaxed">
             {activeTab === '72h'
               ? currentPoint.recommendation
               : isCritical
@@ -434,61 +467,81 @@ export const FieldDetailPanel: React.FC<FieldDetailPanelProps> = ({
               : isWarning
               ? 'Gunakan metode tugal sedalam 4–5 cm untuk memitigasi penguapan pada kondisi ini.'
               : 'Kondisi mikroklimat tanah optimal. Segera lakukan pemupukan pada jendela aman.'}
-          </p>
+          </div>
         </div>
 
-        {/* 3. Grid 2x2 Metrik Biofisika Lapangan */}
-        <div className="grid grid-cols-2 gap-2">
-          <div className="p-2.5 rounded-xl bg-white/5 border border-white/10">
-            <span className="text-[11px] text-slate-400 font-medium flex items-center gap-1.5">
-              <FontAwesomeIcon icon={faTemperatureHalf} className="text-amber-400 text-xs" />
-              <span>Suhu Tanah</span>
-            </span>
-            <p className="text-base font-bold text-white mt-1 font-mono">
+        {/* 3. Grid 2x2 Metrik Biofisika Lapangan Bento Box */}
+        <div className="grid grid-cols-2 gap-2.5">
+          <div className="p-3 rounded-2xl bg-[#F7F9FC] hover:bg-white border border-[#DCE5EE] hover:border-slate-300 shadow-xs transition-all duration-200 group">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Suhu Tanah</span>
+              <div className="w-6 h-6 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center ring-1 ring-amber-200">
+                <FontAwesomeIcon icon={faTemperatureHalf} className="text-[11px]" />
+              </div>
+            </div>
+            <p className="text-lg font-black text-[#172B3A] mt-1.5 font-mono group-hover:text-amber-600 transition-colors">
               {soilTemp.toFixed(1)}°C
             </p>
+            <span className="text-[10px] text-slate-500 font-mono mt-0.5 block">
+              {soilTemp > 30 ? '⚠ Terik Ekstrem' : '✓ Normal Lapangan'}
+            </span>
           </div>
 
-          <div className="p-2.5 rounded-xl bg-white/5 border border-white/10">
-            <span className="text-[11px] text-slate-400 font-medium flex items-center gap-1.5">
-              <FontAwesomeIcon icon={faDroplet} className="text-sky-400 text-xs" />
-              <span>Kadar Air (VWC)</span>
-            </span>
-            <p className="text-base font-bold text-white mt-1 font-mono">
+          <div className="p-3 rounded-2xl bg-[#F7F9FC] hover:bg-white border border-[#DCE5EE] hover:border-slate-300 shadow-xs transition-all duration-200 group">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Kadar Air</span>
+              <div className="w-6 h-6 rounded-lg bg-sky-50 text-sky-600 flex items-center justify-center ring-1 ring-sky-200">
+                <FontAwesomeIcon icon={faDroplet} className="text-[11px]" />
+              </div>
+            </div>
+            <p className="text-lg font-black text-[#172B3A] mt-1.5 font-mono group-hover:text-sky-600 transition-colors">
               {moisture.toFixed(1)}%
             </p>
+            <span className="text-[10px] text-slate-500 font-mono mt-0.5 block">
+              {moisture < 20 ? '⚠ Tanah Kering' : '✓ Lembab Cukup'}
+            </span>
           </div>
 
-          <div className="p-2.5 rounded-xl bg-white/5 border border-white/10">
-            <span className="text-[11px] text-slate-400 font-medium flex items-center gap-1.5">
-              <FontAwesomeIcon icon={faFlask} className="text-purple-400 text-xs" />
-              <span>pH Tanah</span>
-            </span>
-            <p className="text-base font-bold text-white mt-1 font-mono">
+          <div className="p-3 rounded-2xl bg-[#F7F9FC] hover:bg-white border border-[#DCE5EE] hover:border-slate-300 shadow-xs transition-all duration-200 group">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">pH Tanah</span>
+              <div className="w-6 h-6 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center ring-1 ring-purple-200">
+                <FontAwesomeIcon icon={faFlask} className="text-[11px]" />
+              </div>
+            </div>
+            <p className="text-lg font-black text-[#172B3A] mt-1.5 font-mono group-hover:text-purple-600 transition-colors">
               {phVal.toFixed(2)}
             </p>
+            <span className="text-[10px] text-slate-500 font-mono mt-0.5 block">
+              Alkalin Kapur
+            </span>
           </div>
 
-          <div className="p-2.5 rounded-xl bg-white/5 border border-white/10">
-            <span className="text-[11px] text-slate-400 font-medium flex items-center gap-1.5">
-              <FontAwesomeIcon icon={faBolt} className="text-emerald-400 text-xs" />
-              <span>Laju Urease</span>
-            </span>
-            <p className="text-base font-bold text-white mt-1 font-mono">
-              {ureaseRate.toFixed(2)} <span className="text-xs font-normal text-slate-400">/jam</span>
+          <div className="p-3 rounded-2xl bg-[#F7F9FC] hover:bg-white border border-[#DCE5EE] hover:border-slate-300 shadow-xs transition-all duration-200 group">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Laju Urease</span>
+              <div className="w-6 h-6 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center ring-1 ring-emerald-200">
+                <FontAwesomeIcon icon={faBolt} className="text-[11px]" />
+              </div>
+            </div>
+            <p className="text-lg font-black text-[#172B3A] mt-1.5 font-mono group-hover:text-emerald-600 transition-colors">
+              {ureaseRate.toFixed(2)} <span className="text-xs font-normal text-slate-500">/j</span>
             </p>
+            <span className="text-[10px] text-slate-500 font-mono mt-0.5 block">
+              Arrhenius Aktif
+            </span>
           </div>
         </div>
 
         {/* 4. Tab Analisis: Ringkasan | Faktor Risiko | 72 Jam Horizon */}
         <div className="space-y-3 pt-0.5">
-          <div className="flex items-center bg-slate-900/80 border border-white/10 p-0.5 rounded-xl text-xs font-medium">
+          <div className="flex items-center bg-[#EDF2F7] border border-[#DCE5EE] p-1 rounded-2xl text-xs font-semibold gap-1">
             <button
               onClick={() => setActiveTab('summary')}
-              className={`flex-1 py-1.5 rounded-lg text-center transition-all flex items-center justify-center gap-1.5 ${
+              className={`flex-1 py-1.5 rounded-xl text-center transition-all duration-200 active:scale-95 flex items-center justify-center gap-1.5 ${
                 activeTab === 'summary'
-                  ? 'bg-white/15 text-white font-bold shadow-sm'
-                  : 'text-slate-400 hover:text-slate-200'
+                  ? 'bg-white text-[#172B3A] font-bold shadow-xs border border-slate-200'
+                  : 'text-slate-600 hover:text-[#172B3A] hover:bg-white/60'
               }`}
             >
               <FontAwesomeIcon icon={faFileLines} className="text-[11px] opacity-80" />
@@ -496,10 +549,10 @@ export const FieldDetailPanel: React.FC<FieldDetailPanelProps> = ({
             </button>
             <button
               onClick={() => setActiveTab('shap')}
-              className={`flex-1 py-1.5 rounded-lg text-center transition-all flex items-center justify-center gap-1.5 ${
+              className={`flex-1 py-1.5 rounded-xl text-center transition-all duration-200 active:scale-95 flex items-center justify-center gap-1.5 ${
                 activeTab === 'shap'
-                  ? 'bg-white/15 text-white font-bold shadow-sm'
-                  : 'text-slate-400 hover:text-slate-200'
+                  ? 'bg-white text-[#172B3A] font-bold shadow-xs border border-slate-200'
+                  : 'text-slate-600 hover:text-[#172B3A] hover:bg-white/60'
               }`}
             >
               <FontAwesomeIcon icon={faChartPie} className="text-[11px] opacity-80" />
@@ -507,46 +560,49 @@ export const FieldDetailPanel: React.FC<FieldDetailPanelProps> = ({
             </button>
             <button
               onClick={() => setActiveTab('72h')}
-              className={`flex-1 py-1.5 rounded-lg text-center transition-all flex items-center justify-center gap-1.5 ${
+              className={`flex-1 py-1.5 rounded-xl text-center transition-all duration-200 active:scale-95 flex items-center justify-center gap-1.5 ${
                 activeTab === '72h'
-                  ? 'bg-white/15 text-white font-bold shadow-sm'
-                  : 'text-slate-400 hover:text-slate-200'
+                  ? 'bg-white text-[#172B3A] font-bold shadow-xs border border-slate-200'
+                  : 'text-slate-600 hover:text-[#172B3A] hover:bg-white/60'
               }`}
             >
-              <FontAwesomeIcon icon={faClockRotateLeft} className="text-[11px] text-emerald-400" />
+              <FontAwesomeIcon icon={faClockRotateLeft} className="text-[11px] text-emerald-600" />
               <span>72 Jam</span>
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 ring-2 ring-emerald-400/40 animate-pulse" />
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 ring-2 ring-emerald-400/40 animate-pulse" />
             </button>
           </div>
 
           {/* Tab 1: Ringkasan */}
           {activeTab === 'summary' && (
-            <div className="p-3.5 rounded-xl bg-white/5 border border-white/10 space-y-2 text-xs text-slate-300 leading-relaxed">
-              <p className="font-semibold text-white">Analisis Mikroklimat Solokuro:</p>
+            <div className="p-4 rounded-2xl bg-[#F7F9FC] border border-[#DCE5EE] space-y-2.5 text-xs text-slate-600 leading-relaxed shadow-sm">
+              <p className="font-semibold text-[#172B3A]">Analisis Mikroklimat Solokuro:</p>
               <p>
                 Dekomposisi urea di Solokuro dipengaruhi oleh reaksi enzimatik tinggi dan karakter tanah alkalin (pH {phVal.toFixed(1)}). Waktu penaburan menentukan apakah nitrogen diserap perakaran atau hilang menjadi gas amonia.
               </p>
-              <div className="pt-2 border-t border-white/10 flex justify-between text-[11px] text-slate-400 font-medium">
+              <div className="pt-2 border-t border-slate-200 flex justify-between text-[11px] text-slate-500 font-medium">
                 <span>Status Pemupukan:</span>
-                <span className="font-bold text-white">Belum Diaplikasikan</span>
+                <span className="font-bold text-[#172B3A]">Belum Diaplikasikan</span>
               </div>
             </div>
           )}
 
           {/* Tab 2: Faktor Risiko (TreeSHAP) */}
           {activeTab === 'shap' && (
-            <div className="p-3.5 rounded-xl bg-white/5 border border-white/10 space-y-3 text-xs text-slate-300">
-              <span className="font-bold text-white block">Kontribusi Parameter Risiko (TreeSHAP)</span>
-              <div className="space-y-2.5">
+            <div className="p-4 rounded-2xl bg-[#F7F9FC] border border-[#DCE5EE] space-y-3 text-xs text-slate-600 shadow-sm">
+              <div className="flex items-center justify-between pb-1 border-b border-slate-200">
+                <span className="font-bold text-[#172B3A] text-xs">Kontribusi Parameter Risiko (TreeSHAP)</span>
+                <span className="text-[10px] text-emerald-700 font-mono font-semibold">Model PIML v2.4</span>
+              </div>
+              <div className="space-y-3">
                 {shapFactors.map((f, idx) => (
-                  <div key={idx} className="space-y-1">
-                    <div className="flex justify-between text-xs text-slate-300 font-medium">
-                      <span>{f.name} ({f.value})</span>
-                      <span className="font-bold text-emerald-400 font-mono">+{f.impact}%</span>
+                  <div key={idx} className="space-y-1.5">
+                    <div className="flex justify-between text-xs text-slate-600 font-medium">
+                      <span>{f.name} <span className="text-slate-500 font-mono text-[11px]">({f.value})</span></span>
+                      <span className="font-bold text-emerald-700 font-mono">+{f.impact}%</span>
                     </div>
-                    <div className="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                    <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden ring-1 ring-slate-200">
                       <div
-                        className="h-full bg-emerald-400 rounded-full transition-all"
+                        className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full transition-all shadow-[0_0_8px_rgba(16,185,129,0.4)]"
                         style={{ width: `${(f.impact / 40) * 100}%` }}
                       />
                     </div>
@@ -558,25 +614,27 @@ export const FieldDetailPanel: React.FC<FieldDetailPanelProps> = ({
 
           {/* Tab 3: Proyeksi 72 Jam Interaktif & Kontrol Waktu Kustom */}
           {activeTab === '72h' && (
-            <div className="p-3.5 rounded-2xl bg-white/5 border border-white/10 space-y-3 text-xs text-slate-200">
+            <div className="p-4 rounded-3xl bg-[#F7F9FC] border border-[#DCE5EE] space-y-3.5 text-xs text-slate-800 shadow-sm">
               {/* Header Tab 72 Jam */}
-              <div className="flex items-center justify-between pb-1.5 border-b border-white/10">
-                <span className="font-bold text-white text-xs flex items-center gap-1.5">
-                  <FontAwesomeIcon icon={faClockRotateLeft} className="text-emerald-400 text-xs" />
+              <div className="flex items-center justify-between pb-2 border-b border-slate-200">
+                <span className="font-bold text-[#172B3A] text-xs flex items-center gap-2">
+                  <div className="w-6 h-6 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center ring-1 ring-emerald-200">
+                    <FontAwesomeIcon icon={faClockRotateLeft} className="text-xs" />
+                  </div>
                   <span>Simulasi Waktu 72 Jam</span>
                 </span>
-                <span className="text-[11px] font-semibold text-emerald-300 bg-emerald-500/20 px-2 py-0.5 rounded-full border border-emerald-500/40 font-mono">
+                <span className="text-[11px] font-bold text-emerald-800 bg-emerald-50 px-2.5 py-0.5 rounded-xl border border-emerald-200 font-mono shadow-xs">
                   {safeWindowInfo ? safeWindowInfo.label.split(',')[0] : 'Aman: Besok 06:00'}
                 </span>
               </div>
 
               {/* A. Pemilih Hari Kustom */}
-              <div className="space-y-1">
-                <span className="text-[10px] uppercase font-bold text-slate-400 flex items-center gap-1 tracking-wider">
+              <div className="space-y-1.5">
+                <span className="text-[10px] uppercase font-bold text-slate-500 flex items-center gap-1.5 tracking-wider">
                   <FontAwesomeIcon icon={faCalendarDay} className="text-[10px]" />
                   <span>1. Pilih Hari Proyeksi</span>
                 </span>
-                <div className="grid grid-cols-4 gap-1">
+                <div className="grid grid-cols-4 gap-1.5">
                   {[
                     { label: 'Hari Ini', offset: 0 },
                     { label: 'Besok', offset: 1 },
@@ -590,10 +648,10 @@ export const FieldDetailPanel: React.FC<FieldDetailPanelProps> = ({
                         const targetH = Math.min(71, d.offset * 24 + 6);
                         handleSelectHour(targetH);
                       }}
-                      className={`py-1 px-1 rounded-lg text-[11px] font-semibold transition-all text-center ${
+                      className={`py-1.5 px-1 rounded-xl text-[11px] font-bold transition-all duration-150 active:scale-95 text-center ${
                         selectedDayFilter === d.offset
-                          ? 'bg-white/20 text-white shadow-sm border border-white/30 font-bold'
-                          : 'bg-white/5 text-slate-400 border border-white/10 hover:bg-white/10 hover:text-white'
+                          ? 'bg-white text-[#172B3A] shadow-xs border border-slate-300 font-bold'
+                          : 'bg-slate-50 text-slate-600 border border-slate-200 hover:bg-white hover:text-[#172B3A]'
                       }`}
                     >
                       {d.label}
@@ -603,14 +661,14 @@ export const FieldDetailPanel: React.FC<FieldDetailPanelProps> = ({
               </div>
 
               {/* B. Preset Waktu Jam Kritis & Optimal */}
-              <div className="space-y-1">
-                <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">
+              <div className="space-y-1.5">
+                <span className="text-[10px] uppercase font-bold text-slate-500 block tracking-wider">
                   2. Preset Waktu Strategis
                 </span>
-                <div className="grid grid-cols-4 gap-1 text-[11px]">
+                <div className="grid grid-cols-4 gap-1.5 text-[11px]">
                   <button
                     onClick={() => handleSelectHour(selectedDayFilter * 24 + 6)}
-                    className="py-1 px-1 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 font-semibold border border-emerald-500/40 transition-all text-center flex items-center justify-center gap-1"
+                    className="py-1.5 px-1 rounded-xl bg-emerald-50 hover:bg-emerald-100 active:scale-95 text-emerald-700 font-bold border border-emerald-200 transition-all duration-150 text-center flex items-center justify-center gap-1 shadow-xs"
                     title="Jendela pemupukan pagi paling sejuk"
                   >
                     <FontAwesomeIcon icon={faCircleCheck} className="text-[9px]" />
@@ -618,7 +676,7 @@ export const FieldDetailPanel: React.FC<FieldDetailPanelProps> = ({
                   </button>
                   <button
                     onClick={() => handleSelectHour(selectedDayFilter * 24 + 12)}
-                    className="py-1 px-1 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 font-semibold border border-rose-500/40 transition-all text-center flex items-center justify-center gap-1"
+                    className="py-1.5 px-1 rounded-xl bg-rose-50 hover:bg-rose-100 active:scale-95 text-rose-700 font-bold border border-rose-200 transition-all duration-150 text-center flex items-center justify-center gap-1 shadow-xs"
                     title="Puncak suhu dan radiasi terik"
                   >
                     <FontAwesomeIcon icon={faSun} className="text-[9px]" />
@@ -626,7 +684,7 @@ export const FieldDetailPanel: React.FC<FieldDetailPanelProps> = ({
                   </button>
                   <button
                     onClick={() => handleSelectHour(selectedDayFilter * 24 + 16)}
-                    className="py-1 px-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 font-semibold border border-amber-500/40 transition-all text-center flex items-center justify-center gap-1"
+                    className="py-1.5 px-1 rounded-xl bg-amber-50 hover:bg-amber-100 active:scale-95 text-amber-700 font-bold border border-amber-200 transition-all duration-150 text-center flex items-center justify-center gap-1 shadow-xs"
                     title="Sore hari transisi"
                   >
                     <FontAwesomeIcon icon={faWind} className="text-[9px]" />
@@ -634,7 +692,7 @@ export const FieldDetailPanel: React.FC<FieldDetailPanelProps> = ({
                   </button>
                   <button
                     onClick={() => handleSelectHour(selectedDayFilter * 24 + 21)}
-                    className="py-1 px-1 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 font-semibold border border-white/10 transition-all text-center"
+                    className="py-1.5 px-1 rounded-xl bg-slate-50 hover:bg-slate-100 active:scale-95 text-slate-600 font-bold border border-slate-200 transition-all duration-150 text-center"
                     title="Malam hari"
                   >
                     21:00 Malam
@@ -645,13 +703,13 @@ export const FieldDetailPanel: React.FC<FieldDetailPanelProps> = ({
               {/* C. Grafik Interaktif 72 Jam dengan Scrubber Dinamis */}
               <div className="space-y-1.5 pt-1">
                 <div className="flex justify-between items-baseline text-xs font-semibold">
-                  <span className="text-white">{currentPoint.fullLabel}</span>
-                  <span className="font-mono text-emerald-400 text-xs">+{currentPoint.hour} Jam</span>
+                  <span className="text-[#172B3A] font-medium">{currentPoint.fullLabel}</span>
+                  <span className="font-mono text-emerald-700 text-xs font-bold">+{currentPoint.hour} Jam Horizon</span>
                 </div>
 
-                {/* SVG Area Chart dengan Scrubber Bar */}
+                {/* SVG Area Chart dengan Scrubber Bar & Glow Filter */}
                 <div
-                  className="relative h-20 w-full bg-slate-950 rounded-xl p-2 border border-white/10 cursor-pointer overflow-hidden shadow-inner"
+                  className="relative h-20 w-full bg-slate-50 rounded-2xl p-2 border border-slate-200 cursor-pointer overflow-hidden shadow-xs ring-1 ring-slate-100"
                   onClick={(e) => {
                     const rect = e.currentTarget.getBoundingClientRect();
                     const clickX = e.clientX - rect.left - 8;
@@ -664,15 +722,18 @@ export const FieldDetailPanel: React.FC<FieldDetailPanelProps> = ({
                   <svg className="w-full h-full overflow-visible" viewBox={`0 0 ${chartWidth} ${chartHeight}`} preserveAspectRatio="none">
                     <defs>
                       <linearGradient id="avriGradient" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#F43F5E" stopOpacity="0.45" />
-                        <stop offset="50%" stopColor="#F59E0B" stopOpacity="0.25" />
+                        <stop offset="0%" stopColor="#F43F5E" stopOpacity="0.25" />
+                        <stop offset="50%" stopColor="#F59E0B" stopOpacity="0.15" />
                         <stop offset="100%" stopColor="#10B981" stopOpacity="0.05" />
                       </linearGradient>
+                      <filter id="chartGlow" x="-20%" y="-20%" width="140%" height="140%">
+                        <feDropShadow dx="0" dy="1" stdDeviation="1.5" floodColor="#0284C7" floodOpacity="0.3" />
+                      </filter>
                     </defs>
 
                     {/* Garis Batas Aman (30%) & Batas Kritis (70%) */}
-                    <line x1="0" y1={chartHeight - 30 * 0.6 - 5} x2={chartWidth} y2={chartHeight - 30 * 0.6 - 5} stroke="#10B981" strokeWidth="0.8" strokeDasharray="3,3" opacity="0.6" />
-                    <line x1="0" y1={chartHeight - 70 * 0.6 - 5} x2={chartWidth} y2={chartHeight - 70 * 0.6 - 5} stroke="#F43F5E" strokeWidth="0.8" strokeDasharray="3,3" opacity="0.6" />
+                    <line x1="0" y1={chartHeight - (30 / 100) * (chartHeight - 10) - 5} x2={chartWidth} y2={chartHeight - (30 / 100) * (chartHeight - 10) - 5} stroke="#059669" strokeWidth="0.8" strokeDasharray="3,3" opacity="0.7" />
+                    <line x1="0" y1={chartHeight - (70 / 100) * (chartHeight - 10) - 5} x2={chartWidth} y2={chartHeight - (70 / 100) * (chartHeight - 10) - 5} stroke="#E11D48" strokeWidth="0.8" strokeDasharray="3,3" opacity="0.7" />
 
                     {/* Polygon Area Fill */}
                     <polygon
@@ -684,9 +745,10 @@ export const FieldDetailPanel: React.FC<FieldDetailPanelProps> = ({
                     <polyline
                       points={chartPointsSvg}
                       fill="none"
-                      stroke="#38BDF8"
-                      strokeWidth="2"
+                      stroke="#0284C7"
+                      strokeWidth="2.2"
                       strokeLinecap="round"
+                      filter="url(#chartGlow)"
                     />
 
                     {/* Dynamic Scrubber Needle (Jarum Penunjuk Jam Terpilih) */}
@@ -695,30 +757,32 @@ export const FieldDetailPanel: React.FC<FieldDetailPanelProps> = ({
                       y1="0"
                       x2={activeCursorX}
                       y2={chartHeight}
-                      stroke="#FFFFFF"
+                      stroke="#0F172A"
                       strokeWidth="1.5"
+                      strokeDasharray="2,2"
+                      opacity="0.7"
                     />
 
                     {/* Scrubber Dot on Curve */}
                     <circle
                       cx={activeCursorX}
                       cy={activeCursorY}
-                      r="4"
-                      fill={currentPoint.isSafe ? '#10B981' : currentPoint.avri >= 70 ? '#F43F5E' : '#F59E0B'}
+                      r="4.5"
+                      fill={currentPoint.isSafe ? '#10B981' : currentPoint.avri >= 70 ? '#E11D48' : '#D97706'}
                       stroke="#FFFFFF"
-                      strokeWidth="1.5"
+                      strokeWidth="2"
                     />
                   </svg>
                 </div>
               </div>
 
               {/* D. Slider Halus & Stepper Jam (+1j / -1j) */}
-              <div className="space-y-1.5">
+              <div className="space-y-2">
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => handleSelectHour(selectedHour - 1)}
                     disabled={selectedHour <= 0}
-                    className="px-2.5 py-1 bg-white/10 border border-white/15 rounded-lg text-xs font-bold text-white hover:bg-white/20 disabled:opacity-30 transition-colors flex items-center gap-1"
+                    className="px-3 py-1.5 bg-slate-100 border border-slate-200 rounded-xl text-xs font-bold text-[#172B3A] hover:bg-slate-200 active:scale-95 disabled:opacity-30 transition-all duration-150 flex items-center gap-1 shadow-sm"
                     title="Mundur 1 jam"
                   >
                     <FontAwesomeIcon icon={faBackwardStep} className="text-[10px]" />
@@ -732,13 +796,13 @@ export const FieldDetailPanel: React.FC<FieldDetailPanelProps> = ({
                     step="1"
                     value={selectedHour}
                     onChange={(e) => handleSelectHour(Number(e.target.value))}
-                    className="flex-1 h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-emerald-400"
+                    className="flex-1 h-1.5 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-emerald-400"
                   />
 
                   <button
                     onClick={() => handleSelectHour(selectedHour + 1)}
                     disabled={selectedHour >= 71}
-                    className="px-2.5 py-1 bg-white/10 border border-white/15 rounded-lg text-xs font-bold text-white hover:bg-white/20 disabled:opacity-30 transition-colors flex items-center gap-1"
+                    className="px-3 py-1.5 bg-slate-100 border border-slate-200 rounded-xl text-xs font-bold text-[#172B3A] hover:bg-slate-200 active:scale-95 disabled:opacity-30 transition-all duration-150 flex items-center gap-1 shadow-sm"
                     title="Maju 1 jam"
                   >
                     <span>+1j</span>
@@ -750,19 +814,19 @@ export const FieldDetailPanel: React.FC<FieldDetailPanelProps> = ({
                 <div className="flex items-center justify-between pt-1">
                   <button
                     onClick={() => setIsPlaying(!isPlaying)}
-                    className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition-all shadow-md flex items-center gap-1.5"
+                    className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 active:scale-95 text-white text-xs font-bold transition-all duration-150 shadow-sm flex items-center gap-2"
                   >
                     <FontAwesomeIcon icon={isPlaying ? faPause : faPlay} className="text-xs" />
                     <span>{isPlaying ? 'Jeda Simulasi' : 'Putar Simulasi'}</span>
                   </button>
 
-                  <div className="flex gap-1 bg-white/5 border border-white/10 p-0.5 rounded-lg text-[10px] font-bold">
+                  <div className="flex gap-1 bg-slate-50 border border-slate-200 p-0.5 rounded-xl text-[10px] font-bold">
                     {[1, 2, 4].map((spd) => (
                       <button
                         key={spd}
                         onClick={() => setPlaybackSpeed(spd as 1 | 2 | 4)}
-                        className={`px-2 py-0.5 rounded-md transition-all ${
-                          playbackSpeed === spd ? 'bg-white/20 text-white shadow-sm font-black' : 'text-slate-400 hover:text-white'
+                        className={`px-2.5 py-1 rounded-lg transition-all ${
+                          playbackSpeed === spd ? 'bg-white text-[#172B3A] shadow-xs border border-slate-200 font-bold' : 'text-slate-500 hover:text-[#172B3A]'
                         }`}
                       >
                         {spd}x
@@ -773,87 +837,87 @@ export const FieldDetailPanel: React.FC<FieldDetailPanelProps> = ({
               </div>
 
               {/* E. INFORMASI DETAIL MIKROKLIMAT & BIOFISIKA JAM TERPILIH */}
-              <div className="p-3 bg-white/5 rounded-xl border border-white/10 shadow-lg space-y-2.5">
+              <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-200 shadow-xs space-y-2.5">
                 <div className="flex items-start justify-between">
                   <div>
-                    <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">
+                    <span className="text-[10px] uppercase font-bold text-slate-500 block tracking-wider">
                       Evaluasi Jam Terpilih
                     </span>
-                    <p className="text-xs font-bold text-white mt-0.5">
+                    <p className="text-xs font-bold text-[#172B3A] mt-0.5">
                       {currentPoint.fullLabel}
                     </p>
                   </div>
                   <span
-                    className={`px-2.5 py-0.5 rounded-full text-xs font-bold border font-mono ${
+                    className={`px-2.5 py-0.5 rounded-xl text-xs font-bold border font-mono ${
                       currentPoint.isSafe
-                        ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
+                        ? 'bg-emerald-50 text-emerald-700 border-emerald-300'
                         : currentPoint.avri >= 70
-                        ? 'bg-rose-500/20 text-rose-300 border-rose-500/40'
-                        : 'bg-amber-500/20 text-amber-300 border-amber-500/40'
+                        ? 'bg-rose-50 text-rose-700 border-rose-300'
+                        : 'bg-amber-50 text-amber-700 border-amber-300'
                     }`}
                   >
                     AVRI {currentPoint.avri}% ({currentPoint.status.toUpperCase()})
                   </span>
                 </div>
 
-                <p className="text-[11px] text-slate-300 leading-normal border-t border-white/10 pt-1.5">
+                <p className="text-[11px] text-slate-600 leading-normal border-t border-slate-200 pt-2">
                   {currentPoint.recommendation}
                 </p>
 
                 {/* 6 Grid Metrik Detail Jam Ini */}
-                <div className="grid grid-cols-2 gap-1.5 pt-1 text-[11px]">
-                  <div className="p-2 rounded-lg bg-white/5 border border-white/10">
-                    <span className="text-slate-400 block text-[10px] flex items-center gap-1">
-                      <FontAwesomeIcon icon={faTemperatureHalf} className="text-amber-400" />
+                <div className="grid grid-cols-2 gap-2 pt-1 text-[11px]">
+                  <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200">
+                    <span className="text-slate-500 block text-[10px] flex items-center gap-1 font-medium">
+                      <FontAwesomeIcon icon={faTemperatureHalf} className="text-amber-500" />
                       <span>Suhu Tanah / Udara</span>
                     </span>
-                    <span className="font-bold text-white font-mono mt-0.5 block">
-                      {currentPoint.soilTemp}°C <span className="font-normal text-slate-400">/ {currentPoint.airTemp}°C</span>
+                    <span className="font-bold text-[#172B3A] font-mono mt-0.5 block">
+                      {currentPoint.soilTemp}°C <span className="font-normal text-slate-500">/ {currentPoint.airTemp}°C</span>
                     </span>
                   </div>
 
-                  <div className="p-2 rounded-lg bg-white/5 border border-white/10">
-                    <span className="text-slate-400 block text-[10px] flex items-center gap-1">
-                      <FontAwesomeIcon icon={faDroplet} className="text-sky-400" />
-                      <span>Kadar Air Tanah / RH</span>
+                  <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200">
+                    <span className="text-slate-500 block text-[10px] flex items-center gap-1 font-medium">
+                      <FontAwesomeIcon icon={faDroplet} className="text-sky-500" />
+                      <span>Kadar Air / RH</span>
                     </span>
-                    <span className="font-bold text-white font-mono mt-0.5 block">
-                      {currentPoint.moisture}% <span className="font-normal text-slate-400">/ {currentPoint.rh}%</span>
+                    <span className="font-bold text-[#172B3A] font-mono mt-0.5 block">
+                      {currentPoint.moisture}% <span className="font-normal text-slate-500">/ {currentPoint.rh}%</span>
                     </span>
                   </div>
 
-                  <div className="p-2 rounded-lg bg-white/5 border border-white/10">
-                    <span className="text-slate-400 block text-[10px] flex items-center gap-1">
+                  <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200">
+                    <span className="text-slate-500 block text-[10px] flex items-center gap-1 font-medium">
                       <FontAwesomeIcon icon={faSun} className="text-yellow-400" />
-                      <span>Radiasi Matahari</span>
+                      <span>Radiasi Surya</span>
                     </span>
-                    <span className="font-bold text-white font-mono mt-0.5 block">{currentPoint.solarRad} MJ/m²</span>
+                    <span className="font-bold text-[#172B3A] font-mono mt-0.5 block">{currentPoint.solarRad} MJ/m²</span>
                   </div>
 
-                  <div className="p-2 rounded-lg bg-white/5 border border-white/10">
-                    <span className="text-slate-400 block text-[10px] flex items-center gap-1">
-                      <FontAwesomeIcon icon={faWind} className="text-teal-400" />
+                  <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200">
+                    <span className="text-slate-500 block text-[10px] flex items-center gap-1 font-medium">
+                      <FontAwesomeIcon icon={faWind} className="text-teal-500" />
                       <span>Kecepatan Angin</span>
                     </span>
-                    <span className="font-bold text-white font-mono mt-0.5 block">{currentPoint.windSpeed} m/s</span>
+                    <span className="font-bold text-[#172B3A] font-mono mt-0.5 block">{currentPoint.windSpeed} m/s</span>
                   </div>
 
-                  <div className="p-2 rounded-lg bg-white/5 border border-white/10">
-                    <span className="text-slate-400 block text-[10px] flex items-center gap-1">
+                  <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200">
+                    <span className="text-slate-500 block text-[10px] flex items-center gap-1 font-medium">
                       <FontAwesomeIcon icon={faFlask} className="text-purple-400" />
                       <span>Laju Urease</span>
                     </span>
-                    <span className="font-bold text-white font-mono mt-0.5 block">{currentPoint.ureaseRate} /jam</span>
+                    <span className="font-bold text-[#172B3A] font-mono mt-0.5 block">{currentPoint.ureaseRate} /j</span>
                   </div>
 
-                  <div className="p-2 rounded-lg bg-white/5 border border-white/10">
-                    <span className="text-slate-400 block text-[10px] flex items-center gap-1">
-                      <FontAwesomeIcon icon={faTriangleExclamation} className="text-rose-400" />
-                      <span>Potensi Penguapan N</span>
+                  <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200">
+                    <span className="text-slate-500 block text-[10px] flex items-center gap-1 font-medium">
+                      <FontAwesomeIcon icon={faTriangleExclamation} className="text-rose-500" />
+                      <span>Potensi Penguapan</span>
                     </span>
                     <span
                       className={`font-bold font-mono mt-0.5 block ${
-                        currentPoint.nitrogenLossEst >= 30 ? 'text-rose-400' : 'text-emerald-400'
+                        currentPoint.nitrogenLossEst >= 30 ? 'text-rose-500' : 'text-emerald-400'
                       }`}
                     >
                       ~{currentPoint.nitrogenLossEst}%
@@ -864,7 +928,7 @@ export const FieldDetailPanel: React.FC<FieldDetailPanelProps> = ({
                 {/* Tombol Sinkronkan ke Peta */}
                 <button
                   onClick={() => triggerMapSync(currentPoint)}
-                  className="w-full py-2 px-2 rounded-xl bg-emerald-600/90 hover:bg-emerald-500 text-white text-[11px] font-bold transition-all text-center shadow-lg shadow-emerald-950/40 flex items-center justify-center gap-1.5"
+                  className="w-full py-2.5 px-3 rounded-xl bg-emerald-600/90 hover:bg-emerald-500 active:scale-[0.98] text-white text-[11px] font-bold transition-all text-center shadow-sm flex items-center justify-center gap-2 mt-1"
                 >
                   <FontAwesomeIcon icon={faArrowsRotate} className="text-xs" />
                   <span>Sinkronkan Kondisi Jam Ini ke Peta</span>
@@ -875,18 +939,18 @@ export const FieldDetailPanel: React.FC<FieldDetailPanelProps> = ({
         </div>
 
         {/* 5. Rekomendasi Jendela Aman & SPK Button */}
-        <div className="p-3.5 rounded-2xl border border-white/10 bg-white/5 shadow-xl space-y-2.5">
+        <div className="p-4 rounded-3xl border border-emerald-200 bg-gradient-to-br from-emerald-50 via-teal-50/50 to-white shadow-xs space-y-3">
           <div className="flex items-start justify-between">
             <div>
-              <span className="text-[10px] uppercase font-bold text-slate-400 flex items-center gap-1.5 tracking-wider">
-                <FontAwesomeIcon icon={faCircleCheck} className="text-emerald-400 text-xs" />
+              <span className="text-[10px] uppercase font-bold text-emerald-800 flex items-center gap-1.5 tracking-wider">
+                <FontAwesomeIcon icon={faCircleCheck} className="text-emerald-600 text-xs" />
                 <span>Jendela Pemupukan Aman</span>
               </span>
-              <p className="text-xs font-bold text-white mt-0.5">
+              <p className="text-xs font-bold text-[#172B3A] mt-1">
                 {safeWindowInfo ? safeWindowInfo.label : 'Besok, 06:00 – 09:00 WIB'}
               </p>
             </div>
-            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-mono">
+            <span className="px-3 py-1 rounded-xl text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 font-mono shadow-xs">
               AVRI {safeWindowInfo ? `${safeWindowInfo.avri}%` : '18%'}
             </span>
           </div>
@@ -894,55 +958,57 @@ export const FieldDetailPanel: React.FC<FieldDetailPanelProps> = ({
           {onOpenSpkModal && (
             <button
               onClick={onOpenSpkModal}
-              className="w-full py-2.5 px-3 rounded-xl bg-white/10 hover:bg-white/20 text-white border border-white/15 text-xs font-bold transition-all text-center shadow-md flex items-center justify-center gap-2"
+              className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 active:scale-[0.98] text-white font-bold text-xs transition-all duration-200 text-center shadow-[0_4px_24px_rgba(16,185,129,0.35)] flex items-center justify-center gap-2"
             >
-              <FontAwesomeIcon icon={faFileLines} className="text-xs text-emerald-400" />
+              <FontAwesomeIcon icon={faFileLines} className="text-xs" />
               <span>Buat Surat Perintah Kerja (SPK)</span>
             </button>
           )}
         </div>
 
         {/* 6. Accordion: Data Teknis & Sensor */}
-        <div className="border border-white/10 rounded-2xl overflow-hidden bg-white/5">
+        <div className="border border-slate-200 rounded-3xl overflow-hidden bg-slate-50">
           <button
             onClick={() => setShowTechnicalDetails(!showTechnicalDetails)}
-            className="w-full flex items-center justify-between p-3 bg-white/5 hover:bg-white/10 transition-colors text-left text-xs font-bold text-slate-200"
+            className="w-full flex items-center justify-between p-3.5 bg-white/[0.02] hover:bg-slate-100 transition-colors text-left text-xs font-bold text-slate-800"
           >
-            <span className="flex items-center gap-1.5">
-              <FontAwesomeIcon icon={faTowerBroadcast} className="text-emerald-400 text-xs" />
-              <span>Data Teknis & Sensor</span>
+            <span className="flex items-center gap-2">
+              <div className="w-5 h-5 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center ring-1 ring-emerald-200">
+                <FontAwesomeIcon icon={faTowerBroadcast} className="text-[10px]" />
+              </div>
+              <span>Data Teknis & Sensor Lapangan</span>
             </span>
             <FontAwesomeIcon
               icon={showTechnicalDetails ? faChevronUp : faChevronDown}
-              className="text-slate-400 text-xs"
+              className="text-slate-500 text-xs"
             />
           </button>
 
           {showTechnicalDetails && (
-            <div className="p-3 bg-slate-950/70 space-y-2 text-xs border-t border-white/10 text-slate-300">
-              <div className="flex justify-between">
-                <span className="text-slate-400">Stasiun BMKG:</span>
-                <span className="font-semibold text-white">Solokuro, Lamongan</span>
+            <div className="p-3.5 bg-white space-y-2 text-xs border-t border-slate-200 text-slate-700 font-mono">
+              <div className="flex justify-between font-sans">
+                <span className="text-slate-500 font-medium">Stasiun BMKG:</span>
+                <span className="font-semibold text-[#172B3A]">Solokuro, Lamongan</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-400">Node LoRa:</span>
-                <span className="font-mono text-emerald-400 font-semibold">{parcel.nodeId} ({parcel.loraSignalDbm} dBm)</span>
+                <span className="text-slate-500 font-sans font-medium">Node LoRa:</span>
+                <span className="text-emerald-700 font-semibold">{parcel.nodeId} ({parcel.loraSignalDbm} dBm)</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-400">Baterai Node:</span>
-                <span className="font-mono text-white font-semibold flex items-center gap-1">
-                  <FontAwesomeIcon icon={faBatteryFull} className="text-emerald-400 text-[10px]" />
+                <span className="text-slate-500 font-sans font-medium">Baterai Node:</span>
+                <span className="text-[#172B3A] font-semibold flex items-center gap-1.5">
+                  <FontAwesomeIcon icon={faBatteryFull} className="text-emerald-600 text-[10px]" />
                   <span>{parcel.batteryV}V ({parcel.batteryPct}%)</span>
                 </span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-slate-400">Model Neraca:</span>
-                <span className="text-white font-semibold">FAO-56 (Kc {dtTelemetry?.crop_and_kinetics.kc_coefficient || 0.74})</span>
+              <div className="flex justify-between font-sans">
+                <span className="text-slate-500 font-medium">Model Neraca:</span>
+                <span className="text-[#172B3A] font-semibold">FAO-56 (Kc {dtTelemetry?.crop_and_kinetics.kc_coefficient || 0.74})</span>
               </div>
               {dtTelemetry?.data_provenance.checksum_sha256 && (
-                <div className="pt-1.5 border-t border-white/10 flex justify-between text-[11px] text-slate-400 font-mono">
+                <div className="pt-2 border-t border-slate-200 flex justify-between text-[11px] text-slate-500">
                   <span>SHA-256:</span>
-                  <span className="truncate max-w-[170px]">{dtTelemetry.data_provenance.checksum_sha256}</span>
+                  <span className="truncate max-w-[170px] text-slate-600">{dtTelemetry.data_provenance.checksum_sha256}</span>
                 </div>
               )}
             </div>

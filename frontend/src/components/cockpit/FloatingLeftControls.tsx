@@ -1,22 +1,23 @@
 'use client';
 
 import React, { useState } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  Layers,
-  Droplets,
-  Radio,
-  Cpu,
-  MapPin,
-  Flame,
-  Info,
-  Sliders,
-  Calculator,
-  RefreshCw,
-  Sun,
-  Package,
-  ChevronLeft,
-  ChevronRight,
-} from 'lucide-react';
+  faLayerGroup,
+  faDroplet,
+  faTowerBroadcast,
+  faMicrochip,
+  faLocationDot,
+  faFire,
+  faCircleInfo,
+  faSliders,
+  faCalculator,
+  faArrowsRotate,
+  faSun,
+  faBoxArchive,
+  faChevronLeft,
+  faChevronRight,
+} from '@fortawesome/free-solid-svg-icons';
 import { BedengParcel } from '@/types/parcel';
 
 export interface CockpitLayerConfig {
@@ -86,10 +87,10 @@ export const FloatingLeftControls: React.FC<FloatingLeftControlsProps> = ({
         title="Buka Panel Kontrol & Sandbox"
       >
         <div className="w-6 h-6 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-600">
-          <Layers className="w-3.5 h-3.5" />
+          <FontAwesomeIcon icon={faLayerGroup} className="w-3.5 h-3.5" />
         </div>
         <span>Kontrol Lahan</span>
-        <ChevronRight className="w-3.5 h-3.5 text-slate-400 group-hover:translate-x-0.5 transition-transform" />
+        <FontAwesomeIcon icon={faChevronRight} className="w-3.5 h-3.5 text-slate-400 group-hover:translate-x-0.5 transition-transform" />
       </button>
     );
   }
@@ -101,7 +102,7 @@ export const FloatingLeftControls: React.FC<FloatingLeftControlsProps> = ({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="w-7 h-7 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-600">
-              <Layers className="w-4 h-4" />
+              <FontAwesomeIcon icon={faLayerGroup} className="w-4 h-4" />
             </div>
             <div>
               <h3 className="text-xs font-bold text-slate-900 leading-tight">Kontrol Lahan & Sandbox</h3>
@@ -114,7 +115,7 @@ export const FloatingLeftControls: React.FC<FloatingLeftControlsProps> = ({
               className="p-1 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-700 transition-colors"
               title="Perkecil Panel"
             >
-              <ChevronLeft className="w-4 h-4" />
+              <FontAwesomeIcon icon={faChevronLeft} className="w-4 h-4" />
             </button>
           </div>
         </div>
@@ -167,7 +168,7 @@ export const FloatingLeftControls: React.FC<FloatingLeftControlsProps> = ({
             {/* 1. Heatmap AVRI */}
             <div className="flex items-center justify-between p-2 rounded-xl bg-slate-50 hover:bg-slate-100/80 transition-colors">
               <div className="flex items-center gap-2.5">
-                <Flame className="w-4 h-4 text-red-500" />
+                <FontAwesomeIcon icon={faFire} className="w-4 h-4 text-red-500" />
                 <span className="text-xs font-semibold text-slate-700">Heatmap Risiko AVRI</span>
               </div>
               <button
@@ -203,7 +204,7 @@ export const FloatingLeftControls: React.FC<FloatingLeftControlsProps> = ({
             {/* 2. Kontur Kelembaban FAO-56 */}
             <div className="flex items-center justify-between p-2 rounded-xl bg-slate-50 hover:bg-slate-100/80 transition-colors">
               <div className="flex items-center gap-2.5">
-                <Droplets className="w-4 h-4 text-blue-500" />
+                <FontAwesomeIcon icon={faDroplet} className="w-4 h-4 text-blue-500" />
                 <span className="text-xs font-semibold text-slate-700">Neraca Air FAO-56</span>
               </div>
               <button
@@ -219,7 +220,7 @@ export const FloatingLeftControls: React.FC<FloatingLeftControlsProps> = ({
             {/* 3. Node Sensor Fisik LoRa */}
             <div className="flex items-center justify-between p-2 rounded-xl bg-slate-50 hover:bg-slate-100/80 transition-colors">
               <div className="flex items-center gap-2.5">
-                <Radio className="w-4 h-4 text-emerald-600" />
+                <FontAwesomeIcon icon={faTowerBroadcast} className="w-4 h-4 text-emerald-600" />
                 <span className="text-xs font-semibold text-slate-700">Titik Sensor & Beams</span>
               </div>
               <button
@@ -235,7 +236,7 @@ export const FloatingLeftControls: React.FC<FloatingLeftControlsProps> = ({
             {/* 4. Batas Kadastral Persil */}
             <div className="flex items-center justify-between p-2 rounded-xl bg-slate-50 hover:bg-slate-100/80 transition-colors">
               <div className="flex items-center gap-2.5">
-                <MapPin className="w-4 h-4 text-indigo-500" />
+                <FontAwesomeIcon icon={faLocationDot} className="w-4 h-4 text-indigo-500" />
                 <span className="text-xs font-semibold text-slate-700">Batas Persil Sawah</span>
               </div>
               <button
@@ -251,7 +252,7 @@ export const FloatingLeftControls: React.FC<FloatingLeftControlsProps> = ({
             {/* 5. Mesin Imputasi Failover */}
             <div className="flex items-center justify-between p-2 rounded-xl bg-slate-50 hover:bg-slate-100/80 transition-colors">
               <div className="flex items-center gap-2.5">
-                <Cpu className="w-4 h-4 text-amber-500" />
+                <FontAwesomeIcon icon={faMicrochip} className="w-4 h-4 text-amber-500" />
                 <div>
                   <span className="text-xs font-semibold text-slate-700 block leading-none">Auto-Failover</span>
                   <span className="text-[9px] text-slate-400">Digital Twin Imputer</span>
@@ -347,7 +348,7 @@ export const FloatingLeftControls: React.FC<FloatingLeftControlsProps> = ({
                 className="p-1.5 rounded-lg bg-red-50 hover:bg-red-100 border border-red-200 text-center transition-all"
                 title="Suhu 34.5°C, Kelembaban 18% (AVRI 74%)"
               >
-                <Sun className="w-3.5 h-3.5 text-red-600 mx-auto mb-0.5" />
+                <FontAwesomeIcon icon={faSun} className="w-3.5 h-3.5 text-red-600 mx-auto mb-0.5" />
                 <span className="text-[10px] font-black text-red-700 block leading-tight">Skenario A</span>
                 <span className="text-[8px] text-red-500">Terik Kritis</span>
               </button>
@@ -357,7 +358,7 @@ export const FloatingLeftControls: React.FC<FloatingLeftControlsProps> = ({
                 className="p-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-center transition-all"
                 title="Suhu 25.0°C, Kelembaban 38% (AVRI 18%)"
               >
-                <Droplets className="w-3.5 h-3.5 text-emerald-600 mx-auto mb-0.5" />
+                <FontAwesomeIcon icon={faDroplet} className="w-3.5 h-3.5 text-emerald-600 mx-auto mb-0.5" />
                 <span className="text-[10px] font-black text-emerald-700 block leading-tight">Skenario B</span>
                 <span className="text-[8px] text-emerald-500">Pagi Optimal</span>
               </button>
@@ -367,7 +368,7 @@ export const FloatingLeftControls: React.FC<FloatingLeftControlsProps> = ({
                 className="p-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 border border-amber-200 text-center transition-all"
                 title="Simulasi Sensor Dropout / Failover Imputer"
               >
-                <Cpu className="w-3.5 h-3.5 text-amber-600 mx-auto mb-0.5" />
+                <FontAwesomeIcon icon={faMicrochip} className="w-3.5 h-3.5 text-amber-600 mx-auto mb-0.5" />
                 <span className="text-[10px] font-black text-amber-700 block leading-tight">Skenario C</span>
                 <span className="text-[8px] text-amber-500">Failover</span>
               </button>
@@ -378,7 +379,7 @@ export const FloatingLeftControls: React.FC<FloatingLeftControlsProps> = ({
           <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-2.5">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
-                <Sliders className="w-3.5 h-3.5 text-emerald-600" />
+                <FontAwesomeIcon icon={faSliders} className="w-3.5 h-3.5 text-emerald-600" />
                 Simulator Parameter Bebas
               </span>
               {onResetSandbox && (
@@ -387,7 +388,7 @@ export const FloatingLeftControls: React.FC<FloatingLeftControlsProps> = ({
                   className="p-1 text-slate-400 hover:text-slate-700 transition-colors"
                   title="Reset ke Nilai Live"
                 >
-                  <RefreshCw className="w-3 h-3" />
+                  <FontAwesomeIcon icon={faArrowsRotate} className="w-3 h-3" />
                 </button>
               )}
             </div>
@@ -477,7 +478,7 @@ export const FloatingLeftControls: React.FC<FloatingLeftControlsProps> = ({
           <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-2.5">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
-                <Calculator className="w-3.5 h-3.5 text-emerald-600" />
+                <FontAwesomeIcon icon={faCalculator} className="w-3.5 h-3.5 text-emerald-600" />
                 Takaran Praktis Lapangan
               </span>
               <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[9px] font-bold">
@@ -492,14 +493,14 @@ export const FloatingLeftControls: React.FC<FloatingLeftControlsProps> = ({
             {/* Output Karung & Ember */}
             <div className="grid grid-cols-2 gap-2 pt-1">
               <div className="p-2 bg-white rounded-xl border border-slate-200/80 text-center">
-                <Package className="w-4 h-4 text-emerald-600 mx-auto mb-1" />
+                <FontAwesomeIcon icon={faBoxArchive} className="w-4 h-4 text-emerald-600 mx-auto mb-1" />
                 <span className="text-[10px] text-slate-400 block">Urea (46% N)</span>
                 <b className="text-sm text-slate-900">{ureaSacks} Karung</b>
                 <span className="text-[9px] text-slate-400 block">@ 50 kg</span>
               </div>
 
               <div className="p-2 bg-white rounded-xl border border-slate-200/80 text-center">
-                <Package className="w-4 h-4 text-blue-600 mx-auto mb-1" />
+                <FontAwesomeIcon icon={faBoxArchive} className="w-4 h-4 text-blue-600 mx-auto mb-1" />
                 <span className="text-[10px] text-slate-400 block">Phonska 15-15-15</span>
                 <b className="text-sm text-slate-900">{npkSacks} Karung</b>
                 <span className="text-[9px] text-slate-400 block">@ 50 kg</span>
@@ -523,7 +524,7 @@ export const FloatingLeftControls: React.FC<FloatingLeftControlsProps> = ({
 
       {/* Info Tagline di Bawah */}
       <div className="flex items-center gap-2 p-2 rounded-xl bg-emerald-50 border border-emerald-100 text-2xs text-emerald-800">
-        <Info className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+        <FontAwesomeIcon icon={faCircleInfo} className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
         <span>Kawasan Tegal Kapur Bluri · Solokuro (Kadar Liat 38%, pH 7.85)</span>
       </div>
     </div>

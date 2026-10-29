@@ -4,19 +4,14 @@ import React, { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faLocationDot,
-  faSliders,
-  faChevronLeft,
-  faClockRotateLeft,
-  faTowerBroadcast,
   faXmark,
+  faCircleCheck,
 } from '@fortawesome/free-solid-svg-icons';
 import { BedengParcel, ParcelMapSummary } from '@/types/parcel';
 import { initialParcels, initialMapSummary } from '@/mocks/parcelsMock';
 import { CockpitTopBar } from './CockpitTopBar';
 import { FieldListPanel } from './FieldListPanel';
 import { FieldDetailPanel, ForecastPoint } from './FieldDetailPanel';
-import { MapLayersPopover } from './MapLayersPopover';
 import { CockpitLayerConfig, SandboxParams } from './FloatingLeftControls';
 import { FieldWorkOrderModal } from './FieldWorkOrderModal';
 import { EmergencyAlertBanner } from './EmergencyAlertBanner';
@@ -37,9 +32,9 @@ interface LoRaPacket {
 const CockpitFieldMap = dynamic(() => import('./CockpitFieldMap'), {
   ssr: false,
   loading: () => (
-    <div className="w-full h-full min-h-[550px] lg:min-h-[700px] rounded-3xl bg-slate-900 flex flex-col items-center justify-center text-slate-400 gap-3 border border-slate-800">
-      <div className="w-10 h-10 border-3 border-emerald-500 border-t-transparent rounded-full animate-spin" />
-      <span className="text-xs font-semibold text-slate-300">
+    <div className="w-full h-full min-h-[550px] lg:min-h-[700px] rounded-3xl bg-slate-100 flex flex-col items-center justify-center text-slate-500 gap-3 border border-slate-200">
+      <div className="w-10 h-10 border-3 border-emerald-600 border-t-transparent rounded-full animate-spin" />
+      <span className="text-xs font-semibold text-slate-700">
         Menginisialisasi Citra Satelit HD Solokuro & Kontur Kadastral...
       </span>
     </div>
@@ -55,8 +50,6 @@ export const CockpitDashboardView: React.FC<CockpitDashboardViewProps> = () => {
   const [parcels, setParcels] = useState<BedengParcel[]>(initialParcels);
   const [selectedId, setSelectedId] = useState<string>('A1');
   const [isSimulatedCritical, setIsSimulatedCritical] = useState<boolean>(false);
-  const [showPinCard, setShowPinCard] = useState<boolean>(true);
-  const [pinScreenPos, setPinScreenPos] = useState<{ x: number; y: number } | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [dtTelemetry, setDtTelemetry] = useState<DigitalTwin15Telemetry | null>(null);
   const [isFullScreenMap, setIsFullScreenMap] = useState<boolean>(false);
@@ -149,6 +142,7 @@ export const CockpitDashboardView: React.FC<CockpitDashboardViewProps> = () => {
   // Toggle layer helper
   const handleToggleLayer = (layerKey: keyof CockpitLayerConfig) => {
     setLayers((prev) => {
+      if (typeof prev[layerKey] !== 'boolean') return prev;
       const nextVal = !prev[layerKey];
       // Jika nyalakan kontur kelembaban, matikan heatmap AVRI agar tidak tumpang tindih
       if (layerKey === 'showMoistureContour' && nextVal) {
@@ -348,14 +342,16 @@ export const CockpitDashboardView: React.FC<CockpitDashboardViewProps> = () => {
         moist: Number((selectedParcel.moisturePct + moistDelta).toFixed(1)),
       }));
 
-      // Fluktuasi mikro data live sesuai transmisi LoRa fisik
+      // Fluktuasi mikro data live sesuai transmisi LoRa fisik (dengan batas fisis aman)
       setParcels((current) =>
         current.map((p) => {
           if (p.id === selectedId && p.status === 'online') {
+            const clampedTemp = Math.min(50, Math.max(10, Number((p.soilTempC + tempDelta).toFixed(1))));
+            const clampedMoist = Math.min(60, Math.max(5, Number((p.moisturePct + moistDelta).toFixed(1))));
             return {
               ...p,
-              soilTempC: Number((p.soilTempC + tempDelta).toFixed(1)),
-              moisturePct: Number((p.moisturePct + moistDelta).toFixed(1)),
+              soilTempC: clampedTemp,
+              moisturePct: clampedMoist,
               signalRssi: `${rssi} dBm`,
             };
           }
@@ -384,32 +380,63 @@ export const CockpitDashboardView: React.FC<CockpitDashboardViewProps> = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  // When parcel selection changes, ensure the pin card opens
+  // When parcel selection changes
   const handleSelectParcel = (id: string) => {
     setSelectedId(id);
-    setShowPinCard(true);
     setDismissedEmergency(false);
   };
 
   const isCurrentCritical = (selectedParcel.avriScore >= 70 || isSimulatedCritical);
 
+  // Toggle handlers for navbar buttons
+  const handleToggleParcels = () => {
+    if (isLeftPanelOpen && leftPanelTab === 'parcels') {
+      setIsLeftPanelOpen(false);
+    } else {
+      setIsFullScreenMap(false);
+      setIsLeftPanelOpen(true);
+      setLeftPanelTab('parcels');
+    }
+  };
+
+  const handleToggleSandbox = () => {
+    if (isLeftPanelOpen && leftPanelTab === 'sandbox') {
+      setIsLeftPanelOpen(false);
+    } else {
+      setIsFullScreenMap(false);
+      setIsLeftPanelOpen(true);
+      setLeftPanelTab('sandbox');
+    }
+  };
+
+  const handleToggleFertilizer = () => {
+    if (isLeftPanelOpen && leftPanelTab === 'fertilizer') {
+      setIsLeftPanelOpen(false);
+    } else {
+      setIsFullScreenMap(false);
+      setIsLeftPanelOpen(true);
+      setLeftPanelTab('fertilizer');
+    }
+  };
+
   return (
-    <div className="relative w-full h-screen flex flex-col bg-slate-900 select-none overflow-hidden">
-      {/* 1. TOP BAR COCKPIT (Google Earth Style) */}
+    <div className="relative w-full h-screen flex flex-col bg-slate-50 select-none overflow-hidden">
+      {/* 1. TOP BAR COCKPIT (Google Earth Style with Direct Navbar Controls) */}
       <CockpitTopBar
         isSimulatedCritical={isSimulatedCritical}
         onToggleScenario={handleToggleScenario}
         onOpenSpkModal={() => setShowSpkModal(true)}
         onOpenJuryTour={() => setShowJuryTour(true)}
-        onOpenParcels={() => {
+        onOpenParcels={handleToggleParcels}
+        onOpenSandbox={handleToggleSandbox}
+        onOpenFertilizer={handleToggleFertilizer}
+        onToggleRightPanel={() => {
           setIsFullScreenMap(false);
-          setIsLeftPanelOpen(true);
-          setLeftPanelTab('parcels');
+          setIsRightPanelOpen((prev) => !prev);
         }}
-        onOpen72h={() => {
-          setIsFullScreenMap(false);
-          setIsRightPanelOpen(true);
-        }}
+        isRightPanelOpen={!isFullScreenMap && isRightPanelOpen}
+        activeLeftTab={leftPanelTab}
+        isLeftPanelOpen={!isFullScreenMap && isLeftPanelOpen}
         bmkgWeather={
           dtTelemetry
             ? `${dtTelemetry.atmosphere_bmkg.air_temp_c}°C · RH ${dtTelemetry.atmosphere_bmkg.humidity_rh}%`
@@ -418,28 +445,33 @@ export const CockpitDashboardView: React.FC<CockpitDashboardViewProps> = () => {
         provenanceSha={dtTelemetry?.data_provenance?.checksum_sha256}
         isFullScreenMap={isFullScreenMap}
         onToggleFullScreenMap={() => setIsFullScreenMap((prev) => !prev)}
-        onOpenSandbox={() => {
-          setIsFullScreenMap(false);
-          setIsLeftPanelOpen(true);
-          setLeftPanelTab('sandbox');
-        }}
+        layers={layers}
+        onToggleLayer={handleToggleLayer}
+        onUpdateOpacity={handleUpdateOpacity}
+        cropPhase="V8 (DAT 32)"
+        kcValue={dtTelemetry?.crop_and_kinetics?.kc_coefficient ?? 0.74}
+        efficiencyUrea="+24.5% Urea"
+        latestNodeId={latestPacket.nodeId}
+        latestRssiDbm={latestPacket.rssi}
       />
 
       {/* EMERGENCY ALERT BANNER (Kritis Volatilisasi Suhu Ekstrem) */}
       {isCurrentCritical && !dismissedEmergency && (
-        <EmergencyAlertBanner
-          avriScore={isSimulatedCritical ? 74 : selectedParcel.avriScore}
-          soilTempC={isSimulatedCritical ? 34.5 : selectedParcel.soilTempC}
-          onPostpone={handlePostponeAction}
-          onInterveneIrrigation={handleInterveneIrrigation}
-          onDismiss={() => setDismissedEmergency(true)}
-        />
+        <div className="w-full px-3 pb-1 z-30">
+          <EmergencyAlertBanner
+            avriScore={isSimulatedCritical ? 74 : selectedParcel.avriScore}
+            soilTempC={isSimulatedCritical ? 34.5 : selectedParcel.soilTempC}
+            onPostpone={handlePostponeAction}
+            onInterveneIrrigation={handleInterveneIrrigation}
+            onDismiss={() => setDismissedEmergency(true)}
+          />
+        </div>
       )}
 
-      {/* 2. FULL-SCREEN IMMERSIVE GOOGLE EARTH VIEWPORT */}
-      <div className="relative flex-1 w-full h-[calc(100vh-76px)] overflow-hidden">
+      {/* 2. FULL-SCREEN IMMERSIVE DIGITAL TWIN VIEWPORT */}
+      <div className="relative flex-1 w-full h-[calc(100vh-56px)] overflow-hidden">
         {/* ZONA TENGAH: Peta Leaflet Layar Penuh (Edge-to-Edge Canvas) */}
-        <div className="absolute inset-0 w-full h-full bg-slate-950 z-0">
+        <div className="absolute inset-0 w-full h-full bg-slate-100 z-0">
           <CockpitFieldMap
             parcels={parcels}
             selectedId={selectedId}
@@ -447,26 +479,12 @@ export const CockpitDashboardView: React.FC<CockpitDashboardViewProps> = () => {
             summary={summary}
             onSelectParcel={handleSelectParcel}
             isSimulatedCritical={isSimulatedCritical}
-            onPinScreenPosChange={setPinScreenPos}
-          />
-        </div>
-
-        {/* MAP LAYERS POPOVER BUTTON (Pojok Kanan Atas Peta) */}
-        <div
-          className={`absolute top-3.5 z-[400] transition-all duration-300 ease-in-out ${
-            isRightPanelOpen && !isFullScreenMap ? 'right-[390px]' : 'right-4'
-          }`}
-        >
-          <MapLayersPopover
-            layers={layers}
-            onToggleLayer={handleToggleLayer}
-            onUpdateOpacity={handleUpdateOpacity}
           />
         </div>
 
         {/* ZONA KIRI: 320px Floating Side Card dengan Animasi Slide Halus */}
         <div
-          className={`hidden lg:block absolute top-3 bottom-14 left-3 w-[320px] z-20 rounded-2xl bg-slate-950/90 backdrop-blur-2xl border border-white/10 shadow-2xl overflow-hidden transition-all duration-300 ease-in-out ${
+          className={`hidden lg:block absolute top-3 bottom-20 left-3 w-[320px] z-20 rounded-3xl bg-white/95 backdrop-blur-2xl border border-[#DCE5EE] shadow-[0_10px_35px_rgba(16,36,58,0.08)] ring-1 ring-slate-900/5 overflow-hidden transition-all duration-300 ease-in-out ${
             !isFullScreenMap && isLeftPanelOpen
               ? 'translate-x-0 opacity-100 pointer-events-auto'
               : '-translate-x-[calc(100%+24px)] opacity-0 pointer-events-none'
@@ -488,40 +506,9 @@ export const CockpitDashboardView: React.FC<CockpitDashboardViewProps> = () => {
           />
         </div>
 
-        {/* TOMBOL BUKA PANEL KIRI JIKA DITUTUP (Google Earth Floating Pill) */}
-        {(!isLeftPanelOpen || isFullScreenMap) && (
-          <div className="absolute top-3.5 left-3.5 z-[400] flex items-center gap-1.5 animate-in fade-in duration-200">
-            {!isFullScreenMap && (
-              <button
-                onClick={() => {
-                  setIsLeftPanelOpen(true);
-                  setLeftPanelTab('parcels');
-                }}
-                className="bg-slate-900/90 backdrop-blur-xl px-3.5 py-1.5 rounded-full border border-white/15 shadow-2xl text-xs font-medium text-slate-200 hover:text-white hover:bg-slate-800 transition-all flex items-center gap-1.5"
-                title="Buka Daftar Petak"
-              >
-                <FontAwesomeIcon icon={faLocationDot} className="text-emerald-400 text-xs" />
-                <span>Petak ({parcels.length})</span>
-              </button>
-            )}
-            <button
-              onClick={() => {
-                setIsFullScreenMap(false);
-                setIsLeftPanelOpen(true);
-                setLeftPanelTab('sandbox');
-              }}
-              className="bg-slate-900/90 backdrop-blur-xl px-3.5 py-1.5 rounded-full border border-white/15 shadow-2xl text-xs font-medium text-slate-200 hover:text-white hover:bg-slate-800 transition-all flex items-center gap-1.5"
-              title="Buka Simulasi Kondisi"
-            >
-              <FontAwesomeIcon icon={faSliders} className="text-sky-400 text-xs" />
-              <span>Kondisi</span>
-            </button>
-          </div>
-        )}
-
         {/* ZONA KANAN: 370px Floating Side Card dengan Animasi Slide Halus */}
         <div
-          className={`hidden xl:block absolute top-3 bottom-14 right-3 w-[370px] z-20 rounded-2xl bg-slate-950/90 backdrop-blur-2xl border border-white/10 shadow-2xl overflow-hidden transition-all duration-300 ease-in-out ${
+          className={`hidden xl:block absolute top-3 bottom-20 right-3 w-[370px] z-20 rounded-3xl bg-white/95 backdrop-blur-2xl border border-[#DCE5EE] shadow-[0_10px_35px_rgba(16,36,58,0.08)] ring-1 ring-slate-900/5 overflow-hidden transition-all duration-300 ease-in-out ${
             !isFullScreenMap && isRightPanelOpen
               ? 'translate-x-0 opacity-100 pointer-events-auto'
               : 'translate-x-[calc(100%+24px)] opacity-0 pointer-events-none'
@@ -531,7 +518,7 @@ export const CockpitDashboardView: React.FC<CockpitDashboardViewProps> = () => {
             {/* Tombol Tutup Panel Kanan */}
             <button
               onClick={() => setIsRightPanelOpen(false)}
-              className="absolute top-3.5 right-3.5 z-30 w-6 h-6 rounded-full flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition-colors text-xs"
+              className="absolute top-3.5 right-3.5 z-30 w-7 h-7 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 active:scale-90 transition-all duration-150 text-xs"
               title="Tutup Detail Petak"
             >
               <FontAwesomeIcon icon={faXmark} />
@@ -546,47 +533,10 @@ export const CockpitDashboardView: React.FC<CockpitDashboardViewProps> = () => {
             />
           </div>
         </div>
-
-        {/* TOMBOL BUKA PANEL KANAN JIKA DITUTUP */}
-        {!isFullScreenMap && !isRightPanelOpen && (
-          <button
-            onClick={() => setIsRightPanelOpen(true)}
-            className="absolute top-3.5 right-3.5 z-[400] bg-slate-900/90 backdrop-blur-xl px-3.5 py-1.5 rounded-full border border-white/15 shadow-2xl text-xs font-medium text-slate-200 hover:text-white hover:bg-slate-800 transition-all flex items-center gap-1.5 animate-in fade-in duration-200"
-            title="Buka Detail Petak"
-          >
-            <FontAwesomeIcon icon={faChevronLeft} className="text-xs text-slate-400" />
-            <span>Detail Petak</span>
-          </button>
-        )}
-
-        {/* FLOATING AGRO-CLIMATIC FACTS CAPSULE (Bottom Center) */}
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-[390] hidden 2xl:flex items-center gap-3 bg-slate-950/85 backdrop-blur-xl px-4 py-1.5 rounded-full border border-white/15 text-xs text-slate-300 shadow-2xl select-none">
-          <div className="flex items-center gap-1.5 whitespace-nowrap">
-            <span className="text-slate-400 text-[11px]">Fase Jagung:</span>
-            <span className="font-semibold text-white text-xs">V8 (DAT 32)</span>
-          </div>
-          <span className="text-white/15">·</span>
-          <div className="flex items-center gap-1.5 whitespace-nowrap">
-            <span className="text-slate-400 text-[11px]">FAO-56 Kc:</span>
-            <span className="font-semibold text-white text-xs">0.74</span>
-          </div>
-          <span className="text-white/15">·</span>
-          <div className="flex items-center gap-1.5 whitespace-nowrap">
-            <span className="text-slate-400 text-[11px]">Efisiensi:</span>
-            <span className="font-semibold text-emerald-400 text-xs">+24.5% Urea</span>
-          </div>
-          <span className="text-white/15">·</span>
-          <div className="flex items-center gap-1.5 font-mono text-[11px] text-slate-400 whitespace-nowrap">
-            <FontAwesomeIcon icon={faTowerBroadcast} className="text-emerald-400 text-[10px]" />
-            <span className="text-slate-200 font-semibold">{latestPacket.nodeId}</span>
-            <span className="text-white/15">·</span>
-            <span className="text-emerald-400">{latestPacket.rssi} dBm</span>
-          </div>
-        </div>
       </div>
 
       {/* MOBILE / TABLET DRAWER (<1280px): Tampilkan Detail Panel sebagai tab/drawer */}
-      <div className="xl:hidden p-4 space-y-4 bg-slate-950 text-slate-100">
+      <div className="xl:hidden p-4 space-y-4 bg-[#F7F9FC] text-[#172B3A]">
         <FieldDetailPanel
           parcel={selectedParcel}
           isSimulatedCritical={isSimulatedCritical}
@@ -615,8 +565,8 @@ export const CockpitDashboardView: React.FC<CockpitDashboardViewProps> = () => {
 
       {/* TOAST NOTIFICATION */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-900 text-white text-xs font-medium shadow-lg animate-in fade-in slide-in-from-bottom-2">
-          <span className="text-emerald-400">✓</span>
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-white/95 backdrop-blur-xl border border-slate-200 text-slate-800 shadow-xl ring-1 ring-slate-900/5 text-xs font-medium shadow-2xl animate-in fade-in slide-in-from-bottom-2">
+          <FontAwesomeIcon icon={faCircleCheck} className="text-emerald-600 text-xs" />
           <span>{toastMessage}</span>
         </div>
       )}

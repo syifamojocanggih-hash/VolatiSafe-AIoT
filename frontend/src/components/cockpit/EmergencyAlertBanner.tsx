@@ -1,6 +1,13 @@
 'use client';
 
 import React from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import {
+  faTriangleExclamation,
+  faClockRotateLeft,
+  faDroplet,
+  faXmark,
+} from '@fortawesome/free-solid-svg-icons';
 
 interface EmergencyAlertBannerProps {
   avriScore: number;
@@ -18,12 +25,13 @@ export const EmergencyAlertBanner: React.FC<EmergencyAlertBannerProps> = ({
   onDismiss,
 }) => {
   return (
-    <div className="w-full bg-rose-950/90 backdrop-blur-xl text-rose-100 border-b border-rose-500/30 px-4 py-2 flex items-center justify-between gap-3 z-30 select-none text-xs shadow-xl">
+    <div className="w-full bg-rose-50/95 backdrop-blur-xl text-rose-900 border border-rose-200 rounded-2xl px-4 py-2 flex items-center justify-between gap-3 z-30 select-none text-xs shadow-sm ring-1 ring-rose-500/10 animate-in slide-in-from-top-2 fade-in duration-300">
       <div className="flex items-center gap-2.5 min-w-0 truncate">
-        <span className="font-semibold bg-rose-500/25 border border-rose-500/40 text-rose-300 px-2.5 py-0.5 rounded-full text-[11px] shrink-0 font-mono">
-          Risiko Kritis {avriScore}%
+        <span className="font-bold bg-rose-100 border border-rose-300 text-rose-800 px-3 py-1 rounded-xl text-[11px] shrink-0 font-mono flex items-center gap-1.5 shadow-xs">
+          <FontAwesomeIcon icon={faTriangleExclamation} className="w-3.5 h-3.5 text-rose-600 animate-pulse" />
+          <span>Risiko Kritis {avriScore}%</span>
         </span>
-        <span className="truncate text-rose-200/90">
+        <span className="truncate text-rose-800 text-xs font-medium">
           Suhu tanah {soilTempC.toFixed(1)}°C memicu penguapan amonia tinggi. Tunda penaburan urea hingga jendela aman.
         </span>
       </div>
@@ -31,24 +39,26 @@ export const EmergencyAlertBanner: React.FC<EmergencyAlertBannerProps> = ({
       <div className="flex items-center gap-2 shrink-0">
         <button
           onClick={onPostpone}
-          className="px-3 py-1 rounded-full bg-white text-rose-900 hover:bg-rose-100 font-semibold transition-all text-xs shadow-sm"
+          className="px-3.5 py-1.5 rounded-xl bg-white text-rose-900 hover:bg-rose-100 active:scale-95 font-bold transition-all duration-150 text-xs border border-rose-200 shadow-xs flex items-center gap-1.5"
         >
-          Tunda Pemupukan
+          <FontAwesomeIcon icon={faClockRotateLeft} className="w-3 h-3 text-rose-600" />
+          <span>Tunda Pemupukan</span>
         </button>
 
         <button
           onClick={onInterveneIrrigation}
-          className="px-3 py-1 rounded-full bg-rose-600/60 hover:bg-rose-600 text-white border border-rose-400/40 font-medium transition-all text-xs"
+          className="px-3.5 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 active:scale-95 text-white font-semibold transition-all duration-150 text-xs flex items-center gap-1.5 shadow-xs"
         >
-          Simulasi Irigasi
+          <FontAwesomeIcon icon={faDroplet} className="w-3 h-3" />
+          <span>Simulasi Irigasi</span>
         </button>
 
         <button
           onClick={onDismiss}
-          className="w-6 h-6 rounded-full flex items-center justify-center text-rose-300 hover:text-white hover:bg-white/10 transition-colors text-xs leading-none"
+          className="w-7 h-7 rounded-xl flex items-center justify-center text-rose-600 hover:text-rose-900 hover:bg-rose-100 active:scale-90 transition-all duration-150 text-xs"
           title="Tutup peringatan"
         >
-          ✕
+          <FontAwesomeIcon icon={faXmark} className="w-3.5 h-3.5" />
         </button>
       </div>
     </div>

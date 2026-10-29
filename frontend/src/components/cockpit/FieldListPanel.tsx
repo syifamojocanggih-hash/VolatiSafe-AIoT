@@ -16,6 +16,9 @@ import {
   faSun,
   faCircleCheck,
   faTriangleExclamation,
+  faMicrochip,
+  faBagShopping,
+  faWeightHanging,
 } from '@fortawesome/free-solid-svg-icons';
 import { BedengParcel } from '@/types/parcel';
 import { SandboxParams } from './FloatingLeftControls';
@@ -45,16 +48,8 @@ export const FieldListPanel: React.FC<FieldListPanelProps> = ({
   onUpdateSandbox,
   onApplyPreset,
   onResetSandbox,
-  isSimulatedCritical = false,
-  activeTab: controlledTab,
-  onTabChange,
+  activeTab = 'parcels',
 }) => {
-  const [internalTab, setInternalTab] = useState<'parcels' | 'sandbox' | 'fertilizer'>('parcels');
-  const activeTab = controlledTab ?? internalTab;
-  const setActiveTab = (tab: 'parcels' | 'sandbox' | 'fertilizer') => {
-    if (onTabChange) onTabChange(tab);
-    setInternalTab(tab);
-  };
 
   const [filter, setFilter] = useState<'all' | 'kritis' | 'aman'>('all');
 
@@ -68,116 +63,69 @@ export const FieldListPanel: React.FC<FieldListPanelProps> = ({
 
   const filteredParcels = useMemo(() => {
     return parcels.filter((p) => {
-      if (filter === 'kritis' && p.avriScore < 50) return false;
-      if (filter === 'aman' && p.avriScore > 25) return false;
+      if (filter === 'kritis' && p.avriScore < 70) return false;
+      if (filter === 'aman' && p.avriScore >= 30) return false;
       return true;
     });
   }, [parcels, filter]);
 
   if (isCollapsed) {
-    return (
-      <div className="absolute top-3.5 left-3.5 z-20 flex items-center gap-1.5 select-none">
-        <button
-          onClick={onToggleCollapse}
-          className="bg-slate-900/90 backdrop-blur-xl px-3.5 py-1.5 rounded-full border border-white/15 shadow-2xl hover:bg-slate-800 transition-all text-xs font-medium text-slate-200 hover:text-white flex items-center gap-1.5"
-          title="Buka Panel Lahan"
-        >
-          <FontAwesomeIcon icon={faLocationDot} className="text-emerald-400 text-xs" />
-          <span>Petak ({parcels.length})</span>
-        </button>
-
-        <button
-          onClick={() => {
-            if (onToggleCollapse) onToggleCollapse();
-            setActiveTab('sandbox');
-          }}
-          className="bg-slate-900/90 backdrop-blur-xl px-3.5 py-1.5 rounded-full border border-white/15 shadow-2xl hover:bg-slate-800 transition-all text-xs font-medium text-slate-200 hover:text-white flex items-center gap-1.5"
-          title="Buka Simulasi Kondisi"
-        >
-          <FontAwesomeIcon icon={faSliders} className="text-sky-400 text-xs" />
-          <span>Kondisi</span>
-        </button>
-      </div>
-    );
+    return null;
   }
 
   return (
-    <aside className="w-[300px] bg-slate-950/90 backdrop-blur-2xl border-r border-white/10 flex flex-col h-full shrink-0 select-none z-20 text-slate-200">
+    <aside className="w-full h-full flex flex-col shrink-0 select-none text-slate-800">
       {/* 1. Header Panel & Segmented Tab */}
-      <div className="p-3 border-b border-white/10 space-y-2.5">
+      <div className="p-3.5 border-b border-slate-200 space-y-3 bg-slate-50/80">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <FontAwesomeIcon
-              icon={
+          <div className="flex items-center gap-2.5">
+            <div
+              className={`w-7 h-7 rounded-xl flex items-center justify-center shrink-0 ${
                 activeTab === 'parcels'
-                  ? faLocationDot
+                  ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200'
                   : activeTab === 'sandbox'
-                  ? faSliders
-                  : faSeedling
-              }
-              className={`text-xs ${
-                activeTab === 'parcels'
-                  ? 'text-emerald-400'
-                  : activeTab === 'sandbox'
-                  ? 'text-sky-400'
-                  : 'text-amber-400'
+                  ? 'bg-sky-50 text-sky-700 ring-1 ring-sky-200'
+                  : 'bg-amber-50 text-amber-700 ring-1 ring-amber-200'
               }`}
-            />
-            <span className="text-xs font-bold text-white tracking-wide">
-              {activeTab === 'parcels'
-                ? 'Daftar Petak Lahan'
-                : activeTab === 'sandbox'
-                ? 'Simulasi Kondisi'
-                : 'Estimasi Dosis Pupuk'}
-            </span>
+            >
+              <FontAwesomeIcon
+                icon={
+                  activeTab === 'parcels'
+                    ? faLocationDot
+                    : activeTab === 'sandbox'
+                    ? faSliders
+                    : faSeedling
+                }
+                className="text-xs"
+              />
+            </div>
+            <div>
+              <span className="text-xs font-bold text-slate-900 tracking-wide block leading-tight">
+                {activeTab === 'parcels'
+                  ? 'Daftar Petak Lahan'
+                  : activeTab === 'sandbox'
+                  ? 'Simulasi Kondisi'
+                  : 'Estimasi Dosis Pupuk'}
+              </span>
+              <span className="text-[10px] text-slate-500 block leading-none mt-0.5">
+                {activeTab === 'parcels'
+                  ? 'Mikroklimat & Zonasi AVRI'
+                  : activeTab === 'sandbox'
+                  ? 'What-If Biofisika & Irigasi'
+                  : 'Kebutuhan Urea & NPK'}
+              </span>
+            </div>
           </div>
 
           {onToggleCollapse && (
             <button
               onClick={onToggleCollapse}
-              className="w-5 h-5 rounded-full flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition-colors text-xs"
+              className="w-7 h-7 rounded-xl flex items-center justify-center text-slate-500 hover:text-slate-900 hover:bg-slate-200/80 active:scale-90 transition-all text-xs"
               title="Tutup Panel"
             >
               <FontAwesomeIcon icon={faXmark} />
             </button>
           )}
-        </div>
-
-        {/* Segmented Control (Google Earth Dark Pill Switcher) */}
-        <div className="grid grid-cols-3 bg-slate-900/80 border border-white/10 p-0.5 rounded-xl text-xs">
-          <button
-            onClick={() => setActiveTab('parcels')}
-            className={`py-1 rounded-lg text-center transition-all flex items-center justify-center gap-1.5 ${
-              activeTab === 'parcels'
-                ? 'bg-white/15 text-white font-semibold shadow-sm'
-                : 'text-slate-400 hover:text-slate-200'
-            }`}
-          >
-            <FontAwesomeIcon icon={faLocationDot} className="text-[10px] opacity-80" />
-            <span>Petak</span>
-          </button>
-          <button
-            onClick={() => setActiveTab('sandbox')}
-            className={`py-1 rounded-lg text-center transition-all flex items-center justify-center gap-1.5 ${
-              activeTab === 'sandbox'
-                ? 'bg-white/15 text-white font-semibold shadow-sm'
-                : 'text-slate-400 hover:text-slate-200'
-            }`}
-          >
-            <FontAwesomeIcon icon={faSliders} className="text-[10px] opacity-80" />
-            <span>Kondisi</span>
-          </button>
-          <button
-            onClick={() => setActiveTab('fertilizer')}
-            className={`py-1 rounded-lg text-center transition-all flex items-center justify-center gap-1.5 ${
-              activeTab === 'fertilizer'
-                ? 'bg-white/15 text-white font-semibold shadow-sm'
-                : 'text-slate-400 hover:text-slate-200'
-            }`}
-          >
-            <FontAwesomeIcon icon={faSeedling} className="text-[10px] opacity-80" />
-            <span>Pupuk</span>
-          </button>
         </div>
       </div>
 
@@ -185,26 +133,26 @@ export const FieldListPanel: React.FC<FieldListPanelProps> = ({
       {activeTab === 'parcels' && (
         <div className="flex-1 flex flex-col min-h-0">
           {/* Filter Status Sederhana */}
-          <div className="px-3 py-2 border-b border-white/10 flex items-center gap-1.5 text-xs">
+          <div className="px-3 py-2 border-b border-slate-200 flex items-center gap-1.5 text-xs bg-slate-50/50">
             <span className="text-[10px] text-slate-500 mr-0.5">
               <FontAwesomeIcon icon={faFilter} />
             </span>
             <button
               onClick={() => setFilter('all')}
-              className={`px-2.5 py-0.5 rounded-full text-xs transition-all ${
+              className={`px-2.5 py-1 rounded-xl text-xs font-semibold transition-all duration-150 active:scale-95 ${
                 filter === 'all'
-                  ? 'bg-white/15 text-white font-semibold border border-white/20'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'
+                  ? 'bg-white text-slate-900 border border-slate-200 shadow-xs'
+                  : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100'
               }`}
             >
               Semua ({parcels.length})
             </button>
             <button
               onClick={() => setFilter('kritis')}
-              className={`px-2.5 py-0.5 rounded-full text-xs transition-all flex items-center gap-1 ${
+              className={`px-2.5 py-1 rounded-xl text-xs font-semibold transition-all duration-150 active:scale-95 flex items-center gap-1.5 ${
                 filter === 'kritis'
-                  ? 'bg-rose-500/25 text-rose-300 font-semibold border border-rose-500/40'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'
+                  ? 'bg-rose-50 text-rose-700 border border-rose-200 shadow-xs'
+                  : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100'
               }`}
             >
               <FontAwesomeIcon icon={faTriangleExclamation} className="text-[10px]" />
@@ -212,10 +160,10 @@ export const FieldListPanel: React.FC<FieldListPanelProps> = ({
             </button>
             <button
               onClick={() => setFilter('aman')}
-              className={`px-2.5 py-0.5 rounded-full text-xs transition-all flex items-center gap-1 ${
+              className={`px-2.5 py-1 rounded-xl text-xs font-semibold transition-all duration-150 active:scale-95 flex items-center gap-1.5 ${
                 filter === 'aman'
-                  ? 'bg-emerald-500/25 text-emerald-300 font-semibold border border-emerald-500/40'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'
+                  ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-xs'
+                  : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100'
               }`}
             >
               <FontAwesomeIcon icon={faCircleCheck} className="text-[10px]" />
@@ -224,58 +172,66 @@ export const FieldListPanel: React.FC<FieldListPanelProps> = ({
           </div>
 
           {/* List Petak */}
-          <div className="flex-1 overflow-y-auto p-2 space-y-1">
+          <div className="flex-1 overflow-y-auto p-2.5 space-y-2 cockpit-scrollbar">
             {filteredParcels.map((parcel) => {
               const isSelected = parcel.id === selectedId;
               const isCritical = parcel.avriScore >= 70;
               const isWarning = parcel.avriScore >= 30 && parcel.avriScore < 70;
 
-              const dotColor = isCritical
-                ? 'bg-rose-500 ring-2 ring-rose-500/40'
+              const riskBadgeClass = isCritical
+                ? 'text-rose-700 bg-rose-50 border-rose-300'
                 : isWarning
-                ? 'bg-amber-400 ring-2 ring-amber-400/40'
-                : 'bg-emerald-400 ring-2 ring-emerald-400/40';
+                ? 'text-amber-700 bg-amber-50 border-amber-300'
+                : 'text-emerald-700 bg-emerald-50 border-emerald-300';
 
-              const scoreColor = isCritical
-                ? 'text-rose-400'
+              const barGradient = isCritical
+                ? 'from-rose-500 to-red-600 shadow-[0_0_8px_rgba(244,63,94,0.4)]'
                 : isWarning
-                ? 'text-amber-300'
-                : 'text-emerald-400';
+                ? 'from-amber-400 to-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.4)]'
+                : 'from-emerald-400 to-teal-400 shadow-[0_0_8px_rgba(16,185,129,0.4)]';
 
               return (
                 <button
                   key={parcel.id}
                   onClick={() => onSelectParcel(parcel.id)}
-                  className={`w-full p-2.5 rounded-xl text-left transition-all border ${
+                  className={`w-full p-3 rounded-2xl text-left transition-all duration-200 active:scale-[0.98] border group shadow-xs ${
                     isSelected
-                      ? 'bg-white/10 text-white border-white/20 shadow-md font-medium'
-                      : 'border-transparent hover:bg-white/5 text-slate-300 hover:text-white'
+                      ? 'bg-emerald-50/90 text-slate-900 border-emerald-500/80 shadow-sm ring-1 ring-emerald-500/20'
+                      : 'border-slate-200 bg-white hover:bg-slate-50 hover:border-slate-300 text-slate-700'
                   }`}
                 >
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2 min-w-0">
-                      <span className={`w-2 h-2 rounded-full shrink-0 ${dotColor}`} />
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-start gap-2.5 min-w-0">
+                      <span
+                        className={`w-2 h-2 rounded-full mt-1 shrink-0 ${
+                          isCritical
+                            ? 'bg-rose-500 ring-4 ring-rose-500/25 animate-pulse'
+                            : isWarning
+                            ? 'bg-amber-400 ring-4 ring-amber-400/20'
+                            : 'bg-emerald-400 ring-4 ring-emerald-400/20'
+                        }`}
+                      />
                       <div className="min-w-0">
-                        <p className="text-xs truncate leading-tight font-bold text-white">{parcel.name}</p>
-                        <p className="text-[10px] text-slate-400 truncate leading-none mt-0.5">
+                        <p className="text-xs truncate font-bold text-slate-900 group-hover:text-emerald-700 transition-colors leading-tight">
+                          {parcel.name}
+                        </p>
+                        <p className="text-[10px] text-slate-500 truncate mt-0.5">
                           {parcel.cropVariety} · {parcel.areaHa} ha
                         </p>
                       </div>
                     </div>
 
                     <div className="text-right shrink-0">
-                      <span className={`text-xs font-mono font-black ${scoreColor}`}>
+                      <span className={`text-[11px] font-mono font-bold px-2 py-0.5 rounded-lg border ${riskBadgeClass}`}>
                         {parcel.avriScore}%
                       </span>
                     </div>
                   </div>
 
                   {/* Micro Dynamic Bar */}
-                  <div className="w-full h-1 bg-slate-800 rounded-full mt-2 overflow-hidden">
+                  <div className="w-full h-1 bg-slate-100 rounded-full mt-2.5 overflow-hidden ring-1 ring-slate-200">
                     <div
-                      className={`h-full rounded-full transition-all duration-300 ${
-                        isCritical ? 'bg-rose-500' : isWarning ? 'bg-amber-400' : 'bg-emerald-400'
-                      }`}
+                      className={`h-full rounded-full bg-gradient-to-r transition-all duration-300 ${barGradient}`}
                       style={{ width: `${Math.min(100, Math.max(5, parcel.avriScore))}%` }}
                     />
                   </div>
@@ -284,7 +240,7 @@ export const FieldListPanel: React.FC<FieldListPanelProps> = ({
             })}
 
             {filteredParcels.length === 0 && (
-              <div className="p-6 text-center text-xs text-slate-400">
+              <div className="p-8 text-center text-xs text-slate-500">
                 Tidak ada data petak.
               </div>
             )}
@@ -294,73 +250,81 @@ export const FieldListPanel: React.FC<FieldListPanelProps> = ({
 
       {/* 3. TAB 2: SIMULASI KONDISI */}
       {activeTab === 'sandbox' && (
-        <div className="flex-1 overflow-y-auto p-3 space-y-4 text-slate-200 text-xs">
+        <div className="flex-1 overflow-y-auto p-3 space-y-4 text-slate-800 text-xs">
           {/* Konteks Petak */}
-          <div className="flex items-center justify-between pb-1.5 border-b border-white/10">
-            <span className="text-slate-400">Petak Aktif</span>
-            <span className="font-semibold text-white">{selectedParcel.name}</span>
+          <div className="flex items-center justify-between pb-2 border-b border-slate-200">
+            <span className="text-slate-500 text-xs font-medium">Petak Aktif</span>
+            <span className="font-bold text-slate-900 text-xs">{selectedParcel.name}</span>
           </div>
 
           {/* Skenario Uji Cepat */}
-          <div className="space-y-1.5">
-            <span className="text-[11px] font-medium text-slate-400 block">
-              Skenario Pengujian
+          <div className="space-y-2">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 block">
+              Skenario Pengujian Cepat
             </span>
-            <div className="grid grid-cols-3 gap-1.5">
+            <div className="grid grid-cols-3 gap-2">
               <button
                 onClick={() => onApplyPreset && onApplyPreset('A')}
-                className="py-1.5 px-1 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 text-center transition-all group"
+                className="p-2 rounded-2xl border border-rose-200 bg-rose-50/70 hover:bg-rose-50 active:scale-95 text-center transition-all duration-150 group shadow-xs"
               >
-                <FontAwesomeIcon icon={faSun} className="text-rose-400 text-[11px] block mx-auto mb-1 group-hover:scale-110 transition-transform" />
-                <span className="text-xs font-semibold text-white block leading-tight">Terik Kritis</span>
-                <span className="text-[10px] text-rose-400 block pt-0.5 font-mono">AVRI 74%</span>
+                <div className="w-6 h-6 rounded-lg bg-rose-100 text-rose-600 flex items-center justify-center mx-auto mb-1.5 ring-1 ring-rose-200">
+                  <FontAwesomeIcon icon={faSun} className="text-[11px] group-hover:scale-110 transition-transform" />
+                </div>
+                <span className="text-xs font-bold text-slate-900 block leading-tight">Terik Kritis</span>
+                <span className="text-[10px] text-rose-700 block pt-0.5 font-mono font-bold">AVRI 74%</span>
               </button>
 
               <button
                 onClick={() => onApplyPreset && onApplyPreset('B')}
-                className="py-1.5 px-1 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 text-center transition-all group"
+                className="p-2 rounded-2xl border border-emerald-200 bg-emerald-50/70 hover:bg-emerald-50 active:scale-95 text-center transition-all duration-150 group shadow-xs"
               >
-                <FontAwesomeIcon icon={faCircleCheck} className="text-emerald-400 text-[11px] block mx-auto mb-1 group-hover:scale-110 transition-transform" />
-                <span className="text-xs font-semibold text-white block leading-tight">Pagi Optimal</span>
-                <span className="text-[10px] text-emerald-400 block pt-0.5 font-mono">AVRI 18%</span>
+                <div className="w-6 h-6 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center mx-auto mb-1.5 ring-1 ring-emerald-200">
+                  <FontAwesomeIcon icon={faCircleCheck} className="text-[11px] group-hover:scale-110 transition-transform" />
+                </div>
+                <span className="text-xs font-bold text-slate-900 block leading-tight">Pagi Optimal</span>
+                <span className="text-[10px] text-emerald-700 block pt-0.5 font-mono font-bold">AVRI 18%</span>
               </button>
 
               <button
                 onClick={() => onApplyPreset && onApplyPreset('C')}
-                className="py-1.5 px-1 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 text-center transition-all group"
+                className="p-2 rounded-2xl border border-amber-200 bg-amber-50/70 hover:bg-amber-50 active:scale-95 text-center transition-all duration-150 group shadow-xs"
               >
-                <FontAwesomeIcon icon={faSliders} className="text-amber-300 text-[11px] block mx-auto mb-1 group-hover:scale-110 transition-transform" />
-                <span className="text-xs font-semibold text-white block leading-tight">Failover</span>
-                <span className="text-[10px] text-amber-300 block pt-0.5 font-mono">Imputasi</span>
+                <div className="w-6 h-6 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center mx-auto mb-1.5 ring-1 ring-amber-200">
+                  <FontAwesomeIcon icon={faMicrochip} className="text-[11px] group-hover:scale-110 transition-transform" />
+                </div>
+                <span className="text-xs font-bold text-slate-900 block leading-tight">Failover</span>
+                <span className="text-[10px] text-amber-700 block pt-0.5 font-mono font-bold">Imputasi</span>
               </button>
             </div>
           </div>
 
           {/* Slider Parameter Biofisika */}
-          <div className="space-y-3 pt-1">
+          <div className="space-y-3.5 pt-1">
             <div className="flex items-center justify-between">
-              <span className="text-[11px] font-medium text-slate-400">
-                Parameter Tanah
+              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                Parameter Biofisika
               </span>
               {onResetSandbox && (
                 <button
                   onClick={onResetSandbox}
-                  className="text-[11px] text-emerald-400 hover:text-emerald-300 transition-colors flex items-center gap-1"
+                  className="text-[11px] font-semibold text-emerald-700 hover:text-emerald-800 transition-colors flex items-center gap-1 active:scale-95"
                 >
                   <FontAwesomeIcon icon={faRotateLeft} className="text-[10px]" />
-                  <span>Reset</span>
+                  <span>Reset Default</span>
                 </button>
               )}
             </div>
 
             {/* Slider 1: Suhu Tanah */}
-            <div className="space-y-1">
+            <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200 space-y-1.5">
               <div className="flex justify-between items-baseline">
-                <span className="text-slate-300 text-xs flex items-center gap-1.5">
-                  <FontAwesomeIcon icon={faTemperatureHalf} className="text-amber-400 text-xs" />
+                <span className="text-slate-700 text-xs font-semibold flex items-center gap-1.5">
+                  <FontAwesomeIcon icon={faTemperatureHalf} className="text-amber-500 text-xs" />
                   <span>Suhu Tanah</span>
                 </span>
-                <span className="font-semibold text-white text-xs font-mono">{sandboxParams.soilTempC.toFixed(1)}°C</span>
+                <span className="font-bold text-slate-900 text-xs font-mono bg-white px-2 py-0.5 rounded-lg border border-slate-200">
+                  {sandboxParams.soilTempC.toFixed(1)}°C
+                </span>
               </div>
               <input
                 type="range"
@@ -371,22 +335,24 @@ export const FieldListPanel: React.FC<FieldListPanelProps> = ({
                 onChange={(e) =>
                   onUpdateSandbox && onUpdateSandbox({ soilTempC: Number(e.target.value) })
                 }
-                className="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-emerald-400"
+                className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-emerald-600"
               />
               <div className="flex justify-between text-[10px] text-slate-500 font-mono">
-                <span>20°C</span>
-                <span>42°C</span>
+                <span>20°C (Dingin)</span>
+                <span>42°C (Ekstrem)</span>
               </div>
             </div>
 
             {/* Slider 2: Kelembaban Tanah */}
-            <div className="space-y-1">
+            <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200 space-y-1.5">
               <div className="flex justify-between items-baseline">
-                <span className="text-slate-300 text-xs flex items-center gap-1.5">
-                  <FontAwesomeIcon icon={faDroplet} className="text-sky-400 text-xs" />
-                  <span>Kadar Air Tanah</span>
+                <span className="text-slate-700 text-xs font-semibold flex items-center gap-1.5">
+                  <FontAwesomeIcon icon={faDroplet} className="text-sky-500 text-xs" />
+                  <span>Kadar Air (VWC)</span>
                 </span>
-                <span className="font-semibold text-white text-xs font-mono">{sandboxParams.moisturePct.toFixed(1)}%</span>
+                <span className="font-bold text-slate-900 text-xs font-mono bg-white px-2 py-0.5 rounded-lg border border-slate-200">
+                  {sandboxParams.moisturePct.toFixed(1)}%
+                </span>
               </div>
               <input
                 type="range"
@@ -397,22 +363,24 @@ export const FieldListPanel: React.FC<FieldListPanelProps> = ({
                 onChange={(e) =>
                   onUpdateSandbox && onUpdateSandbox({ moisturePct: Number(e.target.value) })
                 }
-                className="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-emerald-400"
+                className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-emerald-600"
               />
               <div className="flex justify-between text-[10px] text-slate-500 font-mono">
-                <span>12%</span>
-                <span>50%</span>
+                <span>12% (Kering)</span>
+                <span>50% (Kenyang Air)</span>
               </div>
             </div>
 
             {/* Slider 3: pH Tanah */}
-            <div className="space-y-1">
+            <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200 space-y-1.5">
               <div className="flex justify-between items-baseline">
-                <span className="text-slate-300 text-xs flex items-center gap-1.5">
-                  <FontAwesomeIcon icon={faFlask} className="text-purple-400 text-xs" />
+                <span className="text-slate-700 text-xs font-semibold flex items-center gap-1.5">
+                  <FontAwesomeIcon icon={faFlask} className="text-purple-500 text-xs" />
                   <span>pH Tanah</span>
                 </span>
-                <span className="font-semibold text-white text-xs font-mono">{sandboxParams.ph.toFixed(2)}</span>
+                <span className="font-bold text-slate-900 text-xs font-mono bg-white px-2 py-0.5 rounded-lg border border-slate-200">
+                  {sandboxParams.ph.toFixed(2)}
+                </span>
               </div>
               <input
                 type="range"
@@ -423,22 +391,24 @@ export const FieldListPanel: React.FC<FieldListPanelProps> = ({
                 onChange={(e) =>
                   onUpdateSandbox && onUpdateSandbox({ ph: Number(e.target.value) })
                 }
-                className="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-emerald-400"
+                className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-emerald-600"
               />
               <div className="flex justify-between text-[10px] text-slate-500 font-mono">
-                <span>6.0</span>
-                <span>9.0</span>
+                <span>6.0 (Asam)</span>
+                <span>9.0 (Alkalin Kapur)</span>
               </div>
             </div>
 
             {/* Slider 4: Simulasi Penyiraman */}
-            <div className="space-y-1">
+            <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200 space-y-1.5">
               <div className="flex justify-between items-baseline">
-                <span className="text-slate-300 text-xs flex items-center gap-1.5">
-                  <FontAwesomeIcon icon={faCloudRain} className="text-teal-400 text-xs" />
+                <span className="text-slate-700 text-xs font-semibold flex items-center gap-1.5">
+                  <FontAwesomeIcon icon={faCloudRain} className="text-teal-500 text-xs" />
                   <span>Simulasi Penyiraman</span>
                 </span>
-                <span className="font-semibold text-white text-xs font-mono">{sandboxParams.irrigationMm} mm</span>
+                <span className="font-bold text-emerald-700 text-xs font-mono bg-emerald-500/10 px-2 py-0.5 rounded-lg border border-emerald-500/20">
+                  +{sandboxParams.irrigationMm} mm
+                </span>
               </div>
               <input
                 type="range"
@@ -449,11 +419,11 @@ export const FieldListPanel: React.FC<FieldListPanelProps> = ({
                 onChange={(e) =>
                   onUpdateSandbox && onUpdateSandbox({ irrigationMm: Number(e.target.value) })
                 }
-                className="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-emerald-400"
+                className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-emerald-600"
               />
               <div className="flex justify-between text-[10px] text-slate-500 font-mono">
                 <span>0 mm</span>
-                <span>30 mm</span>
+                <span>30 mm (Irigasi Penuh)</span>
               </div>
             </div>
           </div>
@@ -462,43 +432,51 @@ export const FieldListPanel: React.FC<FieldListPanelProps> = ({
 
       {/* 4. TAB 3: ESTIMASI DOSIS PUPUK */}
       {activeTab === 'fertilizer' && (
-        <div className="flex-1 overflow-y-auto p-3 space-y-3.5 text-slate-200 text-xs">
-          <div className="flex items-center justify-between pb-1.5 border-b border-white/10">
-            <span className="text-slate-400">Petak Acuan</span>
-            <span className="font-semibold text-white">{selectedParcel.name} ({areaHa} ha)</span>
+        <div className="flex-1 overflow-y-auto p-3.5 space-y-3.5 text-slate-800 text-xs cockpit-scrollbar">
+          <div className="flex items-center justify-between pb-2 border-b border-slate-200">
+            <span className="text-slate-500 text-xs font-medium">Petak Acuan</span>
+            <span className="font-bold text-slate-900 text-xs">{selectedParcel.name} ({areaHa} ha)</span>
           </div>
 
-          <div className="space-y-2">
-            <span className="text-[11px] font-medium text-slate-400 block">
-              Dosis Susulan (Fase V8)
+          <div className="space-y-2.5">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 block">
+              Dosis Rekomendasi (Fase V8)
             </span>
 
             <div className="grid grid-cols-2 gap-2">
-              <div className="p-2.5 bg-white/5 rounded-xl border border-white/10 text-center">
-                <FontAwesomeIcon icon={faSeedling} className="text-emerald-400 text-sm mb-1 block mx-auto" />
-                <span className="text-[10px] text-slate-400 block">Urea (46% N)</span>
-                <span className="text-sm font-bold text-white block mt-0.5">{ureaSacks} Karung</span>
+              <div className="p-3 bg-slate-50 hover:bg-white rounded-2xl border border-slate-200 text-center transition-all duration-150">
+                <div className="w-7 h-7 rounded-xl bg-emerald-500/15 text-emerald-700 flex items-center justify-center mx-auto mb-1.5 ring-1 ring-emerald-500/30">
+                  <FontAwesomeIcon icon={faBagShopping} className="text-xs" />
+                </div>
+                <span className="text-[10px] text-slate-500 font-semibold block">Urea (46% N)</span>
+                <span className="text-base font-black text-slate-900 font-mono block mt-0.5">{ureaSacks} Karung</span>
                 <span className="text-[10px] text-slate-500">@ 50 kg</span>
               </div>
 
-              <div className="p-2.5 bg-white/5 rounded-xl border border-white/10 text-center">
-                <FontAwesomeIcon icon={faFlask} className="text-amber-400 text-sm mb-1 block mx-auto" />
-                <span className="text-[10px] text-slate-400 block">Phonska 15-15-15</span>
-                <span className="text-sm font-bold text-white block mt-0.5">{npkSacks} Karung</span>
+              <div className="p-3 bg-slate-50 hover:bg-white rounded-2xl border border-slate-200 text-center transition-all duration-150">
+                <div className="w-7 h-7 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center mx-auto mb-1.5 ring-1 ring-amber-200">
+                  <FontAwesomeIcon icon={faFlask} className="text-xs" />
+                </div>
+                <span className="text-[10px] text-slate-500 font-semibold block">Phonska 15-15-15</span>
+                <span className="text-base font-black text-slate-900 font-mono block mt-0.5">{npkSacks} Karung</span>
                 <span className="text-[10px] text-slate-500">@ 50 kg</span>
               </div>
             </div>
 
-            <div className="p-2.5 bg-white/5 rounded-xl border border-white/10 text-center">
-              <span className="text-[10px] text-slate-400 block">Takaran Lapangan</span>
-              <span className="text-base font-bold text-emerald-400 block mt-0.5">{buckets} Ember</span>
-              <span className="text-[10px] text-slate-500">Ember takar 8 kg</span>
+            <div className="p-3 bg-emerald-50 rounded-2xl border border-emerald-300 text-center shadow-[0_0_20px_rgba(16,185,129,0.1)]">
+              <div className="w-7 h-7 rounded-xl bg-emerald-500/20 text-emerald-700 flex items-center justify-center mx-auto mb-1.5 ring-1 ring-emerald-500/30">
+                <FontAwesomeIcon icon={faWeightHanging} className="text-xs" />
+              </div>
+              <span className="text-[10px] text-emerald-800 font-semibold block">Takaran Praktis Lapangan</span>
+              <span className="text-lg font-black text-emerald-700 font-mono block mt-0.5">{buckets} Ember</span>
+              <span className="text-[10px] text-slate-500">Ember takar 8 kg (Metode Tugal 4–5 cm)</span>
             </div>
           </div>
 
-          <p className="text-[11px] text-slate-400 leading-normal">
-            Aplikasi pupuk dilakukan dengan metode tugal sedalam 4–5 cm di samping perakaran saat jendela aman terbuka.
-          </p>
+          <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200 text-[11px] text-slate-600 leading-relaxed">
+            <span className="text-emerald-700 font-bold block mb-1">Pedoman Aplikasi:</span>
+            Aplikasi pupuk wajib dengan metode tugal sedalam 4–5 cm di samping perakaran saat jendela aman terbuka. Hindari penaburan permukaan pada siang terik.
+          </div>
         </div>
       )}
     </aside>

@@ -5,13 +5,12 @@ import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faSatellite,
-  faLayerGroup,
+  faMap,
   faMountain,
   faCrosshairs,
-  faPerson,
-  faCompass,
   faPlus,
   faMinus,
+  faXmark,
 } from '@fortawesome/free-solid-svg-icons';
 import { BedengParcel, ParcelMapSummary, SurroundingParcel } from '@/types/parcel';
 import { bluriOuterBoundary, bluriSurroundingParcels } from '@/mocks/parcelsMock';
@@ -75,6 +74,46 @@ export const CockpitFieldMap: React.FC<CockpitFieldMapProps> = ({
     () => (summary.centerCoordinates as [number, number]) || [-6.89931, 112.43439],
     [summary.centerCoordinates]
   );
+  const [zoomLevel, setZoomLevel] = useState<number>(16.5);
+  const [currentCenter, setCurrentCenter] = useState<[number, number]>(defaultCenter);
+
+  // Dynamic Camera Altitude estimation based on standard web Mercator scale:
+  const dynamicAltitude = useMemo(() => {
+    const alt = Math.round(1047 * Math.pow(2, 16.5 - zoomLevel));
+    return alt.toLocaleString('id-ID');
+  }, [zoomLevel]);
+
+  // Dynamic Scale bar distance calculation based on current zoom:
+  const dynamicScaleMeters = useMemo(() => {
+    if (zoomLevel >= 18) return '50 m';
+    if (zoomLevel >= 17) return '100 m';
+    if (zoomLevel >= 16) return '300 m';
+    if (zoomLevel >= 15) return '500 m';
+    if (zoomLevel >= 14) return '1 km';
+    return '2 km';
+  }, [zoomLevel]);
+
+  // Coordinates formatted dynamically in DMS format:
+  const formattedDms = useMemo(() => {
+    const toDms = (deg: number, isLat: boolean) => {
+      const absDeg = Math.abs(deg);
+      const d = Math.floor(absDeg);
+      const m = Math.floor((absDeg - d) * 60);
+      const s = ((absDeg - d - m / 60) * 3600).toFixed(1);
+      const dir = isLat ? (deg >= 0 ? 'N' : 'S') : (deg >= 0 ? 'E' : 'W');
+      return `${d}°${String(m).padStart(2, '0')}'${String(s).padStart(4, '0')}"${dir}`;
+    };
+    return `${toDms(currentCenter[0], true)} ${toDms(currentCenter[1], false)}`;
+  }, [currentCenter]);
+
+  // Cycle tile type on click: Satelit -> Peta -> Topo -> Satelit
+  const cycleTileType = () => {
+    setTileType((prev) => {
+      if (prev === 'satellite') return 'streets';
+      if (prev === 'streets') return 'topo';
+      return 'satellite';
+    });
+  };
   const gatewayPos = useMemo<[number, number]>(
     () => (summary.gatewayCoordinates as [number, number]) || [-6.8979, 112.4346],
     [summary.gatewayCoordinates]
@@ -118,61 +157,40 @@ export const CockpitFieldMap: React.FC<CockpitFieldMapProps> = ({
     }
   };
 
-  // Color generator
+  // Precision Geospatial Polygon Color Generator
   const getParcelStyle = useCallback((p: BedengParcel, isSelected: boolean) => {
-    if (isSelected) {
-      return {
-        fillColor: '#818CF8',
-        color: '#4F46E5',
-        weight: 4,
-        fillOpacity: 0.6,
-      };
-    }
+    const opacity = layersRef.current.heatmapOpacity ?? 0.44;
+    const score = isSimulatedCriticalRef.current && p.id === 'A1' ? 74 : p.avriScore;
+    const isCritical = score >= 70;
+    const isWarning = score >= 30 && score < 70;
 
-    if (!layersRef.current.showAvriHeatmap && !layersRef.current.showMoistureContour) {
-      return {
-        fillColor: '#FFFFFF',
-        color: '#10B981',
-        weight: 1.8,
-        fillOpacity: 0.15,
-      };
-    }
+    let baseFill = isCritical ? '#EF5350' : isWarning ? '#F5B942' : '#16A085';
+    let baseStroke = isCritical ? '#DC2626' : isWarning ? '#D97706' : '#059669';
 
     if (layersRef.current.showMoistureContour) {
       const isDry = p.moisturePct < 25;
+      baseFill = isDry ? '#F59E0B' : '#0284C7';
+      baseStroke = isDry ? '#D97706' : '#0369A1';
+    } else if (!layersRef.current.showAvriHeatmap) {
+      baseFill = '#16A085';
+      baseStroke = '#059669';
+    }
+
+    if (isSelected) {
       return {
-        fillColor: isDry ? '#F59E0B' : '#0284C7',
-        color: isDry ? '#D97706' : '#0369A1',
-        weight: 2,
-        fillOpacity: 0.52,
+        fillColor: baseFill,
+        color: '#FFFFFF',
+        weight: 3.5,
+        fillOpacity: Math.min(0.55, opacity + 0.12),
       };
     }
 
-    // Default: AVRI Heatmap
-    const opacity = layersRef.current.heatmapOpacity ?? 0.52;
-    const score = isSimulatedCriticalRef.current && p.id === 'A1' ? 74 : p.avriScore;
-    if (score >= 70) {
-      return {
-        fillColor: '#EF4444',
-        color: '#B91C1C',
-        weight: 2.4,
-        fillOpacity: opacity,
-      };
-    } else if (score >= 30) {
-      return {
-        fillColor: '#F59E0B',
-        color: '#D97706',
-        weight: 2.2,
-        fillOpacity: Math.max(0.25, opacity - 0.05),
-      };
-    } else {
-      return {
-        fillColor: '#10B981',
-        color: '#047857',
-        weight: 2.2,
-        fillOpacity: Math.max(0.25, opacity - 0.05),
-      };
-    }
+    return {
+      fillColor: baseFill,
+      color: baseStroke,
+      weight: 2,
+      fillOpacity: Math.max(0.22, opacity - 0.08),
+    };
   }, []);
 
   // Recalculate screen pixel position of selected node pin
@@ -196,14 +214,14 @@ export const CockpitFieldMap: React.FC<CockpitFieldMapProps> = ({
     <div class="relative flex items-center justify-center w-8 h-8 cursor-pointer">
       ${
         isSelected
-          ? '<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-80"></span>'
+          ? '<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-60"></span>'
           : ''
       }
-      <div class="relative flex items-center justify-center w-7 h-7 rounded-full ${
+      <div class="relative flex items-center justify-center w-6 h-6 rounded-full ${
         isSelected
-          ? 'bg-indigo-600 border-2 border-white ring-4 ring-indigo-300 shadow-2xl scale-110'
-          : 'bg-slate-900 border border-white/80 shadow-lg'
-      } text-white font-mono text-[10px] font-black transition-all">
+          ? 'bg-[#10243A] border-2 border-white ring-4 ring-sky-400/50 shadow-xl scale-110'
+          : 'bg-[#10243A]/90 border border-white/90 shadow-md'
+      } text-white font-mono text-[10px] font-bold transition-all">
         ${pId}
       </div>
     </div>
@@ -370,9 +388,16 @@ export const CockpitFieldMap: React.FC<CockpitFieldMapProps> = ({
         }
       });
 
-      // Update screen coordinates on map move, zoom, or resize
-      map.on('move', updatePinScreenPos);
-      map.on('zoom', updatePinScreenPos);
+      // Update screen coordinates & telemetry stats on map move, zoom, or resize
+      map.on('move', () => {
+        updatePinScreenPos();
+        const c = map.getCenter();
+        setCurrentCenter([c.lat, c.lng]);
+      });
+      map.on('zoom', () => {
+        updatePinScreenPos();
+        setZoomLevel(map.getZoom());
+      });
       map.on('resize', updatePinScreenPos);
 
       // Force layout calculation
@@ -525,166 +550,93 @@ export const CockpitFieldMap: React.FC<CockpitFieldMapProps> = ({
   };
 
   return (
-    <div className="relative w-full h-full min-h-full overflow-hidden bg-slate-900 select-none">
-      {/* Absolute Container Leaflet Asli */}
+    <div className="relative w-full h-full min-h-full overflow-hidden bg-slate-100 select-none">
+      {/* Absolute Container Leaflet Asli (100% Flat Standard 2D) */}
       <div
         ref={mapContainerRef}
         className="absolute inset-0 w-full h-full z-0"
         style={{ width: '100%', height: '100%' }}
       />
 
-      {/* FLOATING MAP TILE SWITCHER & MINIMAP (Pojok Kiri Bawah - Google Earth Style) */}
-      <div className="absolute bottom-4 left-4 z-[400] flex items-center gap-2 select-none">
-        {/* Google Earth Style Minimap Preview Thumbnail */}
+      {/* FLOATING MAP TILE TOGGLE (Pojok Kiri Bawah - Light Mode Square Toggle) */}
+      <div className="absolute bottom-4 left-4 z-[40] select-none">
         <button
-          onClick={handleResetCenter}
-          className="relative w-12 h-12 rounded-xl overflow-hidden border border-white/20 shadow-2xl bg-slate-950 group hover:border-emerald-400 transition-all shrink-0"
-          title="Pratinjau Regional Lahan Solokuro (Klik untuk Pusatkan)"
+          onClick={cycleTileType}
+          className="w-12 h-12 rounded-2xl bg-white/95 backdrop-blur-xl border border-slate-200/90 hover:border-emerald-500 shadow-[0_8px_30px_rgba(0,0,0,0.08)] flex flex-col items-center justify-center gap-0.5 text-emerald-700 hover:bg-slate-50 active:scale-90 transition-all duration-200 ring-1 ring-slate-900/5 group"
+          title={`Mode Peta: ${
+            tileType === 'satellite' ? 'Citra Satelit' : tileType === 'streets' ? 'Peta Jalan' : 'Kontur Topografi'
+          } (Klik untuk beralih mode)`}
         >
-          <div className="absolute inset-0 bg-gradient-to-tr from-emerald-900/60 to-slate-900/90 flex items-center justify-center">
-            <FontAwesomeIcon icon={faCrosshairs} className="text-white/70 group-hover:text-emerald-400 text-xs transition-colors" />
-          </div>
-          <span className="absolute bottom-0.5 inset-x-0 text-[8px] font-mono text-center text-slate-300 font-semibold bg-black/50">
-            Lamongan
+          <FontAwesomeIcon
+            icon={tileType === 'satellite' ? faSatellite : tileType === 'streets' ? faMap : faMountain}
+            className="w-3.5 h-3.5 group-hover:scale-110 transition-transform"
+          />
+          <span className="text-[8px] font-bold uppercase tracking-tight font-mono text-slate-700">
+            {tileType === 'satellite' ? 'Sat' : tileType === 'streets' ? 'Peta' : 'Topo'}
           </span>
         </button>
-
-        {/* Tile Capsule */}
-        <div className="flex items-center bg-slate-950/85 backdrop-blur-xl p-1 rounded-full border border-white/15 shadow-2xl text-xs">
-          <button
-            onClick={() => setTileType('satellite')}
-            className={`px-3 py-1 rounded-full text-xs font-medium transition-all flex items-center gap-1.5 ${
-              tileType === 'satellite'
-                ? 'bg-white/20 text-white shadow-sm font-semibold'
-                : 'text-slate-300 hover:text-white hover:bg-white/10'
-            }`}
-          >
-            <FontAwesomeIcon icon={faSatellite} className="text-[10px]" />
-            <span>Satelit</span>
-          </button>
-          <button
-            onClick={() => setTileType('streets')}
-            className={`px-3 py-1 rounded-full text-xs font-medium transition-all flex items-center gap-1.5 ${
-              tileType === 'streets'
-                ? 'bg-white/20 text-white shadow-sm font-semibold'
-                : 'text-slate-300 hover:text-white hover:bg-white/10'
-            }`}
-          >
-            <FontAwesomeIcon icon={faLayerGroup} className="text-[10px]" />
-            <span>Peta</span>
-          </button>
-          <button
-            onClick={() => setTileType('topo')}
-            className={`px-3 py-1 rounded-full text-xs font-medium transition-all flex items-center gap-1.5 ${
-              tileType === 'topo'
-                ? 'bg-white/20 text-white shadow-sm font-semibold'
-                : 'text-slate-300 hover:text-white hover:bg-white/10'
-            }`}
-          >
-            <FontAwesomeIcon icon={faMountain} className="text-[10px]" />
-            <span>Topografi</span>
-          </button>
-
-          <div className="w-px h-3.5 bg-white/15 mx-1" />
-
-          <button
-            onClick={handleResetCenter}
-            className="px-2.5 py-1 rounded-full text-slate-300 hover:text-white hover:bg-white/10 text-xs font-medium transition-all flex items-center gap-1"
-            title="Pusatkan Peta ke Blok Utama"
-          >
-            <FontAwesomeIcon icon={faCrosshairs} className="text-[10px]" />
-            <span>Pusatkan</span>
-          </button>
-        </div>
       </div>
 
-      {/* GOOGLE EARTH AUTHENTIC NAVIGATION CLUSTER (Pojok Kanan Bawah) */}
-      <div className="absolute bottom-4 right-4 z-[400] flex items-center gap-2 select-none">
-        {/* Scale, Coordinates & Altitude Tag (Google Earth Status Line) */}
-        <div className="hidden md:flex items-center gap-2.5 bg-slate-950/85 backdrop-blur-xl px-3.5 py-1.5 rounded-full border border-white/15 text-slate-300 text-[11px] font-mono shadow-2xl">
-          <div className="flex items-center gap-1">
-            <span className="w-8 border-b-2 border-white/60 inline-block -mt-1" />
-            <span className="text-[10px] text-slate-400">300 m</span>
+      {/* GOOGLE EARTH NAVIGATION & TELEMETRY CLUSTER (Pojok Kanan Bawah - Light Mode) */}
+      <div className="absolute bottom-4 right-4 z-[40] flex items-center gap-2 select-none">
+        {/* Scale, Dynamic Coordinates & Altitude Tag */}
+        <div className="hidden md:flex items-center gap-2.5 bg-white/95 backdrop-blur-xl px-4 py-2 rounded-2xl border border-slate-200/90 text-[#172B3A] text-[11px] font-mono shadow-xs border border-[#DCE5EE] ring-1 ring-slate-900/5">
+          <div className="flex items-center gap-1.5">
+            <span className="w-7 border-b-2 border-slate-700 inline-block -mt-1" />
+            <span className="text-[10px] text-slate-900 font-bold">{dynamicScaleMeters}</span>
           </div>
-          <span className="text-white/15">·</span>
-          <span>Alt: 1,047 m</span>
-          <span className="text-white/15">·</span>
-          <span>7°06&apos;55.9&quot;S 112°25&apos;40.2&quot;E</span>
-          <span className="text-white/15">·</span>
-          <span className="text-emerald-400 font-semibold">100%</span>
+          <span className="text-slate-400 font-bold">·</span>
+          <span className="text-slate-800 font-semibold">Alt: {dynamicAltitude} m</span>
+          <span className="text-slate-400 font-bold">·</span>
+          <span className="text-slate-800 font-semibold">{formattedDms}</span>
+          <span className="text-slate-400 font-bold">·</span>
+          <span className="text-emerald-700 font-bold font-mono">{Math.round((zoomLevel / 16.5) * 100)}%</span>
         </div>
 
-        {/* Pegman / Street View Icon */}
+        {/* Crosshairs Re-center / Fokus Button */}
         <button
           onClick={handleResetCenter}
-          className="w-9 h-9 rounded-full bg-slate-950/85 backdrop-blur-xl border border-white/15 text-amber-300 flex items-center justify-center shadow-2xl hover:bg-white/15 transition-all"
-          title="Tampilan Lapangan Jagung"
+          className="w-10 h-10 rounded-2xl bg-white/95 backdrop-blur-xl border border-slate-200/90 text-sky-600 flex items-center justify-center shadow-md hover:bg-slate-50 hover:border-slate-300 active:scale-90 transition-all duration-150"
+          title="Fokus / Pusatkan ke Lahan Solokuro"
         >
-          <FontAwesomeIcon icon={faPerson} className="text-sm" />
-        </button>
-
-        {/* Crosshairs Re-center Button */}
-        <button
-          onClick={handleResetCenter}
-          className="w-9 h-9 rounded-full bg-slate-950/85 backdrop-blur-xl border border-white/15 text-sky-400 flex items-center justify-center shadow-2xl hover:bg-white/15 transition-all"
-          title="Pusatkan ke Lahan Solokuro"
-        >
-          <FontAwesomeIcon icon={faCrosshairs} className="text-sm" />
-        </button>
-
-        {/* 2D / 3D Mode Pill */}
-        <button
-          onClick={handleResetCenter}
-          className="w-9 h-9 rounded-full bg-slate-950/85 backdrop-blur-xl border border-white/15 text-white text-xs font-bold shadow-2xl hover:bg-white/15 transition-all flex items-center justify-center"
-          title="Mode Tampilan 2D"
-        >
-          2D
-        </button>
-
-        {/* Compass Button */}
-        <button
-          onClick={handleResetCenter}
-          className="w-9 h-9 rounded-full bg-slate-950/85 backdrop-blur-xl border border-white/15 text-white flex items-center justify-center shadow-2xl hover:bg-white/15 transition-all"
-          title="Reset Orientasi ke Utara"
-        >
-          <FontAwesomeIcon icon={faCompass} className="text-sm text-rose-400" />
+          <FontAwesomeIcon icon={faCrosshairs} className="w-4 h-4" />
         </button>
 
         {/* Zoom Capsule */}
-        <div className="flex flex-col bg-slate-950/85 backdrop-blur-xl rounded-full border border-white/15 shadow-2xl overflow-hidden divide-y divide-white/10">
+        <div className="flex flex-col bg-white/95 backdrop-blur-xl rounded-2xl border border-slate-200/90 shadow-md overflow-hidden divide-y divide-slate-200">
           <button
             onClick={() => mapInstanceRef.current?.zoomIn()}
-            className="w-8 h-8 flex items-center justify-center text-white hover:bg-white/20 transition-all text-xs font-semibold"
+            className="w-9 h-9 flex items-center justify-center text-slate-700 hover:bg-slate-100 active:scale-90 transition-all duration-150 text-xs font-semibold"
             title="Perbesar Peta (+)"
           >
-            <FontAwesomeIcon icon={faPlus} />
+            <FontAwesomeIcon icon={faPlus} className="w-3 h-3" />
           </button>
           <button
             onClick={() => mapInstanceRef.current?.zoomOut()}
-            className="w-8 h-8 flex items-center justify-center text-white hover:bg-white/20 transition-all text-xs font-semibold"
+            className="w-9 h-9 flex items-center justify-center text-slate-700 hover:bg-slate-100 active:scale-90 transition-all duration-150 text-xs font-semibold"
             title="Perkecil Peta (-)"
           >
-            <FontAwesomeIcon icon={faMinus} />
+            <FontAwesomeIcon icon={faMinus} className="w-3 h-3" />
           </button>
         </div>
       </div>
 
       {/* POPUP INFO PERSIL TETANGGA (Saat Persil Tetangga Diklik) */}
       {selectedSurrounding && (
-        <div className="absolute bottom-16 left-4 z-[410] w-64 bg-slate-900/95 backdrop-blur-md p-3.5 rounded-2xl border border-slate-700 text-white shadow-2xl animate-in fade-in slide-in-from-bottom-2">
-          <div className="flex items-center justify-between border-b border-slate-800 pb-1.5 mb-2">
-            <span className="text-xs font-bold text-emerald-400">Persil Tetangga</span>
+        <div className="absolute bottom-20 left-4 z-[410] w-64 bg-white/95 backdrop-blur-md p-3.5 rounded-2xl border border-slate-200 text-slate-800 shadow-xl animate-in fade-in slide-in-from-bottom-2">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-1.5 mb-2">
+            <span className="text-xs font-bold text-emerald-700">Persil Tetangga</span>
             <button
               onClick={() => setSelectedSurrounding(null)}
-              className="text-slate-400 hover:text-white text-xs px-1"
+              className="text-slate-400 hover:text-slate-800 active:scale-90 transition-all duration-150 text-xs px-1"
             >
-              ✕
+              <FontAwesomeIcon icon={faXmark} className="w-3 h-3" />
             </button>
           </div>
-          <p className="text-xs font-semibold">{selectedSurrounding.name}</p>
-          <div className="mt-1 flex items-center justify-between text-2xs text-slate-400">
+          <p className="text-xs font-semibold text-slate-900">{selectedSurrounding.name}</p>
+          <div className="mt-1 flex items-center justify-between text-2xs text-slate-500 font-mono">
             <span>Luas: {selectedSurrounding.areaHa} ha</span>
-            <span className="text-emerald-300">Mesh Neighbor</span>
+            <span className="text-emerald-700 font-bold">Mesh Neighbor</span>
           </div>
         </div>
       )}

@@ -394,6 +394,7 @@ export async function getDigitalTwinTelemetry(
 // 10. Digital Twin 72h Forecast
 export async function getDigitalTwin72hForecast(
   fieldId: string = 'BLOK-A'
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): Promise<any | null> {
   try {
     const res = await fetch(`${API_BASE_URL}/digital-twin/forecast-72h/${fieldId}`, {

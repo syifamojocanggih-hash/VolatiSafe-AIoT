@@ -1,6 +1,10 @@
 import type { Metadata, Viewport } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
+import "@fortawesome/fontawesome-svg-core/styles.css";
+import { config } from "@fortawesome/fontawesome-svg-core";
 import "./globals.css";
+
+config.autoAddCss = false;
 
 const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],

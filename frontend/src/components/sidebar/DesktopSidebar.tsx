@@ -24,7 +24,7 @@ export const DesktopSidebar: React.FC<DesktopSidebarProps> = ({
   farmerName,
   location,
 }) => {
-  const [isCollapsed, setIsCollapsed] = React.useState<boolean>(false);
+  const [isCollapsed] = React.useState<boolean>(false);
 
   const navItems = [
     { id: 'dashboard', label: 'Dashboard Petak', icon: LayoutDashboard },
