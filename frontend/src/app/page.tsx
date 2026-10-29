@@ -539,6 +539,32 @@ export default function DashboardPage() {
         lastUpdatedMinutesAgo: 0,
       };
 
+      // 5. Update Live Trend Point at Current Hour (Live IoT Sensor) in WIB
+      const currentH = (() => {
+        try {
+          const formatter = new Intl.DateTimeFormat('en-US', {
+            hour: 'numeric',
+            hour12: false,
+            timeZone: 'Asia/Jakarta',
+          });
+          const h = parseInt(formatter.format(new Date()), 10);
+          return isNaN(h) ? 16 : (h % 24);
+        } catch {
+          return (new Date().getUTCHours() + 7) % 24;
+        }
+      })();
+      const updatedTrend = (prev.trend24h || []).map((pt, idx) => {
+        if (idx === currentH) {
+          return {
+            ...pt,
+            moisture: Number(m.toFixed(1)),
+            temperature: Number(t.toFixed(1)),
+            ph: Number(ph.toFixed(2)),
+          };
+        }
+        return pt;
+      });
+
       return {
         ...prev,
         metrics: updatedMetrics,
@@ -546,6 +572,7 @@ export default function DashboardPage() {
         shapExplanations,
         physicsDiagnostics,
         field: updatedField,
+        trend24h: updatedTrend,
       };
     });
 

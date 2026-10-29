@@ -14,16 +14,39 @@ const ReactECharts = dynamic(() => import('echarts-for-react'), {
   ),
 });
 
+// Helper untuk mendapatkan jam sekarang dalam zona waktu WIB (Asia/Jakarta, UTC+7)
+// secara konsisten baik di Server SSR (UTC) maupun Browser Client
+function getWibCurrentHour(): number {
+  try {
+    const formatter = new Intl.DateTimeFormat('en-US', {
+      hour: 'numeric',
+      hour12: false,
+      timeZone: 'Asia/Jakarta',
+    });
+    const hourStr = formatter.format(new Date());
+    const hour = parseInt(hourStr, 10);
+    return isNaN(hour) ? 16 : Math.min(23, Math.max(0, hour % 24));
+  } catch {
+    const now = new Date();
+    const utcHours = now.getUTCHours();
+    return (utcHours + 7) % 24;
+  }
+}
+
 interface Trend24hChartProps {
   data: ForecastPoint[];
 }
 
 export const Trend24hChart: React.FC<Trend24hChartProps> = ({ data }) => {
   const [isClient, setIsClient] = useState(false);
+  const [currentHourIndex, setCurrentHourIndex] = useState<number>(() => getWibCurrentHour());
 
   useEffect(() => {
     setIsClient(true);
+    setCurrentHourIndex(getWibCurrentHour());
   }, []);
+
+  const currentHourStr = `${String(currentHourIndex).padStart(2, '0')}.00`;
 
   const xCategories = data.map((d) => d.time);
   const moistureData = data.map((d) => d.moisture);
@@ -54,7 +77,11 @@ export const Trend24hChart: React.FC<Trend24hChartProps> = ({ data }) => {
       formatter: (params: Array<{ seriesName: string; value: number; marker: string; name?: string; axisValueLabel?: string }>) => {
         if (!params || params.length === 0) return '';
         const timeLabel = params[0].axisValueLabel || params[0].name || '';
-        let res = `<div class="font-bold text-xs text-emerald-400 mb-1">Pukul ${timeLabel} WIB</div>`;
+        const isNow = timeLabel === currentHourStr;
+        let res = `<div class="font-bold text-xs text-emerald-400 mb-1 flex items-center justify-between gap-3">
+          <span>Pukul ${timeLabel} WIB</span>
+          ${isNow ? '<span class="px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300 text-3xs font-extrabold border border-emerald-400/40">Jam Nyata (Sekarang)</span>' : ''}
+        </div>`;
         params.forEach((item) => {
           const unit = item.seriesName.includes('Suhu') ? '°C' : '%';
           const val = typeof item.value === 'number' ? item.value.toFixed(1) : item.value;
@@ -80,14 +107,20 @@ export const Trend24hChart: React.FC<Trend24hChartProps> = ({ data }) => {
         show: false,
       },
       axisLabel: {
-        color: '#475569',
+        color: (val: string) => (val === currentHourStr ? '#1B6633' : '#475569'),
+        fontWeight: (val: string) => (val === currentHourStr ? 'bold' : 'normal'),
         fontSize: 11,
         fontFamily: 'inherit',
         margin: 12,
         formatter: (val: string) => {
-          if (val === '00.00' || val === '08.00' || val === '16.00' || val === '23.00') {
+          // Selalu tampilkan jam nyata sekarang (posisi titik)
+          if (val === currentHourStr) {
             return val;
           }
+          if (val === '00.00' && currentHourIndex >= 2) return val;
+          if (val === '23.00' && currentHourIndex <= 21) return val;
+          if (val === '08.00' && Math.abs(currentHourIndex - 8) >= 3) return val;
+          if (val === '16.00' && Math.abs(currentHourIndex - 16) >= 3) return val;
           return '';
         },
       },
@@ -111,13 +144,15 @@ export const Trend24hChart: React.FC<Trend24hChartProps> = ({ data }) => {
         data: moistureData,
         smooth: true,
         symbol: (value: number, params: { dataIndex: number }) => {
-          return params.dataIndex === 8 ? 'circle' : 'none';
+          return params.dataIndex === currentHourIndex ? 'circle' : 'none';
         },
-        symbolSize: 7,
+        symbolSize: 8,
         itemStyle: {
           color: '#2563EB',
           borderColor: '#FFFFFF',
-          borderWidth: 1.5,
+          borderWidth: 2,
+          shadowBlur: 4,
+          shadowColor: 'rgba(37, 99, 235, 0.4)',
         },
         lineStyle: {
           color: '#2563EB',
@@ -152,13 +187,15 @@ export const Trend24hChart: React.FC<Trend24hChartProps> = ({ data }) => {
         data: tempData,
         smooth: true,
         symbol: (value: number, params: { dataIndex: number }) => {
-          return params.dataIndex === 8 ? 'circle' : 'none';
+          return params.dataIndex === currentHourIndex ? 'circle' : 'none';
         },
-        symbolSize: 7,
+        symbolSize: 8,
         itemStyle: {
           color: '#C25E26',
           borderColor: '#FFFFFF',
-          borderWidth: 1.5,
+          borderWidth: 2,
+          shadowBlur: 4,
+          shadowColor: 'rgba(194, 94, 38, 0.4)',
         },
         lineStyle: {
           color: '#C25E26',
@@ -172,9 +209,19 @@ export const Trend24hChart: React.FC<Trend24hChartProps> = ({ data }) => {
     <div className="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200/90 shadow-2xs">
       {/* Title & Custom Legend Matching Mockup */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-2">
-        <h4 className="text-sm sm:text-base font-bold text-slate-900 tracking-tight">
-          Tren 24 Jam (Forecast)
-        </h4>
+        <div className="flex items-center gap-2.5 min-h-[28px]">
+          <h4 className="text-sm sm:text-base font-bold text-slate-900 tracking-tight">
+            Tren 24 Jam (Forecast)
+          </h4>
+          {isClient && (
+            <span
+              suppressHydrationWarning
+              className="px-2 py-0.5 rounded-full text-3xs font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-300 animate-in fade-in duration-150"
+            >
+              Jam Nyata: {currentHourStr} WIB
+            </span>
+          )}
+        </div>
 
         {/* Legend */}
         <div className="flex flex-wrap items-center gap-3.5 sm:gap-5 text-xs text-slate-600 font-medium">

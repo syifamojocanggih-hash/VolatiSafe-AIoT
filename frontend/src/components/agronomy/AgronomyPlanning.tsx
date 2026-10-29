@@ -21,6 +21,8 @@ import {
   ChevronRight,
   Bell,
   Check,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react';
 
 export const AgronomyPlanning: React.FC = () => {
@@ -36,6 +38,7 @@ export const AgronomyPlanning: React.FC = () => {
   const [, setLastSyncTime] = useState<string | null>(null);
   const [logs, setLogs] = useState<ApplicationLog[]>(initialAgronomyData.applicationLogs);
   const [selectedPhaseId, setSelectedPhaseId] = useState<string | null>('v8');
+  const [showAllLogs, setShowAllLogs] = useState(false);
 
   // Modals & Feedback
   const [isWhatsAppModalOpen, setIsWhatsAppModalOpen] = useState(false);
@@ -713,8 +716,13 @@ export const AgronomyPlanning: React.FC = () => {
         <section className="lg:col-span-5 bg-white rounded-3xl p-5 sm:p-6 border border-slate-200/90 shadow-2xs space-y-4">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <h3 className="text-base font-bold text-slate-900 tracking-tight">
-                Catatan Aplikasi Aktual
+              <h3 className="text-base font-bold text-slate-900 tracking-tight flex items-center gap-2">
+                <span>Catatan Aplikasi Aktual</span>
+                {logs.length > 0 && (
+                  <span className="text-3xs font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200">
+                    {logs.length}
+                  </span>
+                )}
               </h3>
               <p className="text-3xs text-slate-400 font-medium">
                 Sinkron ke Digital Twin (F_log)
@@ -722,19 +730,19 @@ export const AgronomyPlanning: React.FC = () => {
             </div>
             <button
               onClick={() => setIsRecordModalOpen(true)}
-              className="py-1.5 px-3 rounded-xl bg-[#236B32] hover:bg-[#1C5628] text-white text-xs font-bold transition-all flex items-center gap-1.5 active:scale-95 shadow-2xs"
+              className="py-1.5 px-3 rounded-xl bg-[#236B32] hover:bg-[#1C5628] text-white text-xs font-bold transition-all flex items-center gap-1.5 active:scale-95 shadow-2xs cursor-pointer"
             >
               <Plus className="w-3.5 h-3.5" />
               <span>+ Catat Pemupukan</span>
             </button>
           </div>
 
-          {/* List of Logs */}
+          {/* List of Logs (Maksimal 3 item dengan opsi Lihat Selengkapnya) */}
           <div className="space-y-3">
-            {logs.map((log) => (
+            {(showAllLogs ? logs : logs.slice(0, 3)).map((log) => (
               <div
                 key={log.id}
-                className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-1.5"
+                className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-1.5 transition-all"
               >
                 <div className="flex items-center justify-between text-xs">
                   <span className="font-bold text-slate-900">
@@ -757,6 +765,26 @@ export const AgronomyPlanning: React.FC = () => {
                 </div>
               </div>
             ))}
+
+            {/* Tombol Lihat Selengkapnya jika lebih dari 3 catatan */}
+            {logs.length > 3 && (
+              <button
+                type="button"
+                onClick={() => setShowAllLogs((prev) => !prev)}
+                className="w-full py-2.5 px-3 rounded-2xl bg-slate-50 hover:bg-slate-100 border border-slate-200/90 text-slate-700 text-xs font-semibold flex items-center justify-center gap-1.5 transition-all active:scale-[0.99] cursor-pointer"
+              >
+                <span>
+                  {showAllLogs
+                    ? 'Tampilkan Lebih Sedikit'
+                    : `Lihat Selengkapnya (${logs.length - 3} catatan lainnya)`}
+                </span>
+                {showAllLogs ? (
+                  <ChevronUp className="w-4 h-4 text-slate-500" />
+                ) : (
+                  <ChevronDown className="w-4 h-4 text-slate-500" />
+                )}
+              </button>
+            )}
 
             {/* Pending Log Placeholder Card */}
             <div className="p-3.5 rounded-2xl border-2 border-dashed border-slate-200 text-center text-xs text-slate-400 space-y-1">

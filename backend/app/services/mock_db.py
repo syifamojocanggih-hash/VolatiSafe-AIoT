@@ -446,8 +446,8 @@ class MockDB:
         # Proyeksi dinamis jendela pemupukan berbasis siklus diurnal mikroklimat lahan karst Solokuro
         now_dt = datetime.now(timezone.utc).replace(minute=0, second=0, microsecond=0)
         windows = []
-        step_hours = 3
-        total_steps = max(1, min(56, hours // step_hours))
+        step_hours = 1
+        total_steps = max(1, min(168, hours // step_hours))
 
         for i in range(total_steps):
             start_dt = now_dt + timedelta(hours=i * step_hours)
@@ -455,26 +455,45 @@ class MockDB:
             # Waktu lokal WIB (UTC+7)
             local_hour = (start_dt.hour + 7) % 24
 
-            if 6 <= local_hour < 10:
-                # Pagi hari sejuk & lembap (Jendela aman emas)
-                avri = round(16.5 + (local_hour - 6) * 3.2, 1)
+            day_offset = i // 24
+
+            # Variasi cuaca harian mikroklimat lahan:
+            # - Hari 0 (Hari ini): normal (pagi 06-10, malam 18-19)
+            # - Hari 1 (Besok): pagi sejuk (06-09) & sore berawan (16-18)
+            # - Hari 2 (Lusa): pagi panjang (07-11)
+            if day_offset == 0:
+                is_morning_safe = (6 <= local_hour < 10)
+                is_afternoon_safe = False
+                base_morning_avri = 16.5
+            elif day_offset == 1:
+                is_morning_safe = (6 <= local_hour < 9)
+                is_afternoon_safe = (16 <= local_hour < 18)
+                base_morning_avri = 18.2
+            else:
+                is_morning_safe = (7 <= local_hour < 11)
+                is_afternoon_safe = False
+                base_morning_avri = 15.0
+
+            if is_morning_safe:
+                avri = round(base_morning_avri + (local_hour - 6) * 2.5, 1)
+                cat = "aman"
+                is_safe = True
+            elif is_afternoon_safe:
+                avri = round(23.5 + (local_hour - 16) * 1.5, 1)
                 cat = "aman"
                 is_safe = True
             elif 10 <= local_hour < 15:
-                # Siang terik panas & kering (Risiko kritis penguapan tinggi)
-                avri = round(65.0 + (local_hour - 10) * 2.5, 1)
+                avri = round(64.0 + (local_hour - 10) * 2.5 + (day_offset * 1.2), 1)
                 cat = "kritis" if avri <= 75.0 else "bahaya"
                 is_safe = False
             elif 15 <= local_hour < 18:
-                # Sore hari suhu mulai melandai
-                avri = round(44.0 - (local_hour - 15) * 3.5, 1)
+                avri = round(43.0 - (local_hour - 15) * 3.5, 1)
                 cat = "waspada"
                 is_safe = False
             else:
-                # Malam hingga fajar
-                avri = round(21.0 + (local_hour % 6) * 1.2, 1)
+                avri = round(21.0 + ((local_hour + day_offset) % 4) * 1.1, 1)
                 cat = "aman"
-                is_safe = True
+                is_safe = (18 <= local_hour <= 19)
 
             windows.append(
                 ForecastWindowItemDTO(
