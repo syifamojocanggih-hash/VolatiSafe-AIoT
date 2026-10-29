@@ -1,160 +1,194 @@
 'use client';
 
 import React from 'react';
-import { StatusBannerData, RiskCategory } from '@/types/dashboard';
-import {
-  CheckCircle2,
-  AlertCircle,
-  AlertTriangle,
-  AlertOctagon,
-  Smartphone,
-} from 'lucide-react';
+import { StatusBannerData, RiskCategory, DayWindowProjection } from '@/types/dashboard';
 
 interface RiskStatusBannerProps {
   banner: StatusBannerData;
+  forecastDays?: DayWindowProjection[];
   onOpenDetails: () => void;
   onPostponeAction: () => void;
   isPostponed?: boolean;
   onOpenWhatsApp?: () => void;
 }
 
-const RISK_CONFIG: Record<
+const RISK_THEME: Record<
   RiskCategory,
   {
     containerClass: string;
-    tagClass: string;
-    badgePillClass: string;
-    badgeDotClass: string;
     titleClass: string;
     primaryBtnClass: string;
-    secondaryBtnBorderClass: string;
-    secondaryBtnTextClass: string;
-    secondaryBtnHoverClass: string;
-    badgeLabel: string;
-    icon: React.ComponentType<{ className?: string }>;
+    dividerClass: string;
+    cardBorderClass: string;
+    timeTextClass: string;
   }
 > = {
   aman: {
     containerClass: 'bg-[#EDF8EE] border-[#C6E7C9]',
-    tagClass: 'text-[#276A32]',
-    badgePillClass: 'bg-[#DCF3DF] text-[#1E6128] border-[#A8E2AF]',
-    badgeDotClass: 'bg-[#16A34A]',
-    titleClass: 'text-[#1A5323]',
+    titleClass: 'text-[#1B6633]',
     primaryBtnClass: 'bg-[#236B32] hover:bg-[#1C5628] text-white',
-    secondaryBtnBorderClass: 'border-[#236B32]',
-    secondaryBtnTextClass: 'text-[#236B32]',
-    secondaryBtnHoverClass: 'hover:bg-emerald-50/50',
-    badgeLabel: 'Aman',
-    icon: CheckCircle2,
+    dividerClass: 'border-[#C6E7C9]',
+    cardBorderClass: 'border-[#C6E7C9]/80',
+    timeTextClass: 'text-[#1B6633]',
   },
   waspada: {
     containerClass: 'bg-[#FFFBEB] border-[#FDE68A]',
-    tagClass: 'text-[#B45309]',
-    badgePillClass: 'bg-[#FEF3C7] text-[#92400E] border-[#FCD34D]',
-    badgeDotClass: 'bg-[#D97706]',
-    titleClass: 'text-[#78350F]',
+    titleClass: 'text-[#B45309]',
     primaryBtnClass: 'bg-[#D97706] hover:bg-[#B45309] text-white',
-    secondaryBtnBorderClass: 'border-[#D97706]',
-    secondaryBtnTextClass: 'text-[#D97706]',
-    secondaryBtnHoverClass: 'hover:bg-amber-50/50',
-    badgeLabel: 'Waspada',
-    icon: AlertCircle,
+    dividerClass: 'border-[#FDE68A]',
+    cardBorderClass: 'border-[#FDE68A]/80',
+    timeTextClass: 'text-[#B45309]',
   },
   kritis: {
     containerClass: 'bg-[#FFF7ED] border-[#FED7AA]',
-    tagClass: 'text-[#C2410C]',
-    badgePillClass: 'bg-[#FFEDD5] text-[#9A3412] border-[#FDBA74]',
-    badgeDotClass: 'bg-[#EA580C]',
-    titleClass: 'text-[#7C2D12]',
+    titleClass: 'text-[#C2410C]',
     primaryBtnClass: 'bg-[#EA580C] hover:bg-[#C2410C] text-white',
-    secondaryBtnBorderClass: 'border-[#EA580C]',
-    secondaryBtnTextClass: 'text-[#EA580C]',
-    secondaryBtnHoverClass: 'hover:bg-orange-50/50',
-    badgeLabel: 'Kritis',
-    icon: AlertTriangle,
+    dividerClass: 'border-[#FED7AA]',
+    cardBorderClass: 'border-[#FED7AA]/80',
+    timeTextClass: 'text-[#C2410C]',
   },
   bahaya: {
     containerClass: 'bg-[#FEF2F2] border-[#FECACA]',
-    tagClass: 'text-[#DC2626]',
-    badgePillClass: 'bg-[#FEE2E2] text-[#991B1B] border-[#FCA5A5]',
-    badgeDotClass: 'bg-[#DC2626]',
-    titleClass: 'text-[#991B1B]',
+    titleClass: 'text-[#DC2626]',
     primaryBtnClass: 'bg-[#DC2626] hover:bg-[#B91C1C] text-white',
-    secondaryBtnBorderClass: 'border-[#DC2626]',
-    secondaryBtnTextClass: 'text-[#DC2626]',
-    secondaryBtnHoverClass: 'hover:bg-red-50/50',
-    badgeLabel: 'Bahaya',
-    icon: AlertOctagon,
+    dividerClass: 'border-[#FECACA]',
+    cardBorderClass: 'border-[#FECACA]/80',
+    timeTextClass: 'text-[#DC2626]',
   },
 };
 
 export const RiskStatusBanner: React.FC<RiskStatusBannerProps> = ({
   banner,
+  forecastDays,
   onOpenDetails,
   onPostponeAction,
   isPostponed = false,
-  onOpenWhatsApp,
 }) => {
   const category: RiskCategory = banner.category || 'aman';
-  const config = RISK_CONFIG[category] || RISK_CONFIG.aman;
+  const theme = RISK_THEME[category] || RISK_THEME.aman;
+
+  // Day 1 (Hari ini)
+  const day1IsSafe = category === 'aman' || (forecastDays && forecastDays[0] && forecastDays[0].isSafe);
+  // Day 2 (Besok)
+  const day2IsSafe = forecastDays && forecastDays[1] ? forecastDays[1].isSafe : false;
+  // Day 3 (Lusa)
+  const day3IsSafe = forecastDays && forecastDays[2] ? forecastDays[2].isSafe : true;
 
   return (
     <section
       aria-label="Status Peringatan Risiko Volatilisasi Hari Ini"
-      className={`rounded-2xl p-5 sm:p-6 border transition-all duration-200 shadow-2xs ${config.containerClass}`}
+      className={`rounded-3xl p-5 sm:p-7 border transition-all duration-200 shadow-2xs ${theme.containerClass}`}
     >
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5">
-        {/* Left Text Content */}
+      {/* ================= BAGIAN ATAS: STATUS PREDIKSI AI & TOMBOL AKSI ================= */}
+      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-5">
+        {/* Sisi Kiri: Headline & Deskripsi Prediksi */}
         <div className="flex-1 min-w-0">
-          {/* Header Row: Badge Status Kategori (4 Tingkat) */}
-          <div className="flex items-center gap-2 mb-2">
-            <span
-              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-2xs font-extrabold uppercase border ${config.badgePillClass}`}
-            >
-              Status: {config.badgeLabel}
-            </span>
-            {onOpenWhatsApp && (
-              <button
-                onClick={onOpenWhatsApp}
-                className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-3xs font-bold bg-white/80 hover:bg-white text-emerald-800 border border-emerald-300 shadow-2xs transition-all active:scale-95 cursor-pointer"
-                title="Lihat Pratinjau Pesan WhatsApp Petani"
-              >
-                <Smartphone className="w-3 h-3 text-emerald-600" />
-                <span>Simulasi Notifikasi WA Petani</span>
-              </button>
-            )}
-          </div>
-
-          <p className={`text-xs font-bold tracking-wider uppercase ${config.tagClass}`}>
-            {banner.tag}
-          </p>
-          <h3 className={`text-lg sm:text-2xl font-extrabold tracking-tight mt-1 mb-2 ${config.titleClass}`}>
-            {banner.title}
+          <h3 className={`text-lg sm:text-xl font-bold tracking-tight ${theme.titleClass}`}>
+            {banner.title || 'Aman, waktu optimal pemupukan'}
           </h3>
-          <p className="text-xs sm:text-sm text-slate-700 leading-relaxed">
-            {banner.description}
+          <p className="text-xs sm:text-sm text-slate-700 leading-relaxed mt-1.5 max-w-2xl">
+            {banner.description ||
+              'Suhu tanah 26,0°C, kelembapan 42,0%, pH 7,10. Tanah cukup untuk mengikat nitrogen ke zona perakaran.'}
           </p>
         </div>
 
-        {/* Action Buttons */}
-        <div className="flex flex-row lg:flex-col gap-2.5 sm:gap-3 w-full lg:w-52 shrink-0">
+        {/* Sisi Kanan: Dua Tombol Aksi (Lihat Detail Prediksi & Sudah Saya Tunda) */}
+        <div className="flex flex-col gap-2.5 w-full sm:w-48 shrink-0">
           <button
             onClick={onOpenDetails}
-            className={`flex-1 lg:w-full py-2.5 px-4 rounded-xl text-xs sm:text-sm font-semibold transition-all active:scale-[0.98] text-center ${config.primaryBtnClass}`}
+            className={`w-full py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold transition-all shadow-xs active:scale-[0.98] text-center ${theme.primaryBtnClass}`}
           >
             Lihat Detail Prediksi
           </button>
 
           <button
             onClick={onPostponeAction}
-            className={`flex-1 lg:w-full py-2.5 px-4 rounded-xl text-xs sm:text-sm font-semibold transition-all active:scale-[0.98] text-center bg-white ${
-              isPostponed
-                ? 'bg-slate-100 text-slate-500 border border-slate-300'
-                : `border ${config.secondaryBtnBorderClass} ${config.secondaryBtnTextClass} ${config.secondaryBtnHoverClass}`
+            className={`w-full py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold transition-all shadow-2xs active:scale-[0.98] text-center bg-white border border-slate-300 text-slate-800 hover:bg-slate-50 ${
+              isPostponed ? 'bg-slate-100 text-slate-500' : ''
             }`}
           >
             {isPostponed ? '✓ Sudah Ditunda' : 'Sudah Saya Tunda'}
           </button>
+        </div>
+      </div>
+
+      {/* ================= GARIS PEMBATAS ================= */}
+      <hr className={`border-t my-5 sm:my-6 ${theme.dividerClass}`} />
+
+      {/* ================= BAGIAN BAWAH: JENDELA WAKTU AMAN (HARI INI, BESOK, LUSA) ================= */}
+      <div className="space-y-3.5">
+        <h4 className="text-center text-xs sm:text-sm font-bold text-slate-800 tracking-tight">
+          Waktu yang ideal untuk memberi pupuk
+        </h4>
+
+        {/* 3 Kartu Proyeksi Jendela Waktu (Desktop: 3 Kolom, Mobile: 3 Baris) */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 sm:gap-4">
+          {/* Kartu 1: Hari Ini */}
+          <div
+            className={`bg-white rounded-2xl p-4 sm:p-4.5 border ${theme.cardBorderClass} shadow-2xs flex flex-col justify-between`}
+          >
+            <span className="text-xs font-semibold text-slate-500 mb-2 block">
+              Hari ini :
+            </span>
+            {day1IsSafe ? (
+              <div className="space-y-1 text-xs font-bold leading-relaxed">
+                <div className={`flex items-center justify-between gap-2 ${theme.timeTextClass}`}>
+                  <span>10.00 - 11.00 WIB</span>
+                  <span className="text-slate-300 font-normal">|</span>
+                  <span>13.02 - 14.00 WIB</span>
+                </div>
+                <div className={`flex items-center justify-between gap-2 ${theme.timeTextClass}`}>
+                  <span>19.00 - 20.02 WIB</span>
+                  <span className="text-slate-300 font-normal">|</span>
+                  <span>21.00 - 22.01 WIB</span>
+                </div>
+              </div>
+            ) : (
+              <span className="text-xs font-bold text-red-600 block">
+                Tidak ada pemupukan untuk hari ini
+              </span>
+            )}
+          </div>
+
+          {/* Kartu 2: Besok */}
+          <div
+            className={`bg-white rounded-2xl p-4 sm:p-4.5 border ${theme.cardBorderClass} shadow-2xs flex flex-col justify-between`}
+          >
+            <span className="text-xs font-semibold text-slate-500 mb-2 block">
+              Besok :
+            </span>
+            {day2IsSafe ? (
+              <div className={`text-xs font-bold ${theme.timeTextClass}`}>
+                <span>06.00 - 09.00 WIB</span>
+              </div>
+            ) : (
+              <span className="text-xs font-bold text-red-600 block leading-snug">
+                Tidak ada pemupukan untuk hari ini
+              </span>
+            )}
+          </div>
+
+          {/* Kartu 3: Lusa */}
+          <div
+            className={`bg-white rounded-2xl p-4 sm:p-4.5 border ${theme.cardBorderClass} shadow-2xs flex flex-col justify-between`}
+          >
+            <span className="text-xs font-semibold text-slate-500 mb-2 block">
+              Lusa :
+            </span>
+            {day3IsSafe ? (
+              <div className="space-y-1 text-xs font-bold leading-relaxed">
+                <div className={`flex items-center justify-between gap-2 ${theme.timeTextClass}`}>
+                  <span>10.00 - 11.00 WIB</span>
+                  <span className="text-slate-300 font-normal">|</span>
+                  <span>13.02 - 14.00 WIB</span>
+                </div>
+              </div>
+            ) : (
+              <span className="text-xs font-bold text-red-600 block">
+                Tidak ada pemupukan untuk hari ini
+              </span>
+            )}
+          </div>
         </div>
       </div>
     </section>

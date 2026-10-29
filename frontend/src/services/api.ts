@@ -4,6 +4,7 @@
  */
 
 import { FieldNodeItem, BoMResponse } from '@/types/admin';
+import { CropCycleResponse, CropCycleRequest } from '@/types/agronomy';
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
@@ -909,6 +910,40 @@ export async function recordFertilizerLog(payload: {
     if (!res.ok) return null;
     const json = await res.json();
     return json.data || null;
+  } catch {
+    return null;
+  }
+}
+
+
+// 15. Crop Cycles & Phenology Gantt Model
+export async function getCropCycle(fieldId: string = 'BLOK-A'): Promise<CropCycleResponse | null> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/crop-cycles?field_id=${fieldId}`, {
+      cache: 'no-store',
+      headers: { 'Accept': 'application/json' },
+    });
+    if (!res.ok) return null;
+    const json: ApiResponse<CropCycleResponse> = await res.json();
+    return json.data;
+  } catch {
+    return null;
+  }
+}
+
+export async function updateCropCycle(payload: CropCycleRequest): Promise<CropCycleResponse | null> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/crop-cycles`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) return null;
+    const json: ApiResponse<CropCycleResponse> = await res.json();
+    return json.data;
   } catch {
     return null;
   }

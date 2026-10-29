@@ -25,10 +25,54 @@ def calculate_blend(req: FertilizerBlendRequestDTO):
     blend_response = AgronomyService.calculate_blend(req)
     return create_envelope(blend_response.model_dump())
 
+@router.get("/crop-cycles")
+def get_active_crop_cycle(
+    field_id: str = Query("BLOK-A", description="ID petak sawah"),
+    session: Session = Depends(get_db)
+):
+    """
+    Mengambil data siklus tanam aktif lengkap dengan model Gantt Chart fenologi real-time.
+    """
+    cycle_rec = (
+        session.query(CropCycleModel)
+        .filter(CropCycleModel.field_id == field_id)
+        .filter(CropCycleModel.status == "active")
+        .order_by(CropCycleModel.created_at.desc())
+        .first()
+    )
+
+    if cycle_rec:
+        planting_date_str = cycle_rec.planting_date.isoformat()
+        variety = cycle_rec.corn_variety
+        area = 0.75
+        yield_target = float(cycle_rec.target_yield_ton_ha or 8.0)
+    else:
+        # Default baseline dari DB awal
+        planting_date_str = "2026-09-25"
+        variety = "Hibrida Bisi-18"
+        area = 0.75
+        yield_target = 8.0
+
+    req = CropCycleCreateDTO(
+        field_id=field_id,
+        planting_date=planting_date_str,
+        seed_variety=variety,
+        field_area_ha=area,
+        target_yield_ton_ha=yield_target
+    )
+    cycle_response = AgronomyService.calculate_crop_cycle(req)
+    return create_envelope(cycle_response.model_dump())
+
 @router.post("/crop-cycles", status_code=status.HTTP_201_CREATED)
 def create_crop_cycle(req: CropCycleCreateDTO, session: Session = Depends(get_db)):
     cycle_response = AgronomyService.calculate_crop_cycle(req)
     try:
+        # Non-aktifkan siklus lama untuk field yang sama jika ada
+        session.query(CropCycleModel).filter(
+            CropCycleModel.field_id == req.field_id,
+            CropCycleModel.status == "active"
+        ).update({"status": "archived"})
+
         cycle_model = CropCycleModel(
             cycle_id=cycle_response.cycle_id,
             field_id=req.field_id,
@@ -38,6 +82,13 @@ def create_crop_cycle(req: CropCycleCreateDTO, session: Session = Depends(get_db
             status="active"
         )
         session.add(cycle_model)
+
+        # Update umur DAT pada FieldStateModel
+        f_state = session.query(FieldStateModel).filter(FieldStateModel.field_id == req.field_id).first()
+        if f_state:
+            f_state.dat = cycle_response.current_dat
+            f_state.updated_at = datetime.now(timezone.utc)
+
         session.commit()
     except Exception:
         session.rollback()

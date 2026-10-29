@@ -44,12 +44,34 @@ class CropMilestoneDTO(BaseModel):
     h3_alert_date: str
     action_required: str
 
+class GanttPhaseDTO(BaseModel):
+    id: str
+    name: str
+    subtitle: str
+    start_hst: int
+    end_hst: int
+    duration_days: int
+    start_date: str
+    end_date: str
+    status: str = "upcoming"  # "completed", "active", "upcoming"
+    progress_pct: float = 0.0
+    fertilizer_action: Optional[str] = None
+    h3_reminder_date: Optional[str] = None
+    description: str = ""
+    color_theme: str = "emerald"
+
 class CropCycleResponseDTO(BaseModel):
     cycle_id: str
     field_id: str
     planting_date: str
+    seed_variety: str = "Hibrida Bisi-18"
+    field_area_ha: float = 0.75
+    target_yield_ton_ha: float = 8.0
     current_dat: int
     growth_stage: str
+    total_duration_days: int = 105
+    harvest_estimate_date: str = ""
+    gantt_phases: List[GanttPhaseDTO] = Field(default_factory=list)
     milestones: List[CropMilestoneDTO] = Field(default_factory=list)
 
 class FertilizationLogCreateDTO(BaseModel):

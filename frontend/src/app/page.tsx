@@ -8,7 +8,6 @@ import { MobileBottomNav } from '@/components/navigation/MobileBottomNav';
 import { RiskStatusBanner } from '@/components/dashboard/RiskStatusBanner';
 import { MetricCardsGrid } from '@/components/dashboard/MetricCardsGrid';
 import { Trend24hChart } from '@/components/dashboard/Trend24hChart';
-import { SafeWindowForecast } from '@/components/dashboard/SafeWindowForecast';
 import { ParcelRiskMap } from '@/components/map/ParcelRiskMap';
 import { AgronomyPlanning } from '@/components/agronomy/AgronomyPlanning';
 import { NodeManagement } from '@/components/admin/NodeManagement';
@@ -673,9 +672,10 @@ export default function DashboardPage() {
             /* Layar 1: Dashboard Utama Petak */
             <div className="space-y-4 sm:space-y-5">
 
-              {/* Status Banner */}
+              {/* Status Banner with Integrated Safe Window (Top Section) */}
               <RiskStatusBanner
                 banner={currentData.statusBanner}
+                forecastDays={currentData.forecast72h}
                 onOpenDetails={() => setIsDetailModalOpen(true)}
                 onPostponeAction={handlePostpone}
                 isPostponed={isPostponed}
@@ -691,11 +691,8 @@ export default function DashboardPage() {
                 riskCategory={currentData.statusBanner.category}
               />
 
-              {/* 24-Hour Forecast Trend Chart (ECharts + Shadcn styling) */}
+              {/* 24-Hour Forecast Trend Chart */}
               <Trend24hChart data={currentData.trend24h} />
-
-              {/* 72-Hour Safe Window Bar Strip */}
-              <SafeWindowForecast days={currentData.forecast72h} />
             </div>
           )}
         </main>

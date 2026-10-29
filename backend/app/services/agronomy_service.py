@@ -9,7 +9,8 @@ from app.schemas.agronomy import (
     PracticalUnitsDTO,
     CropCycleCreateDTO,
     CropCycleResponseDTO,
-    CropMilestoneDTO
+    CropMilestoneDTO,
+    GanttPhaseDTO
 )
 
 class AgronomyService:
@@ -111,9 +112,18 @@ class AgronomyService:
             p_date = date.today()
 
         today = date.today()
-        # Jika tanggal tanam di masa lalu, hitung selisih hari. Jika masa depan, DAT = 0
+        # Jika tanggal tanam di masa lalu, hitung selisih hari aktual. Jika masa depan, DAT = 0
         diff_days = (today - p_date).days
         current_dat = max(0, diff_days)
+
+        # Durasi hidup total berdasarkan varietas benih
+        seed_lower = req.seed_variety.lower()
+        if "nk" in seed_lower or "212" in seed_lower:
+            total_duration = 100
+        elif "pioneer" in seed_lower or "p27" in seed_lower:
+            total_duration = 110
+        else:
+            total_duration = 105
 
         if current_dat <= 7:
             stage = "Fase Perkecambahan (VE)"
@@ -128,6 +138,114 @@ class AgronomyService:
         else:
             stage = "Fase Masak Fisiologis (R6)"
 
+        harvest_date = p_date + timedelta(days=total_duration)
+
+        # 6 Definisi Fase Siklus Tanam Lengkap Model Gantt Chart
+        phases_def = [
+            {
+                "id": "ve",
+                "name": "Perkecambahan & Pertumbuhan Awal (VE)",
+                "subtitle": "0–7 HST",
+                "start_hst": 0,
+                "end_hst": 7,
+                "fertilizer_action": "Tanpa pupuk kimia · Jaga kelembaban tanah > 30% VWC",
+                "h3_reminder_date": None,
+                "description": "Kemunculan koleoptil di permukaan dan perpanjangan akar seminal primer. Sangat sensitif kekeringan.",
+                "color_theme": "emerald"
+            },
+            {
+                "id": "v3",
+                "name": "Fase Daun Tiga (V3) · Pemupukan Dasar",
+                "subtitle": "8–20 HST",
+                "start_hst": 8,
+                "end_hst": 20,
+                "fertilizer_action": "Aplikasi Dasar: 112 kg Phonska 15-15-15 + 38 kg Urea (19 Ember)",
+                "h3_reminder_date": (p_date + timedelta(days=9)).isoformat(),
+                "description": "Diferensiasi titik tumbuh perakaran. Pupuk NPK Phonska dan Urea dasar untuk memperkokoh akar tunjang.",
+                "color_theme": "blue"
+            },
+            {
+                "id": "v8",
+                "name": "Fase Pertumbuhan Cepat (V8) · Susulan I",
+                "subtitle": "21–40 HST",
+                "start_hst": 21,
+                "end_hst": 40,
+                "fertilizer_action": "Aplikasi Susulan I: 105 kg Urea + 40 kg Phonska (18 Ember)",
+                "h3_reminder_date": (p_date + timedelta(days=29)).isoformat(),
+                "description": "Puncak kebutuhan nitrogen harian. Fase paling kritis terhadap risiko penguapan gas amonia (AVRI).",
+                "color_theme": "amber"
+            },
+            {
+                "id": "v12",
+                "name": "Fase Bunting & Malai (V12 / Tasseling) · Susulan II",
+                "subtitle": "41–65 HST",
+                "start_hst": 41,
+                "end_hst": 65,
+                "fertilizer_action": "Aplikasi Susulan II: 100 kg Urea + 25 kg ZA",
+                "h3_reminder_date": (p_date + timedelta(days=47)).isoformat(),
+                "description": "Pembentukan bakal tongkol dan penyerbukan malai jantan. Membutuhkan tambahan sulfur dari ZA.",
+                "color_theme": "purple"
+            },
+            {
+                "id": "r3",
+                "name": "Fase Pengisian Biji & Pembuahan (R3)",
+                "subtitle": "66–90 HST",
+                "start_hst": 66,
+                "end_hst": 90,
+                "fertilizer_action": "Monitoring air tanah · Hindari genangan berlebih",
+                "h3_reminder_date": None,
+                "description": "Akumulasi pati pada bulir jagung. Daun bendera fotosintesis aktif memaksimalkan bobot pipilan.",
+                "color_theme": "teal"
+            },
+            {
+                "id": "r6",
+                "name": "Fase Masak Fisiologis & Panen Raya (R6)",
+                "subtitle": f"91–{total_duration} HST",
+                "start_hst": 91,
+                "end_hst": total_duration,
+                "fertilizer_action": "Persiapan alat panen & pengeringan lantai terpal",
+                "h3_reminder_date": (p_date + timedelta(days=total_duration - 7)).isoformat(),
+                "description": "Terbentuk lapisan hitam (black layer) pada pangkal biji, kadar air susut 20–25%. Jagung siap dipanen.",
+                "color_theme": "rose"
+            }
+        ]
+
+        gantt_phase_dtos: List[GanttPhaseDTO] = []
+        for p in phases_def:
+            s_date = p_date + timedelta(days=p["start_hst"])
+            e_date = p_date + timedelta(days=p["end_hst"])
+            duration = (p["end_hst"] - p["start_hst"]) + 1
+
+            if current_dat > p["end_hst"]:
+                status_str = "completed"
+                prog = 100.0
+            elif current_dat >= p["start_hst"]:
+                status_str = "active"
+                span = max(1, p["end_hst"] - p["start_hst"] + 1)
+                prog = round(min(100.0, max(0.0, ((current_dat - p["start_hst"] + 1) / span) * 100.0)), 1)
+            else:
+                status_str = "upcoming"
+                prog = 0.0
+
+            gantt_phase_dtos.append(
+                GanttPhaseDTO(
+                    id=p["id"],
+                    name=p["name"],
+                    subtitle=p["subtitle"],
+                    start_hst=p["start_hst"],
+                    end_hst=p["end_hst"],
+                    duration_days=duration,
+                    start_date=s_date.isoformat(),
+                    end_date=e_date.isoformat(),
+                    status=status_str,
+                    progress_pct=prog,
+                    fertilizer_action=p["fertilizer_action"],
+                    h3_reminder_date=p["h3_reminder_date"],
+                    description=p["description"],
+                    color_theme=p["color_theme"]
+                )
+            )
+
         # Milestones jadwal pemupukan & panen
         milestones_def = [
             {
@@ -141,9 +259,14 @@ class AgronomyService:
                 "action": "Tebus 2 karung Urea + 1/2 karung Phonska"
             },
             {
-                "phase": "Estimasi Panen Fisiologis (R6)",
-                "target_dat": 105,
-                "action": "Persiapan pengeringan terpal & panen"
+                "phase": "Fase V12 (Pemupukan Susulan II)",
+                "target_dat": 50,
+                "action": "Tebus 2 karung Urea + 1/2 karung ZA"
+            },
+            {
+                "phase": f"Estimasi Panen Fisiologis ({harvest_date.strftime('%d %b %Y')})",
+                "target_dat": total_duration,
+                "action": "Persiapan pengeringan terpal & pemanenan jagung"
             }
         ]
 
@@ -167,7 +290,13 @@ class AgronomyService:
             cycle_id=cycle_id,
             field_id=req.field_id,
             planting_date=p_date.isoformat(),
+            seed_variety=req.seed_variety,
+            field_area_ha=req.field_area_ha,
+            target_yield_ton_ha=req.target_yield_ton_ha,
             current_dat=current_dat,
             growth_stage=stage,
+            total_duration_days=total_duration,
+            harvest_estimate_date=harvest_date.isoformat(),
+            gantt_phases=gantt_phase_dtos,
             milestones=milestone_dtos
         )

@@ -28,16 +28,15 @@ export const Trend24hChart: React.FC<Trend24hChartProps> = ({ data }) => {
   const xCategories = data.map((d) => d.time);
   const moistureData = data.map((d) => d.moisture);
   const tempData = data.map((d) => d.temperature);
-  const phData = data.map((d) => (d.ph != null ? Number(d.ph.toFixed(2)) : 7.82));
 
-  // ECharts Configuration Styled with Shadcn UI Aesthetics
+  // ECharts Configuration Styled Exactly as User Mockup
   const option = {
     backgroundColor: 'transparent',
     grid: {
-      left: 48,
-      right: 36,
-      top: 18,
-      bottom: 24,
+      left: 36,
+      right: 48,
+      top: 24,
+      bottom: 28,
       containLabel: false,
     },
     tooltip: {
@@ -57,18 +56,8 @@ export const Trend24hChart: React.FC<Trend24hChartProps> = ({ data }) => {
         const timeLabel = params[0].axisValueLabel || params[0].name || '';
         let res = `<div class="font-bold text-xs text-emerald-400 mb-1">Pukul ${timeLabel} WIB</div>`;
         params.forEach((item) => {
-          let unit = '%';
-          let val: string | number = item.value;
-          if (item.seriesName.includes('Suhu')) {
-            unit = '°C';
-            val = typeof item.value === 'number' ? item.value.toFixed(1) : item.value;
-          } else if (item.seriesName.includes('pH')) {
-            unit = ' pH';
-            val = typeof item.value === 'number' ? item.value.toFixed(2) : item.value;
-          } else {
-            unit = '%';
-            val = typeof item.value === 'number' ? item.value.toFixed(1) : item.value;
-          }
+          const unit = item.seriesName.includes('Suhu') ? '°C' : '%';
+          const val = typeof item.value === 'number' ? item.value.toFixed(1) : item.value;
           res += `<div class="flex items-center justify-between gap-4 text-xs py-0.5">
             <span class="flex items-center gap-1.5 text-slate-300">${item.marker} ${item.seriesName}</span>
             <span class="font-bold text-white">${val}${unit}</span>
@@ -95,63 +84,36 @@ export const Trend24hChart: React.FC<Trend24hChartProps> = ({ data }) => {
         fontSize: 11,
         fontFamily: 'inherit',
         margin: 12,
-        hideOverlap: true,
-        interval: (index: number) => {
-          // Display evenly spaced interval markers across 24h: 00.00, 03.00, 06.00, 09.00, 12.00, 15.00, 18.00, 21.00, 23.00
-          return index % 3 === 0 || index === 23;
+        formatter: (val: string) => {
+          if (val === '00.00' || val === '08.00' || val === '16.00' || val === '23.00') {
+            return val;
+          }
+          return '';
         },
+      },
+      splitLine: {
+        show: false,
       },
     },
-    yAxis: [
-      {
-        type: 'value',
-        min: 15,
-        max: 50,
-        interval: 10,
-        splitLine: {
-          show: false,
-        },
-        axisLine: {
-          show: true,
-          lineStyle: {
-            color: '#1F2937',
-            width: 1.5,
-          },
-        },
-        axisTick: {
-          show: false,
-        },
-        axisLabel: {
-          show: false,
-        },
+    yAxis: {
+      type: 'value',
+      min: 10,
+      max: 48,
+      show: false,
+      splitLine: {
+        show: false,
       },
-      {
-        type: 'value',
-        min: 4,
-        max: 10,
-        splitLine: {
-          show: false,
-        },
-        axisLine: {
-          show: false,
-        },
-        axisTick: {
-          show: false,
-        },
-        axisLabel: {
-          show: false,
-        },
-      },
-    ],
+    },
     series: [
       {
         name: 'Kelembapan tanah',
         type: 'line',
-        yAxisIndex: 0,
         data: moistureData,
-        smooth: false,
-        symbol: 'circle',
-        symbolSize: 6,
+        smooth: true,
+        symbol: (value: number, params: { dataIndex: number }) => {
+          return params.dataIndex === 8 ? 'circle' : 'none';
+        },
+        symbolSize: 7,
         itemStyle: {
           color: '#2563EB',
           borderColor: '#FFFFFF',
@@ -162,8 +124,8 @@ export const Trend24hChart: React.FC<Trend24hChartProps> = ({ data }) => {
           width: 2.2,
         },
         markLine: {
-          symbol: 'none',
           silent: true,
+          symbol: 'none',
           data: [
             {
               yAxis: 25,
@@ -176,7 +138,7 @@ export const Trend24hChart: React.FC<Trend24hChartProps> = ({ data }) => {
                 formatter: '25%',
                 position: 'end',
                 color: '#64748B',
-                fontSize: 10,
+                fontSize: 11,
                 fontWeight: 600,
                 fontFamily: 'inherit',
               },
@@ -187,11 +149,12 @@ export const Trend24hChart: React.FC<Trend24hChartProps> = ({ data }) => {
       {
         name: 'Suhu Tanah',
         type: 'line',
-        yAxisIndex: 0,
         data: tempData,
-        smooth: false,
-        symbol: 'circle',
-        symbolSize: 6,
+        smooth: true,
+        symbol: (value: number, params: { dataIndex: number }) => {
+          return params.dataIndex === 8 ? 'circle' : 'none';
+        },
+        symbolSize: 7,
         itemStyle: {
           color: '#C25E26',
           borderColor: '#FFFFFF',
@@ -199,24 +162,6 @@ export const Trend24hChart: React.FC<Trend24hChartProps> = ({ data }) => {
         },
         lineStyle: {
           color: '#C25E26',
-          width: 2.2,
-        },
-      },
-      {
-        name: 'pH Tanah',
-        type: 'line',
-        yAxisIndex: 1,
-        data: phData,
-        smooth: false,
-        symbol: 'circle',
-        symbolSize: 6,
-        itemStyle: {
-          color: '#8B5CF6',
-          borderColor: '#FFFFFF',
-          borderWidth: 1.5,
-        },
-        lineStyle: {
-          color: '#8B5CF6',
           width: 2.2,
         },
       },
@@ -234,19 +179,15 @@ export const Trend24hChart: React.FC<Trend24hChartProps> = ({ data }) => {
         {/* Legend */}
         <div className="flex flex-wrap items-center gap-3.5 sm:gap-5 text-xs text-slate-600 font-medium">
           <div className="flex items-center gap-1.5">
-            <span className="w-3 h-1.5 rounded-full inline-block" style={{ backgroundColor: '#2563EB' }} />
+            <span className="w-3.5 h-1 rounded-full inline-block bg-[#2563EB]" />
             <span>Kelembapan tanah</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="w-3 h-1.5 rounded-full inline-block" style={{ backgroundColor: '#C25E26' }} />
+            <span className="w-3.5 h-1 rounded-full inline-block bg-[#C25E26]" />
             <span>Suhu Tanah</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="w-3 h-1.5 rounded-full inline-block" style={{ backgroundColor: '#8B5CF6' }} />
-            <span>pH Tanah</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span className="w-3 h-0.5 border-t border-dashed border-slate-400 inline-block" />
+            <span className="w-3.5 h-0.5 border-t border-dashed border-slate-400 inline-block" />
             <span>Ambang Kritis</span>
           </div>
         </div>

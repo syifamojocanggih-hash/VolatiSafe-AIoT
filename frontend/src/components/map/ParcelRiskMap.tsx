@@ -3,7 +3,7 @@ import dynamic from 'next/dynamic';
 import { BedengParcel, ActiveLayer, ParcelMapSummary } from '@/types/parcel';
 import { initialParcels, initialMapSummary } from '@/mocks/parcelsMock';
 import { getFieldParcels, toggleParcelFailover } from '@/services/api';
-import { RefreshCw, Radio, Map as MapIcon, LayoutGrid, Satellite, ShieldCheck } from 'lucide-react';
+import { RefreshCw, Radio, Map as MapIcon, LayoutGrid } from 'lucide-react';
 import { SchematicFieldDiagram } from './SchematicFieldDiagram';
 
 // Dynamic import with ssr: false for Leaflet map component
@@ -28,7 +28,6 @@ export const ParcelRiskMap: React.FC<ParcelRiskMapProps> = () => {
   const [activeLayer, setActiveLayer] = useState<ActiveLayer>('avri');
   const [mapViewMode, setMapViewMode] = useState<'leaflet' | 'schematic'>('leaflet');
   const [toastMessage, setToastMessage] = useState<string | null>(null);
-  const [isBackendSynced, setIsBackendSynced] = useState<boolean>(false);
   const [isSyncing, setIsSyncing] = useState<boolean>(false);
 
   const selectedParcel = parcels.find((p) => p.id === selectedId) || parcels[0];
@@ -63,7 +62,6 @@ export const ParcelRiskMap: React.FC<ParcelRiskMapProps> = () => {
           }));
 
           setParcels(mappedParcels);
-          setIsBackendSynced(true);
 
           if (res.summary) {
             setSummary({
@@ -219,22 +217,6 @@ export const ParcelRiskMap: React.FC<ParcelRiskMapProps> = () => {
           <div>
             <div className="flex flex-wrap items-center gap-2">
               <span className="font-semibold text-slate-800">Koordinat Hamparan:</span> {summary.coordinatesText} · {summary.soilTypeText}
-              {summary.satelliteMetadata && (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-100/90 text-blue-900 border border-blue-300/80 text-3xs font-bold">
-                  <Satellite className="w-2.5 h-2.5 text-blue-600" />
-                  {summary.satelliteMetadata.source} ({summary.satelliteMetadata.resolution})
-                </span>
-              )}
-              {isBackendSynced && (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 text-3xs font-semibold">
-                  <ShieldCheck className="w-2.5 h-2.5 text-emerald-600" />
-                  Backend Sync 12 Bedeng
-                </span>
-              )}
-            </div>
-            <div className="flex items-center gap-1.5 text-slate-800 font-semibold mt-1">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span>Gateway Basecamp Aktif ({summary.gatewayDistanceKm.toString().replace('.', ',')} km) · {parcels.length} Bedeng Terintegrasi</span>
             </div>
           </div>
 

@@ -300,7 +300,11 @@ export const PredictionDetailModal: React.FC<PredictionDetailModalProps> = ({
               Dekomposisi Lapisan Fisika Arrhenius, Koreksi Residual LightGBM & TreeSHAP
             </p>
             <div className="flex flex-wrap items-center gap-1.5 mt-2 text-[10.5px]">
-              <span className="font-semibold text-slate-500">Input Telemetri:</span>
+              <span className="font-semibold text-slate-500">Model AI:</span>
+              <span className="px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-900 font-bold border border-emerald-300">
+                PIML-LightGBM v1.0.0-tkt3 (R² 0.9873)
+              </span>
+              <span className="font-semibold text-slate-500 ml-1">Input Telemetri:</span>
               <span className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-800 font-bold border border-slate-200">
                 Kelembaban {currentMoisture}
               </span>
