@@ -420,7 +420,7 @@ export const WhatIfPanel: React.FC = () => {
             <div className="flex items-center justify-between text-xs">
               <span className="font-bold text-slate-800 flex items-center gap-2">
                 <Flame className="w-4 h-4 text-orange-500" />
-                Suhu Tanah Permukaan (Probe DS18B20)
+                Suhu Tanah Permukaan
               </span>
               <span className="px-2.5 py-1 rounded-lg bg-orange-50 border border-orange-200 text-orange-800 font-extrabold text-sm">
                 {params.soilTemp.toFixed(1)} °C
@@ -450,7 +450,7 @@ export const WhatIfPanel: React.FC = () => {
             <div className="flex items-center justify-between text-xs">
               <span className="font-bold text-slate-800 flex items-center gap-2">
                 <Droplets className="w-4 h-4 text-blue-500" />
-                Kelembaban Tanah (Kapasitif v1.2)
+                Kelembapan Tanah
               </span>
               <span className="px-2.5 py-1 rounded-lg bg-blue-50 border border-blue-200 text-blue-800 font-extrabold text-sm">
                 {params.soilMoisture.toFixed(1)} % VWC

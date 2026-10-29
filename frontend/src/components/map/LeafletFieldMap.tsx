@@ -191,7 +191,7 @@ export const LeafletFieldMap: React.FC<LeafletFieldMapProps> = ({
             <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
             Gateway Basecamp LoRa
           </div>
-          <p class="text-xs text-slate-600 mt-1">Transceiver ESP32-LoRa 433 MHz</p>
+          <p class="text-xs text-slate-600 mt-1">Pusat Penerima Data Lapangan</p>
           <p class="text-xs text-slate-500 mt-0.5">Jarak ke Hamparan: <b>${summary.gatewayDistanceKm.toString().replace('.', ',')} km</b></p>
           <span class="inline-block mt-2 px-2 py-0.5 rounded text-2xs font-semibold bg-emerald-100 text-emerald-800">Status Aktif</span>
         </div>
@@ -541,7 +541,7 @@ export const LeafletFieldMap: React.FC<LeafletFieldMapProps> = ({
 
               <div className="flex items-center gap-2.5">
                 <span className="w-3.5 h-3.5 rounded-full bg-emerald-600 border border-white shadow-xs inline-block"></span>
-                <span className="text-slate-700">Gateway Basecamp LoRa (433 MHz)</span>
+                <span className="text-slate-700">Stasiun Pemantauan Lapangan</span>
               </div>
             </div>
           </div>

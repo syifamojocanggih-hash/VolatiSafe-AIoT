@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { Download, CheckCircle2, RefreshCw, ShieldCheck, Database, Radio, Cpu } from 'lucide-react';
+import { Download, CheckCircle2, RefreshCw, Radio, Cpu } from 'lucide-react';
 import {
   getReportImpactSummary,
   getProvenanceAudit,
@@ -13,7 +13,7 @@ import {
 export const ReportAnalytics: React.FC = () => {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [isDownloading, setIsDownloading] = useState<boolean>(false);
-  const [isBackendSynced, setIsBackendSynced] = useState<boolean>(false);
+  const [, setIsBackendSynced] = useState<boolean>(false);
   const [activeTableTab, setActiveTableTab] = useState<'live_audit' | 'scientific_reference'>('live_audit');
 
   // Dynamic Impact Summary State with initial fallback
@@ -88,12 +88,7 @@ export const ReportAnalytics: React.FC = () => {
             <h2 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
               Laporan, Provenance Data &amp; Batas Kejujuran Ilmiah
             </h2>
-            {isBackendSynced && (
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 text-3xs font-bold">
-                <ShieldCheck className="w-3 h-3 text-emerald-600" />
-                Backend Live Sync
-              </span>
-            )}
+            
           </div>
           <p className="text-xs sm:text-sm text-slate-500 mt-0.5 font-medium">
             Ringkasan dampak, audit log telemetri deret waktu, dan batas klaim sistem — untuk audit PPL &amp; dewan juri
@@ -151,9 +146,7 @@ export const ReportAnalytics: React.FC = () => {
                 <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block">
                   EKSPOR DATA AUDIT
                 </span>
-                <span className="inline-flex items-center gap-1 text-3xs font-bold text-emerald-700 bg-emerald-100/70 px-2 py-0.5 rounded-full">
-                  <Database className="w-2.5 h-2.5" /> TimescaleDB Stream
-                </span>
+                
               </div>
               <p className="text-xs text-slate-600 mt-1 mb-4 leading-relaxed">
                 Unduh log telemetri deret waktu lengkap ({auditLogs.length > 0 ? `${auditLogs.length} titik aktif` : '120+ baris'}) beserta tag provenance (*ESP32 vs FAO-56*) untuk validasi audit.

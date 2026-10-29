@@ -18,14 +18,9 @@ import {
   CheckCircle2,
   Package,
   Layers,
-  Calendar,
-  Clock,
   ChevronRight,
   Bell,
-  RefreshCw,
   Check,
-  MapPin,
-  Flame,
 } from 'lucide-react';
 
 export const AgronomyPlanning: React.FC = () => {
@@ -37,8 +32,8 @@ export const AgronomyPlanning: React.FC = () => {
 
   // Backend Real-time Data
   const [cropCycle, setCropCycle] = useState<CropCycleResponse | null>(null);
-  const [isSyncing, setIsSyncing] = useState<boolean>(false);
-  const [lastSyncTime, setLastSyncTime] = useState<string | null>(null);
+  const [, setIsSyncing] = useState<boolean>(false);
+  const [, setLastSyncTime] = useState<string | null>(null);
   const [logs, setLogs] = useState<ApplicationLog[]>(initialAgronomyData.applicationLogs);
   const [selectedPhaseId, setSelectedPhaseId] = useState<string | null>('v8');
 
@@ -47,7 +42,7 @@ export const AgronomyPlanning: React.FC = () => {
   const [isRecordModalOpen, setIsRecordModalOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [backendBlend, setBackendBlend] = useState<BlendCalculationResponse | null>(null);
-  const [isCalculatingBackend, setIsCalculatingBackend] = useState(false);
+  const [, setIsCalculatingBackend] = useState(false);
 
   // Safe numeric fallbacks
   const safeArea = Math.max(0.01, areaHa || 0.75);
@@ -268,155 +263,106 @@ export const AgronomyPlanning: React.FC = () => {
 
       {/* ================= FITUR A: GANTT CHART FENOLOGI REAL-TIME ================= */}
       <section className="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200/90 shadow-2xs space-y-6">
-        {/* Top Controls: Title, Realtime Status & Inputs */}
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-slate-100">
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-bold text-emerald-800 tracking-wider uppercase">
-                FITUR A · REAL-TIME PHENOLOGY GANTT MODEL
-              </span>
-              <span
-                className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-3xs font-semibold transition-all ${
-                  isSyncing
-                    ? 'bg-amber-100 text-amber-800 border border-amber-300'
-                    : 'bg-emerald-100 text-emerald-800 border border-emerald-300'
-                }`}
-              >
-                <RefreshCw className={`w-3 h-3 ${isSyncing ? 'animate-spin text-amber-600' : 'text-emerald-600'}`} />
-                <span>{isSyncing ? 'Menyinkronkan...' : 'Realtime TimescaleDB Sync'}</span>
-              </span>
-            </div>
-            <h3 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight mt-0.5">
-              Kalender Siklus Tanam Dinamis (0–{totalDuration} HST)
+        {/* Top Header: Title & Inputs separated by Vertical Divider */}
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 pb-2">
+          {/* Sisi Kiri: Judul & Keterangan */}
+          <div className="flex-1 min-w-0 pr-4">
+            <h3 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+              Kalender Siklus Tanam Dinamis
             </h3>
-            <p className="text-xs text-slate-500">
-              Gantt chart otomatis menyesuaikan tanggal kalender & early-warning logistik saat tanggal tanam atau varietas diubah.
-              {lastSyncTime && <span className="ml-1 text-slate-400">· Terakhir sync: {lastSyncTime}</span>}
+            <p className="text-xs sm:text-sm text-slate-600 mt-1.5 leading-relaxed max-w-xl">
+              Sebagai Pusat perencanaan untuk menyesuaikan progress dan gambaran apa yang harus dilakukan kedepannya
             </p>
           </div>
 
-          {/* Form Inputs (Date, Variety, Age) */}
-          <div className="flex flex-wrap items-center gap-3">
+          {/* Sisi Kanan: Input Tanggal Tanam & Varietas (dengan Pembatas Garis Vertikal) */}
+          <div className="flex items-center gap-6 shrink-0 lg:border-l lg:border-slate-200 lg:pl-6">
             {/* Tanggal Tanam */}
             <div>
-              <label className="block text-3xs font-semibold text-slate-500 mb-1">
-                Tanggal Tanam (HST 0)
+              <label className="block text-xs font-bold text-slate-800 mb-1.5">
+                Tanggal tanam
               </label>
               <div className="relative">
                 <input
                   type="date"
                   value={plantingDate}
                   onChange={(e) => setPlantingDate(e.target.value)}
-                  className="text-xs font-bold text-slate-800 px-3 py-2 rounded-xl border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all cursor-pointer"
+                  className="text-xs font-semibold text-slate-800 px-3 py-1.5 rounded-lg border border-slate-300 bg-white shadow-2xs focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all cursor-pointer"
                 />
               </div>
             </div>
 
-            {/* Varietas Jagung */}
+            {/* Varietas Benih Jagung */}
             <div>
-              <label className="block text-3xs font-semibold text-slate-500 mb-1">
-                Varietas Benih Jagung
+              <label className="block text-xs font-bold text-slate-800 mb-1.5">
+                Varietas Benih jagung
               </label>
               <select
                 value={seedVariety}
                 onChange={(e) => setSeedVariety(e.target.value)}
-                className="text-xs font-bold text-slate-800 px-3 py-2 rounded-xl border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all cursor-pointer"
+                className="text-xs font-semibold text-slate-800 px-3 py-1.5 rounded-lg border border-slate-300 bg-white shadow-2xs focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all cursor-pointer"
               >
                 <option value="Hibrida Bisi-18">Hibrida Bisi-18 (105 Hari)</option>
                 <option value="NK-212">NK-212 (100 Hari)</option>
                 <option value="Pioneer P27">Pioneer P27 (110 Hari)</option>
               </select>
             </div>
-
-            {/* Umur Tanaman Card */}
-            <div className="bg-[#EDF8EE] border border-[#C6E7C9] rounded-xl px-4 py-1.5 text-center shrink-0">
-              <span className="text-3xs font-bold text-[#276A32] uppercase tracking-wider block">
-                UMUR TANAMAN
-              </span>
-              <span className="text-base font-extrabold text-[#1A5323] block leading-tight">
-                {currentHst} HST
-              </span>
-            </div>
-
-            {/* Estimasi Panen Card */}
-            <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-1.5 text-center shrink-0">
-              <span className="text-3xs font-bold text-amber-800 uppercase tracking-wider block">
-                ESTIMASI PANEN
-              </span>
-              <span className="text-xs font-extrabold text-amber-900 block leading-tight mt-0.5">
-                {formatDateIndo(cropCycle?.harvest_estimate_date)}
-              </span>
-            </div>
           </div>
         </div>
 
-        {/* Progres Keseluruhan Musim Tanam */}
+        {/* Garis Pembatas Horizontal */}
+        <hr className="border-t border-slate-200 my-4" />
+
+        {/* Progres Saat ini */}
         <div className="space-y-2">
-          <div className="flex items-center justify-between text-xs font-bold text-slate-700">
-            <span className="flex items-center gap-1.5 text-emerald-900">
-              <Clock className="w-4 h-4 text-emerald-600" />
-              Progres Siklus Tanam: Hari ke-{currentHst} dari {totalDuration} Hari ({seasonProgressPct}%)
-            </span>
-            <span className="text-3xs font-semibold text-slate-500 bg-slate-100 px-2.5 py-0.5 rounded-full">
-              Fase Aktif: {cropCycle?.growth_stage || 'Fase V8 (Vegetatif Aktif)'}
-            </span>
+          <div className="text-xs sm:text-sm font-bold text-slate-800">
+            Progress Saat ini : <span className="text-[#65A30D] font-extrabold">{seasonProgressPct}%</span>
           </div>
-          <div className="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden relative border border-slate-200">
+          <div className="w-full h-7 rounded-xl border border-[#84CC16] bg-white p-0.5 overflow-hidden relative">
             <div
-              className="h-full bg-linear-to-r from-emerald-500 via-teal-500 to-amber-500 rounded-full transition-all duration-700 ease-out"
+              className="h-full bg-[#84CC16]/90 rounded-lg transition-all duration-700 ease-out"
               style={{ width: `${seasonProgressPct}%` }}
             />
           </div>
         </div>
 
         {/* ================= GANTT CHART TIMELINE CONTAINER ================= */}
-        <div className="space-y-3">
-          <div className="flex items-center justify-between text-xs font-bold text-slate-700">
-            <span className="flex items-center gap-1.5">
-              <Calendar className="w-4 h-4 text-slate-500" />
-              Gantt Chart Linimasa Fenologi & Pemupukan Jagung
-            </span>
-            <span className="text-3xs text-slate-400">
-              Klik pada bar fase untuk melihat rekomendasi detail
-            </span>
-          </div>
-
+        <div className="pt-2">
           <div className="overflow-x-auto pb-2 -mx-2 px-2">
-            <div className="min-w-[840px] bg-slate-50/60 rounded-2xl border border-slate-200/80 p-4 space-y-3 relative">
-              {/* Timeline Header (HST & Tanggal Markers) */}
-              <div className="grid grid-cols-12 gap-2 text-3xs font-bold text-slate-400 border-b border-slate-200/90 pb-2">
-                <div className="col-span-4 pl-1 text-slate-600">
-                  FASE PERTUMBUHAN & AKSI
+            <div className="min-w-[880px] bg-white rounded-2xl border border-slate-200/90 p-5 space-y-3.5 shadow-2xs">
+              {/* Header: Title on Left, Timeline Ticks on Right (Aligned Row per User Wireframe) */}
+              <div className="grid grid-cols-12 gap-4 items-end pb-3 border-b border-slate-200">
+                <div className="col-span-4 pl-1">
+                  <h4 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">
+                    Fase Pertumbuhan Aksi
+                  </h4>
                 </div>
-                <div className="col-span-8 relative h-6">
-                  {ganttTicks.map((tick, idx) => (
-                    <div
-                      key={idx}
-                      className="absolute -translate-x-1/2 flex flex-col items-center"
-                      style={{ left: `${tick.pct}%` }}
-                    >
-                      <span className="font-mono text-slate-600 font-bold">{tick.hst} HST</span>
-                      <span className="text-3xs text-slate-400 font-normal">{tick.dateStr}</span>
-                    </div>
-                  ))}
+                <div className="col-span-8 relative h-8">
+                  {ganttTicks.map((tick, idx) => {
+                    const isFirst = idx === 0;
+                    const isLast = idx === ganttTicks.length - 1;
+                    return (
+                      <div
+                        key={idx}
+                        className={`absolute flex flex-col whitespace-nowrap ${
+                          isFirst
+                            ? 'left-0 items-start'
+                            : isLast
+                            ? 'right-0 items-end text-right'
+                            : '-translate-x-1/2 items-center text-center'
+                        }`}
+                        style={!isFirst && !isLast ? { left: `${tick.pct}%` } : undefined}
+                      >
+                        <span className="font-bold text-slate-900 text-xs">{tick.hst} HST</span>
+                        <span className="text-3xs text-slate-500 font-medium">{tick.dateStr}</span>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
 
-              {/* Today's Vertical Guide Line (Hari Ini Marker) */}
-              <div
-                className="absolute top-12 bottom-4 w-0.5 bg-amber-500 z-20 pointer-events-none transition-all duration-500"
-                style={{
-                  left: `calc(33.333% + (66.666% * ${Math.min(100, Math.max(0, currentHst / totalDuration)) / 100}))`,
-                }}
-              >
-                <div className="absolute -top-7 -translate-x-1/2 bg-amber-600 text-white font-extrabold text-3xs px-2 py-0.5 rounded-full shadow-md whitespace-nowrap flex items-center gap-1 animate-bounce">
-                  <MapPin className="w-2.5 h-2.5" />
-                  Hari Ini ({currentHst} HST)
-                </div>
-              </div>
-
-              {/* Gantt Phase Tracks */}
-              <div className="space-y-2.5 relative">
+              {/* 6 Dynamic Phase Rows matching user mockup with grey background track */}
+              <div className="space-y-2.5">
                 {(cropCycle?.gantt_phases || []).map((phase: GanttPhase) => {
                   const isSelected = selectedPhaseId === phase.id;
                   const isActive = phase.status === 'active';
@@ -424,110 +370,75 @@ export const AgronomyPlanning: React.FC = () => {
 
                   // Calculate left and width percentage relative to total duration
                   const leftPct = Math.max(0, Math.min(100, (phase.start_hst / totalDuration) * 100));
-                  const widthPct = Math.max(2, Math.min(100 - leftPct, (phase.duration_days / totalDuration) * 100));
+                  const widthPct = Math.max(3, Math.min(100 - leftPct, (phase.duration_days / totalDuration) * 100));
 
-                  // Color themes mapping
-                  const themeStyles = {
-                    emerald: {
-                      bgActive: 'from-emerald-500 to-teal-600 text-white shadow-emerald-200',
-                      bgCompleted: 'bg-emerald-600 text-white',
-                      bgUpcoming: 'bg-emerald-50/70 border-emerald-200 text-emerald-900',
-                      badge: 'bg-emerald-100 text-emerald-800 border-emerald-200',
-                    },
-                    amber: {
-                      bgActive: 'from-amber-500 to-orange-600 text-white shadow-amber-200',
-                      bgCompleted: 'bg-amber-600 text-white',
-                      bgUpcoming: 'bg-amber-50/70 border-amber-200 text-amber-900',
-                      badge: 'bg-amber-100 text-amber-800 border-amber-200',
-                    },
-                    purple: {
-                      bgActive: 'from-purple-500 to-indigo-600 text-white shadow-purple-200',
-                      bgCompleted: 'bg-purple-600 text-white',
-                      bgUpcoming: 'bg-purple-50/70 border-purple-200 text-purple-900',
-                      badge: 'bg-purple-100 text-purple-800 border-purple-200',
-                    },
-                    teal: {
-                      bgActive: 'from-teal-500 to-cyan-600 text-white shadow-teal-200',
-                      bgCompleted: 'bg-teal-600 text-white',
-                      bgUpcoming: 'bg-teal-50/70 border-teal-200 text-teal-900',
-                      badge: 'bg-teal-100 text-teal-800 border-teal-200',
-                    },
-                    rose: {
-                      bgActive: 'from-rose-500 to-red-600 text-white shadow-rose-200',
-                      bgCompleted: 'bg-rose-600 text-white',
-                      bgUpcoming: 'bg-rose-50/70 border-rose-200 text-rose-900',
-                      badge: 'bg-rose-100 text-rose-800 border-rose-200',
-                    },
-                    blue: {
-                      bgActive: 'from-blue-500 to-sky-600 text-white shadow-blue-200',
-                      bgCompleted: 'bg-blue-600 text-white',
-                      bgUpcoming: 'bg-blue-50/70 border-blue-200 text-blue-900',
-                      badge: 'bg-blue-100 text-blue-800 border-blue-200',
-                    },
-                  }[phase.color_theme] || {
-                    bgActive: 'from-emerald-500 to-teal-600 text-white shadow-emerald-200',
-                    bgCompleted: 'bg-emerald-600 text-white',
-                    bgUpcoming: 'bg-slate-100 border-slate-300 text-slate-800',
-                    badge: 'bg-slate-100 text-slate-800 border-slate-200',
-                  };
+                  // Clean display name per mockup
+                  const cleanName =
+                    phase.id === 've'
+                      ? 'Perkecambahan'
+                      : phase.id === 'v3'
+                      ? 'Fase Daun Tiga'
+                      : phase.id === 'v8'
+                      ? 'Fase Pertumbuhan Cepat (V8)'
+                      : phase.id === 'v12'
+                      ? 'Fase Bunting & Malai (V12)'
+                      : phase.id === 'r3'
+                      ? 'Fase Pengisian Biji & Pembuahan (R3)'
+                      : phase.id === 'r6'
+                      ? 'Fase Masak Fisiologis & Panen Raya (R6)'
+                      : phase.name.split('·')[0].trim();
+
+                  const dateRangeStr = `${formatDateShort(phase.start_date)} - ${formatDateShort(phase.end_date)}`;
 
                   return (
                     <div
                       key={phase.id}
                       onClick={() => setSelectedPhaseId(phase.id)}
-                      className={`grid grid-cols-12 gap-2 items-center p-2 rounded-xl transition-all cursor-pointer border ${
+                      className={`grid grid-cols-12 gap-4 items-center p-3 rounded-xl transition-all cursor-pointer border ${
                         isSelected
-                          ? 'bg-white border-emerald-500/80 shadow-md ring-2 ring-emerald-500/20'
-                          : 'bg-white/70 border-slate-200/70 hover:bg-white hover:border-slate-300'
+                          ? 'bg-emerald-50/40 border-emerald-500/80 shadow-xs ring-1 ring-emerald-500/30'
+                          : 'bg-slate-50/70 border-slate-200/80 hover:bg-slate-100/70 hover:border-slate-300'
                       }`}
                     >
-                      {/* Left: Phase Title, Code & Dates */}
-                      <div className="col-span-4 flex items-center gap-2.5 min-w-0 pr-2">
-                        <div
-                          className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs uppercase shrink-0 ${
-                            isActive
-                              ? 'bg-amber-500 text-white shadow-xs'
-                              : isCompleted
-                              ? 'bg-emerald-600 text-white'
-                              : 'bg-slate-200 text-slate-600'
-                          }`}
-                        >
-                          {phase.id.toUpperCase()}
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-center gap-1.5">
-                            <span className="text-xs font-bold text-slate-900 truncate">
-                              {phase.name.split('·')[0]}
+                      {/* Left: Phase Title & Dates formatted as "0-7 HST & 1 Nov - 8 Nov" */}
+                      <div className="col-span-4 pl-1 min-w-0 pr-2">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-bold text-slate-900 truncate">{cleanName}</span>
+                          {isActive && (
+                            <span className="px-2 py-0.5 rounded-full text-3xs font-extrabold bg-amber-100 text-amber-800 border border-amber-300">
+                              Aktif
                             </span>
-                            {isActive && (
-                              <span className="inline-flex items-center px-1.5 py-0.2 rounded-full text-3xs font-extrabold bg-amber-100 text-amber-800 border border-amber-300">
-                                Aktif
-                              </span>
-                            )}
-                            {isCompleted && (
-                              <span className="inline-flex items-center text-emerald-600">
-                                <Check className="w-3.5 h-3.5" />
-                              </span>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-1.5 text-3xs text-slate-400">
-                            <span className="font-semibold text-slate-600">{phase.subtitle}</span>
-                            <span>·</span>
-                            <span>{formatDateShort(phase.start_date)} – {formatDateShort(phase.end_date)}</span>
-                          </div>
+                          )}
+                          {isCompleted && (
+                            <span className="inline-flex items-center text-emerald-600" title="Selesai">
+                              <Check className="w-3.5 h-3.5 stroke-[3]" />
+                            </span>
+                          )}
                         </div>
+                        <span className="text-xs text-slate-500 font-medium mt-0.5 block truncate">
+                          {phase.start_hst} - {phase.end_hst} HST &amp; {dateRangeStr}
+                        </span>
                       </div>
 
-                      {/* Right: Gantt Bar Track (Spanning Timeline) */}
-                      <div className="col-span-8 relative h-9 bg-slate-100/90 rounded-lg p-0.5 border border-slate-200/60 overflow-hidden flex items-center">
-                        {/* The Phase Bar */}
+                      {/* Right: Grey Rounded Track matching mockup */}
+                      <div className="col-span-8 relative h-9 bg-[#E2E8F0]/80 rounded-lg p-0.5 border border-slate-200/60 overflow-hidden flex items-center">
+                        {/* Subtle tick grid markers */}
+                        {ganttTicks.slice(1, -1).map((t, i) => (
+                          <div
+                            key={i}
+                            className="absolute inset-y-0 w-px bg-slate-300/40 pointer-events-none"
+                            style={{ left: `${t.pct}%` }}
+                          />
+                        ))}
+
+                        {/* Phase Bar positioned at its active HST window */}
                         <div
-                          className={`absolute top-1 bottom-1 rounded-md transition-all duration-500 flex items-center px-2.5 shadow-xs overflow-hidden ${
+                          className={`absolute top-0.5 bottom-0.5 rounded-md transition-all duration-500 flex items-center px-2.5 shadow-xs overflow-hidden ${
                             isActive
-                              ? `bg-linear-to-r ${themeStyles.bgActive} ring-2 ring-amber-400/50 shadow-md`
+                              ? 'bg-linear-to-r from-[#236B32] to-emerald-600 text-white shadow-sm ring-1 ring-emerald-400'
                               : isCompleted
-                              ? `${themeStyles.bgCompleted} opacity-95`
-                              : `${themeStyles.bgUpcoming} border border-dashed`
+                              ? 'bg-[#236B32] text-white opacity-95'
+                              : 'bg-white/95 border border-slate-300 text-slate-700'
                           }`}
                           style={{
                             left: `${leftPct}%`,
@@ -542,16 +453,15 @@ export const AgronomyPlanning: React.FC = () => {
                             />
                           )}
 
-                          {/* Phase Label & Action inside Bar */}
-                          <div className="relative z-10 flex items-center justify-between w-full min-w-0 text-3xs font-bold">
-                            <span className="truncate flex items-center gap-1">
-                              {isActive && <Flame className="w-3 h-3 text-yellow-300 animate-pulse shrink-0" />}
-                              {phase.fertilizer_action ? phase.fertilizer_action.split('·')[0] : phase.name}
-                            </span>
-                            <span className="shrink-0 ml-1.5 opacity-90 font-mono text-3xs">
-                              {isCompleted ? '100%' : isActive ? `${phase.progress_pct}%` : `${phase.duration_days}h`}
-                            </span>
-                          </div>
+                          <span className="relative z-10 text-3xs font-bold whitespace-nowrap truncate">
+                            {isActive
+                              ? `● Aktif (${currentHst} HST) · ${phase.fertilizer_action ? phase.fertilizer_action.split('·')[0] : 'Monitoring'}`
+                              : isCompleted
+                              ? `✓ Selesai · ${phase.duration_days} Hari`
+                              : phase.fertilizer_action
+                              ? phase.fertilizer_action.split('·')[0]
+                              : phase.name}
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -646,9 +556,6 @@ export const AgronomyPlanning: React.FC = () => {
                 <span className="text-2xs font-bold text-blue-800 tracking-wider uppercase block">
                   EARLY–WARNING LOGISTIK PUPUK (PENGINGAT H-3 OTOMATIS)
                 </span>
-                <span className="text-3xs font-semibold px-2 py-0.2 rounded-full bg-blue-200/70 text-blue-900">
-                  Target: {upcomingMilestone?.phase_name || 'Fase V8'}
-                </span>
               </div>
               <p className="text-xs text-slate-700 leading-relaxed italic">
                 &ldquo;Halo Pak Suparman, 3 hari lagi tanaman jagung Anda memasuki {upcomingMilestone?.phase_name || 'fase V8'} ({currentHst} HST). Segera siapkan/tebus {sacksPhase2} karung pupuk campuran di Kios Pupuk Desa. VolatiSafe sedang memantau cuaca & jam terbaik untuk hari penaburan.&rdquo;
@@ -670,18 +577,11 @@ export const AgronomyPlanning: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* ================= FITUR B: MULTI-FERTILIZER BLENDER (7 cols on lg) ================= */}
         <section className="lg:col-span-7 bg-white rounded-3xl p-5 sm:p-6 border border-slate-200/90 shadow-2xs space-y-5">
-          <div>
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-emerald-800 tracking-wider uppercase">
+            <div>
+              <span className="text-xs font-bold text-emerald-800 tracking-wider uppercase block">
                 FITUR B · PERMENTAN NO. 40/2007 & BALITBANGTAN
               </span>
-              {backendBlend && (
-                <span className="text-3xs font-semibold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
-                  {isCalculatingBackend ? 'Menghitung...' : 'AI Backend Sync'}
-                </span>
-              )}
-            </div>
-            <h3 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight mt-0.5">
+              <h3 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight mt-0.5">
               Kalkulator Campuran Pupuk Majemuk
             </h3>
             <p className="text-xs text-slate-500 mt-0.5">

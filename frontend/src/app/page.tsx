@@ -56,7 +56,6 @@ function transformBackendStatus(
   physicsDiagnostics?: DashboardState['physicsDiagnostics'];
 } {
   const m = status.metrics;
-  const b = status.alert_banner;
 
   const defaultTitle =
     m.avri_category === 'aman'
@@ -67,15 +66,22 @@ function transformBackendStatus(
       ? 'Peringatan Kritis: Tunda penaburan Urea sekarang'
       : 'Bahaya Ekstrem: Dilarang keras menabur Urea';
 
+  const defaultDesc =
+    m.avri_category === 'aman'
+      ? `Suhu tanah ${m.soil_temp_c.toFixed(1).replace('.', ',')}°C, kelembapan ${m.moisture_pct.toFixed(1).replace('.', ',')}%, pH ${m.ph.toFixed(2).replace('.', ',')}. Tanah cukup untuk mengikat nitrogen ke zona perakaran.`
+      : m.avri_category === 'waspada'
+      ? `Suhu tanah ${m.soil_temp_c.toFixed(1).replace('.', ',')}°C, kelembapan ${m.moisture_pct.toFixed(1).replace('.', ',')}%, pH ${m.ph.toFixed(2).replace('.', ',')}. Potensi penguapan sedang, disarankan benam ke tanah 5–7 cm.`
+      : m.avri_category === 'kritis'
+      ? `Suhu tanah ${m.soil_temp_c.toFixed(1).replace('.', ',')}°C, kelembapan ${m.moisture_pct.toFixed(1).replace('.', ',')}%, pH ${m.ph.toFixed(2).replace('.', ',')}. Suhu terik memicu penguraian cepat amonia ke udara, segera tunda pemupukan.`
+      : `Suhu tanah ${m.soil_temp_c.toFixed(1).replace('.', ',')}°C, kelembapan ${m.moisture_pct.toFixed(1).replace('.', ',')}%, pH ${m.ph.toFixed(2).replace('.', ',')}. Suhu ekstrem memicu penguapan masif >80%, dilarang menabur pupuk.`;
+
   const banner: StatusBannerData = {
     category: m.avri_category,
     avriScore: Math.round(m.avri_score),
-    tag:
-      b?.headline ||
-      `STATUS HARI INI - RISIKO ${m.avri_category.toUpperCase()} AVRI ${Math.round(m.avri_score)}%`,
-    title: b?.subheadline || defaultTitle,
-    description: `Suhu tanah ${m.soil_temp_c.toFixed(1).replace('.', ',')}°C, kelembapan ${m.moisture_pct.toFixed(1).replace('.', ',')}%, pH ${m.ph.toFixed(2)}. ${b?.subheadline || ''} Jendela aman: ${b?.best_window || '06:00 – 09:00 WIB'}.`,
-    bestWindow: b?.best_window || 'Besok Pagi, 06:00 – 09:00 WIB (Risiko 18%)',
+    tag: `STATUS HARI INI - RISIKO ${m.avri_category.toUpperCase()} AVRI ${Math.round(m.avri_score)}%`,
+    title: defaultTitle,
+    description: defaultDesc,
+    bestWindow: 'Besok Pagi, 06:00 – 09:00 WIB',
     openDurationText: status.is_postponed ? 'Aplikasi Urea ditunda oleh petani' : '',
   };
 
@@ -133,12 +139,12 @@ function transformBackendStatus(
 
   const field: DashboardState['field'] = {
     ...prevField,
-    name: status.field_name || prevField.name,
+    name: 'Kebun Jagung pak suparman',
     farmerName: status.farmer_name || prevField.farmerName,
     areaHa: status.area_ha ?? prevField.areaHa,
-    block: status.block || prevField.block,
+    block: 'Blok A',
     datDays: status.crop_age_days ?? prevField.datDays,
-    phaseName: status.crop_phase || prevField.phaseName,
+    phaseName: 'Fase 8',
     batteryPct: status.battery_pct ?? prevField.batteryPct,
     lastUpdatedMinutesAgo:
       !isNaN(minutesAgo) && minutesAgo > 0 && minutesAgo < 1440
@@ -163,7 +169,11 @@ function transformForecastToDays(
     return fallbackDays;
   }
 
-  const firstDate = new Date(windows[0].timestamp_start);
+  // Waktu Indonesia Barat (WIB = UTC+7)
+  const WIB_OFFSET_MS = 7 * 60 * 60 * 1000;
+  const toWibDate = (isoStr: string) => new Date(new Date(isoStr).getTime() + WIB_OFFSET_MS);
+
+  const firstDate = toWibDate(windows[0].timestamp_start);
   const baseDayTime = new Date(
     Date.UTC(firstDate.getUTCFullYear(), firstDate.getUTCMonth(), firstDate.getUTCDate())
   ).getTime();
@@ -188,8 +198,8 @@ function transformForecastToDays(
   }));
 
   windows.forEach((win) => {
-    const sDate = new Date(win.timestamp_start);
-    const eDate = new Date(win.timestamp_end);
+    const sDate = toWibDate(win.timestamp_start);
+    const eDate = toWibDate(win.timestamp_end);
 
     const sDayIndex = Math.floor(
       (new Date(
@@ -218,7 +228,8 @@ function transformForecastToDays(
       for (let h = startH; h < endH && h < 24; h++) {
         dayTarget.hourlyBlocks[h] = win.is_safe;
         dayTarget.hourlyCategories[h] = cat;
-        if (win.is_safe) {
+        // Rekomendasi jam kerja pertanian di lapangan (06.00 – 18.00 WIB)
+        if (win.is_safe && h >= 6 && h <= 18) {
           dayTarget.safeHours.push(h);
         }
       }

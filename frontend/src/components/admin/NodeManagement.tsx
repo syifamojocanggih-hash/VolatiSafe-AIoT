@@ -12,7 +12,6 @@ import {
   Copy,
   Check,
   RefreshCw,
-  ShieldCheck,
 } from 'lucide-react';
 
 export const NodeManagement: React.FC = () => {
@@ -24,7 +23,7 @@ export const NodeManagement: React.FC = () => {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [bomList, setBomList] = useState<BoMItem[]>(initialBoMList);
   const [totalBomCost, setTotalBomCost] = useState<number>(449000);
-  const [isBackendSynced, setIsBackendSynced] = useState<boolean>(false);
+  const [, setIsBackendSynced] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const selectedNode = nodes.find((n) => n.id === selectedNodeId) || nodes[0];
@@ -128,17 +127,12 @@ export const NodeManagement: React.FC = () => {
         <div>
           <div className="flex items-center gap-2">
             <h2 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
-              Manajemen Field Node & Jaringan LoRa 433 MHz
+              Manajemen Titik Pantau Lahan
             </h2>
-            {isBackendSynced && (
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 text-3xs font-bold">
-                <ShieldCheck className="w-3 h-3 text-emerald-600" />
-                Backend Live Sync ({nodes.length} Node)
-              </span>
-            )}
+            
           </div>
           <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
-            ESP32 + Capacitive Moisture v1.2 + DS18B20 + Soil pH + SX1278 Ra-02 (Deep Sleep 15 menit)
+            Pemantauan otomatis kelembapan tanah, suhu tanah, pH, dan status operasional petak
           </p>
         </div>
 

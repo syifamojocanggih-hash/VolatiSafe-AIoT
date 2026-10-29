@@ -67,12 +67,38 @@ export const RiskStatusBanner: React.FC<RiskStatusBannerProps> = ({
   const category: RiskCategory = banner.category || 'aman';
   const theme = RISK_THEME[category] || RISK_THEME.aman;
 
-  // Day 1 (Hari ini)
-  const day1IsSafe = category === 'aman' || (forecastDays && forecastDays[0] && forecastDays[0].isSafe);
-  // Day 2 (Besok)
-  const day2IsSafe = forecastDays && forecastDays[1] ? forecastDays[1].isSafe : false;
-  // Day 3 (Lusa)
-  const day3IsSafe = forecastDays && forecastDays[2] ? forecastDays[2].isSafe : true;
+  // Helper render jendela aman dinamis dari prediksi backend
+  const renderDayWindows = (
+    day?: DayWindowProjection,
+    fallbackIsSafe: boolean = false,
+    dayLabel: string = ''
+  ) => {
+    const isSafe = day ? day.isSafe : fallbackIsSafe;
+    const windows = day?.safeWindows;
+
+    if (!isSafe || !windows || windows.length === 0) {
+      return (
+        <span className="text-xs font-bold text-red-600 block leading-snug">
+          Tidak ada pemupukan aman {dayLabel ? `untuk ${dayLabel}` : ''}
+        </span>
+      );
+    }
+
+    return (
+      <div className="space-y-1.5 text-xs font-bold leading-relaxed">
+        {windows.slice(0, 2).map((win, idx) => (
+          <div key={idx} className={`flex items-center justify-between gap-2 ${theme.timeTextClass}`}>
+            <span>{win.rangeText} WIB</span>
+            {win.periodLabel && (
+              <span className="text-3xs font-semibold px-1.5 py-0.5 rounded bg-emerald-100/80 text-emerald-800">
+                {win.periodLabel}
+              </span>
+            )}
+          </div>
+        ))}
+      </div>
+    );
+  };
 
   return (
     <section
@@ -103,9 +129,8 @@ export const RiskStatusBanner: React.FC<RiskStatusBannerProps> = ({
 
           <button
             onClick={onPostponeAction}
-            className={`w-full py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold transition-all shadow-2xs active:scale-[0.98] text-center bg-white border border-slate-300 text-slate-800 hover:bg-slate-50 ${
-              isPostponed ? 'bg-slate-100 text-slate-500' : ''
-            }`}
+            className={`w-full py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold transition-all shadow-2xs active:scale-[0.98] text-center bg-white border border-slate-300 text-slate-800 hover:bg-slate-50 ${isPostponed ? 'bg-slate-100 text-slate-500' : ''
+              }`}
           >
             {isPostponed ? '✓ Sudah Ditunda' : 'Sudah Saya Tunda'}
           </button>
@@ -130,24 +155,7 @@ export const RiskStatusBanner: React.FC<RiskStatusBannerProps> = ({
             <span className="text-xs font-semibold text-slate-500 mb-2 block">
               Hari ini :
             </span>
-            {day1IsSafe ? (
-              <div className="space-y-1 text-xs font-bold leading-relaxed">
-                <div className={`flex items-center justify-between gap-2 ${theme.timeTextClass}`}>
-                  <span>10.00 - 11.00 WIB</span>
-                  <span className="text-slate-300 font-normal">|</span>
-                  <span>13.02 - 14.00 WIB</span>
-                </div>
-                <div className={`flex items-center justify-between gap-2 ${theme.timeTextClass}`}>
-                  <span>19.00 - 20.02 WIB</span>
-                  <span className="text-slate-300 font-normal">|</span>
-                  <span>21.00 - 22.01 WIB</span>
-                </div>
-              </div>
-            ) : (
-              <span className="text-xs font-bold text-red-600 block">
-                Tidak ada pemupukan untuk hari ini
-              </span>
-            )}
+            {renderDayWindows(forecastDays?.[0], category === 'aman', 'hari ini')}
           </div>
 
           {/* Kartu 2: Besok */}
@@ -157,15 +165,7 @@ export const RiskStatusBanner: React.FC<RiskStatusBannerProps> = ({
             <span className="text-xs font-semibold text-slate-500 mb-2 block">
               Besok :
             </span>
-            {day2IsSafe ? (
-              <div className={`text-xs font-bold ${theme.timeTextClass}`}>
-                <span>06.00 - 09.00 WIB</span>
-              </div>
-            ) : (
-              <span className="text-xs font-bold text-red-600 block leading-snug">
-                Tidak ada pemupukan untuk hari ini
-              </span>
-            )}
+            {renderDayWindows(forecastDays?.[1], false, 'besok')}
           </div>
 
           {/* Kartu 3: Lusa */}
@@ -175,19 +175,7 @@ export const RiskStatusBanner: React.FC<RiskStatusBannerProps> = ({
             <span className="text-xs font-semibold text-slate-500 mb-2 block">
               Lusa :
             </span>
-            {day3IsSafe ? (
-              <div className="space-y-1 text-xs font-bold leading-relaxed">
-                <div className={`flex items-center justify-between gap-2 ${theme.timeTextClass}`}>
-                  <span>10.00 - 11.00 WIB</span>
-                  <span className="text-slate-300 font-normal">|</span>
-                  <span>13.02 - 14.00 WIB</span>
-                </div>
-              </div>
-            ) : (
-              <span className="text-xs font-bold text-red-600 block">
-                Tidak ada pemupukan untuk hari ini
-              </span>
-            )}
+            {renderDayWindows(forecastDays?.[2], true, 'lusa')}
           </div>
         </div>
       </div>
