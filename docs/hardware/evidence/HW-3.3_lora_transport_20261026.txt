@@ -1,0 +1,58 @@
+HW-3.3 - Transport LoRa SX1278 433 MHz
+Tanggal : 26 Okt 2026
+Build   : pio run -e esp32dev  -> SUCCESS, Flash 24,5 % (320984 B), RAM 6,9 % (22452 B)
+
+Yang dibuktikan:
+1. Build fisik `esp32dev` lulus dengan transport LoRa sungguhan. Stub FASE 1
+   sudah hilang; transport_lora.cpp sekarang menginisialisasi SPI + SX1278
+   dan memakai transport_retry() yang sama dengan build MQTT.
+2. Isolasi modul utuh (DoD). Objek yang benar-benar ditautkan:
+
+   esp32dev: calibration, calibration_core, main, payload, power_mgmt, sensors,
+             sensors_core, transport_core, transport_lora
+   wokwi   : calibration, calibration_core, main, payload, power_mgmt, sensors,
+             sensors_core, transport_core, transport_mqtt
+
+   Tidak ada transport_mqtt.o di esp32dev dan tidak ada transport_lora.o di
+   wokwi. main.cpp hanya memanggil transport_init/transport_send/
+   transport_shutdown/transport_available; tidak ada satu pun simbol LoRa,
+   SPI, WiFi, atau PubSubClient di dalamnya.
+3. Parameter radio sesuai spesifikasi 03_ROADMAP_TUGAS.md HW-3.3: 433 MHz,
+   SF7, BW 125 kHz, CR 4/5, sync word 0x12, +17 dBm, dengan pin dari
+   config.h (SCK 18, MISO 19, MOSI 23, CS 5, RST 14, DIO0 2).
+4. Aturan retry sama dengan MQTT karena keduanya memakai transport_retry():
+   maksimal 3 percobaan, jeda 2 s hanya di antara percobaan, berhenti di
+   percobaan yang berhasil. Diuji 8 kasus di env:native.
+5. Modul yang tidak menjawab (LoRa.begin gagal) tidak memicu tiga percobaan
+   sia-sia: transport_send() langsung mengembalikan ok=0 attempts=0.
+
+Batas bukti yang jujur - BACA INI:
+Tidak ada satu pun paket LoRa yang benar-benar dipancarkan atau diterima.
+Wokwi tidak punya part SX1278, dan hardware TKT 4 belum ada. DoD HW-3.3
+adalah level build + isolasi, dan itu yang tercapai. Klaim "radio terbukti
+memancarkan dan gateway menerima" belum bisa dibuat dan baru diverifikasi di
+HW-9.3 saat modul fisik tersedia.
+
+Dua hal lain yang perlu tercatat:
+- LoRa.endPacket() == 1 berarti modul selesai memancarkan, BUKAN berarti
+  gateway menerima. Tidak ada ACK di lapisan ini, jadi "retry" hanya
+  menyelamatkan kegagalan lokal modul (DEC-IOT-08). Celah data ditangani
+  Digital Twin, bukan oleh firmware.
+- Ambang RSSI tidak dilaporkan di build ini: TxResult.rssi tetap 0 karena
+  sandeepmistry/LoRa tidak memberi RSSI pada sisi pengirim. Nilai RSSI baru
+  ada di gateway penerima (HW-6.3).
+
+--- Ringkasan build (lengkap: build_esp32dev.txt) ---
+Processing esp32dev (platform: espressif32@8.0.0; board: esp32dev; framework: arduino)
+Dependency Graph
+|-- OneWire @ 2.3.8
+|-- DallasTemperature @ 3.11.0
+|-- LoRa @ 0.8.0
+|-- ArduinoJson @ 7.4.3
+|-- Preferences @ 3.3.12
+|-- SPI @ 3.3.12
+RAM:   [=         ]   6.9% (used 22452 bytes from 327680 bytes)
+Flash: [==        ]  24.5% (used 320984 bytes from 1310720 bytes)
+========================= [SUCCESS] Took 4.32 seconds =========================
+esp32dev       SUCCESS   00:00:04.321
+========================= 1 succeeded in 00:00:04.321 =========================

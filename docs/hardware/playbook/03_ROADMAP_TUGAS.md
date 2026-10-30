@@ -233,6 +233,8 @@ Aturan: `main.cpp` tidak boleh berisi logika sensor/kalibrasi/radio. Hanya uruta
 | **Output** | `TelemetryFrame` selalu dalam batas fisik sebelum dikirim |
 | **DoD** | Nilai di luar batas **tidak** dikirim mentah; ditandai status dan dikirim dengan flag agar backend bisa menolak (bukan dipalsukan) |
 
+> **Koreksi 26 Okt 2026:** kontrak payload hanya punya enam key (`n, ts, m, t, ph, b`), jadi **tidak ada tempat untuk flag**. DoD di atas karena itu tidak bisa dicapai persis seperti tertulis. Yang dicapai: nilai rusak dikirim **apa adanya** (tidak di-clamp) sehingga jatuh di luar batas kontrak, dan backend menolaknya lewat `validate_sensor_bounds()`. Status per kanal tetap ada di `TelemetryFrame` untuk logging dan untuk keputusan lokal, tetapi tidak melintas ke jaringan. Usulan menambah field status per kanal dieskalasi ke Syifa (lihat `DEC-IOT-18`).
+
 > **Perhatikan:** backend punya `validate_sensor_bounds()` ([`../../backend/INGESTION_PIPELINE.md`](../../backend/INGESTION_PIPELINE.md) §2). Jangan men-*clamp* nilai rusak menjadi nilai valid — itu menyembunyikan kerusakan sensor dan membuat data palsu lolos gate. Biarkan nilai asli terkirim dengan penanda; backend yang memutuskan.
 
 Catatan implementasi 26 Okt 2026 (FASE 2 selesai): HW-2.1, 2.2, 2.3, 2.4, 2.5 sudah final dan terverifikasi di simulator. Fungsi murni ada di `sensors_core.cpp`, I/O di `sensors.cpp`, kalibrasi murni di `calibration_core.cpp`, I/O NVS di `calibration.cpp`. Total 30 unit test native PASS. Bukti runtime: `evidence/HW-2.1_adc_burst_wokwi_20261026.txt`, `evidence/HW-2.2_ds18b20_wokwi_20261026.txt`, `evidence/HW-2.6_nvs_selftest_wokwi_20261026.txt`.
@@ -276,6 +278,16 @@ Penyimpangan dari tabel di atas (detail di `DEC-IOT-17`): DS18B20 memakai konver
 
 > Kenapa `native`: logika encoder tidak butuh hardware. Menjalankannya di PC = tes dalam <1 detik, bisa dijalankan tiap commit.
 
+Catatan implementasi 26 Okt 2026 (FASE 3 selesai): HW-3.1, 3.2, 3.3, 3.4, 3.5 selesai. Bukti: `evidence/HW-3.1_no_clamp_wokwi_20261026.txt`, `evidence/HW-3.3_lora_transport_20261026.txt`, `evidence/HW-3.4_mqtt_transport_20261026.txt`, `evidence/unit_test_native_20261026.txt` (45 test PASS), `evidence/build_esp32dev.txt`, `evidence/build_wokwi.txt`.
+
+Penyimpangan dari tabel di atas (detail di `DEC-IOT-18` dan `DEC-IOT-19`):
+
+1. **HW-3.1 tidak meng-clamp.** Clamp dibuang seluruhnya: nilai rusak dikirim apa adanya dan ditandai `SENSOR_OUT_OF_RANGE`, karena clamp mengubah sensor short/putus menjadi `m=100.0`/`m=0.0` yang lolos gate backend. Sentinel `-999` dipakai untuk kerusakan kalibrasi.
+2. **HW-3.3 lulus di level build, bukan radio.** Wokwi tidak punya part SX1278 dan hardware belum ada, jadi tidak ada paket LoRa yang benar-benar dipancarkan. Klaim "radio terbukti" ditunda ke HW-9.3, dan itu dinyatakan di evidence, bukan disembunyikan.
+3. **HW-3.4 lulus tanpa bukti sampai broker.** `wokwi-cli` memakai gateway publik Wokwi yang tidak bisa menjangkau jaringan lokal, sehingga Mosquitto di mesin ini tidak terjangkau. I-03 tetap menjadi DoD HW-5.4.
+4. **Retry dipindah ke `transport_core.cpp`.** Kedua transport memanggil `transport_retry()` yang sama, sehingga aturan jeda tidak bisa menyimpang antar build dan bisa diuji di `env:native` (8 kasus).
+5. **Estimasi aktual:** FASE 3 memakan ±4 jam, di bawah estimasi 5,5 jam. Yang paling banyak menghabiskan waktu bukan kode, melainkan membuktikan jalur MQTT sampai broker (lihat butir 3).
+
 ---
 
 ## 7. FASE 4 — Power Management
@@ -318,6 +330,18 @@ Penyimpangan dari tabel di atas (detail di `DEC-IOT-17`): DS18B20 memakai konver
 
 ---
 
+Catatan implementasi 27 Okt 2026 (FASE 4 selesai): HW-4.1, 4.2, 4.3, 4.4 selesai. Bukti: `evidence/HW-4.1_power_gate_20261027.txt`, `evidence/HW-4.2_deep_sleep_20261027.txt`, `evidence/HW-4.3_orchestration_20261027.txt`, `evidence/HW-4.4_power_budget_20261027.md`.
+
+Penyimpangan dan batas bukti (detail di `DEC-IOT-20`):
+
+1. **Urutan timestamp berubah.** `transport_init()` dan `transport_syncClock()` dipanggil sebelum `payload_encode()` supaya `ts` tidak 0 di build MQTT. Urutan spec 04 10 tidak bisa dipakai apa adanya.
+2. **Deep sleep tidak disimulasikan.** `wokwi-cli` 0.29.1 memicu `TG1WDT_SYS_RESET` sebelum timer tidur berbunyi; build `SIM_FAST_CYCLE` menunggu di `loop()` lalu `ESP.restart()`. Jalur `esp_sleep_enable_timer_wakeup()` + `esp_deep_sleep_start()` tetap dikompilasi untuk fisik dan diverifikasi di HW-9.1 (F-04).
+3. **Probe dihapus.** `SENSOR_PROBE` dan `CAL_NVS_SELFTEST` hilang dari `main.cpp`/`platformio.ini`; semua skenario memakai `[SENS]`/`[PWR]`, dan `scenario_cycle.yaml` ditambahkan.
+4. **Budget daya:** durasi sampling terukur 1,013-1,015 s; total 0,05673 mAh/siklus (81 % dari batas 0,07). Arus masih estimasi dokumen, bukan pengukuran.
+5. **Flash wokwi** turun ke 76,0 %, fisik naik ke 26,2 % karena `esp_sleep`/`esp_system`. Tidak ada dependensi baru.
+
+---
+
 ## 8. FASE 5 — Wokwi Testbed
 
 ### HW-5.1 — `diagram.json`
@@ -355,6 +379,14 @@ Penyimpangan dari tabel di atas (detail di `DEC-IOT-17`): DS18B20 memakai konver
 
 ---
 
+Catatan implementasi 27 Okt 2026 (FASE 5): HW-5.3 dan HW-5.4 selesai. Bukti: `evidence/HW-5.3_parity_20261027.txt`, `evidence/I03_mqtt_rx.txt`, `evidence/HW-5.4_local_mqtt_20261027.md`.
+
+- **HW-5.3:** modul sensor/kalibrasi/payload/transport_core identik; perbedaan hanya transport, `platformio.ini`, dan cabang `SIM_FAST_CYCLE` (DEC-IOT-20).
+- **HW-5.4:** 5 paket berturut sampai Mosquitto lokal. Akun Wokwi gratis tidak punya Private Gateway, jadi broker lokal diekspos sementara lewat tunnel TCP Serveo; firmware tetap publish sendiri lewat `transport_mqtt.cpp`. Ini bukan bridge.
+- **Belum:** screenshot rangkaian (CLI tidak bisa mengambil framebuffer board; butuh UI Wokwi) dan link publik Wokwi (butuh proyek wokwi.com). Ditunda ke HW-8.2.
+
+---
+
 ## 9. FASE 6 — Gateway & MQTT
 
 ### HW-6.1 — Topik & QoS sesuai kontrak
@@ -385,6 +417,14 @@ Penyimpangan dari tabel di atas (detail di `DEC-IOT-17`): DS18B20 memakai konver
 
 ---
 
+Catatan implementasi 27 Okt 2026 (FASE 6): HW-6.1 dan HW-6.2 selesai; HW-6.3 tetap TKT 4.
+
+- **HW-6.1:** 5 paket dari Wokwi sampai Mosquitto lokal; topik persis, `q=0`, `r=0`, `ts` monoton. Bukti: `evidence/HW-6.1_topic_qos_retain_20261027.txt`.
+- **HW-6.2:** adapter aktual `IngestionService.process_lora_payload()` diuji dari `origin/full-stack` commit `8e77211` lewat folder temp. Payload valid diterima, nilai rusak utama ditolak, tetapi baterai `0.0`, `b` hilang, dan `ts=0` masih lolos. Temuan: `evidence/HW-6.2_backend_findings_20261027.md`, keputusan `DEC-IOT-21`.
+- **HW-6.3:** gateway LoRa RX fisik dan LWT baru TKT 4. `rssi/snr` tetap DEC-IOT-11.
+
+---
+
 ## 10. FASE 7 — Uji & Bukti
 
 ### HW-7.1 — Unit test lulus
@@ -409,6 +449,14 @@ Penyimpangan dari tabel di atas (detail di `DEC-IOT-17`): DS18B20 memakai konver
 
 ---
 
+Catatan implementasi 27 Okt 2026 (FASE 7, sisi IoT):
+
+- **HW-7.1 ✅:** `pio test -e native` 45 PASS; bukti `evidence/unit_test_native_20261027.txt`.
+- **HW-7.2 ⛔:** backend belum punya MQTT worker/ingestion; API masih `mock_db`. Blocker: `evidence/HW-7.2_backend_blocker_20261027.md`.
+- **HW-7.3 🟨:** E01 lulus (serial + MQTT + validator). E02 dan I-06 tidak bisa dijalankan karena kuota CI Wokwi gratis habis. E03 dan dashboard butuh backend. Bukti: `E01_*`, blocker: `HW-7.3_blockers_20261027.md`.
+- **HW-7.4 🟨:** inventaris 12 bukti di `evidence/HW-7.4_evidence_inventory_20261027.md`; item backend/dashboard/screenshot/video masih kosong.
+
+---
 ## 11. FASE 8 — Demo & Handover
 
 ### HW-8.1 — Video demo 2 menit

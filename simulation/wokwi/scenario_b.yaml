@@ -23,5 +23,5 @@ steps:
       name: temperature
       value: 26.0
 
-  - delay: 6s
-  - wait-serial: '[PROBE] m=42.0%(OK) ph=6.80(OK) t=26.00C(OK) b=3.90V(OK)'
+  - delay: 2s
+  - wait-serial: '[SENS] m=42.0%(OK) ph=6.80(OK) t=26.00C(OK) b=3.90V(OK)'

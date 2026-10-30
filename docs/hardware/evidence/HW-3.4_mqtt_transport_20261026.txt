@@ -1,0 +1,73 @@
+HW-3.4 - Transport MQTT (WiFi + PubSubClient) + sinkronisasi jam NTP
+Tanggal : 26 Okt 2026
+Build   : pio run -e wokwi  -> SUCCESS, Flash 76,1 % (996810 B), RAM 14,5 % (47676 B)
+
+Yang dibuktikan:
+1. Build `wokwi` lulus dengan transport MQTT sungguhan (WiFi + PubSubClient),
+   bukan stub. Stub FASE 1 sudah hilang dari firmware.
+2. Topik persis sesuai kontrak INTERFACES.md 1.1, termasuk garis miring di
+   depan: /volatisafe/v1/node/VS-SIM-001/telemetry
+3. Rantai penuh sample -> composeFrame -> payload_encode -> transport_send
+   berjalan di simulator: payload 71 byte keluar dengan enam key kontrak dan
+   timestamp NTP yang valid (1793031606, jauh di atas 1700000000).
+4. Broker tidak terjangkau: tiga percobaan, lalu menyerah, dan siklus
+   berikutnya tetap jalan. Tidak menggantung, tidak crash (I-04).
+5. Logika retry diuji terpisah di env:native (8 kasus, lihat
+   unit_test_native_20261026.txt): berhenti di percobaan yang berhasil, jeda
+   hanya di antara percobaan, dan max_attempts 0 berarti tidak mengirim.
+
+Batas bukti yang jujur - BACA INI:
+Pengiriman sampai broker TIDAK terbukti di sini. wokwi-cli memakai gateway
+publik Wokwi, dan gateway itu hanya bisa menghubungi internet, bukan jaringan
+lokal mesin ini. Private Gateway (yang membuat host.wokwi.internal bisa
+diakses) hanya tersedia untuk akun berbayar. Akibatnya:
+
+  [TX] broker host.wokwi.internal -> 10.13.37.254:1883
+  [TX] MQTT gagal ke host.wokwi.internal:1883, state=-2
+
+DNS berhasil (10.13.37.254 = gateway), TCP ke port 1883 gagal. Ini batas
+lingkungan, bukan bug firmware: jalur yang sama berhasil untuk NTP (UDP 123)
+lewat gateway publik, dan Mosquitto di host terbukti menerima publish
+(evidence/I00_mqtt_pubsub_20261026.md).
+
+Jadi DoD HW-3.4 yang tercapai adalah level build + kontrak topik. Bukti
+"data sampai broker" adalah DoD HW-5.4 dan dikerjakan di FASE 5, dengan dua
+jalan yang sudah diidentifikasi:
+  a. Wokwi for VS Code (Private Gateway bawaan) atau wokwi.com dengan F1 ->
+     "Enable Private Wokwi IoT Gateway", plus wokwigw.exe berjalan di 9011.
+  b. Menjalankan broker di host yang terjangkau dari gateway publik.
+
+Mencatat ini sebagai DEC-IOT-19, bukan menyembunyikannya.
+
+--- Serial log (Skenario MQTT Down, I-04) ---
+[SIM] SENSOR_PROBE: siklus probing, TANPA TX dan TANPA sleep
+[TX] WiFi ke "Wokwi-GUEST"
+[TX] WiFi tersambung, IP 10.13.37.2
+[TX] broker host.wokwi.internal -> 10.13.37.254:1883
+[TX] MQTT gagal ke host.wokwi.internal:1883, state=-2
+[TX] jam tersinkron: 1793031606 (epoch UTC)
+[SIM] probe siap, siklus tiap 5 detik
+[PROBE] m=21.0%(OK) ph=7.85(OK) t=34.50C(OK) b=3.87V(OK)
+[TX] payload 71 byte: {"n":"VS-SIM-001","ts":1793031606,"m":21.0,"t":34.5,"ph":7.85,"b":3.87}
+[TX] connect gagal, state=-2
+[TX] connect gagal, state=-2
+[TX] connect gagal, state=-2
+[TX] GAGAL ok=0 attempts=3
+[Skenario MQTT Down - broker tidak terjangkau] Expected text matched: "[TX] GAGAL ok=0 attempts=3"
+[Skenario MQTT Down - broker tidak terjangkau] Expected text matched: "[PROBE] m=21.0%(OK) ph=7.85(OK) t=34.50C(OK) b=3.87V(OK)"
+[Skenario MQTT Down - broker tidak terjangkau] Scenario completed successfully
+
+--- Catatan implementasi ---
+- transport_send() tidak lagi punya loop retry sendiri; ia memanggil
+  transport_retry() di transport_core.cpp yang sama-sama dipakai build LoRa.
+  Versi dua-salinan mudah menyimpang soal jeda setelah percobaan terakhir.
+- Payload 71 byte cocok dengan angka DEC-IOT-02 (70-76 byte), bukan 52 byte
+  seperti klaim dokumen lama.
+- Jam disinkronkan lewat configTime(0,0,"pool.ntp.org","time.google.com")
+  sesuai DEC-IOT-09. Tanpa NTP, f.timestamp tetap 0 dan backend menolak semua
+  paket karena ts < 1700000000.
+- transport_syncClock() dipanggil walau MQTT gagal: NTP hanya butuh WiFi, dan
+  log tetap butuh waktu yang benar untuk mendiagnosis kegagalan.
+- Buffer PubSubClient dinaikkan ke PAYLOAD_BUF_SIZE + 64. Default 256 byte
+  sebenarnya cukup, tetapi header topik ikut dihitung dan ruang lebih tidak
+  merugikan.

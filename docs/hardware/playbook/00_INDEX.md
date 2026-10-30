@@ -4,6 +4,7 @@
 > **CABANG GIT:** `iot`
 > **AREA TULIS (R/W):** `firmware/`, `simulation/wokwi/`, `docs/hardware/`
 > **STATUS:** dokumen hidup (*living document*) — diperbarui setiap task selesai
+> **SISA TASK:** [`../REMAINING_TASKS.md`](../REMAINING_TASKS.md)
 
 ---
 
@@ -100,49 +101,49 @@ Update kolom Status dan Bukti setiap menyelesaikan task. Jangan tandai `✅` tan
 ### FASE 3 — Payload & Transport
 | ID | Task | Status | Bukti |
 |---|---|---|---|
-| HW-3.1 | Validasi rentang lokal sebelum kirim | ⬜ | |
+| HW-3.1 | Validasi rentang lokal sebelum kirim | ✅ | `sensors_core.cpp` `channelStatus()`, clamp dibuang, sentinel `-999`, `evidence/HW-3.1_no_clamp_wokwi_20261026.txt` |
 | HW-3.2 | Encoder JSON 6 field + ukur panjang | ✅ | `payload.cpp`, 6 test lulus (70 B / ≤76 B) |
-| HW-3.3 | `transport_lora.cpp` (SX1278, retry 3×) | ⬜ | |
-| HW-3.4 | `transport_mqtt.cpp` (WiFi + publish) | ⬜ | |
-| HW-3.5 | Unit test payload di env `native` | ✅ | `evidence/unit_test_native_20261026.txt`, 30 PASS (payload + sensors_core + calibration_core) |
+| HW-3.3 | `transport_lora.cpp` (SX1278, retry 3×) | ✅ | Build-only: `evidence/HW-3.3_lora_transport_20261026.txt`; radio belum memancar → HW-9.3 |
+| HW-3.4 | `transport_mqtt.cpp` (WiFi + publish) | ✅ | `evidence/HW-3.4_mqtt_transport_20261026.txt`; data sampai broker → HW-5.4 (DEC-IOT-19) |
+| HW-3.5 | Unit test payload di env `native` | ✅ | `evidence/unit_test_native_20261026.txt`, 45 PASS (payload + sensors_core + calibration_core + transport_core) |
 
 ### FASE 4 — Power Management
 | ID | Task | Status | Bukti |
 |---|---|---|---|
-| HW-4.1 | Sequencing power gate GPIO25 | ⬜ | |
-| HW-4.2 | Deep sleep + radio off | ⬜ | |
-| HW-4.3 | Orkestrasi siklus di `main.cpp` | ⬜ | |
-| HW-4.4 | Verifikasi power budget | ⬜ | |
+| HW-4.1 | Sequencing power gate GPIO25 | ✅ | `power_mgmt.cpp` + urutan log, `evidence/HW-4.1_power_gate_20261027.txt` |
+| HW-4.2 | Deep sleep + radio off | ✅ | `power_mgmt.cpp`, `evidence/HW-4.2_deep_sleep_20261027.txt` (deep sleep fisik → HW-9.1) |
+| HW-4.3 | Orkestrasi siklus di `main.cpp` | ✅ | `main.cpp`, 6 skenario lulus, `evidence/HW-4.3_orchestration_20261027.txt` |
+| HW-4.4 | Verifikasi power budget | ✅ | `evidence/HW-4.4_power_budget_20261027.md` (durasi terukur, arus estimasi) |
 
 ### FASE 5 — Wokwi Testbed
 | ID | Task | Status | Bukti |
 |---|---|---|---|
 | HW-5.1 | `diagram.json` | ✅ | `simulation/wokwi/diagram.json` (ditarik ke FASE 2, DEC-IOT-17), `evidence/HW-5.1_diagram_lint_20261026.txt` |
 | HW-5.2 | `wokwi.toml` + wiring build | ✅ | `simulation/wokwi/wokwi.toml` + `scenario_a.yaml`, `evidence/HW-5.2_wokwi_scenario_ab_20261026.txt` |
-| HW-5.3 | Verifikasi paritas firmware | ⬜ | |
-| HW-5.4 | Telemetri sampai Mosquitto | ⬜ | |
+| HW-5.3 | Verifikasi paritas firmware | ✅ | `evidence/HW-5.3_parity_20261027.txt` |
+| HW-5.4 | Telemetri sampai Mosquitto | ✅ | `evidence/I03_mqtt_rx.txt` + `evidence/HW-5.4_local_mqtt_20261027.md` (via tunnel TCP; Private Gateway tidak tersedia di akun gratis) |
 
 ### FASE 6 — Gateway & MQTT
 | ID | Task | Status | Bukti |
 |---|---|---|---|
-| HW-6.1 | Topik & QoS sesuai kontrak | ⬜ | |
-| HW-6.2 | Uji ACL adapter (koordinasi Syifa) | ⬜ | |
+| HW-6.1 | Topik & QoS sesuai kontrak | ✅ | `evidence/HW-6.1_topic_qos_retain_20261027.txt` + `evidence/HW-6.1_verification_20261027.md` (5 paket, topik persis, q=0, r=0) |
+| HW-6.2 | Uji ACL adapter (koordinasi Syifa) | ✅ | `evidence/HW-6.2_adapter_test_20261027.txt` + `evidence/HW-6.2_backend_findings_20261027.md` (diuji ke `origin/full-stack` 8e77211; re-test setelah merge) |
 | HW-6.3 | Gate LoRa RX fisik | ➖ | |
 
 ### FASE 7 — Uji & Bukti
 | ID | Task | Status | Bukti |
 |---|---|---|---|
-| HW-7.1 | Unit test lulus | ⬜ | |
-| HW-7.2 | Integrasi Wokwi → MQTT → backend | ⬜ | |
-| HW-7.3 | Skenario A/B/C | ⬜ | |
-| HW-7.4 | Arsip bukti | ⬜ | |
+| HW-7.1 | Unit test lulus | ✅ | `evidence/unit_test_native_20261027.txt` (45 PASS) |
+| HW-7.2 | Integrasi Wokwi → MQTT → backend | ⛔ | `evidence/HW-7.2_backend_blocker_20261027.md` (backend belum punya MQTT worker) |
+| HW-7.3 | Skenario A/B/C | 🟨 | `evidence/E01_serial.txt`, `E01_mqtt.txt`, `E01_validation.txt`; E02/I-06 kuota Wokwi habis, E03/dashboard butuh backend (`evidence/HW-7.3_blockers_20261027.md`) |
+| HW-7.4 | Arsip bukti | 🟨 | `evidence/HW-7.4_evidence_inventory_20261027.md` (item 6-11 belum lengkap) |
 
 ### FASE 8 — Demo & Handover
 | ID | Task | Status | Bukti |
 |---|---|---|---|
 | HW-8.1 | Video demo 2 menit | ⬜ | |
-| HW-8.2 | Screenshot + link Wokwi | ⬜ | |
-| HW-8.3 | Paket serah terima ke Syifa | ⬜ | |
+| HW-8.2 | Screenshot + link Wokwi | 🟨 | `evidence/wokwi_diagram.png` (screenshot 1270x490 + full 1920x1080); link publik belum ada |
+| HW-8.3 | Paket serah terima ke Syifa | ✅ | `evidence/HANDOVER.md` + `evidence/HANDOVER_MESSAGE.md` (draft siap; pengiriman/konfirmasi Syifa di luar repo) |
 | HW-8.4 | PR `iot` → `Development` | ⬜ | |
 
 ### FASE 9 — TKT 4–6 (pasca-insentif)

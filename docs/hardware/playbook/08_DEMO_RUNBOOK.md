@@ -29,6 +29,7 @@
 - [ ] Telegram/WA alert terkirim (uji sekali ke nomor sendiri)
 - [ ] `simulation/wokwi/diagram.json` + `wokwi.toml` ter-commit
 - [ ] Payload contoh tersimpan di `docs/hardware/evidence/`
+- [ ] **Jalur Wokwi → Mosquitto sudah terbukti di mesin yang akan dipakai demo.** `wokwi-cli` dengan gateway publik **tidak bisa** menghubungi Mosquitto lokal (DEC-IOT-19), jadi demo wajib memakai Wokwi for VS Code / wokwi.com dengan Private Gateway aktif, atau broker yang terjangkau dari internet. Uji ini H-1, bukan hari-H.
 
 ### 2.2 Cadangan (fallback)
 

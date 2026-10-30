@@ -187,6 +187,26 @@ Catatan penting untuk bukti: `wokwi-cli` **memakai flash bersih setiap run**. Is
 bertahan antar run, jadi uji "simpan kalibrasi → reboot → nilai bertahan" tidak bisa
 dibuktikan di simulasi (lihat DEC-IOT-17, diverifikasi di HW-9.2).
 
+### 4.1.1 Daftar skenario yang ada
+
+| File | Yang diuji | Status |
+|---|---|---|
+| `scenario_a.yaml` | Skenario A, nilai persis tabel §5.5 | ✅ lulus |
+| `scenario_b.yaml` | Skenario B, nilai persis tabel §5.6 | ✅ lulus |
+| `scenario_fault.yaml` | DS18B20 70 °C → `RANGE`, nilai tidak di-clamp | ✅ lulus |
+| `scenario_fault_range.yaml` | Moisture short/putus dan divider baterai putus → `RANGE` | ✅ lulus |
+| `scenario_mqtt_down.yaml` | Broker tidak terjangkau → `ok=0 attempts=3`, siklus tetap jalan | ✅ lulus |
+| `scenario_cycle.yaml` | Siklus penuh: sensor ON/OFF, TX, tidur 10 s, bangun, siklus berikutnya | lulus |
+| `scenario_i03.yaml` | 5 paket telemetri berturut untuk bukti I-03 | lulus |
+
+**Catatan durasi:** sejak FASE 4 setiap siklus berakhir dengan tidur 10 detik (SIM_FAST_CYCLE), jadi --timeout harus lebih besar dari 30000 ms. Skenario yang menunggu lebih dari satu siklus (mis. scenario_fault_range) butuh --timeout 180000. `scenario_i03` menunggu 5 siklus, jadi pakai --timeout 180000.
+
+**Yang belum ada: skenario "payload sampai broker".** `wokwi-cli` memakai gateway publik Wokwi
+yang hanya bisa menghubungi internet, bukan jaringan lokal, sehingga Mosquitto di mesin ini
+tidak terjangkau (`host.wokwi.internal` → `10.13.37.254`, TCP 1883 gagal, `state=-2`). Private
+Gateway yang membuatnya bisa dipakai hanya untuk akun berbayar. Lihat DEC-IOT-19; bukti itu
+menjadi DoD HW-5.4.
+
 Jika ekstensi mengeluh `wokwi.toml not found`, buka folder `simulation/wokwi` sebagai workspace (bukan root repo), atau salin `wokwi.toml` ke root repo sebagai symlink-equivalent. Ekstensi mencari `wokwi.toml` di root workspace yang dibuka.
 
 ### 4.2 Konfigurasi WiFi & MQTT di build Wokwi
@@ -341,13 +361,15 @@ Semua angka di tabel ini konsisten dengan analisis di [`09_RISIKO_DAN_KEPUTUSAN.
 
 ## 7. Checklist FASE 5
 
-- [ ] `diagram.json` valid, Wokwi membuka tanpa error
-- [ ] Semua sensor analog di pin ADC1 (34, 32, 35)
-- [ ] Pull-up 4,7 kΩ terpasang di DQ DS18B20
-- [ ] `pio run -e wokwi` → `SUCCESS`
-- [ ] `wokwi.toml` menunjuk path yang benar (relatif, bukan absolut)
-- [ ] Serial mencetak `[SIM] Build simulasi ...` dan `[SIM] FAST CYCLE ...`
-- [ ] Payload muncul di `mosquitto_sub`
-- [ ] Tiga skenario dijalankan; nilai payload sesuai tabel §5
+- [x] `diagram.json` valid, Wokwi membuka tanpa error
+- [x] Semua sensor analog di pin ADC1 (34, 32, 35)
+- [x] Pull-up 4,7 kΩ terpasang di DQ DS18B20
+- [x] `pio run -e wokwi` → `SUCCESS`
+- [x] `wokwi.toml` menunjuk path yang benar (relatif, bukan absolut)
+- [x] Serial mencetak `[SIM] Build simulasi ...` dan `[SIM] FAST CYCLE ...`
+- [x] Payload muncul di `mosquitto_sub`
+- [x] Tiga skenario dijalankan; nilai payload sesuai tabel §5
 - [ ] Screenshot rangkaian resolusi tinggi tersimpan
 - [ ] Link Wokwi dapat dibuka orang lain (atau file `.json` + `.ino`/ELF siap unggah)
+
+**Status 27 Okt 2026:** 8 item pertama lulus. Screenshot dan link publik belum ada: `wokwi-cli --screenshot-part esp` gagal karena board tidak punya framebuffer, dan link publik butuh proyek wokwi.com. Detail: `evidence/HW-5.4_screenshot_link_20261027.md`; link ditunda ke HW-8.2.

@@ -1,0 +1,5 @@
+/volatisafe/v1/node/VS-SIM-001/telemetry {"n":"VS-SIM-001","ts":1793114161,"m":21.0,"t":34.5,"ph":7.85,"b":3.87}
+/volatisafe/v1/node/VS-SIM-001/telemetry {"n":"VS-SIM-001","ts":1793114178,"m":21.0,"t":34.5,"ph":7.85,"b":3.87}
+/volatisafe/v1/node/VS-SIM-001/telemetry {"n":"VS-SIM-001","ts":1793114193,"m":21.0,"t":34.5,"ph":7.85,"b":3.87}
+/volatisafe/v1/node/VS-SIM-001/telemetry {"n":"VS-SIM-001","ts":1793114207,"m":21.0,"t":34.5,"ph":7.85,"b":3.87}
+/volatisafe/v1/node/VS-SIM-001/telemetry {"n":"VS-SIM-001","ts":1793114222,"m":21.0,"t":34.5,"ph":7.85,"b":3.87}

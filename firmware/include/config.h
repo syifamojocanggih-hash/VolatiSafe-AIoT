@@ -39,6 +39,9 @@
 #define LORA_FREQUENCY      433E6   // 433.0 MHz
 #define LORA_TX_POWER       17      // +17 dBm
 #define LORA_SYNC_WORD      0x12
+#define LORA_SF             7       // SF7: tercepat, jangkauan cukup untuk TKT 4
+#define LORA_BANDWIDTH      125E3   // 125 kHz
+#define LORA_CODING_RATE    5       // CR 4/5
 
 // --- Sampling & Filtering ---------------------------------------------------
 // ADC_11db hanya ada di core Arduino. env:native mengompilasi config.h tanpa
@@ -68,6 +71,14 @@
 #define SOIL_TEMP_MAX       60.0f
 #define PH_MIN              3.0f
 #define PH_MAX              10.0f
+#define BATTERY_MIN_V       2.80f   // sama dengan types.h dan gate backend
+#define BATTERY_MAX_V       4.25f
+
+// Sentinel untuk kerusakan yang tidak punya nilai fisik. Semuanya sengaja di
+// luar rentang kontrak supaya backend menolak paket, bukan menerimanya sebagai
+// pembacaan wajar (DEC-IOT-18).
+#define MOISTURE_ERROR_FLAG -999.0f
+#define PH_ERROR_FLAG       -999.0f
 #define TEMP_ERROR_FLAG     -999.0f // DS18B20 terputus (-127C)
 #define TEMP_DISCONNECTED_C -126.0f // DallasTemperature DEVICE_DISCONNECTED_C
 #define ADC_UNSTABLE_RANGE  800     // placeholder; diukur nyata di HW-9.1 (F-01)
@@ -93,3 +104,4 @@
 #define TX_RETRY_DELAY_MS      2000
 #define WIFI_CONNECT_TIMEOUT_MS 10000
 #define MQTT_CONNECT_TIMEOUT_MS 5000
+#define NTP_SYNC_TIMEOUT_MS     10000   // Wokwi butuh ~1-2 s; 10 s beri ruang

@@ -225,6 +225,92 @@
 
 ---
 
+### DEC-IOT-18 — Clamp Dibuang: Nilai Rusak Dikirim Apa Adanya + Status Per Kanal
+
+| | |
+|---|---|
+| **Tanggal** | 26 Okt 2026 |
+| **Status** | ✅ Diputuskan |
+| **Konteks** | `03_ROADMAP_TUGAS.md` HW-3.1 sudah memperingatkan "jangan men-clamp nilai rusak menjadi nilai valid", tetapi `sensors_core.cpp` FASE 2 masih memakai `clampf()` di moisture dan pH. |
+| **Masalah** | Clamp mengubah kerusakan menjadi angka yang tampak sah. Sensor short (ADC 0) menjadi `m=100.0 %`, sensor putus (ADC 4095) menjadi `m=0.0 %`, kalibrasi kosong (`dry == wet`) menjadi `m=0.0 %`, dan slope pH 0 menjadi `ph=0.00` yang ter-clamp ke `3.00`. Semua lolos `validate_sensor_bounds()` dan masuk database sebagai tanah jenuh/kering atau pH asam sungguhan. |
+| **Keputusan** | Clamp dihapus dari `sensors_adcToMoisturePct` dan `sensors_adcToPh`. Nilai keluar apa adanya; status per kanal (`SENSOR_OUT_OF_RANGE`) menandai kanal yang di luar batas fisik. Kerusakan kalibrasi menghasilkan sentinel `MOISTURE_ERROR_FLAG` / `PH_ERROR_FLAG` (-999) yang dijamin ditolak gate backend. |
+| **Pengecualian** | Kompensasi pH tetap membatasi **input** `moisture_pct` ke 0..100. Tanpa itu, sentinel -999 menggeser pH sejauh 3,1 satuan dan menutupi penyebab sebenarnya. Yang tidak dibatasi adalah hasil pH-nya. |
+| **Prioritas status** | `OUT_OF_RANGE` menang atas `UNSTABLE`. Nilai di luar batas sudah pasti rusak; menyebutnya "cuma goyang" menutupi penyebabnya. |
+| **Konsekuensi** | Payload bisa berisi `m=193.1` atau `ph=-1.65`. Backend **wajib** menolaknya, dan itu memang tujuannya: data rusak harus terlihat sebagai data rusak, bukan dibulatkan menjadi data sah. `simulation/wokwi/validate_payload.py` meniru gate itu supaya kegagalan bisa dibedakan: payload salah vs backend salah. |
+| **Batas bukti** | Yang diuji adalah konversi ADC → nilai → status di simulator (`evidence/HW-3.1_no_clamp_wokwi_20261026.txt`). Efeknya terhadap backend belum diuji karena backend belum ada; validator lokal menjadi pengganti sementara. |
+
+---
+
+### DEC-IOT-19 — Broker Lokal Tidak Terjangkau dari `wokwi-cli` (Gateway Publik)
+
+| | |
+|---|---|
+| **Tanggal** | 26 Okt 2026 |
+| **Status** | ⛔ Terbuka — memblokir I-03, ditangani di HW-5.4 |
+| **Konteks** | HW-3.4 membutuhkan bukti "payload sampai broker" (I-03: 5 paket, `ts` monoton). |
+| **Temuan** | `wokwi-cli` 0.29.1 memakai **gateway publik** Wokwi. Gateway publik hanya bisa menghubungi internet, bukan jaringan lokal mesin ini. Hasil nyata di simulator: `host.wokwi.internal` berhasil di-resolve ke `10.13.37.254` (alamat gateway), tetapi TCP ke port 1883 gagal (`state=-2`), sementara NTP lewat UDP 123 berhasil pada run yang sama. |
+| **Percobaan yang gagal** | (a) Menjalankan `wokwigw.exe` v2.0.1 di port 9011 dan menambahkan `[net] gateway = "ws://localhost:9011"` ke `wokwi.toml`: CLI tidak pernah membuka koneksi ke 9011 (dicek dengan `netstat`), dan penambahan `[net]` justru membuat NTP ikut gagal. Konfigurasi itu sudah dibatalkan. (b) Mengarahkan `SIM_MQTT_HOST` ke `test.mosquitto.org`: DNS berhasil, TCP 1883 tetap gagal. |
+| **Sebab** | Private Gateway, satu-satunya jalur yang membuat `host.wokwi.internal` bisa dipakai, **hanya tersedia untuk akun Wokwi berbayar** (dokumentasi Wokwi, "The Private Gateway"). |
+| **Keputusan** | DoD HW-3.4 diturunkan ke level yang bisa dibuktikan: build lulus, topik persis kontrak, payload 71 byte dengan `ts` NTP valid, dan retry 3× tanpa crash (I-04). Bukti "data sampai broker" tetap menjadi DoD **HW-5.4**, tidak dipindahkan diam-diam. |
+| **Jalan keluar untuk HW-5.4** | (1) Pakai Wokwi for VS Code atau wokwi.com dengan Private Gateway aktif, lalu jalankan `wokwigw.exe`; (2) jalankan broker di host yang terjangkau gateway publik; (3) rekam bukti I-03 dari mesin yang punya lisensi Wokwi. Pilih satu sebelum FASE 5 dimulai, bukan saat demo. |
+| **Konsekuensi** | R-02 naik dari "sedang" ke "sudah terbukti terjadi". `scenario_mqtt_down.yaml` sekarang menguji jalur gagal (bukan jalur sukses) karena itulah satu-satunya yang bisa dijalankan konsisten di lingkungan ini. |
+
+**Update 27 Okt 2026 (HW-5.4):** I-03 sudah lulus. Karena akun Wokwi yang dipakai gratis (Private Gateway butuh akun berbayar), broker lokal diekspos sementara lewat tunnel TCP Serveo (`ssh -p 443 -R 0:localhost:1883 serveo.net`), lalu firmware build `wokwi` diarahkan ke host/port tunnel. Ini **bukan bridge** dan tidak mengubah firmware: `transport_mqtt.cpp` tetap publish sendiri. Hasil: 5 paket berturut di Mosquitto lokal, `ts` monoton, 5/5 payload valid. Bukti: `evidence/I03_mqtt_rx.txt`, `evidence/HW-5.4_local_mqtt_20261027.md`. Klaim `host.wokwi.internal` langsung tetap belum terbukti dan tetap butuh Private Gateway berbayar.
+
+---
+
+### DEC-IOT-20 - Penyimpangan FASE 4: Urutan Timestamp, Deep Sleep Wokwi, dan Penghapusan Probe
+
+| | |
+|---|---|
+| **Tanggal** | 27 Okt 2026 |
+| **Status** | Diputuskan |
+| **Konteks** | HW-4.2/HW-4.3 mengubah `power_mgmt.cpp` dan `main.cpp` dari stub menjadi siklus penuh. `04_FIRMWARE_CORE.md` 10 menaruh `payload_encode()` sebelum `transport_init()`, dan `esp_deep_sleep_start()` diasumsikan langsung menghentikan eksekusi. |
+| **Temuan 1** | Build MQTT butuh `ts` valid. `transport_syncClock()` hanya bisa jalan setelah `transport_init()` (WiFi hidup). Kalau urutan spec diikuti, `f.timestamp` masih 0 saat encode dan backend menolak setiap paket (`ts < 1700000000`). |
+| **Keputusan 1** | Urutan final: sampling -> `transport_init()` -> `transport_syncClock()` -> `f.timestamp = time(nullptr)` -> encode -> send -> shutdown -> sleep. Untuk build fisik, `ts` tetap belum terpecahkan (DEC-IOT-09) dan diverifikasi di TKT 4. |
+| **Temuan 2** | `wokwi-cli` 0.29.1 tidak menyelesaikan deep sleep timer dengan bersih. `esp_deep_sleep_start()` memasang timer tetapi CPU memicu `TG1WDT_SYS_RESET` sebelum timer 10 detik, lalu `DEEPSLEEP_RESET` datang di tengah siklus berikutnya. `disableLoopWDT()` dan `disableCore0WDT()` tidak memperbaiki perilaku ini. |
+| **Keputusan 2** | Build `SIM_FAST_CYCLE` tidak memanggil `esp_deep_sleep_start()`. `power_enterDeepSleep()` menandai waktu tidur, `loop()` menunggu durasi yang sama sambil memberi feed watchdog, lalu `ESP.restart()`. Build fisik tetap memakai `esp_sleep_enable_timer_wakeup()` + `esp_deep_sleep_start()`. |
+| **Konsekuensi 2** | Bukti simulator hanya membuktikan durasi tidur, urutan shutdown, dan siklus bangun - bukan `DEEPSLEEP_RESET`/wake timer fisik. Arus deep sleep dan wake timer nyata diverifikasi di HW-9.1 (F-04). Ini dicatat di `evidence/HW-4.2_deep_sleep_20261027.txt`, bukan diklaim sebagai deep sleep terbukti. |
+| **Temuan 3** | `SENSOR_PROBE` dan `CAL_NVS_SELFTEST` adalah blok sementara DEC-IOT-17 yang wajib dihapus saat HW-4.3. Skrip skenario masih menunggu `[PROBE]`. |
+| **Keputusan 3** | Kedua flag dihapus dari `main.cpp` dan `platformio.ini`. Semua skenario memakai `[SENS]`/`[PWR]`, dan `scenario_cycle.yaml` ditambahkan untuk membuktikan siklus tidur -> bangun. |
+| **Temuan 4** | `power_mgmt.cpp` tidak boleh meng-include `<WiFi.h>`/`<LoRa.h>`; itu akan membuat paritas modul rusak dan menambah flash build fisik. |
+| **Keputusan 4** | Radio dimatikan oleh `transport_shutdown()` masing-masing transport (MQTT: disconnect + `WiFi.mode(WIFI_OFF)`; LoRa: `LoRa.sleep()` + `SPI.end()`). `power_mgmt.cpp` hanya mengurus gate sensor, deep sleep, dan wake reason. |
+| **Angka** | Sampling terukur 1,013-1,015 s. Siklus aktif simulator 11,7-16,8 s karena WiFi/NTP/MQTT, bukan angka fisik. Budget fisik 0,05673 mAh/siklus (81 % batas 0,07). Flash `wokwi` 76,0 %, fisik 26,2 %; tidak ada dependensi baru. |
+
+---
+
+### DEC-IOT-21 - Adapter Backend Belum Menegakkan Batas Baterai dan Timestamp
+
+| | |
+|---|---|
+| **Tanggal** | 27 Okt 2026 |
+| **Status** | Temuan - perlu tindakan Syifa |
+| **Konteks** | HW-6.2 menguji adapter aktual di `origin/full-stack` commit `8e77211`: `IngestionService.process_lora_payload()` di `backend/app/services/ingestion.py`. Tidak ada file `lora_adapter.py` terpisah. |
+| **Yang lulus** | Payload valid A/B diterima dan field normalisasi cocok. `t=-999`, moisture `193.1`, pH `2.0`, dan payload tanpa `n` ditolak. |
+| **Temuan 1** | `b=0.0` diterima dan disimpan sebagai `battery_voltage=0.0`; batas `2.80..4.25` di `INTERFACES.md` 1.3 tidak ditegakkan. `docs/backend/INGESTION_PIPELINE.md` 2 menulis `2.5..4.5`, dan `validate_sensor_bounds()` tidak dipanggil. |
+| **Temuan 2** | `b` yang hilang diisi default `3.87`, padahal `b` wajib di kontrak. Ini menyembunyikan paket tidak lengkap. |
+| **Temuan 3** | `ts=0` atau `ts` tidak ada diterima lalu diganti `datetime.now()`. Kontrak meminta `ts >= 1700000000`; penggantian ini mengaburkan waktu ukur vs waktu terima dan menyentuh DEC-IOT-09. |
+| **Temuan 4** | `rssi_dbm`/`snr_db` tidak ada di output adapter; keputusan tetap di DEC-IOT-11. |
+| **Temuan 5** | Dokumen 06 menyebut `lora_adapter.unpack_lora_payload()`, tetapi implementasinya `IngestionService.process_lora_payload()`. Nama file/method perlu diselaraskan. |
+| **Keputusan** | IoT tidak mengedit backend. Temuan dikirim ke Syifa lewat `evidence/HW-6.2_backend_findings_20261027.md`. Status HW-6.2 dianggap lulus untuk commit `8e77211`, tetapi harus di-re-test setelah merge ke `Development`. |
+| **Konsekuensi** | Paket dengan baterai rusak atau timestamp tidak valid bisa lolos ke database. Backend perlu menolak/menandai, atau gateway menstempel ulang `ts` (butuh keputusan Aris). |
+
+---
+
+### DEC-IOT-22 - Kuota CI Wokwi Gratis Habis Sebelum E02/I-06
+
+| | |
+|---|---|
+| **Tanggal** | 27 Okt 2026 |
+| **Status** | Terjadi - memblokir E02, I-06, dan demo live |
+| **Konteks** | Setelah E01 selesai, `wokwi-cli` menolak menjalankan simulasi berikutnya: "You have used up your Free plan monthly CI minute quota." |
+| **Dampak** | E02 dan I-06 tidak bisa dijalankan; screenshot/link dan video live juga berisiko. Build firmware dan unit test tetap bisa. |
+| **Keputusan** | Jangan menandai E02/E03/I-06 lulus. E01 dipertahankan sebagai bukti sisi IoT. Log `[SENS]` B lama dipakai sebagai bukti parsial. Demo harus memakai rekaman yang ada atau akun/kuota lain. |
+| **Mitigasi** | Cek apakah VS Code interaktif memakai kuota terpisah; rekam semua segmen H-1; siapkan akun berbayar bila memungkinkan. |
+| **Bukti** | `evidence/HW-7.3_blockers_20261027.md`, `evidence/HW-7.4_evidence_inventory_20261027.md`. |
+
+---
+
 ## Bagian B — Risk Register
 
 Probabilitas & dampak: T = Tinggi, S = Sedang, R = Rendah.
@@ -232,10 +318,10 @@ Probabilitas & dampak: T = Tinggi, S = Sedang, R = Rendah.
 | ID | Risiko | P | D | Mitigasi | Pemilik |
 |---|---|---|---|---|---|
 | R-01 | Waktu habis sebelum FASE 5 (Wokwi) selesai | T | T | Ikuti jalur kritis §2 di `03_ROADMAP_TUGAS.md`; potong task non-esensial (§14) | Hafiiz |
-| R-02 | Wokwi tidak bisa menjangkau broker lokal | S | T | Uji `host.wokwi.internal` lebih dulu (HW-5.4); cadangan pakai IP LAN + buka firewall | Hafiiz |
+| R-02 | Wokwi tidak bisa menjangkau broker lokal | **T (terbukti)** | T | DEC-IOT-19: gateway publik memblokir TCP ke host; I-03 dipindah ke HW-5.4 dengan Private Gateway / VS Code, diputuskan sebelum FASE 5 | Hafiiz |
 | R-03 | Backend Syifa belum siap saat HW-7.2 | T | S | Bukti integrasi bisa berupa payload di `mosquitto_sub` + validator; jadwalkan HW-7.2 lebih lambat | Hafiiz + Syifa |
 | R-04 | Klaim 52 byte terbukti salah di depan juri | S | T | DEC-IOT-02: koreksi dokumen + jawaban jujur di video | Hafiiz → Aris |
-| R-05 | Kuota simulasi Wokwi habis saat demo | S | T | Uji penuh H-1; rekam semua segmen H-1; jangan simulasi berulang hari-H | Hafiiz |
+| R-05 | Kuota simulasi Wokwi habis saat demo | **T (terjadi 27 Okt 2026)** | T | Kuota CI gratis habis setelah E01; E02/I-06 tertunda. Rekam semua segmen dengan sisa akses interaktif/akun berbayar, jangan simulasi berulang hari-H | Hafiiz |
 | R-06 | Broker tanpa auth di WiFi publik saat demo | S | T | Aktifkan `password_file`; demo di hotspot pribadi | Hafiiz |
 | R-07 | `.pio/` ter-commit (315 MB artefak) | S | S | `git add <path>` eksplisit sampai `.gitignore` ada (HW-0.4) | Hafiiz → Aris |
 | R-08 | Arus deep sleep nyata jauh di atas klaim → klaim daya gugur | T | T | Dek-IOT-05: ganti klaim ke "target desain", tambahkan panel surya | Hafiiz |

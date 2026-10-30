@@ -60,6 +60,15 @@ Tanpa nomor 5, status tetap `🟨`.
 | Panjang terukur | dicatat (70 / 71 / 76 byte), bukan diklaim 52 |
 | Dua transport | hanya `transport_*.cpp` yang berbeda; `diff` bersih |
 | Tidak bocor | `main.cpp` tidak meng-include `<LoRa.h>` atau `<WiFi.h>` |
+| Validasi rentang | nilai rusak dikirim di luar kontrak + `SENSOR_OUT_OF_RANGE`, bukan di-clamp (DEC-IOT-18) |
+| Retry teruji | U-46 … U-53 PASS di `env:native`, bukan hanya di kode |
+
+**Yang belum tercakup di FASE 3 dan sengaja tidak diklaim:**
+
+| Kriteria | Alasan |
+|---|---|
+| Radio LoRa benar-benar memancar | Wokwi tidak punya part SX1278 → HW-9.3 |
+| Payload sampai broker (I-03) | Gateway publik Wokwi tidak bisa menjangkau host → HW-5.4, DEC-IOT-19 |
 
 ### FASE 4 — Daya
 
@@ -77,7 +86,7 @@ Tanpa nomor 5, status tetap `🟨`.
 | Rangkaian valid | Wokwi membuka tanpa error |
 | ADC1 | pin 34, 32, 35 — bukan ADC2 |
 | Pull-up | 4,7 kΩ terpasang di DQ |
-| Data mengalir | 5 paket berturut di `mosquitto_sub`, `ts` monoton |
+| Data mengalir | 5 paket berturut di `mosquitto_sub`, `ts` monoton (lulus via tunnel TCP ke Mosquitto lokal, 27 Okt 2026) |
 
 ### FASE 6 — Gateway
 
@@ -85,17 +94,17 @@ Tanpa nomor 5, status tetap `🟨`.
 |---|---|
 | Topik persis | garis miring di depan, `NODE_ID` benar |
 | QoS/retain | 0 / false untuk telemetri |
-| ACL menerima | payload lolos adaptor Syifa tanpa error |
+| ACL menerima | payload lolos adaptor Syifa tanpa error (diuji ke `origin/full-stack` 8e77211; re-test setelah merge) |
 | Validator lokal | `validate_payload.py` → `[OK]` |
 
 ### FASE 7 — Uji
 
 | Kriteria | Cara verifikasi |
 |---|---|
-| Unit | 33 kasus PASS (U-01 … U-33) |
-| Integrasi | I-01 … I-06 dijalankan, hasil dicatat |
-| E2E | E-01 … E-03 dijalankan, kategori risiko sesuai |
-| Bukti | 12 item di `07_TEST_PLAN.md` §6 lengkap |
+| Unit | 45 kasus PASS (U-01 … U-53; bukti `unit_test_native_20261027.txt`) |
+| Integrasi | I-01 … I-05 lulus; I-06 tertunda karena kuota Wokwi; I-03 lulus |
+| E2E | E-01 sisi IoT lulus; E-02 tertunda kuota; E-03 butuh backend |
+| Bukti | 12 item di `07_TEST_PLAN.md` §6 terisi sebagian; lihat `HW-7.4_evidence_inventory_20261027.md` |
 
 ### FASE 8 — Demo & Handover
 

@@ -1,0 +1,35 @@
+name: 'Skenario MQTT Down — broker tidak terjangkau'
+version: 1
+author: 'VolatiSafe AIoT — Hafiiz'
+
+# I-04 (07_TEST_PLAN 6): broker mati tidak boleh menggantungkan node.
+# Yang diharapkan: 3 percobaan, lalu menyerah, dan siklus berikutnya tetap
+# jalan. Bukan crash, bukan retry tanpa batas.
+#
+# Catatan: di wokwi-cli gateway publik, host.wokwi.internal memang tidak
+# terjangkau (Private Gateway hanya untuk akun berbayar). Jadi skenario ini
+# bisa dijalankan di mana saja, dan sekaligus menjadi bukti jalur gagal.
+
+steps:
+  - set-control:
+      part-id: pot_moist
+      name: position
+      value: 0.609523
+  - set-control:
+      part-id: pot_ph
+      name: position
+      value: 0.310378
+  - set-control:
+      part-id: pot_batt
+      name: position
+      value: 0.586325
+  - set-control:
+      part-id: ds18b20
+      name: temperature
+      value: 34.5
+
+  - delay: 2s
+  - wait-serial: '[TX] GAGAL ok=0 attempts=3'
+
+  # Siklus berikutnya harus tetap berjalan: node tidak berhenti di kegagalan.
+  - wait-serial: '[SENS] m=21.0%(OK) ph=7.85(OK) t=34.50C(OK) b=3.87V(OK)'

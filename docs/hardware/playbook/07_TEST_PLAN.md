@@ -117,6 +117,8 @@ Isi = output lengkap `pio test -e native`. Format akhir harus:
 | I-05 | NVS kosong | `pio run -t erase` lalu jalankan | Serial mencetak `[CAL] NVS kosong ...`, node tetap mengirim data |
 | I-06 | DS18B20 terputus | hapus part DS18B20 di diagram, jalankan | payload berisi `"t":-999.0`; backend menolak (bukan diterima) |
 
+**Status per 27 Okt 2026:** I-01, I-02, I-03, I-04, I-05 lulus; I-06 tertunda karena kuota CI Wokwi gratis habis. I-03 dijalankan dengan Mosquitto lokal di port 1883; karena akun Wokwi gratis tidak punya Private Gateway, broker lokal diekspos sementara lewat tunnel TCP (Serveo) dan firmware diarahkan ke endpoint tunnel. Hasil: 5 paket berturut, topik persis, `ts` monoton 1793115044 -> 1793115103, 5/5 payload lolos `validate_payload.py`. Bukti: `evidence/I03_mqtt_rx.txt`, `evidence/HW-5.4_local_mqtt_20261027.md`. Jalur langsung `host.wokwi.internal` tetap hanya untuk akun berbayar (DEC-IOT-19).
+
 ### 3.1 Bukti I-03 (contoh format yang harus disimpan)
 
 ```
@@ -145,6 +147,8 @@ Nilai injeksi tepat: [`05_WOKWI_SIMULASI.md`](05_WOKWI_SIMULASI.md) §5.
 
 **Toleransi:** nilai AVRI E-01 dan E-02 bergantung pada model AI (domain Aris) dan data cuaca BMKG yang aktif. Angka 78 % / 18 % adalah target desain, bukan hasil yang dijamin. Bila model menghasilkan 71 % atau 84 %, skenario tetap **PASS** selama kategori risiko sesuai (Kritis / Aman). Catat nilai aktual, jangan memaksa hasil.
 
+**Status 27 Okt 2026:** E-01 selesai di sisi IoT (`E01_serial.txt`, `E01_mqtt.txt`, `E01_validation.txt`); dashboard PNG belum ada. E-02 dan I-06 tidak bisa dijalankan karena kuota CI Wokwi gratis habis. E-03 dan dashboard butuh backend yang menerima MQTT. Detail: `evidence/HW-7.3_blockers_20261027.md`.
+
 ### 4.1 Bukti E2E
 
 | File | Isi |
@@ -172,15 +176,24 @@ Nilai injeksi tepat: [`05_WOKWI_SIMULASI.md`](05_WOKWI_SIMULASI.md) §5.
 | 2 | `esp32dev` | 6,8 % (22.300 / 327.680 B) | 24,0 % (314.556 / 1.310.720 B) | 26 Okt 2026 | driver sensor + kalibrasi NVS, transport masih stub |
 | 2 | `wokwi` | 6,8 % (22.324 / 327.680 B) | 24,7 % (323.468 / 1.310.720 B) | 26 Okt 2026 | idem + PubSubClient + `SENSOR_PROBE`/`CAL_NVS_SELFTEST` |
 | 2 | `native` | — | — | 26 Okt 2026 | 30 test PASS (payload + sensors_core + calibration_core) |
-| 3 | `esp32dev` | | | | + LoRa + payload |
-| 3 | `wokwi` | | | | + WiFi + PubSubClient |
-| 4 | `esp32dev` | | | | final |
+| 3 | `esp32dev` | 6,9 % (22.452 / 327.680 B) | 24,5 % (320.984 / 1.310.720 B) | 26 Okt 2026 | + transport LoRa nyata (SX1278), payload nyata |
+| 3 | `wokwi` | 14,5 % (47.676 / 327.680 B) | 76,1 % (996.810 / 1.310.720 B) | 26 Okt 2026 | + WiFi + PubSubClient + NTP nyata |
+| 3 | `native` | — | — | 26 Okt 2026 | 45 test PASS (payload + sensors_core + calibration_core + transport_core) |
+| 4 | `esp32dev` | 6,9 % (22.572 / 327.680 B) | 26,2 % (343.428 / 1.310.720 B) | 27 Okt 2026 | orkestrasi siklus + deep sleep; probe/selftest dihapus |
+| 4 | `wokwi` | 14,6 % (47.684 / 327.680 B) | 76,0 % (996.618 / 1.310.720 B) | 27 Okt 2026 | SIM sleep via restart, tanpa probe/selftest |
+| 4 | `native` | - | - | 27 Okt 2026 | 45 test PASS (tidak berubah) |
+
+**FASE 4:** Flash fisik naik dari 24,5 % ke 26,2 % karena `esp_sleep`/`esp_system`; build `wokwi` turun tipis ke 76,0 % setelah `SENSOR_PROBE`/`CAL_NVS_SELFTEST` dihapus. Tidak ada dependensi baru.
+
+**Catatan lompatan Flash `wokwi` 24,7 % → 76,1 %.** Bukan regresi kode aplikasi: menautkan WiFi + lwIP + mbedTLS untuk NTP memakan ±670 KB. Batas waspada 80 % karena itu **hampir tersentuh**, dan FASE 4 tidak boleh menambah dependensi baru tanpa memeriksa angka ini. Build fisik 26,2 % setelah FASE 4, tetap jauh di bawah ambang karena tidak membawa tumpukan jaringan.
 
 Ambang waspada: RAM > 60 % atau Flash > 80 % → tinjau dependensi.
 
 ### 5.2 Power budget — estimasi vs terukur
 
 Tabel dari `../FIRMWARE_SPEC.md` §3 adalah **estimasi**, bukan pengukuran. Isi kolom terukur di TKT 4.
+
+**FASE 4:** durasi sampling terukur 1,013-1,015 s (3 siklus, `HW-4.3_scenario_fault_range_20261027.txt`). Budget fisik dihitung ulang dengan durasi itu: **0,05673 mAh/siklus** (81 % dari batas 0,07). Arus sensor/LoRa/MCU masih estimasi; rincian di `evidence/HW-4.4_power_budget_20261027.md`. Siklus aktif simulator (11,7-16,8 s) tidak dipakai karena membawa WiFi/NTP/MQTT yang tidak ada di node LoRa.
 
 | Fase | Estimasi dokumen | Terukur (TKT 4) | Metode |
 |---|---|---|---|
@@ -220,6 +233,16 @@ Semua file disimpan di `docs/hardware/evidence/` (folder ini milik domain IoT, a
 | 3e | NVS kosong → default + round-trip tulis/baca | `HW-2.6_nvs_selftest_wokwi_20261026.txt` | HW-2.6 |
 | 3f | Lint `diagram.json` | `HW-5.1_diagram_lint_20261026.txt` | HW-5.1 |
 | 3g | Dua skenario demo jalan di simulator | `HW-5.2_wokwi_scenario_ab_20261026.txt` | HW-5.2 |
+| 3h | Short & putus jadi `OUT_OF_RANGE`, bukan 0/100 | `HW-3.1_no_clamp_wokwi_20261026.txt` | HW-3.1 |
+| 3i | LoRa: build + isolasi modul (radio belum memancar) | `HW-3.3_lora_transport_20261026.txt` | HW-3.3 |
+| 3j | MQTT: topik kontrak, payload 71 B, NTP valid, retry 3× | `HW-3.4_mqtt_transport_20261026.txt` | HW-3.4 |
+| 3k | Urutan power gate ON -> OFF -> TX | `HW-4.1_power_gate_20261027.txt` | HW-4.1 |
+| 3l | Tidur, wake reason, siklus berikutnya | `HW-4.2_deep_sleep_20261027.txt` | HW-4.2 |
+| 3m | Orkestrasi penuh + 6 skenario regresi | `HW-4.3_orchestration_20261027.txt`, `HW-4.3_scenario_*_20261027.txt` | HW-4.3 |
+| 3n | Power budget dari durasi terukur | `HW-4.4_power_budget_20261027.md` | HW-4.4 |
+| 3o | Paritas firmware fisik vs simulasi | `HW-5.3_parity_20261027.txt` | HW-5.3 |
+| 3p | Topik, QoS 0, retain false (5 paket) | `HW-6.1_topic_qos_retain_20261027.txt`, `HW-6.1_verification_20261027.md` | HW-6.1 |
+| 3q | Adapter backend menerima payload valid / menolak yang rusak | `HW-6.2_adapter_test_20261027.txt`, `HW-6.2_backend_findings_20261027.md` | HW-6.2 |
 | 4 | Payload sampai broker | `I03_mqtt_rx.txt` | HW-5.4 |
 | 5 | Hex dump payload | `payload_hexdump.txt` | HW-3.2 |
 | 6 | Integrasi ke backend | `I07_backend.png` + `I07_query.txt` | HW-7.2 |
@@ -229,6 +252,10 @@ Semua file disimpan di `docs/hardware/evidence/` (folder ini milik domain IoT, a
 | 10 | Screenshot rangkaian Wokwi | `wokwi_diagram.png` | HW-8.2 |
 | 11 | Video demo | tautan (bukan file besar di repo) | HW-8.1 |
 | 12 | Baseline RAM/Flash | terisi di §5.1 | HW-0.5 |
+| 13 | Unit test FASE 7 | `unit_test_native_20261027.txt` (45 PASS) | HW-7.1 |
+| 14 | E01 sisi IoT | `E01_serial.txt`, `E01_mqtt.txt`, `E01_validation.txt` | HW-7.3 |
+| 15 | Inventaris bukti FASE 7 | `HW-7.4_evidence_inventory_20261027.md` | HW-7.4 |
+| 16 | Blocker backend/kuota | `HW-7.2_backend_blocker_20261027.md`, `HW-7.3_blockers_20261027.md` | HW-7.2/7.3 |
 
 **Aturan ukuran:** jangan commit file > 5 MB. Video disimpan di Google Drive/YouTube (unlisted), repo hanya berisi tautan.
 
@@ -271,11 +298,17 @@ Bukti F-06 disimpan sebagai tabel jarak vs RSSI/SNR + screenshot `LoRa.packetRss
 | HW-2.4 | U-14 … U-22 | #3 |
 | HW-2.5 | U-23 … U-25 | #3 |
 | HW-3.2 | U-26 … U-33 | #3, #5 |
+| HW-3.1 | U-34 … U-45 (range & status per kanal) | #3, #3h |
+| HW-3.3 | Build + isolasi objek | #1, #3i |
+| HW-3.4 | U-46 … U-53 (retry), I-04 | #2, #3j |
 | HW-4.3 | I-01, I-05 | #1, #3 |
 | HW-5.4 | I-03 | #4 |
-| HW-6.1 | I-04 | #4 |
+| HW-6.1 | I-03 (topik/QoS/retain) | #3p |
+| HW-6.2 | Vektor adapter | #3q |
+| HW-7.1 | U-01 … U-53 (native) | #3, #13 |
 | HW-7.2 | E2E prasyarat | #6 |
-| HW-7.3 | E-01 … E-03 | #7, #8, #9 |
+| HW-7.3 | E-01 … E-03 | #7, #8, #9, #14 |
+| HW-7.4 | Inventaris 12 bukti | #15 |
 | HW-8.2 | — | #10 |
 | HW-8.1 | — | #11 |
 
