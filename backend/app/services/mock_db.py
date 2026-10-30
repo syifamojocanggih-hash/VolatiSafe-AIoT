@@ -252,71 +252,71 @@ class MockDB:
     def get_hardware_bom(self) -> BoMResponseDTO:
         items = [
             BoMItemDTO(
-                id="moisture",
-                component_name="Capacitive Moisture Sensor v1.2",
-                pin_mapping="ADC1 GPIO34",
-                price_idr=15000,
-                category="Sensor Tanah"
-            ),
-            BoMItemDTO(
-                id="ph",
-                component_name="Soil pH Probe Industri + Modul Signal Conditioning",
-                pin_mapping="ADC1 GPIO32",
-                price_idr=62000,
-                category="Sensor Tanah"
-            ),
-            BoMItemDTO(
-                id="temp",
-                component_name="Sensor Suhu DS18B20 Stainless Probe Waterproof",
-                pin_mapping="1-Wire GPIO4",
-                price_idr=18000,
-                category="Sensor Tanah"
-            ),
-            BoMItemDTO(
-                id="lora",
-                component_name="Modul Transceiver LoRa SX1278 Ra-02 433 MHz",
-                pin_mapping="SPI 5/18/19/23",
-                price_idr=45000,
-                category="Komunikasi Nirkabel"
-            ),
-            BoMItemDTO(
                 id="esp32",
-                component_name="Mikrokontroler ESP32 NodeMCU 30-Pin Ultra-Low Power",
+                component_name="ESP32 NodeMCU V1 (30-Pin CP2102)",
                 pin_mapping="Dual-Core 240MHz",
                 price_idr=55000,
                 category="Pemrosesan Komputasi"
             ),
             BoMItemDTO(
-                id="solar",
-                component_name="Panel Surya Monokristalin 5V 1W + Modul Charger TP4056",
-                pin_mapping="Regulator VBUS",
+                id="moisture",
+                component_name="Capacitive Soil Moisture v1.2",
+                pin_mapping="ADC1 GPIO34",
+                price_idr=15000,
+                category="Sensor Tanah"
+            ),
+            BoMItemDTO(
+                id="temp",
+                component_name="Sensor Suhu DS18B20 Waterproof Probe",
+                pin_mapping="1-Wire GPIO4",
+                price_idr=18000,
+                category="Sensor Tanah"
+            ),
+            BoMItemDTO(
+                id="ph",
+                component_name="Soil pH Probe + Modul Signal Conditioning",
+                pin_mapping="ADC1 GPIO32",
+                price_idr=62000,
+                category="Sensor Tanah"
+            ),
+            BoMItemDTO(
+                id="lora",
+                component_name="Modul LoRa SX1278 Ra-02 433 MHz",
+                pin_mapping="SPI 5/18/19/23",
                 price_idr=45000,
-                category="Sub-sistem Daya"
+                category="Komunikasi Nirkabel"
             ),
             BoMItemDTO(
                 id="battery",
-                component_name="Baterai Industri Li-Ion 18650 3.7V 2600mAh (High-Drain)",
+                component_name="Baterai Li-Ion 18650 3.7V 2600mAh",
                 pin_mapping="JST-PH 2.0mm",
                 price_idr=45000,
                 category="Sub-sistem Daya"
             ),
             BoMItemDTO(
+                id="solar",
+                component_name="Panel Surya Mini 5V 1W + TP4056 Charger",
+                pin_mapping="Regulator VBUS",
+                price_idr=45000,
+                category="Sub-sistem Daya"
+            ),
+            BoMItemDTO(
                 id="enclosure",
-                component_name="Enclosure Box IP65 Waterproof + Cable Gland PG7",
-                pin_mapping="Weatherproof IP65",
+                component_name="Enclosure Box IP65 Waterproof Weatherproof",
+                pin_mapping="IP65 Weatherproof",
                 price_idr=55000,
                 category="Proteksi Mekanikal"
             ),
             BoMItemDTO(
                 id="power_switch",
-                component_name="MOSFET AO3401A Gate Isolation Switch (Cegah Elektrolisis)",
+                component_name="MOSFET AO3401A Gate Isolation Switch",
                 pin_mapping="GPIO25 Power Gate",
                 price_idr=25000,
                 category="Proteksi Elektronika"
             ),
             BoMItemDTO(
                 id="calibration_kit",
-                component_name="Kit Larutan Penyangga pH 4.00 & pH 7.00 + Kalibrator",
+                component_name="Kit Larutan Buffer Kalibrasi pH 4.01 & 6.86",
                 pin_mapping="Lab Testing",
                 price_idr=84000,
                 category="Aksesoris & Kalibrasi"
@@ -645,7 +645,7 @@ class MockDB:
         Returns full detailed 12 bedeng cadastral parcels, surrounding mosaic parcels,
         and outer field boundaries with GeoJSON FeatureCollection.
         """
-        if field_id not in self._bedeng_parcels or not self._bedeng_parcels[field_id] or len(self._bedeng_parcels[field_id][0].polygon) < 10:
+        if field_id not in self._bedeng_parcels or not self._bedeng_parcels[field_id] or len(self._bedeng_parcels[field_id]) < 5:
             self._bedeng_parcels[field_id] = get_initial_12_bedeng_parcels()
         parcels = self._bedeng_parcels[field_id]
 

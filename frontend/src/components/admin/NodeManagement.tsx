@@ -129,7 +129,7 @@ export const NodeManagement: React.FC = () => {
             <h2 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
               Manajemen Titik Pantau Lahan
             </h2>
-            
+
           </div>
           <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
             Pemantauan otomatis kelembapan tanah, suhu tanah, pH, dan status operasional petak
@@ -188,9 +188,8 @@ export const NodeManagement: React.FC = () => {
                   <tr
                     key={node.id}
                     onClick={() => setSelectedNodeId(node.id)}
-                    className={`cursor-pointer transition-colors ${
-                      isSelected ? 'bg-emerald-50/70 font-semibold' : 'hover:bg-slate-50'
-                    }`}
+                    className={`cursor-pointer transition-colors ${isSelected ? 'bg-emerald-50/70 font-semibold' : 'hover:bg-slate-50'
+                      }`}
                   >
                     <td className="py-3 px-3 font-mono font-bold text-[#1B6633]">
                       <div className="flex items-center gap-1.5">
@@ -203,11 +202,10 @@ export const NodeManagement: React.FC = () => {
                     </td>
                     <td className="py-3 px-3">
                       <span
-                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-3xs font-semibold ${
-                          isOnline
+                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-3xs font-semibold ${isOnline
                             ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
                             : 'bg-amber-50 text-amber-800 border border-amber-200'
-                        }`}
+                          }`}
                       >
                         {node.sleepIntervalText}
                       </span>
@@ -298,10 +296,7 @@ export const NodeManagement: React.FC = () => {
             </div>
           </div>
 
-          {/* Technical Hardware Footnote */}
-          <p className="text-3xs text-slate-500 leading-relaxed pt-2 border-t border-slate-100">
-            Firmware mengeksekusi <strong>MOSFET Gate Control (GPIO25)</strong> untuk memutus arus VCC sensor saat Deep Sleep (10 µA), mencegah elektrolisis probe & menghemat baterai hingga &gt;120 hari.
-          </p>
+
         </div>
 
         {/* ================= RIGHT: RINGKASAN BOM & PIN MAPPING (6 cols on lg) ================= */}
@@ -321,22 +316,42 @@ export const NodeManagement: React.FC = () => {
               </span>
             </div>
 
-            {/* BoM Component Cards (Scrollable List for Complete 10 Items) */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-h-[300px] overflow-y-auto pr-1">
-              {bomList.map((item) => (
-                <div
-                  key={item.id}
-                  className="p-3 rounded-2xl bg-[#FBF9F5] border border-slate-200/80 space-y-1 hover:border-emerald-300 transition-colors"
-                >
-                  <p className="font-bold text-slate-900 text-xs truncate" title={item.componentName}>
-                    {item.componentName}
-                  </p>
-                  <div className="flex items-center justify-between text-3xs font-semibold text-slate-500">
-                    <span className="font-mono text-slate-600 truncate max-w-[110px]">{item.pinMapping}</span>
-                    <span className="text-emerald-800 font-bold">Rp{item.priceIdr.toLocaleString('id-ID')}</span>
-                  </div>
-                </div>
-              ))}
+            {/* BoM Table (Clean, Structured, Zero Truncation, Zero Scrollbar) */}
+            <div className="overflow-x-auto rounded-2xl border border-slate-200/80 bg-white shadow-2xs">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-slate-50/90 border-b border-slate-200 text-slate-500 font-bold text-3xs uppercase tracking-wider">
+                    <th className="py-2.5 px-3">Komponen</th>
+                    <th className="py-2.5 px-3">Pinout / Bus</th>
+                    <th className="py-2.5 px-3 text-right">Harga Satuan</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 text-xs">
+                  {bomList.map((item) => (
+                    <tr
+                      key={item.id}
+                      className="hover:bg-emerald-50/40 transition-colors"
+                    >
+                      <td className="py-2.5 px-3">
+                        <span className="font-semibold text-slate-900 block leading-tight">
+                          {item.componentName}
+                        </span>
+                        <span className="text-3xs text-slate-400">
+                          {item.category}
+                        </span>
+                      </td>
+                      <td className="py-2.5 px-3">
+                        <span className="font-mono text-3xs font-semibold text-slate-700 bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200 inline-block whitespace-nowrap">
+                          {item.pinMapping}
+                        </span>
+                      </td>
+                      <td className="py-2.5 px-3 text-right font-bold text-emerald-800 font-mono whitespace-nowrap">
+                        Rp{item.priceIdr.toLocaleString('id-ID')}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
 
@@ -350,9 +365,7 @@ export const NodeManagement: React.FC = () => {
                 Rp{totalBomCost.toLocaleString('id-ID')}
               </span>
             </div>
-            <p className="text-3xs text-slate-400 italic">
-              *Tercakup dalam pagu dana pembinaan prototipe fisik 10 besar finalis (Rp3.000.000).
-            </p>
+
           </div>
         </div>
       </div>

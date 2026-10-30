@@ -226,7 +226,7 @@ export const SchematicFieldDiagram: React.FC<SchematicFieldDiagramProps> = ({
             <div className="flex items-start justify-between gap-2">
               <div>
                 <h4 className="font-bold text-sm sm:text-base text-slate-900 tracking-tight">
-                  A1 · VS-A1-001
+                  {pA1.id} · {pA1.nodeId}
                 </h4>
               </div>
               <span className={`px-2.5 py-0.5 rounded-full text-2xs font-extrabold uppercase shrink-0 ${styleA1.badgeBg}`}>
@@ -252,7 +252,7 @@ export const SchematicFieldDiagram: React.FC<SchematicFieldDiagramProps> = ({
             <div className="flex items-start justify-between gap-2">
               <div>
                 <h4 className="font-bold text-sm sm:text-base text-slate-900 tracking-tight">
-                  A2 · VS-A2-002
+                  {pA2.id} · {pA2.nodeId}
                 </h4>
               </div>
               <span className={`px-2.5 py-0.5 rounded-full text-2xs font-extrabold uppercase shrink-0 ${styleA2.badgeBg}`}>
@@ -278,7 +278,7 @@ export const SchematicFieldDiagram: React.FC<SchematicFieldDiagramProps> = ({
             <div className="flex items-start justify-between gap-2">
               <div>
                 <h4 className="font-bold text-sm sm:text-base text-slate-900 tracking-tight">
-                  A3 · VS-A3-003
+                  {pA3.id} · {pA3.nodeId}
                 </h4>
               </div>
               <span className={`px-2.5 py-0.5 rounded-full text-2xs font-extrabold uppercase shrink-0 ${styleA3.badgeBg}`}>
@@ -337,8 +337,8 @@ export const SchematicFieldDiagram: React.FC<SchematicFieldDiagramProps> = ({
           <span className="bg-white/95 text-slate-600 px-3 py-1 rounded-full text-2xs font-bold border border-slate-200/90 shadow-2xs">
             {pB1.loraSignalDbm} dBm
           </span>
-          <span className="bg-amber-100 text-amber-800 px-3 py-1 rounded-full text-2xs font-bold border border-amber-300 shadow-2xs">
-            offline
+          <span className={`px-3 py-1 rounded-full text-2xs font-bold shadow-2xs ${pB2.status === 'online' ? 'bg-white/95 text-slate-600 border border-slate-200/90' : 'bg-amber-100 text-amber-800 border border-amber-300'}`}>
+            {pB2.status === 'online' ? `${pB2.loraSignalDbm} dBm` : 'offline'}
           </span>
         </div>
 
@@ -352,7 +352,7 @@ export const SchematicFieldDiagram: React.FC<SchematicFieldDiagramProps> = ({
             <div className="flex items-start justify-between gap-2">
               <div>
                 <h4 className="font-bold text-sm sm:text-base text-slate-900 tracking-tight">
-                  B1 · VS-B1-004
+                  {pB1.id} · {pB1.nodeId}
                 </h4>
               </div>
               <span className={`px-2.5 py-0.5 rounded-full text-2xs font-extrabold uppercase shrink-0 ${styleB1.badgeBg}`}>
@@ -378,20 +378,24 @@ export const SchematicFieldDiagram: React.FC<SchematicFieldDiagramProps> = ({
             <div className="flex items-start justify-between gap-2">
               <div>
                 <h4 className="font-bold text-sm sm:text-base text-slate-900 tracking-tight">
-                  B2 · VS-B2-005
+                  {pB2.id} · {pB2.nodeId}
                 </h4>
               </div>
               <span className={`px-2.5 py-0.5 rounded-full text-2xs font-extrabold uppercase shrink-0 ${styleB2.badgeBg}`}>
-                Est-Simulated · FAO-56
+                {pB2.status === 'online' ? `AVRI ${pB2.avriScore}% · ${pB2.avriCategory}` : 'Est-Simulated · FAO-56'}
               </span>
             </div>
 
-            <div className="mt-3 pt-2.5 border-t border-amber-200/80 text-xs font-medium text-slate-700 space-y-1">
+            <div className={`mt-3 pt-2.5 border-t text-xs font-medium text-slate-700 space-y-1 ${pB2.status === 'online' ? 'border-slate-100' : 'border-amber-200/80'}`}>
               <p>
                 θ {pB2.moisturePct.toString().replace('.', ',')}% &nbsp; T {pB2.soilTempC.toString().replace('.', ',')}°C &nbsp; pH {pB2.ph.toString().replace('.', ',')}
               </p>
-              <p className="text-2xs text-amber-800 font-semibold">
-                Baterai — &nbsp;·&nbsp; RSSI offline (Digital Twin Imputasi)
+              <p className="text-2xs">
+                {pB2.status === 'online' ? (
+                  <span className="text-slate-500">Baterai {pB2.batteryPct}% &nbsp;·&nbsp; RSSI {pB2.loraSignalDbm} dBm</span>
+                ) : (
+                  <span className="text-amber-800 font-semibold">Baterai — &nbsp;·&nbsp; RSSI offline (Digital Twin Imputasi)</span>
+                )}
               </p>
             </div>
           </div>

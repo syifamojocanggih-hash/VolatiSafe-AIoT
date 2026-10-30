@@ -80,7 +80,7 @@ export const Trend24hChart: React.FC<Trend24hChartProps> = ({ data }) => {
         const isNow = timeLabel === currentHourStr;
         let res = `<div class="font-bold text-xs text-emerald-400 mb-1 flex items-center justify-between gap-3">
           <span>Pukul ${timeLabel} WIB</span>
-          ${isNow ? '<span class="px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300 text-3xs font-extrabold border border-emerald-400/40">Jam Nyata (Sekarang)</span>' : ''}
+          ${isNow ? '<span class="text-emerald-300 text-3xs font-semibold">(Sekarang)</span>' : ''}
         </div>`;
         params.forEach((item) => {
           const unit = item.seriesName.includes('Suhu') ? '°C' : '%';
@@ -209,18 +209,10 @@ export const Trend24hChart: React.FC<Trend24hChartProps> = ({ data }) => {
     <div className="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200/90 shadow-2xs">
       {/* Title & Custom Legend Matching Mockup */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-2">
-        <div className="flex items-center gap-2.5 min-h-[28px]">
+        <div className="flex items-center gap-2.5">
           <h4 className="text-sm sm:text-base font-bold text-slate-900 tracking-tight">
             Tren 24 Jam (Forecast)
           </h4>
-          {isClient && (
-            <span
-              suppressHydrationWarning
-              className="px-2 py-0.5 rounded-full text-3xs font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-300 animate-in fade-in duration-150"
-            >
-              Jam Nyata: {currentHourStr} WIB
-            </span>
-          )}
         </div>
 
         {/* Legend */}

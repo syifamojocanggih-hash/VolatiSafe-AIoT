@@ -407,11 +407,6 @@ export const AgronomyPlanning: React.FC = () => {
                       <div className="col-span-4 pl-1 min-w-0 pr-2">
                         <div className="flex items-center gap-2">
                           <span className="text-sm font-bold text-slate-900 truncate">{cleanName}</span>
-                          {isActive && (
-                            <span className="px-2 py-0.5 rounded-full text-3xs font-extrabold bg-amber-100 text-amber-800 border border-amber-300">
-                              Aktif
-                            </span>
-                          )}
                           {isCompleted && (
                             <span className="inline-flex items-center text-emerald-600" title="Selesai">
                               <Check className="w-3.5 h-3.5 stroke-[3]" />
@@ -490,20 +485,6 @@ export const AgronomyPlanning: React.FC = () => {
                       Rentang Umur: <strong className="text-emerald-900">{selectedPhase.subtitle}</strong> · Tanggal Kalender: <strong className="text-slate-800">{formatDateIndo(selectedPhase.start_date)}</strong> s/d <strong className="text-slate-800">{formatDateIndo(selectedPhase.end_date)}</strong> ({selectedPhase.duration_days} hari)
                     </p>
                   </div>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <span
-                    className={`text-3xs font-bold px-2.5 py-1 rounded-full border ${
-                      selectedPhase.status === 'active'
-                        ? 'bg-amber-100 text-amber-900 border-amber-300'
-                        : selectedPhase.status === 'completed'
-                        ? 'bg-emerald-100 text-emerald-900 border-emerald-300'
-                        : 'bg-slate-100 text-slate-700 border-slate-300'
-                    }`}
-                  >
-                    Status: {selectedPhase.status === 'active' ? `⚡ Aktif (${selectedPhase.progress_pct}%)` : selectedPhase.status === 'completed' ? '✓ Selesai' : 'Mendatang'}
-                  </span>
                 </div>
               </div>
 
@@ -716,13 +697,8 @@ export const AgronomyPlanning: React.FC = () => {
         <section className="lg:col-span-5 bg-white rounded-3xl p-5 sm:p-6 border border-slate-200/90 shadow-2xs space-y-4">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <h3 className="text-base font-bold text-slate-900 tracking-tight flex items-center gap-2">
-                <span>Catatan Aplikasi Aktual</span>
-                {logs.length > 0 && (
-                  <span className="text-3xs font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200">
-                    {logs.length}
-                  </span>
-                )}
+              <h3 className="text-base font-bold text-slate-900 tracking-tight">
+                Catatan Aplikasi Aktual
               </h3>
               <p className="text-3xs text-slate-400 font-medium">
                 Sinkron ke Digital Twin (F_log)
@@ -755,12 +731,9 @@ export const AgronomyPlanning: React.FC = () => {
                 <p className="text-xs text-slate-600">
                   {log.mixtureSummary}
                 </p>
-                <div className="flex items-center justify-between pt-1">
+                <div className="pt-1">
                   <span className="text-2xs text-slate-500 font-medium">
                     AVRI saat tebar: <strong>{log.avriAtApplication}%</strong>
-                  </span>
-                  <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-3xs font-bold">
-                    {log.statusText}
                   </span>
                 </div>
               </div>
@@ -792,10 +765,7 @@ export const AgronomyPlanning: React.FC = () => {
             </div>
           </div>
 
-          {/* Technical Info Box */}
-          <p className="text-3xs text-slate-400 leading-relaxed pt-2 border-t border-slate-100">
-            Setiap pencatatan memperbarui <code>last_urea_kg</code> dan koreksi pengasaman lambat <code>pH(t+1) = pH(t) - 0.002 * N_applied</code> pada Digital Twin.
-          </p>
+
         </section>
       </div>
 

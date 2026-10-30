@@ -252,10 +252,21 @@ export const ParcelRiskMap: React.FC<ParcelRiskMapProps> = () => {
       {/* ================= 2. SELECTED BEDENG DETAIL CARD (Ditaruh di Bawah Map) ================= */}
       <div className="w-full bg-white rounded-3xl p-5 sm:p-7 border border-slate-200/90 shadow-sm space-y-5">
         {/* Header: Name */}
-        <div className="pb-4 border-b border-slate-100">
-          <h3 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
-            {selectedParcel.name}
-          </h3>
+        <div className="pb-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div>
+            <h3 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+              {selectedParcel.name}
+            </h3>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Identitas Sensor IoT: <span className="font-mono font-bold text-slate-800">{selectedParcel.nodeId}</span> · Transmisi {selectedParcel.telemetryMode}
+            </p>
+          </div>
+          <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold shrink-0 self-start sm:self-auto ${
+            selectedParcel.status === 'online' ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : 'bg-amber-100 text-amber-800 border border-amber-300'
+          }`}>
+            <span className={`w-2 h-2 rounded-full ${selectedParcel.status === 'online' ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`} />
+            {selectedParcel.status === 'online' ? 'Online' : 'Digital Twin Failover'}
+          </span>
         </div>
 
         {/* 4 Info Parameter Tiles (Wide 4-Column Responsive Layout) */}
@@ -349,8 +360,9 @@ export const ParcelRiskMap: React.FC<ParcelRiskMapProps> = () => {
                       isSelected ? 'bg-emerald-50/60 font-semibold' : 'hover:bg-slate-50'
                     }`}
                   >
-                    <td className="py-3 px-3 font-bold text-slate-900">
-                      {p.shortName}
+                    <td className="py-3 px-3">
+                      <div className="font-bold text-slate-900">{p.shortName}</div>
+                      <div className="text-3xs font-mono text-slate-500 font-medium">{p.nodeId}</div>
                     </td>
                     <td className="py-3 px-3 font-medium text-slate-600">{p.areaHa.toString().replace('.', ',')} Ha</td>
                     <td className="py-3 px-3 text-slate-700">
