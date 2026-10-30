@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { initialFieldNodes, initialBoMList } from '@/mocks/adminMock';
-import { FieldNodeItem, BoMItem, CalibrationParams } from '@/types/admin';
-import { getNodesList, getHardwareBoM, registerFieldNode } from '@/services/api';
+import { initialFieldNodes } from '@/mocks/adminMock';
+import { FieldNodeItem, CalibrationParams } from '@/types/admin';
+import { getNodesList, registerFieldNode } from '@/services/api';
 import { CalibrationModal } from '@/components/modals/CalibrationModal';
 import { OnboardingQRModal } from '@/components/modals/OnboardingQRModal';
 import {
@@ -21,21 +21,16 @@ export const NodeManagement: React.FC = () => {
   const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
   const [hasCopied, setHasCopied] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
-  const [bomList, setBomList] = useState<BoMItem[]>(initialBoMList);
-  const [totalBomCost, setTotalBomCost] = useState<number>(449000);
   const [, setIsBackendSynced] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const selectedNode = nodes.find((n) => n.id === selectedNodeId) || nodes[0];
 
-  // Fetch real node data and hardware BoM from FastAPI backend
+  // Fetch real node data from FastAPI backend
   const loadNodeData = useCallback(async () => {
     setIsLoading(true);
     try {
-      const [nodesRes, bomRes] = await Promise.all([
-        getNodesList('BLOK-A'),
-        getHardwareBoM(),
-      ]);
+      const nodesRes = await getNodesList('BLOK-A');
 
       if (nodesRes && nodesRes.length > 0) {
         setNodes(nodesRes);
@@ -43,15 +38,6 @@ export const NodeManagement: React.FC = () => {
         setSelectedNodeId((prevId) =>
           nodesRes.some((n) => n.id === prevId) ? prevId : nodesRes[0].id
         );
-      }
-
-      if (bomRes) {
-        if (bomRes.items && bomRes.items.length > 0) {
-          setBomList(bomRes.items);
-        }
-        if (bomRes.totalCostIdr) {
-          setTotalBomCost(bomRes.totalCostIdr);
-        }
       }
     } catch (err) {
       console.warn('Gagal memuat data node dari backend, menggunakan data lokal:', err);
@@ -193,7 +179,7 @@ export const NodeManagement: React.FC = () => {
                   >
                     <td className="py-3 px-3 font-mono font-bold text-[#1B6633]">
                       <div className="flex items-center gap-1.5">
-                        <span className={`w-2 h-2 rounded-full ${isOnline ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`} />
+                        <span className={`w-2 h-2 rounded-full ${isOnline ? 'bg-emerald-500 animate-pulse' : 'bg-red-500'}`} />
                         {node.id}
                       </div>
                     </td>
@@ -202,9 +188,7 @@ export const NodeManagement: React.FC = () => {
                     </td>
                     <td className="py-3 px-3">
                       <span
-                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-3xs font-semibold ${isOnline
-                            ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
-                            : 'bg-amber-50 text-amber-800 border border-amber-200'
+                        className={`text-xs font-semibold ${isOnline ? 'text-emerald-600' : 'text-red-600'
                           }`}
                       >
                         {node.sleepIntervalText}
@@ -234,139 +218,59 @@ export const NodeManagement: React.FC = () => {
         </div>
       </div>
 
-      {/* ================= LOWER SECTION: PAYLOAD INSPECTOR (LEFT) + BOM & PINOUT (RIGHT) ================= */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
-        {/* ================= LEFT: LIVE LORA PAYLOAD INSPECTOR (6 cols on lg) ================= */}
-        <div className="lg:col-span-6 bg-white rounded-3xl p-5 sm:p-6 border border-slate-200/90 shadow-2xs flex flex-col justify-between space-y-4">
-          <div className="space-y-3">
-            <div className="flex items-center justify-between gap-2">
-              <h3 className="text-sm sm:text-base font-bold text-slate-900 tracking-tight">
-                Live LoRa Payload Inspector · SF7 · 52 Bytes
-              </h3>
-              <span className="font-mono text-3xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
-                433.0 MHz ISM
-              </span>
-            </div>
-
-            {/* Live LoRa RF Signal Metrics Card */}
-            <div className="grid grid-cols-3 gap-2.5 p-3 rounded-2xl bg-slate-50 border border-slate-200/80 text-center">
-              <div className="p-2 rounded-xl bg-white border border-slate-100 shadow-2xs">
-                <span className="text-3xs font-semibold text-slate-400 uppercase tracking-wider block">
-                  Kekuatan Sinyal
-                </span>
-                <span className="text-xs sm:text-sm font-extrabold text-slate-900 font-mono mt-0.5 block">
-                  {selectedNode.rssiLoRa} dBm
-                </span>
-                <span className="text-3xs text-emerald-600 font-semibold block">Sinyal Prima</span>
-              </div>
-
-              <div className="p-2 rounded-xl bg-white border border-slate-100 shadow-2xs">
-                <span className="text-3xs font-semibold text-slate-400 uppercase tracking-wider block">
-                  Noise Margin (SNR)
-                </span>
-                <span className="text-xs sm:text-sm font-extrabold text-emerald-700 font-mono mt-0.5 block">
-                  {selectedNode.snrDb != null ? `${selectedNode.snrDb >= 0 ? '+' : ''}${selectedNode.snrDb.toFixed(1)}` : '+8.2'} dB
-                </span>
-                <span className="text-3xs text-slate-500 font-medium block">Margin Tinggi</span>
-              </div>
-
-              <div className="p-2 rounded-xl bg-white border border-slate-100 shadow-2xs">
-                <span className="text-3xs font-semibold text-slate-400 uppercase tracking-wider block">
-                  Packet Loss
-                </span>
-                <span className="text-xs sm:text-sm font-extrabold text-slate-900 font-mono mt-0.5 block">
-                  {selectedNode.packetLossPct != null ? `${selectedNode.packetLossPct.toFixed(1)}%` : '0.4%'}
-                </span>
-                <span className="text-3xs text-emerald-600 font-semibold block">Transmisi Stabil</span>
-              </div>
-            </div>
-
-            {/* Terminal Window */}
-            <div className="relative bg-[#111B21] rounded-2xl p-4 font-mono text-xs text-white shadow-inner border border-slate-800">
-              <button
-                onClick={handleCopy}
-                className="absolute top-3 right-3 p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-slate-300 transition-colors"
-                title="Salin JSON Payload"
-              >
-                {hasCopied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-              </button>
-              <pre className="text-emerald-400 overflow-x-auto selection:bg-emerald-900">
-                {payloadJson}
-              </pre>
-            </div>
-          </div>
-
-
+      {/* ================= LOWER SECTION: LIVE LORA PAYLOAD INSPECTOR (FULL WIDTH) ================= */}
+      <div className="w-full bg-white rounded-3xl p-5 sm:p-7 border border-slate-200/90 shadow-2xs space-y-4">
+        <div className="pb-3 border-b border-slate-100">
+          <h3 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">
+            Live LoRa Payload Inspector
+          </h3>
         </div>
 
-        {/* ================= RIGHT: RINGKASAN BOM & PIN MAPPING (6 cols on lg) ================= */}
-        <div className="lg:col-span-6 bg-white rounded-3xl p-5 sm:p-6 border border-slate-200/90 shadow-2xs flex flex-col justify-between space-y-4">
-          <div>
-            <div className="flex items-center justify-between mb-3">
-              <div>
-                <h3 className="text-sm sm:text-base font-bold text-slate-900 tracking-tight">
-                  Rincian Biaya Perangkat (BoM) & Pinout
-                </h3>
-                <p className="text-3xs text-slate-400 font-medium">
-                  {bomList.length} Komponen Modular · Terverifikasi Standar Kompetisi
-                </p>
-              </div>
-              <span className="text-3xs font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
-                TKT-3 Ready
-              </span>
-            </div>
-
-            {/* BoM Table (Clean, Structured, Zero Truncation, Zero Scrollbar) */}
-            <div className="overflow-x-auto rounded-2xl border border-slate-200/80 bg-white shadow-2xs">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="bg-slate-50/90 border-b border-slate-200 text-slate-500 font-bold text-3xs uppercase tracking-wider">
-                    <th className="py-2.5 px-3">Komponen</th>
-                    <th className="py-2.5 px-3">Pinout / Bus</th>
-                    <th className="py-2.5 px-3 text-right">Harga Satuan</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 text-xs">
-                  {bomList.map((item) => (
-                    <tr
-                      key={item.id}
-                      className="hover:bg-emerald-50/40 transition-colors"
-                    >
-                      <td className="py-2.5 px-3">
-                        <span className="font-semibold text-slate-900 block leading-tight">
-                          {item.componentName}
-                        </span>
-                        <span className="text-3xs text-slate-400">
-                          {item.category}
-                        </span>
-                      </td>
-                      <td className="py-2.5 px-3">
-                        <span className="font-mono text-3xs font-semibold text-slate-700 bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200 inline-block whitespace-nowrap">
-                          {item.pinMapping}
-                        </span>
-                      </td>
-                      <td className="py-2.5 px-3 text-right font-bold text-emerald-800 font-mono whitespace-nowrap">
-                        Rp{item.priceIdr.toLocaleString('id-ID')}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+        {/* Live LoRa RF Signal Metrics Card (Expanded Across Full Width) */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 p-4 rounded-2xl bg-slate-50 border border-slate-200/80 text-center">
+          <div className="p-3 rounded-xl bg-white border border-slate-100 shadow-2xs">
+            <span className="text-3xs font-semibold text-slate-400 uppercase tracking-wider block">
+              Kekuatan Sinyal
+            </span>
+            <span className="text-base sm:text-lg font-extrabold text-slate-900 font-mono mt-0.5 block">
+              {selectedNode.rssiLoRa} dBm
+            </span>
+            <span className="text-3xs text-emerald-600 font-semibold block mt-0.5">Sinyal Prima</span>
           </div>
 
-          {/* Footer Total BoM */}
-          <div className="pt-3 border-t border-slate-100 space-y-1">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-slate-600">
-                Total BoM Paket Lengkap (IP65 + Dual Power):
-              </span>
-              <span className="text-lg font-extrabold text-[#1A5323]">
-                Rp{totalBomCost.toLocaleString('id-ID')}
-              </span>
-            </div>
-
+          <div className="p-3 rounded-xl bg-white border border-slate-100 shadow-2xs">
+            <span className="text-3xs font-semibold text-slate-400 uppercase tracking-wider block">
+              Noise Margin (SNR)
+            </span>
+            <span className="text-base sm:text-lg font-extrabold text-emerald-700 font-mono mt-0.5 block">
+              {selectedNode.snrDb != null ? `${selectedNode.snrDb >= 0 ? '+' : ''}${selectedNode.snrDb.toFixed(1)}` : '+8.2'} dB
+            </span>
+            <span className="text-3xs text-slate-500 font-medium block mt-0.5">Margin Tinggi</span>
           </div>
+
+          <div className="p-3 rounded-xl bg-white border border-slate-100 shadow-2xs">
+            <span className="text-3xs font-semibold text-slate-400 uppercase tracking-wider block">
+              Packet Loss
+            </span>
+            <span className="text-base sm:text-lg font-extrabold text-slate-900 font-mono mt-0.5 block">
+              {selectedNode.packetLossPct != null ? `${selectedNode.packetLossPct.toFixed(1)}%` : '0.4%'}
+            </span>
+            <span className="text-3xs text-emerald-600 font-semibold block mt-0.5">Transmisi Stabil</span>
+          </div>
+        </div>
+
+        {/* Terminal Window (Full Width) */}
+        <div className="relative bg-[#111B21] rounded-2xl p-5 font-mono text-xs text-white shadow-inner border border-slate-800">
+          <button
+            onClick={handleCopy}
+            className="absolute top-4 right-4 p-2 rounded-xl bg-white/10 hover:bg-white/20 text-slate-300 transition-colors cursor-pointer"
+            title="Salin JSON Payload"
+          >
+            {hasCopied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+          </button>
+          <pre className="text-emerald-400 overflow-x-auto selection:bg-emerald-900 text-xs sm:text-sm leading-relaxed">
+            {payloadJson}
+          </pre>
         </div>
       </div>
 

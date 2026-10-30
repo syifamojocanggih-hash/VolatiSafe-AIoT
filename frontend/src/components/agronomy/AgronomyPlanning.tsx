@@ -561,11 +561,8 @@ export const AgronomyPlanning: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* ================= FITUR B: MULTI-FERTILIZER BLENDER (7 cols on lg) ================= */}
         <section className="lg:col-span-7 bg-white rounded-3xl p-5 sm:p-6 border border-slate-200/90 shadow-2xs space-y-5">
-            <div>
-              <span className="text-xs font-bold text-emerald-800 tracking-wider uppercase block">
-                FITUR B · PERMENTAN NO. 40/2007 & BALITBANGTAN
-              </span>
-              <h3 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight mt-0.5">
+          <div>
+            <h3 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">
               Kalkulator Campuran Pupuk Majemuk
             </h3>
             <p className="text-xs text-slate-500 mt-0.5">
@@ -672,9 +669,6 @@ export const AgronomyPlanning: React.FC = () => {
                 <div className="space-y-1 text-xs text-slate-700">
                   <p>Pupuk Urea (Fokus N): <strong className="text-slate-900">{urea2} kg</strong></p>
                   <p>NPK Phonska: <strong className="text-slate-900">{phonska2} kg</strong></p>
-                  <p className="text-3xs text-emerald-700 font-semibold italic mt-1">
-                    *Wajib ditebar saat AVRI &le; 30%
-                  </p>
                 </div>
               </div>
 
@@ -700,9 +694,6 @@ export const AgronomyPlanning: React.FC = () => {
               <h3 className="text-base font-bold text-slate-900 tracking-tight">
                 Catatan Aplikasi Aktual
               </h3>
-              <p className="text-3xs text-slate-400 font-medium">
-                Sinkron ke Digital Twin (F_log)
-              </p>
             </div>
             <button
               onClick={() => setIsRecordModalOpen(true)}

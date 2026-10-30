@@ -9,6 +9,53 @@ interface MetricCardsGridProps {
 }
 
 export const MetricCardsGrid: React.FC<MetricCardsGridProps> = ({ metrics, riskCategory = 'aman' }) => {
+  const getMetricTextColor = (item: MetricItem): string => {
+    // 1. Prioritaskan status metrik individual
+    let effectiveStatus = item.status;
+
+    if (!effectiveStatus || effectiveStatus === 'normal') {
+      if (item.id === 'moisture') {
+        effectiveStatus = item.numericValue < 24 ? 'danger' : item.numericValue < 30 ? 'warning' : 'optimal';
+      } else if (item.id === 'temp') {
+        effectiveStatus = item.numericValue > 32 ? 'danger' : item.numericValue > 28 ? 'warning' : 'optimal';
+      } else if (item.id === 'ph') {
+        effectiveStatus = item.numericValue > 7.7 ? 'danger' : item.numericValue > 7.3 ? 'warning' : 'optimal';
+      }
+    }
+
+    if (effectiveStatus === 'danger') {
+      if (riskCategory === 'bahaya') return 'text-[#DC2626]';
+      return 'text-[#C2410C]'; // Oranye Kritis
+    }
+
+    if (effectiveStatus === 'warning') {
+      if (riskCategory === 'kritis') return 'text-[#C2410C]';
+      return 'text-[#B45309]'; // Amber Waspada
+    }
+
+    // 2. Jika status metrik optimal tapi field secara keseluruhan waspada/kritis/bahaya
+    if (riskCategory === 'waspada') {
+      if (
+        (item.id === 'moisture' && item.numericValue < 30) ||
+        (item.id === 'temp' && item.numericValue > 28) ||
+        (item.id === 'ph' && item.numericValue > 7.3)
+      ) {
+        return 'text-[#B45309]';
+      }
+    } else if (riskCategory === 'kritis' || riskCategory === 'bahaya') {
+      if (
+        (item.id === 'moisture' && item.numericValue < 28) ||
+        (item.id === 'temp' && item.numericValue > 30) ||
+        (item.id === 'ph' && item.numericValue > 7.4)
+      ) {
+        return riskCategory === 'bahaya' ? 'text-[#DC2626]' : 'text-[#C2410C]';
+      }
+    }
+
+    // Default kondisi aman/optimal
+    return 'text-[#1B6633]';
+  };
+
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">
       {metrics.map((item) => {
@@ -45,6 +92,8 @@ export const MetricCardsGrid: React.FC<MetricCardsGridProps> = ({ metrics, riskC
           );
         }
 
+        const valueColorClass = getMetricTextColor(item);
+
         // Kartu Telemetri Standar (Kelembapan Tanah, Suhu Tanah, pH Tanah)
         return (
           <div
@@ -56,7 +105,7 @@ export const MetricCardsGrid: React.FC<MetricCardsGridProps> = ({ metrics, riskC
             </span>
 
             <div className="mt-2.5 sm:mt-3">
-              <span className="text-2xl sm:text-4xl font-extrabold text-[#1B6633] tracking-tight block">
+              <span className={`text-2xl sm:text-4xl font-extrabold ${valueColorClass} tracking-tight block`}>
                 {item.value}
               </span>
             </div>

@@ -93,7 +93,7 @@ function transformBackendStatus(
       numericValue: m.moisture_pct,
       unit: '%',
       delta24h: `${m.moisture_delta_24h >= 0 ? '+' : ''}${m.moisture_delta_24h.toFixed(1)}%`,
-      status: m.moisture_pct < 25 ? 'warning' : 'optimal',
+      status: m.moisture_pct < 24 ? 'danger' : m.moisture_pct < 30 ? 'warning' : 'optimal',
     },
     {
       id: 'temp',
@@ -111,7 +111,7 @@ function transformBackendStatus(
       numericValue: m.ph,
       unit: '',
       delta24h: `${m.ph_delta_24h >= 0 ? '+' : ''}${m.ph_delta_24h.toFixed(2)}`,
-      status: m.ph > 7.5 ? 'warning' : 'optimal',
+      status: m.ph > 7.7 ? 'danger' : m.ph > 7.3 ? 'warning' : 'optimal',
     },
     {
       id: 'avri',
