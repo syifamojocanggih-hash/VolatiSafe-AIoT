@@ -42,6 +42,7 @@ const config: Config = {
       },
       fontFamily: {
         sans: ["'Plus Jakarta Sans'", "var(--font-jakarta)", "Inter", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "sans-serif"],
+        mono: ["ui-monospace", "SFMono-Regular", "Menlo", "Monaco", "Consolas", "'Liberation Mono'", "monospace"],
       },
       borderRadius: {
         "2xl": "1rem",

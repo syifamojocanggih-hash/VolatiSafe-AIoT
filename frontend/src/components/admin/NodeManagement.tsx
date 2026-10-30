@@ -156,13 +156,13 @@ export const NodeManagement: React.FC = () => {
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse">
             <thead>
-              <tr className="border-b border-slate-200 text-slate-400 font-semibold">
-                <th className="py-2.5 px-3">NODE ID</th>
-                <th className="py-2.5 px-3">LOKASI BEDENG</th>
-                <th className="py-2.5 px-3">STATUS TRANSMISI</th>
-                <th className="py-2.5 px-3">SENSOR LIVE (θ / T / PH)</th>
-                <th className="py-2.5 px-3">BATERAI 18650 + SOLAR</th>
-                <th className="py-2.5 px-3 text-right">SINYAL LORA (RSSI / SNR)</th>
+              <tr className="border-b border-slate-200 text-slate-400 font-semibold tracking-wider text-3xs uppercase">
+                <th className="py-2.5 px-3 whitespace-nowrap">NODE ID</th>
+                <th className="py-2.5 px-3 whitespace-nowrap">LOKASI BEDENG</th>
+                <th className="py-2.5 px-3 whitespace-nowrap">STATUS TRANSMISI</th>
+                <th className="py-2.5 px-3 whitespace-nowrap">SENSOR LIVE (θ / T / PH)</th>
+                <th className="py-2.5 px-3 whitespace-nowrap">BATERAI 18650 + SOLAR</th>
+                <th className="py-2.5 px-3 text-right whitespace-nowrap">SINYAL LORA (RSSI / SNR)</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -177,16 +177,16 @@ export const NodeManagement: React.FC = () => {
                     className={`cursor-pointer transition-colors ${isSelected ? 'bg-emerald-50/70 font-semibold' : 'hover:bg-slate-50'
                       }`}
                   >
-                    <td className="py-3 px-3 font-mono font-bold text-[#1B6633]">
-                      <div className="flex items-center gap-1.5">
-                        <span className={`w-2 h-2 rounded-full ${isOnline ? 'bg-emerald-500 animate-pulse' : 'bg-red-500'}`} />
-                        {node.id}
+                    <td className="py-3 px-3 font-bold text-[#1B6633] whitespace-nowrap">
+                      <div className="flex items-center gap-2">
+                        <span className={`w-2 h-2 rounded-full shrink-0 ${isOnline ? 'bg-emerald-500 animate-pulse' : 'bg-red-500'}`} />
+                        <span>{node.id}</span>
                       </div>
                     </td>
-                    <td className="py-3 px-3 font-medium text-slate-800">
+                    <td className="py-3 px-3 font-medium text-slate-800 whitespace-nowrap">
                       {node.bedengLocation}
                     </td>
-                    <td className="py-3 px-3">
+                    <td className="py-3 px-3 whitespace-nowrap">
                       <span
                         className={`text-xs font-semibold ${isOnline ? 'text-emerald-600' : 'text-red-600'
                           }`}
@@ -194,18 +194,18 @@ export const NodeManagement: React.FC = () => {
                         {node.sleepIntervalText}
                       </span>
                     </td>
-                    <td className="py-3 px-3 text-slate-700 font-mono">
+                    <td className="py-3 px-3 text-slate-700 font-medium whitespace-nowrap">
                       {node.moisturePct.toString().replace('.', ',')}% &nbsp;|&nbsp;{' '}
                       {node.tempC.toString().replace('.', ',')}°C &nbsp;|&nbsp;{' '}
                       {node.ph.toString().replace('.', ',')}
                     </td>
-                    <td className="py-3 px-3 text-slate-600">
+                    <td className="py-3 px-3 text-slate-600 font-medium whitespace-nowrap">
                       {node.batteryPct}% ({node.batteryV.toString().replace('.', ',')}V · {node.consumptionPerCycle})
                     </td>
-                    <td className="py-3 px-3 text-right font-mono text-slate-700">
+                    <td className="py-3 px-3 text-right text-slate-700 whitespace-nowrap font-medium">
                       <span className="font-bold text-slate-900">{node.rssiLoRa} dBm</span>
                       {node.snrDb != null && (
-                        <span className="text-3xs text-slate-400 block">
+                        <span className="text-3xs text-slate-400 block mt-0.5 font-normal">
                           SNR {node.snrDb >= 0 ? '+' : ''}{node.snrDb.toFixed(1)} dB · Loss {node.packetLossPct ?? 0.4}%
                         </span>
                       )}
@@ -232,7 +232,7 @@ export const NodeManagement: React.FC = () => {
             <span className="text-3xs font-semibold text-slate-400 uppercase tracking-wider block">
               Kekuatan Sinyal
             </span>
-            <span className="text-base sm:text-lg font-extrabold text-slate-900 font-mono mt-0.5 block">
+            <span className="text-base sm:text-lg font-extrabold text-slate-900 mt-0.5 block">
               {selectedNode.rssiLoRa} dBm
             </span>
             <span className="text-3xs text-emerald-600 font-semibold block mt-0.5">Sinyal Prima</span>
@@ -242,7 +242,7 @@ export const NodeManagement: React.FC = () => {
             <span className="text-3xs font-semibold text-slate-400 uppercase tracking-wider block">
               Noise Margin (SNR)
             </span>
-            <span className="text-base sm:text-lg font-extrabold text-emerald-700 font-mono mt-0.5 block">
+            <span className="text-base sm:text-lg font-extrabold text-emerald-700 mt-0.5 block">
               {selectedNode.snrDb != null ? `${selectedNode.snrDb >= 0 ? '+' : ''}${selectedNode.snrDb.toFixed(1)}` : '+8.2'} dB
             </span>
             <span className="text-3xs text-slate-500 font-medium block mt-0.5">Margin Tinggi</span>
@@ -252,7 +252,7 @@ export const NodeManagement: React.FC = () => {
             <span className="text-3xs font-semibold text-slate-400 uppercase tracking-wider block">
               Packet Loss
             </span>
-            <span className="text-base sm:text-lg font-extrabold text-slate-900 font-mono mt-0.5 block">
+            <span className="text-base sm:text-lg font-extrabold text-slate-900 mt-0.5 block">
               {selectedNode.packetLossPct != null ? `${selectedNode.packetLossPct.toFixed(1)}%` : '0.4%'}
             </span>
             <span className="text-3xs text-emerald-600 font-semibold block mt-0.5">Transmisi Stabil</span>
