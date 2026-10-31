@@ -15,6 +15,8 @@
 > - `docs/backend/` — `INGESTION_PIPELINE.md`, `DATABASE_SCHEMA.md`, `INTEGRATION.md`, `WEBSOCKET_AND_ALERTS.md`
 > - `docs/ai/MODEL_SPEC.md`, `docs/digital_twin/` — `FAO56_WATER_BALANCE.md`, `FAILOVER_IMPUTATION.md`
 
+> **Status as-built (31 Okt 2026):** dokumen ini menggambarkan desain target. Hardware yang benar-benar ada saat ini hanya ESP32-WROOM-32D, Capacitive Moisture v1.2, DS18B20, dan modul Micro SD; transport fisik memakai WiFi/MQTT. pH, LoRa, baterai, dan power gate belum ada. Lihat [`HARDWARE_STATUS.md`](HARDWARE_STATUS.md).
+
 ---
 
 ## 1. Tujuan, Ruang Lingkup & Batasan Domain
@@ -39,9 +41,9 @@ Dokumen universal [`ARCHITECTURE.md`](../universal/ARCHITECTURE.md) memberi gamb
 | ✅ Boleh tulis | `firmware/`, `simulation/wokwi/`, `docs/hardware/` |
 | ❌ Dilarang | Modifikasi FastAPI, skema TimescaleDB, model AI/ML, file UI frontend |
 | ❌ Dilarang | Mengubah struktur payload LoRa tanpa koordinasi via `INTERFACES.md` §1 |
-| 🔒 Aturan tetap | Node **tidak pernah** berkomunikasi langsung dengan frontend atau internet — hanya via LoRa ke gateway |
+| 🔒 Aturan tetap | Node **tidak pernah** berkomunikasi langsung dengan frontend atau internet — pada desain target hanya via LoRa ke gateway |
 
-> **Hukum Utama (no bypassing):** `[IoT: Hafiiz] ⟶ LoRa ⟶ [Gateway] ⟶ MQTT ⟶ [Backend] ⟶ DTO ⟶ [AI]`. Node sensor tidak memiliki koneksi seluler/internet langsung (ADR 002).
+> **Hukum Utama (no bypassing):** `[IoT: Hafiiz] ⟶ LoRa ⟶ [Gateway] ⟶ MQTT ⟶ [Backend] ⟶ DTO ⟶ [AI]`. Node sensor tidak memiliki koneksi seluler/internet langsung (ADR 002). Prototipe bench saat ini memakai WiFi/MQTT langsung ke broker; LoRa adalah target lapangan, bukan kondisi terpasang.
 
 ### 1.4 Peta Alur Besar — Grand Flow End-to-End (IoT → Backend → AI → Frontend)
 
@@ -456,21 +458,21 @@ GPIO25 LOW   ──> MOSFET OFF ──> VCC sensor terputus total
 
 ### 3.4 Bill of Materials (BoM) per Node
 
-| # | Komponen | Spesifikasi | Qty | Estimasi Harga |
-|---|---|---|---|---|
-| 1 | ESP32-WROOM-32D | Modul WROOM-32D, Dual Core 240 MHz | 1 | Rp55.000 |
-| 2 | Capacitive Soil Moisture v1.2 | Anti-korosi | 1 | Rp15.000 |
-| 3 | DS18B20 Probe | Stainless waterproof 1m | 1 | Rp18.000 |
-| 4 | Modul pH + Probe BNC | Analog pH lapangan (belum ada, simulasi Wokwi) | 1 | Rp62.000 |
-| 5 | LoRa SX1278 Ra-02 | 433 MHz + antena helikal | 1 | Rp45.000 |
-| 6 | Baterai Li-ion 18650 | 2600 mAh 3.7V + Holder | 1 | Rp35.000 |
-| 7 | Charger TP4056 | + proteksi DW01 | 1 | Rp6.000 |
-| 8 | Panel Surya Mini | 5V 1W + Dioda 1N4007 | 1 | Rp25.000 |
-| 9 | MOSFET | IRLZ44N / AO3401 | 1 | Rp4.000 |
-| 10 | Enclosure | Box PVC IP65 tahan UV | 1 | Rp30.000 |
-| 11 | Housing Probe | Pipa PVC ¾ inch | 1 | Rp10.000 |
-| 12 | Modul Micro SD | SPI 3,3 V + kartu micro SD | 1 | Rp15.000 |
-| | **TOTAL PER NODE** | | | **± Rp305.000** |
+| # | Komponen | Spesifikasi | Qty | Estimasi Harga | Status |
+|---|---|---|---|---|---|
+| 1 | ESP32-WROOM-32D | Modul WROOM-32D, Dual Core 240 MHz | 1 | Rp55.000 | Sudah dibeli |
+| 2 | Capacitive Soil Moisture v1.2 | Anti-korosi | 1 | Rp15.000 | Sudah dibeli |
+| 3 | DS18B20 Probe | Stainless waterproof 1m | 1 | Rp18.000 | Sudah dibeli |
+| 4 | Modul pH + Probe BNC | Analog pH lapangan | 1 | Rp62.000 | Belum; simulasi Wokwi, build fisik placeholder |
+| 5 | LoRa SX1278 Ra-02 | 433 MHz + antena helikal | 1 | Rp45.000 | Belum |
+| 6 | Baterai Li-ion 18650 | 2600 mAh 3.7V + Holder | 1 | Rp35.000 | Belum |
+| 7 | Charger TP4056 | + proteksi DW01 | 1 | Rp6.000 | Belum |
+| 8 | Panel Surya Mini | 5V 1W + Dioda 1N4007 | 1 | Rp25.000 | Belum |
+| 9 | MOSFET | IRLZ44N / AO3401 | 1 | Rp4.000 | Belum |
+| 10 | Enclosure | Box PVC IP65 tahan UV | 1 | Rp30.000 | Belum |
+| 11 | Housing Probe | Pipa PVC ¾ inch | 1 | Rp10.000 | Belum |
+| 12 | Modul Micro SD | SPI 3,3 V + kartu micro SD | 1 | Rp15.000 | Sudah dibeli; kartu belum terdeteksi saat bench |
+| | **TOTAL PER NODE** | | | **± Rp320.000** | |
 
 ---
 

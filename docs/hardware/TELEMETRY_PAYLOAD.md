@@ -1,5 +1,7 @@
 # TELEMETRY_PAYLOAD.md — Spesifikasi Payload Telemetri LoRa & Gateway Adapter
 
+> **Transport fisik saat ini (31 Okt 2026):** WiFi/MQTT. Payload di bawah tetap LoRa-compatible dan dipakai apa adanya oleh `transport_mqtt.cpp`. pH dan baterai dapat berisi placeholder `7.00` dan `3.87 V` karena hardware-nya belum ada; status kanal tidak ikut di payload. Lihat [`HARDWARE_STATUS.md`](HARDWARE_STATUS.md).
+
 ---
 
 ## 1. Format Payload Kompak (ESP32 → Gateway)
@@ -19,7 +21,7 @@ Untuk menghemat konsumsi energi transmisi dan mematuhi batasan *Time-on-Air (ToA
 | `t` | Float (1 desimal) | 4 | `34.1` | Suhu tanah probe DS18B20 (°C) |
 | `ph` | Float (2 desimal) | 4 | `7.83` | Derajat keasaman tanah terkoreksi |
 | `b` | Float (2 desimal) | 4 | `3.87` | Tegangan baterai Li-ion (Volt) |
-| **Total** | — | **~52 Byte** | — | Muat penuh dalam 1 paket radio LoRa SF7 |
+| **Total** | — | **70 Byte** | — | Panjang contoh di atas; hasil bench 63 byte, rentang nyata 63–76 byte tergantung nilai. Muat dalam 1 paket radio LoRa SF7 |
 
 ---
 

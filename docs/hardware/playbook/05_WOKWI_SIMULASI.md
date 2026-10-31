@@ -2,6 +2,7 @@
 
 > **Dipakai pada:** FASE 5 (HW-5.1 … HW-5.4)
 > **Rujukan perilaku:** [`../WOKWI_SIMULATION.md`](../WOKWI_SIMULATION.md) · [`../ARCHITECTURE_IOT.md`](../ARCHITECTURE_IOT.md) §10
+> **Status as-built:** [`../HARDWARE_STATUS.md`](../HARDWARE_STATUS.md) — moisture, DS18B20, dan modul SD sudah ada; pH, LoRa, dan baterai belum.
 
 ---
 

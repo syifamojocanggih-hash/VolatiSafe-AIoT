@@ -24,6 +24,7 @@ docs/
 │
 ├── hardware/                          <-- DOMAIN 1: HARDWARE & EDGE FIRMWARE (Hafiiz)
 │   ├── README.md                      <-- Lingkup, wewenang & zona terlarang Hafiiz
+│   ├── HARDWARE_STATUS.md             <-- Status hardware aktual (as-built) & daftar belanja
 │   ├── TASK_GUIDE.md                  <-- Panduan tugas teknis langkah demi langkah
 │   ├── PINOUT_AND_SCHEMATICS.md       <-- Skema rangkaian ESP32, sensor probe, & power gate
 │   ├── FIRMWARE_SPEC.md               <-- Algoritma burst sampling, kalibrasi, & deep sleep
@@ -72,10 +73,12 @@ Untuk menghindari kerusakan silang (*cross-domain regression*), setiap anggota t
 
 | Peran & Developer | Fokus Tugas Utama | Folder Boleh Ditulis (R/W) | Zona Terlarang (DILARANG KERAS) | Titik Kontak Resmi |
 |---|---|---|---|---|
-| **IoT & Hardware**<br>*(Hafiiz)* | Firmware ESP32 C++, sensor tanah (Moisture & pH), LoRa SX1278 433 MHz, Wokwi virtual node, deep sleep | `firmware/`, `simulation/wokwi/`, `docs/hardware/` | Dilarang menyentuh kode database, API backend, model AI, atau UI frontend | Mengirim payload 52-byte ke topik MQTT Gateway via `docs/universal/INTERFACES.md` §1 |
+| **IoT & Hardware**<br>*(Hafiiz)* | Firmware ESP32 C++, sensor tanah (Moisture & pH), LoRa SX1278 433 MHz (target), Wokwi virtual node, deep sleep | `firmware/`, `simulation/wokwi/`, `docs/hardware/` | Dilarang menyentuh kode database, API backend, model AI, atau UI frontend | Mengirim payload 6-key (63–76 byte) ke topik MQTT Gateway via `docs/universal/INTERFACES.md` §1 |
 | **Digital Twin**<br>*(Andharu)* | Model biofisika tanah FAO-56 ($ET_0$), difusi termal tanah damped, imputasi failover dropout, BMKG weather replay | `digital_twin/`, `simulations/data_replay/`, `docs/digital_twin/` | Dilarang mengutak-atik model LightGBM, firmware ESP32, atau membuat UI web | Menghasilkan `FieldStateDTO` standar melalui interface di `docs/universal/INTERFACES.md` §2 |
 | **Fullstack (BE + FE)**<br>*(Syifa)* | Ingestion MQTT, TimescaleDB, REST API FastAPI, WebSocket, bot WhatsApp/Telegram, Next.js 14 PWA, Leaflet, Recharts, What-If UI | `backend/`, `frontend/`, `migrations/`, `docker/`, `docs/backend/`, `docs/frontend/` | Dilarang mengubah formula kinetika urease PIML atau mendikte pinout mikrokontroler hardware | Mengekspos REST DTO & WebSocket stream sesuai `docs/universal/INTERFACES.md` §3 |
 | **AI Engineer & Lead**<br>*(Aris)* | Arsitek sistem, penjamin kontrak data, Physics-Informed ML (PIML), LightGBM Regressor, AVRI formula, TreeSHAP | `ai_engine/`, `models/`, `docs/ai/` (MODEL_SPEC, SHAP), `docs/universal/` | Dilarang mengubah implementasi internal firmware atau styling CSS sepihak di luar kontrak | Menghasilkan model PIML terlatih dan mengelola *Single Source of Truth* universal |
+
+> **Status as-built (31 Okt 2026):** hardware yang ada baru ESP32-WROOM-32D, moisture kapasitif, DS18B20, dan modul Micro SD. pH dan baterai placeholder; transport fisik WiFi/MQTT, bukan LoRa. Rincian: [`hardware/HARDWARE_STATUS.md`](hardware/HARDWARE_STATUS.md).
 
 ---
 

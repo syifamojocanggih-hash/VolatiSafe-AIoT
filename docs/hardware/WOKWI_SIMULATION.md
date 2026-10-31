@@ -1,5 +1,7 @@
 # WOKWI_SIMULATION.md — Panduan Simulasi Perangkat Keras Virtual (TKT 3)
 
+> **Hardware nyata vs simulasi:** status as-built ada di [`HARDWARE_STATUS.md`](HARDWARE_STATUS.md). Tabel part di bawah memetakan mana yang sudah ada di meja dan mana yang hanya simulasi.
+
 ---
 
 ## 1. Peran Virtual Testbed dalam Seleksi Proposal

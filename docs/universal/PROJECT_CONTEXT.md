@@ -70,3 +70,5 @@ Berdasarkan studi literatur dan observasi lapangan pada sektor agritech Indonesi
 | **Backend & Storage**| FastAPI, TimescaleDB, PostgreSQL, Docker Compose | Query time-series telemetri ultra cepat, ACID compliance, orkestrasi asinkron. |
 | **Frontend Web** | Next.js 14 (App Router), TypeScript, Tailwind CSS, Leaflet, Recharts, PWA | Tampilan responsif modern, visualisasi peta bedeng ringan, ramah sinyal lambat desa. |
 | **Notifikasi** | Fonnte/Wablas WhatsApp Gateway API & Telegram Bot API | Notifikasi langsung ke aplikasi yang setiap hari dibuka oleh petani Indonesia. |
+
+> **Status as-built (31 Okt 2026):** hardware yang benar-benar ada baru board ESP32-WROOM-32D, sensor moisture kapasitif, DS18B20 waterproof, dan modul Micro SD. LoRa, baterai, charger, panel surya, MOSFET, pH, dan enclosure belum ada; transport fisik saat ini WiFi/MQTT. Rincian: [`../hardware/HARDWARE_STATUS.md`](../hardware/HARDWARE_STATUS.md).

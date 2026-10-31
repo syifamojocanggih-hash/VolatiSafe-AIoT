@@ -6,6 +6,8 @@
 > **STATUS:** dokumen hidup (*living document*) — diperbarui setiap task selesai
 > **SISA TASK:** [`../REMAINING_TASKS.md`](../REMAINING_TASKS.md)
 
+> **Status as-built (31 Okt 2026):** 4 item sudah dibeli (ESP32-WROOM-32D, moisture kapasitif, DS18B20, modul Micro SD). Task yang menyebut pH, LoRa, baterai, MOSFET, dan enclosure adalah target, bukan kondisi terpasang. Ringkasan: [`../HARDWARE_STATUS.md`](../HARDWARE_STATUS.md).
+
 ---
 
 ## 1. Untuk Apa Playbook Ini
@@ -52,7 +54,7 @@ Urutan baca per niat:
 |---|---|---|---|
 | 00 | `00_INDEX.md` | Peta dokumen, status board, aturan update | Sekarang |
 | 01 | `01_SETUP_LINGKUNGAN.md` | Inventaris tool yang sudah ada vs harus diunduh, perintah verifikasi, troubleshooting Windows | FASE 0 |
-| 02 | `02_HARDWARE_BOM.md` | BoM 11 item, alternatif komponen, aturan pengadaan bertahap, prosedur kalibrasi lab | FASE 0, 9 |
+| 02 | `02_HARDWARE_BOM.md` | BoM 12 item + 7 pendukung (4 item sudah dibeli), alternatif komponen, aturan pengadaan bertahap, prosedur kalibrasi lab | FASE 0, 9 |
 | 03 | `03_ROADMAP_TUGAS.md` | 40+ task ber-ID dengan dependensi, estimasi, output, DoD | Setiap hari |
 | 04 | `04_FIRMWARE_CORE.md` | Desain per modul: file, fungsi, pseudocode, edge case, acceptance test | FASE 1–4 |
 | 05 | `05_WOKWI_SIMULASI.md` | `diagram.json`, `wokwi.toml`, build `[env:wokwi]`, 3 skenario injeksi, batasan | FASE 5 |

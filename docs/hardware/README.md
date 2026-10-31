@@ -4,6 +4,8 @@
 > **AREA AKSES PENUH (R/W):** `firmware/`, `simulation/wokwi/`, `docs/hardware/`  
 > **CABANG GIT RESMI:** `iot`
 
+> **Status as-built (31 Okt 2026):** hardware yang ada baru ESP32-WROOM-32D, Capacitive Soil Moisture v1.2, DS18B20 waterproof, dan modul Micro SD. Transport fisik memakai WiFi/MQTT; pH, LoRa, baterai, dan power gate belum ada. Mulai dari [`HARDWARE_STATUS.md`](HARDWARE_STATUS.md).
+
 ---
 
 ## 1. Mandat & Ruang Lingkup Kerja
@@ -21,9 +23,9 @@ Hafiiz bertanggung jawab penuh atas segala hal yang berkaitan dengan perangkat k
 
 Untuk mencegah benturan kode dengan tim/AI lain:
 1. ❌ **Dilarang Menyentuh Database:** Jangan pernah menulis query SQL, skema migrasi, atau koneksi DB di modul firmware.
-2. ❌ **Dilarang Menghubungi REST API Langsung:** Node sensor lapangan tidak memiliki koneksi internet langsung. Transmisi **hanya via LoRa SX1278** ke Gateway.
+2. ❌ **Dilarang Menghubungi REST API Langsung:** Node sensor lapangan tidak memiliki koneksi internet langsung. Pada desain target, transmisi **hanya via LoRa SX1278** ke Gateway. Prototipe bench saat ini memakai WiFi/MQTT langsung ke broker; jangan menambah jalur akses lain tanpa keputusan tertulis.
 3. ❌ **Dilarang Mengubah Payload LoRa Sepihak:** Bentuk payload LoRa terikat kontrak di [`docs/universal/INTERFACES.md`](../universal/INTERFACES.md) §1. Jika Anda mengubah urutan byte atau field JSON, Anda **wajib** memperbarui fungsi adapter di `docs/hardware/TELEMETRY_PAYLOAD.md` dan memberitahukan tim backend.
-4. ❌ **Wajib Menjaga Anggaran Daya:** Firmware wajib menerapkan *deep sleep* 15 menit dan mematikan suplai daya sensor via MOSFET (GPIO25). Konsumsi daya per siklus tidak boleh melampaui 0,07 mAh.
+4. ❌ **Wajib Menjaga Anggaran Daya:** Firmware wajib menerapkan *deep sleep* 15 menit dan, pada desain target, mematikan suplai daya sensor via MOSFET (GPIO25). Prototipe saat ini menyalakan sensor langsung dari 3V3 karena MOSFET belum ada. Konsumsi daya per siklus tidak boleh melampaui 0,07 mAh.
 
 ---
 
@@ -31,9 +33,10 @@ Untuk mencegah benturan kode dengan tim/AI lain:
 
 ### 3.1 Spesifikasi (apa yang harus dibangun)
 
-1. [`PINOUT_AND_SCHEMATICS.md`](PINOUT_AND_SCHEMATICS.md): Pemetaan pin ESP32, rangkaian sensor, pull-up resistor, dan skema power gating MOSFET.
+0. [`HARDWARE_STATUS.md`](HARDWARE_STATUS.md): Status hardware aktual (as-built), hasil uji bench, dan daftar belanja berikutnya.
+1. [`PINOUT_AND_SCHEMATICS.md`](PINOUT_AND_SCHEMATICS.md): Pemetaan pin ESP32, status komponen, catatan pull-up internal, dan skema power gate target.
 2. [`FIRMWARE_SPEC.md`](FIRMWARE_SPEC.md): Logika sampling burst (5x median filter), kalibrasi dua titik, dan siklus deep-sleep.
-3. [`TELEMETRY_PAYLOAD.md`](TELEMETRY_PAYLOAD.md): Spesifikasi paket LoRa ringkas dan adapter ekstraksi gateway.
+3. [`TELEMETRY_PAYLOAD.md`](TELEMETRY_PAYLOAD.md): Spesifikasi payload ringkas (LoRa-compatible, transport fisik MQTT) dan adapter ekstraksi gateway.
 4. [`WOKWI_SIMULATION.md`](WOKWI_SIMULATION.md): Petunjuk menjalankan purwarupa virtual testbed Wokwi untuk demonstrasi juri 3 skenario.
 5. [`ARCHITECTURE_IOT.md`](ARCHITECTURE_IOT.md): Arsitektur domain IoT (Lapis 1 & 2), alur data end-to-end, dan titik kontak ke Backend/AI.
 6. [`SETUP_IOT.md`](SETUP_IOT.md): Langkah konfigurasi operasional dari nol — infrastruktur, MQTT, Wokwi, hardware fisik, kalibrasi, verifikasi, troubleshooting.

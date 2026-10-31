@@ -1,7 +1,7 @@
 # 02_HARDWARE_BOM.md — Bill of Materials, Rangkaian & Kalibrasi
 
 > **Dipakai pada:** FASE 0 (persiapan) dan FASE 9 (pengadaan TKT 4)
-> **PENTING:** Pada fase TKT 3 (s.d. 31 Okt 2026) **tidak ada pembelian apa pun**. Dokumen ini disiapkan agar pengadaan Bulan 1 pasca-insentif berjalan tanpa revisi.
+> **STATUS (31 Okt 2026):** 4 item sudah dibeli (Rp103.000): ESP32-WROOM-32D, Capacitive Soil Moisture v1.2, DS18B20 waterproof, dan modul Micro SD. Delapan item BoM lainnya masih rencana. Ringkasan as-built ada di [`../HARDWARE_STATUS.md`](../HARDWARE_STATUS.md).
 
 ---
 
@@ -9,8 +9,8 @@
 
 | Tahap | Kapan | Yang Dibeli | Tujuan |
 |---|---|---|---|
-| **Tahap 0** | Sekarang (TKT 3) | **Nol rupiah.** | Simulasi software sudah cukup untuk proposal |
-| **Tahap 1** | Bulan 1, setelah insentif cair | **1 unit prototipe** saja (±Rp305.000) | Buktikan asumsi: kalibrasi, deep sleep, jangkauan LoRa |
+| **Tahap 0** | Sekarang (TKT 3) | **4 item inti sudah dibeli (Rp103.000).** | Sensor nyata dan SD sudah bisa diuji bench |
+| **Tahap 1** | Bulan 1, setelah insentif cair | **Sisa 8 item BoM (±Rp217.000) + pendukung (±Rp12.500)** | Buktikan asumsi: kalibrasi, deep sleep, jangkauan LoRa |
 | **Tahap 2** | Bulan 2, setelah Tahap 1 lulus | 8 unit node + 1 gateway | Uji multi-node, fabrikasi PCB |
 | **Tahap 3** | Bulan 4 | Spare part 1 unit (10% cadangan) | Antisipasi probe rusak di lapangan |
 
@@ -78,16 +78,16 @@ Plafon: **Rp3.000.000**.
 
 | Skenario | Perhitungan | Total | Status |
 |---|---|---|---|
-| Naif: 10 node, BoM resmi | 10 × Rp305.000 | Rp3.050.000 | ❌ **lewat Rp50.000** |
-| Realistis: 10 node + pendukung | 10 × Rp317.500 | Rp3.175.000 | ❌ lewat Rp175.000 |
-| Realistis + gateway | 10 × Rp317.500 + Rp165.000 | **Rp3.340.000** | ❌ lewat Rp340.000 |
-| **Rekomendasi: 8 node + 1 gateway + cadangan** | 8 × Rp317.500 + Rp165.000 | **Rp2.705.000** | ✅ sisa Rp295.000 |
-| Rekomendasi + 1 node cadangan | + Rp317.500 | Rp3.022.500 | ⚠️ lewat tipis |
-| **Rekomendasi final: 9 node + 1 gateway** | 9 × Rp317.500 + Rp165.000 | **Rp3.022.500** | ⚠️ lewat Rp22.500 |
+| Naif: 10 node, BoM resmi | 10 × Rp320.000 | Rp3.200.000 | ❌ **lewat Rp200.000** |
+| Realistis: 10 node + pendukung | 10 × Rp332.500 | Rp3.325.000 | ❌ lewat Rp325.000 |
+| Realistis + gateway | 10 × Rp332.500 + Rp165.000 | **Rp3.490.000** | ❌ lewat Rp490.000 |
+| **Rekomendasi: 8 node + 1 gateway + cadangan** | 8 × Rp332.500 + Rp165.000 | **Rp2.825.000** | ✅ sisa Rp175.000 |
+| Rekomendasi + 1 node cadangan | + Rp332.500 | Rp3.157.500 | ⚠️ lewat Rp157.500 |
+| **Rekomendasi final: 9 node + 1 gateway** | 9 × Rp332.500 + Rp165.000 | **Rp3.157.500** | ⚠️ lewat Rp157.500 |
 
-**Usulan penyesuaian agar pas:** turunkan enclosure ke box plastik ABS non-IP65 untuk node yang dipasang di bawah kanopi (Rp12.000, hemat Rp18.000/node) → 9 × Rp299.500 + Rp165.000 = **Rp2.860.500**, sisa Rp139.500 untuk cadangan probe. Lihat `DEC-IOT-04` di [`09_RISIKO_DAN_KEPUTUSAN.md`](09_RISIKO_DAN_KEPUTUSAN.md).
+**Usulan penyesuaian agar pas:** turunkan enclosure ke box plastik ABS non-IP65 untuk node yang dipasang di bawah kanopi (Rp12.000, hemat Rp18.000/node) → 9 × Rp314.500 + Rp165.000 = **Rp2.995.500**, sisa Rp4.500 tanpa cadangan probe. Bila cadangan probe diperlukan, turun ke 8 node: 8 × Rp314.500 + Rp165.000 = **Rp2.681.000**, sisa Rp319.000. Lihat `DEC-IOT-04` di [`09_RISIKO_DAN_KEPUTUSAN.md`](09_RISIKO_DAN_KEPUTUSAN.md).
 
-> **Catatan strategi proposal:** 8–9 node sudah cukup untuk klaim "multi-node mesh". Menulis "10 node" di proposal tetapi hanya sanggup 9 akan menjadi temuan saat audit insentif. Lebih aman menulis **"9 node + 1 gateway"**.
+> **Catatan strategi proposal:** 8–9 node sudah cukup untuk klaim "multi-node mesh". Menulis "10 node" di proposal tetapi hanya sanggup 9 akan menjadi temuan saat audit insentif. Lebih aman menulis **"8 node + 1 gateway"** bila cadangan probe dianggarkan; **"9 node + 1 gateway"** hanya jika tanpa cadangan.
 
 ---
 
@@ -257,7 +257,7 @@ Butuh larutan buffer pH 4,01 dan pH 6,86 (beli di toko kimia, ±Rp25.000/botol).
 
 ## 9. Checklist FASE 9 (Pengadaan)
 
-- [ ] 1 unit prototipe dipesan (Tahap 1), **termasuk komponen pendukung #12–#17**
+- [ ] 1 unit prototipe dipesan (Tahap 1), **termasuk komponen pendukung #13–#19**
 - [ ] Multimeter + USB power meter tersedia
 - [ ] Buffer pH 4,01 & 6,86 tersedia sebelum kalibrasi
 - [ ] Arus deep sleep diukur nyata; angka dicatat menggantikan klaim 10 µA

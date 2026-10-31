@@ -3,6 +3,8 @@
 > **Peran dokumen:** `TASK_GUIDE.md` menyebut 5 tahap besar. Dokumen ini memecahnya menjadi **46 task atomik** (40 untuk TKT 3, 6 untuk TKT 4–6) dengan ID, dependensi, estimasi, output, dan kriteria terima, dari kondisi repo hari ini (`main.cpp` skeleton) sampai PR ke `Development`.
 > **Estimasi** = jam kerja fokus, bukan jam kalender.
 
+> **Status as-built (31 Okt 2026):** hardware yang ada baru ESP32-WROOM-32D, moisture kapasitif, DS18B20, dan modul Micro SD. Task HW-2.4 (pH), HW-2.5 (baterai), HW-3.3 (LoRa), dan FASE 9 adalah target; jangan dibaca sebagai fitur yang sudah terpasang. Ringkasan: [`../HARDWARE_STATUS.md`](../HARDWARE_STATUS.md).
+
 ---
 
 ## 1. Peta Fase

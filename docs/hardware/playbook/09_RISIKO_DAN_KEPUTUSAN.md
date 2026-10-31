@@ -50,11 +50,11 @@
 |---|---|
 | **Tanggal** | 26 Okt 2026 |
 | **Status** | ⚠️ Menunggu keputusan Lead |
-| **Temuan 1** | BoM resmi Rp305.000/node × 10 = **Rp3.050.000** > plafon Rp3.000.000. |
+| **Temuan 1** | BoM resmi Rp320.000/node × 10 = **Rp3.200.000** > plafon Rp3.000.000. |
 | **Temuan 2** | BoM awal tidak memuat divider baterai, divider pH, kabel, dan header, total ±Rp12.500/node. Pull-up DS18B20 kini ditangani internal (`INPUT_PULLUP`), tetapi resistor 4,7 kΩ tetap disarankan untuk kabel panjang. Tanpa divider baterai/pH, kedua kanal itu tidak berfungsi. |
 | **Temuan 3** | BoM **tidak memuat gateway** sama sekali (ESP32 + LoRa RX + adaptor + enclosure ≈ Rp165.000). |
-| **Keputusan diusulkan** | 9 node + 1 gateway, enclosure ABS untuk node di bawah kanopi: 9 × Rp299.500 + Rp165.000 = **Rp2.860.500**, sisa Rp139.500 untuk cadangan probe. |
-| **Alternatif** | 8 node + gateway Rp2.705.000 (sisa lebih besar, tapi klaim "mesh" lebih lemah). |
+| **Keputusan diusulkan** | 9 node + 1 gateway, enclosure ABS untuk node di bawah kanopi: 9 × Rp314.500 + Rp165.000 = **Rp2.995.500**, sisa Rp4.500; tidak cukup untuk cadangan probe. |
+| **Alternatif** | 8 node + gateway Rp2.681.000 (sisa Rp319.000, cukup untuk cadangan probe; klaim "mesh" lebih lemah). |
 | **Tindakan** | Ajukan ke Aris. **Jangan menulis "10 node" di proposal** bila anggaran tidak mencukupi — ini akan menjadi temuan audit insentif. |
 
 ### DEC-IOT-05 — Klaim Arus Deep Sleep 10 µA Tidak Realistis

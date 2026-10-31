@@ -8,10 +8,12 @@
 VolatiSafe AIoT adalah platform kecerdasan buatan dan telemetri mikroklimat tanah yang dirancang untuk mencegah kehilangan nitrogen pupuk Urea akibat volatilisasi gas amonia ($NH_3$) pada lahan jagung kering (Lampung & Lamongan). Berbeda dengan sistem agritech konvensional yang hanya menyarankan takaran pupuk statis, VolatiSafe memecahkan dimensi waktu: **"Kapan jendela jam paling aman untuk menebar pupuk agar Nitrogen tidak menguap?"**.
 
 Sistem memadukan:
-1. **IoT Node Berdaya Mandiri (< Rp250.000/node):** ESP32 + sensor fisik terverifikasi (Kelembaban Kapasitif, Suhu Probe DS18B20, pH Tanah) + transmisi radio LoRa 433 MHz mesh (zero-internet di lahan).
+1. **IoT Node Berdaya Mandiri (< Rp250.000/node):** ESP32 + sensor fisik terverifikasi (Kelembaban Kapasitif, Suhu Probe DS18B20, pH Tanah) + transmisi radio LoRa 433 MHz mesh (zero-internet di lahan) — **target desain**.
 2. **Agro-Climatic Digital Twin:** Model virtual neraca air tanah FAO-56 ($ET_0$) dan difusi termal kontinu untuk imputasi data saat terjadi *sensor dropout*.
 3. **Physics-Informed Machine Learning (PIML):** Model LightGBM Regressor yang memprediksi *residual variance* di atas kinetika reaksi kimia enzim urease (Arrhenius Decay) untuk menghasilkan skor *Ammonia Volatilization Risk Index* (AVRI 0–100%).
 4. **PWA Dashboard & Bot Alert WhatsApp:** Preskripsi waktu jam-ke-jam, instruksi mitigasi fisik lapangan (tugal/benam vs siram), serta fitur *Dynamic DAT Tracker* dan *Multi-Fertilizer Blender* (konversi praktis karung & ember).
+
+> **Status hardware (31 Okt 2026):** prototipe fisik baru memakai ESP32-WROOM-32D, sensor moisture kapasitif, DS18B20, dan modul Micro SD. pH dan baterai masih placeholder; transport fisik WiFi/MQTT, bukan LoRa. Rincian dan hasil bench: [`docs/hardware/HARDWARE_STATUS.md`](docs/hardware/HARDWARE_STATUS.md).
 
 ---
 
@@ -49,6 +51,7 @@ Seluruh dokumentasi dirancang menggunakan arsitektur modular **Multi-Domain Isol
 2. **Backend Services & Database:** Jalankan stack Docker lokal via [`docs/backend/SETUP.md`](docs/backend/SETUP.md).
 3. **Frontend PWA Dashboard:** Ikuti petunjuk instalasi di [`docs/frontend/SETUP.md`](docs/frontend/SETUP.md).
 4. **Validasi Model AI:** Akses mock predictor di [`docs/ai/MOCK_PREDICTOR.md`](docs/ai/MOCK_PREDICTOR.md).
+5. **Arduino IDE:** buka [`firmware/arduino/VolatiSafeNode/VolatiSafeNode.ino`](firmware/arduino/VolatiSafeNode/VolatiSafeNode.ino); setelan board dan library ada di [`README`](firmware/arduino/VolatiSafeNode/README.md) folder tersebut.
 
 ### Jalankan seluruh stack di mesin lokal
 

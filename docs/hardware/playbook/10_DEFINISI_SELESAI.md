@@ -118,6 +118,8 @@ Tanpa nomor 5, status tetap `🟨`.
 
 ### FASE 9 — Fisik
 
+> **Catatan as-built (31 Okt 2026):** tabel ini adalah target TKT 4–6. Hardware saat ini baru board, moisture, DS18B20, dan modul Micro SD; kriteria pH, LoRa, enclosure, otonomi, dan gateway belum bisa diverifikasi. Lihat [`../HARDWARE_STATUS.md`](../HARDWARE_STATUS.md).
+
 | Kriteria | Cara verifikasi |
 |---|---|
 | Kalibrasi | F-01 … F-03 dalam toleransi |

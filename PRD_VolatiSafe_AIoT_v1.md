@@ -162,6 +162,8 @@ Pada fase seleksi proposal (batas 31 Okt 2026), sistem **100% dijalankan dalam l
 
 ### 4.1 Bill of Materials (BoM) per Node
 
+> **Status as-built (31 Okt 2026):** BoM ini adalah target desain. Hardware yang sudah ada baru 4 item: ESP32-WROOM-32D, Capacitive Soil Moisture v1.2, DS18B20 waterproof, dan modul Micro SD. pH, LoRa, baterai, charger, panel surya, MOSFET, dan enclosure belum ada. Rincian dan hasil bench: [`docs/hardware/HARDWARE_STATUS.md`](docs/hardware/HARDWARE_STATUS.md).
+
 | # | Komponen | Spesifikasi | Qty | Harga Satuan | Interface | Peran |
 |---|---|---|---|---|---|---|
 | 1 | **MCU** | ESP32-WROOM-32D | 1 | Rp55.000 | WiFi/BLE/SPI/I2C/ADC | Akuisisi, edge preprocessing, kontrol LoRa |
@@ -174,9 +176,9 @@ Pada fase seleksi proposal (batas 31 Okt 2026), sistem **100% dijalankan dalam l
 | 8 | **Catu Sensor** | Modul MOSFET IRLZ44N / Relay 5V 1-Channel | 1 | Rp10.000 | GPIO gate | Memutus VCC sensor saat sleep (anti-elektrolisis probe) |
 | 9 | **Enclosure** | Box Junction PVC IP65 + Pipa PVC ¾" (probe housing) | 1 | Rp30.000 | — | Tahan hujan & radiasi UV |
 | 10 | **Modul Micro SD** | Modul SPI 3,3 V + kartu micro SD | 1 | Rp15.000 | SPI (CS5/SCK18/MISO19/MOSI23) | Buffer store-and-forward saat pengiriman gagal |
-| | **TOTAL per node** | | | **± Rp320.000** | | Target optimasi: ≤ Rp250.000 (10 node = Rp3,05 jt, sesuai plafon Rp3 jt) |
+| | **TOTAL per node** | | | **± Rp320.000** | | Target optimasi: ≤ Rp250.000 (10 node = Rp3,2 jt, di atas plafon Rp3 jt) |
 
-> **Catatan biaya:** Untuk 10 node, komponen dikomunikasikan sebagai *starter kit* dengan potensi penurunan harga melalui pembelian batch (estimasi −25% pada volume 10+). Plafon dana purwarupa Rp3.000.000 dapat menutup 8–10 node.
+> **Catatan biaya:** Untuk 10 node, komponen dikomunikasikan sebagai *starter kit* dengan potensi penurunan harga melalui pembelian batch (estimasi −25% pada volume 10+). Plafon dana purwarupa Rp3.000.000 realistis menutup 8–9 node, bukan 10.
 
 ### 4.2 Pin Mapping ESP32
 

@@ -39,6 +39,8 @@ Satu paket harus melewati empat titik ini. Kalau salah satu diam, bagian itu yan
 
 Port yang harus bebas: `5433` (DB), `1883` (MQTT), `8000` (API), `3000` (dashboard).
 
+> **As-built (31 Okt 2026):** jalur hardware saat ini memakai ESP32-WROOM-32D, sensor moisture kapasitif, DS18B20, dan modul Micro SD. pH dan baterai masih placeholder; transport fisik WiFi/MQTT. Rincian: [`HARDWARE_STATUS.md`](HARDWARE_STATUS.md).
+
 ---
 
 ## 2. Langkah 1 — Nyalakan infrastruktur
@@ -219,6 +221,10 @@ Catatan jalur B:
 | Micro SD (SPI) | CS 5, SCK 18, MISO 19, MOSI 23 | buffer offline |
 
 Analog wajib di ADC1 (GPIO32–39); ADC2 tidak bisa dipakai saat WiFi aktif.
+
+Baris pH, divider baterai, dan MOSFET adalah target desain; hardware-nya belum ada. Yang benar-benar terpasang saat ini hanya moisture (GPIO34), DS18B20 (GPIO4), dan Micro SD (SPI).
+
+**Alternatif Arduino IDE:** buka `firmware/arduino/VolatiSafeNode/VolatiSafeNode.ino`. Panduan board, library, dan kredensial ada di `firmware/arduino/VolatiSafeNode/README.md`.
 
 #### 4C.2 Kredensial dan alamat broker
 

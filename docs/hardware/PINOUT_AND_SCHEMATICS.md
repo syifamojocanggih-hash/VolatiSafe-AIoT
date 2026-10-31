@@ -6,7 +6,7 @@
 
 > ⚠️ **PERINGATAN KRITIS ADC:** Sensor analog (Kelembaban & pH) **WAJIB** terhubung ke pin **ADC1** (GPIO 32–39). Jangan pernah memindahkan sensor ke ADC2 (GPIO 0, 2, 4, 12–15, 25–27) karena ADC2 terkunci (*hardware conflict*) saat modul radio/WiFi aktif.
 
-Status komponen mengikuti hardware yang benar-benar dipegang saat ini.
+Status komponen mengikuti hardware yang benar-benar dipegang saat ini. Ringkasan as-built, hasil uji bench, dan daftar belanja ada di [`HARDWARE_STATUS.md`](HARDWARE_STATUS.md).
 
 | Komponen / Sensor | Pin ESP32 | Tipe Sinyal | Status | Keterangan |
 |---|---|---|---|---|
@@ -93,7 +93,7 @@ Kolom **Status** membedakan yang sudah dibeli dari rencana pengadaan berikutnya.
 | 10 | Saklar Daya Sensor | MOSFET IRLZ44N / P-Channel AO3401 | 1 | Rp4.000 | Belum |
 | 11 | Enclosure | Box junction PVC IP65 tahan UV | 1 | Rp30.000 | Belum |
 | 12 | Housing Probe | Pipa PVC ¾ inch pelindung probe tanah | 1 | Rp10.000 | Belum |
-| | **TOTAL BIAYA PER NODE** | | | **± Rp305.000** | |
+| | **TOTAL BIAYA PER NODE** | | | **± Rp320.000** | |
 
 ### 4.1 Komponen Pendukung
 
@@ -104,3 +104,6 @@ Kolom **Status** membedakan yang sudah dibeli dari rencana pengadaan berikutnya.
 | 15 | Resistor 10 kΩ | ¼ W | 2 | Rp1.000 | Belum; untuk pembagi output modul pH. |
 | 16 | Kapasitor 100 nF | Keramik | 2 | Rp1.000 | Belum. |
 | 17 | Kabel jumper | Dupont 20 cm | 1 set | Rp5.000 | Belum. |
+| 18 | Header pin | Male/female 2.54 mm | 1 set | Rp3.000 | Belum. |
+| 19 | Silica gel | 5 g | 1 | Rp1.000 | Belum. |
+| | **TOTAL PENDUKUNG** | | | **± Rp12.500** | |
