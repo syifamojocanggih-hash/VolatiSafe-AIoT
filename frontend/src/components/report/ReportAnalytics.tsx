@@ -106,11 +106,11 @@ export const ReportAnalytics: React.FC = () => {
       </div>
 
       {/* Main Sandy Canvas Container matching design */}
-      <div className="bg-[#FAF4E6] rounded-3xl p-5 sm:p-6 border border-[#E4D9BC] space-y-6">
+      <div className="bg-[#FAF4E6] rounded-3xl p-3.5 sm:p-6 border border-[#E4D9BC] space-y-5 sm:space-y-6 min-w-0 overflow-hidden">
         {/* ================= UPPER SECTION: 3 IMPACT CARDS ================= */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 sm:gap-5 min-w-0">
           {/* Card 1: Target Efisiensi Pupuk Urea */}
-          <div className="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-2xs flex flex-col justify-between">
+          <div className="bg-white rounded-2xl p-4 sm:p-6 border border-slate-200/80 shadow-2xs flex flex-col justify-between min-w-0">
             <div>
               <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
                 TARGET EFISIENSI PUPUK UREA
@@ -125,7 +125,7 @@ export const ReportAnalytics: React.FC = () => {
           </div>
 
           {/* Card 2: Penurunan Kehilangan Nitrogen */}
-          <div className="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-2xs flex flex-col justify-between">
+          <div className="bg-white rounded-2xl p-4 sm:p-6 border border-slate-200/80 shadow-2xs flex flex-col justify-between min-w-0">
             <div>
               <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
                 PENURUNAN KEHILANGAN NITROGEN
@@ -140,7 +140,7 @@ export const ReportAnalytics: React.FC = () => {
           </div>
 
           {/* Card 3: Ekspor Data Audit Real-Time */}
-          <div className="bg-[#EDF8EE] rounded-2xl p-6 border border-[#C6E7C9] shadow-2xs flex flex-col justify-between">
+          <div className="bg-[#EDF8EE] rounded-2xl p-4 sm:p-6 border border-[#C6E7C9] shadow-2xs flex flex-col justify-between min-w-0">
             <div>
               <div className="flex items-center justify-between">
                 <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block">
@@ -173,55 +173,59 @@ export const ReportAnalytics: React.FC = () => {
         </div>
 
         {/* ================= LOWER SECTION: PROVENANCE TABLE & THE MOAT ================= */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 items-start min-w-0">
           {/* Left Column: Tabel Audit Data Provenance (7 cols) */}
-          <div className="lg:col-span-7 bg-white rounded-2xl p-6 border border-slate-200/80 shadow-2xs flex flex-col">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+          <div className="lg:col-span-7 bg-white rounded-2xl p-4 sm:p-6 border border-slate-200/80 shadow-2xs flex flex-col min-w-0">
+            <div className="flex flex-col gap-3 mb-4">
               <div>
                 <h3 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">
                   Tabel Audit Data Provenance
                 </h3>
-                <p className="text-xs text-slate-500 mt-0.5">
+                <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">
                   Menghindari &quot;Fake Simulator&quot; dengan pembuktian asal-usul data telemetri nyata vs estimasi failover.
                 </p>
               </div>
 
-              {/* Sub-tab Switcher */}
-              <div className="inline-flex rounded-xl bg-slate-100 p-1 border border-slate-200 text-xs font-semibold">
-                <button
-                  onClick={() => setActiveTableTab('live_audit')}
-                  className={`px-3 py-1 rounded-lg transition-all ${
-                    activeTableTab === 'live_audit'
-                      ? 'bg-white text-slate-900 shadow-2xs font-bold'
-                      : 'text-slate-600 hover:text-slate-900'
-                  }`}
-                >
-                  Riwayat Log Live ({auditLogs.length})
-                </button>
-                <button
-                  onClick={() => setActiveTableTab('scientific_reference')}
-                  className={`px-3 py-1 rounded-lg transition-all ${
-                    activeTableTab === 'scientific_reference'
-                      ? 'bg-white text-slate-900 shadow-2xs font-bold'
-                      : 'text-slate-600 hover:text-slate-900'
-                  }`}
-                >
-                  Acuan Ilmiah
-                </button>
+              {/* Sub-tab Switcher: Tersusun rapi di bawah deskripsi agar tidak bertabrakan */}
+              <div className="flex items-center">
+                <div className="inline-flex rounded-xl bg-slate-100 p-1 border border-slate-200 text-xs font-semibold">
+                  <button
+                    onClick={() => setActiveTableTab('live_audit')}
+                    className={`px-3.5 py-1.5 rounded-lg transition-all text-center whitespace-nowrap ${
+                      activeTableTab === 'live_audit'
+                        ? 'bg-white text-slate-900 shadow-2xs font-bold'
+                        : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    Riwayat Log Live ({auditLogs.length})
+                  </button>
+                  <button
+                    onClick={() => setActiveTableTab('scientific_reference')}
+                    className={`px-3.5 py-1.5 rounded-lg transition-all text-center whitespace-nowrap ${
+                      activeTableTab === 'scientific_reference'
+                        ? 'bg-white text-slate-900 shadow-2xs font-bold'
+                        : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    Acuan Ilmiah
+                  </button>
+                </div>
               </div>
             </div>
 
             {/* TAB 1: Live Audit Log from Backend Database */}
             {activeTableTab === 'live_audit' && (
               <div className="space-y-3">
-                <div className="flex items-center justify-between text-2xs text-slate-500 border-b border-slate-100 pb-2">
-                  <span className="flex items-center gap-1.5">
-                    <Radio className="w-3 h-3 text-emerald-600" />
-                    Transmisi Langsung: <b>{directCount} paket</b>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-2xs text-slate-600 border-b border-slate-100 pb-2.5">
+                  <span className="flex items-center gap-1.5 whitespace-nowrap">
+                    <Radio className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                    <span>Transmisi Langsung:</span>
+                    <b className="font-bold text-slate-900">{directCount} paket</b>
                   </span>
-                  <span className="flex items-center gap-1.5">
-                    <Cpu className="w-3 h-3 text-amber-600" />
-                    Failover Digital Twin: <b>{failoverCount} paket</b>
+                  <span className="flex items-center gap-1.5 whitespace-nowrap">
+                    <Cpu className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                    <span>Failover Digital Twin:</span>
+                    <b className="font-bold text-slate-900">{failoverCount} paket</b>
                   </span>
                 </div>
 
@@ -350,7 +354,7 @@ export const ReportAnalytics: React.FC = () => {
           </div>
 
           {/* Right Column: Batas Kejujuran Ilmiah (The Moat) (5 cols) */}
-          <div className="lg:col-span-5 bg-white rounded-2xl p-6 border border-slate-200/80 shadow-2xs flex flex-col justify-between">
+          <div className="lg:col-span-5 bg-white rounded-2xl p-4 sm:p-6 border border-slate-200/80 shadow-2xs flex flex-col justify-between min-w-0">
             <div>
               <h3 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight mb-4">
                 Batas Kejujuran Ilmiah (The Moat)

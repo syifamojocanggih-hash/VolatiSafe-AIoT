@@ -142,6 +142,7 @@ export const LeafletFieldMap: React.FC<LeafletFieldMapProps> = ({
         center: defaultCenter,
         zoom: 18,
         zoomControl: false,
+        attributionControl: false,
         scrollWheelZoom: true,
       });
 
@@ -397,68 +398,60 @@ export const LeafletFieldMap: React.FC<LeafletFieldMapProps> = ({
   };
 
   return (
-    <div className="relative w-full h-[480px] sm:h-[540px] lg:h-[580px] rounded-2xl overflow-hidden border border-[#E5DEC7] shadow-lg bg-slate-900">
+    <div className="relative w-full h-[440px] sm:h-[520px] lg:h-[580px] rounded-2xl overflow-hidden border border-[#E5DEC7] shadow-lg bg-slate-900">
       {/* Map Leaflet Canvas */}
       <div ref={mapContainerRef} className="w-full h-full z-10" />
 
-      {/* TOP HEADER CONTROLS (Info Chip + Tombol Legenda + Layer Switcher) */}
-      <div className="absolute top-3 left-3 right-3 z-[400] flex flex-wrap items-center justify-between gap-2 pointer-events-none">
-        {/* Left: Location & Project Chip */}
-        <div className="pointer-events-auto flex items-center gap-1.5 sm:gap-2 bg-white/95 backdrop-blur-md px-3 py-1.5 rounded-xl border border-slate-200/90 shadow-md text-xs font-semibold text-slate-800">
-          <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-          <span className="truncate max-w-[160px] sm:max-w-none">Hamparan Persawahan Jagung · Solokuro, Lamongan</span>
-          <span className="hidden sm:inline-block text-slate-300">|</span>
-          <span className="hidden sm:inline-block px-1.5 py-0.5 rounded text-2xs bg-emerald-50 text-emerald-700 font-bold border border-emerald-200">
-            {parcels.length} Node Sensor Aktif
-          </span>
-        </div>
-
-        {/* Right: Tombol Legenda & Layer Switcher */}
-        <div className="pointer-events-auto flex items-center gap-2">
-          {/* Tombol Legenda Dropdown */}
+      {/* TOP HEADER CONTROLS (Clean Single Row: Left Legenda, Right Layer Switcher & Reset) */}
+      <div className="absolute top-2.5 left-2.5 right-2.5 sm:top-3 sm:left-3 sm:right-3 z-[400] flex items-center justify-between gap-2 pointer-events-none">
+        {/* Left: Tombol Legenda */}
+        <div className="pointer-events-auto">
           <button
             onClick={() => setShowLegend(!showLegend)}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-semibold shadow-md transition-all ${showLegend
+            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border text-xs font-semibold shadow-md transition-all ${showLegend
               ? 'bg-blue-600 text-white border-blue-600 ring-2 ring-blue-300'
               : 'bg-white/95 backdrop-blur-md text-slate-700 border-slate-200 hover:bg-slate-50'
               }`}
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h18v18H3z" /><path d="M21 9H3" /><path d="M21 15H3" /><path d="M9 3v18" /></svg>
             <span>Legenda</span>
-            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" className={`transition-transform duration-200 ${showLegend ? 'rotate-180' : ''}`}><path d="m6 9 6 6 6-6" /></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" className={`transition-transform duration-200 ${showLegend ? 'rotate-180' : ''}`}><path d="m6 9 6 6 6-6" /></svg>
           </button>
+        </div>
 
+        {/* Right: Layer Switcher & Reset Button */}
+        <div className="pointer-events-auto flex items-center gap-1 sm:gap-1.5">
           {/* Layer Switcher (Citra Satelit vs Peta Jalan vs Topo) */}
-          <div className="flex items-center bg-white/95 backdrop-blur-md p-0.5 rounded-xl border border-slate-200 shadow-md">
+          <div className="flex items-center bg-white/95 backdrop-blur-md p-0.5 rounded-xl border border-slate-200 shadow-md text-2xs font-bold">
             <button
               onClick={() => handleLayerClick('satellite')}
-              className={`px-2.5 py-1 rounded-lg text-2xs font-bold transition-colors ${tileType === 'satellite'
+              className={`px-2 py-1 rounded-lg transition-colors ${tileType === 'satellite'
                 ? 'bg-slate-900 text-white shadow-xs'
                 : 'text-slate-600 hover:text-slate-900'
                 }`}
               title="Citra Satelit Beresolusi Tinggi (Google Hybrid)"
             >
-              🛰️ Satelit
+              Satelit
             </button>
             <button
               onClick={() => handleLayerClick('streets')}
-              className={`px-2.5 py-1 rounded-lg text-2xs font-bold transition-colors ${tileType === 'streets'
+              className={`px-2 py-1 rounded-lg transition-colors ${tileType === 'streets'
                 ? 'bg-slate-900 text-white shadow-xs'
                 : 'text-slate-600 hover:text-slate-900'
                 }`}
               title="Peta Jalan Standar OpenStreetMap"
             >
-              🗺️ Jalan
+              Jalan
             </button>
             <button
               onClick={() => handleLayerClick('topo')}
-              className={`px-2.5 py-1 rounded-lg text-2xs font-bold transition-colors ${tileType === 'topo'
+              className={`px-2 py-1 rounded-lg transition-colors ${tileType === 'topo'
                 ? 'bg-slate-900 text-white shadow-xs'
                 : 'text-slate-600 hover:text-slate-900'
                 }`}
               title="Peta Kontur & Topografi Lereng Kapur"
             >
-              ⛰️ Topo
+              Topo
             </button>
           </div>
 
@@ -468,14 +461,14 @@ export const LeafletFieldMap: React.FC<LeafletFieldMapProps> = ({
             className="p-1.5 rounded-xl bg-white/95 backdrop-blur-md border border-slate-200 text-slate-700 hover:bg-slate-100 shadow-md transition-colors"
             title="Pusatkan ke Hamparan Bluri (Zoom Default 16)"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" /><path d="m16 12-4-4-4 4" /><path d="M12 16V8" /></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" /><path d="m16 12-4-4-4 4" /><path d="M12 16V8" /></svg>
           </button>
         </div>
       </div>
 
       {/* POPUP / MODAL LEGENDA (Muncul saat tombol Legenda ditekan) */}
       {showLegend && (
-        <div className="absolute top-14 right-3 z-[410] w-72 sm:w-80 bg-white/95 backdrop-blur-md rounded-2xl border border-slate-200 shadow-2xl p-3.5 text-xs font-sans animate-in fade-in slide-in-from-top-2 duration-150">
+        <div className="absolute top-12 left-2.5 sm:left-auto sm:right-3 z-[410] max-w-[calc(100vw-36px)] w-72 sm:w-80 bg-white/95 backdrop-blur-md rounded-2xl border border-slate-200 shadow-2xl p-3.5 text-xs font-sans animate-in fade-in slide-in-from-top-2 duration-150">
           <div className="flex items-center justify-between border-b border-slate-100 pb-2 mb-2.5">
             <div className="flex items-center gap-1.5 font-bold text-slate-900">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="text-blue-600"><circle cx="12" cy="12" r="10" /><path d="M12 16v-4" /><path d="M12 8h.01" /></svg>
@@ -548,17 +541,6 @@ export const LeafletFieldMap: React.FC<LeafletFieldMapProps> = ({
         </div>
       )}
 
-      {/* BOTTOM FLOATING BADGE (Mode Telemetri & Tile Indicator) */}
-      <div className="absolute bottom-3 left-3 z-[400] bg-slate-900/80 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/20 shadow-lg text-2xs text-white font-medium flex items-center gap-2">
-        <span className="w-2 h-2 rounded-full bg-blue-400"></span>
-        <span>
-          Lapisan:{' '}
-          <b className="text-emerald-400 capitalize">
-            {tileType === 'satellite' ? 'Citra Satelit HD' : tileType === 'topo' ? 'OpenTopoMap Kontur' : 'OpenStreetMap'}
-          </b>{' '}
-          · Hamparan Tegal Kapur Bluri
-        </span>
-      </div>
     </div>
   );
 };

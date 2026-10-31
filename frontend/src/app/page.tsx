@@ -139,7 +139,7 @@ function transformBackendStatus(
 
   const field: DashboardState['field'] = {
     ...prevField,
-    name: 'Kebun Jagung pak suparman',
+    name: 'Kebun Jagung Pak Suparman',
     farmerName: status.farmer_name || prevField.farmerName,
     areaHa: status.area_ha ?? prevField.areaHa,
     block: 'Blok A',
@@ -676,7 +676,7 @@ export default function DashboardPage() {
       />
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 overflow-x-hidden">
         {/* Mobile Header Banner */}
         <MobileHeader />
 
@@ -690,7 +690,7 @@ export default function DashboardPage() {
         )}
 
         {/* Main Canvas View Switcher */}
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 pb-24 md:pb-8 max-w-6xl w-full mx-auto">
+        <main className="flex-1 p-3.5 sm:p-6 lg:p-8 pb-24 md:pb-8 max-w-6xl w-full mx-auto min-w-0">
           {activeTab === 'map' ? (
             /* Layar 2: Peta Zonasi Risiko Volatilisasi Lahan */
             <ParcelRiskMap onBackToDashboard={() => setActiveTab('dashboard')} />

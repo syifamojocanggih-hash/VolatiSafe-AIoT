@@ -120,75 +120,81 @@ export const ParcelRiskMap: React.FC<ParcelRiskMapProps> = () => {
         </div>
 
         {/* Layer Filter Buttons */}
-        <div className="flex items-center gap-1.5 sm:gap-2 bg-slate-100 p-1 rounded-xl shrink-0 self-start sm:self-auto">
+        <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl w-full sm:w-auto overflow-x-auto text-xs font-semibold">
           <button
             onClick={() => setActiveLayer('avri')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+            className={`flex-1 sm:flex-none px-3 py-1.5 rounded-lg transition-all text-center whitespace-nowrap ${
               activeLayer === 'avri'
-                ? 'bg-[#236B32] text-white shadow-xs'
+                ? 'bg-[#236B32] text-white shadow-xs font-bold'
                 : 'text-slate-600 hover:text-slate-900'
             }`}
           >
-            Layer Risiko AVRI
+            Layer AVRI
           </button>
           <button
             onClick={() => setActiveLayer('battery')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+            className={`flex-1 sm:flex-none px-3 py-1.5 rounded-lg transition-all text-center whitespace-nowrap ${
               activeLayer === 'battery'
-                ? 'bg-[#236B32] text-white shadow-xs'
+                ? 'bg-[#236B32] text-white shadow-xs font-bold'
                 : 'text-slate-600 hover:text-slate-900'
             }`}
           >
-            Status Baterai
+            Baterai
           </button>
           <button
             onClick={() => setActiveLayer('lora')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+            className={`flex-1 sm:flex-none px-3 py-1.5 rounded-lg transition-all text-center whitespace-nowrap ${
               activeLayer === 'lora'
-                ? 'bg-[#236B32] text-white shadow-xs'
+                ? 'bg-[#236B32] text-white shadow-xs font-bold'
                 : 'text-slate-600 hover:text-slate-900'
             }`}
           >
-            Koneksi Sinyal
+            Sinyal LoRa
           </button>
         </div>
       </div>
 
       {/* ================= 1. FULL-WIDTH MAP CANVAS (Tarik ke Kanan Full) ================= */}
-      <div className="w-full bg-white rounded-3xl p-5 sm:p-6 border border-slate-200/90 shadow-sm relative overflow-hidden">
+      <div className="w-full bg-white rounded-2xl sm:rounded-3xl p-3.5 sm:p-6 border border-slate-200/90 shadow-sm relative min-w-0 overflow-hidden">
         {/* Top Info inside Map Canvas */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-2xs sm:text-xs text-slate-600 font-medium pb-4 border-b border-slate-100 mb-5">
-          <div>
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-slate-50 border border-slate-200 shadow-2xs text-xs font-semibold text-slate-800">
-              <MapPin className="w-3.5 h-3.5 text-[#236B32] shrink-0" />
-              <span className="text-slate-500 font-medium">Titik Koordinat:</span>
-              <span className="font-bold text-slate-900 font-mono">{summary.coordinatesText}</span>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-2xs sm:text-xs text-slate-600 font-medium pb-3.5 border-b border-slate-100 mb-4">
+          <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+            <div className="flex items-center justify-between sm:justify-start gap-2 px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold text-slate-800">
+              <div className="flex items-center gap-1.5">
+                <MapPin className="w-3.5 h-3.5 text-[#236B32] shrink-0" />
+                <span className="text-slate-500 font-medium">Koordinat:</span>
+              </div>
+              <span className="font-bold text-slate-900 font-mono text-2xs sm:text-xs">{summary.coordinatesText}</span>
+            </div>
+            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 border border-emerald-200 text-xs font-bold text-emerald-800">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+              <span>Hamparan Solokuro · {parcels.length} Node</span>
             </div>
           </div>
 
           {/* View Mode Toggle: Leaflet Map vs Schematic Grid */}
-          <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl shrink-0 self-start sm:self-auto">
+          <div className="grid grid-cols-2 gap-1 bg-slate-100 p-1 rounded-xl w-full sm:w-auto">
             <button
               onClick={() => setMapViewMode('leaflet')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+              className={`flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                 mapViewMode === 'leaflet'
-                  ? 'bg-[#236B32] text-white shadow-xs'
+                  ? 'bg-[#236B32] text-white shadow-xs font-bold'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              <MapIcon className="w-3.5 h-3.5" />
-              <span>Peta Spasial & Satelit</span>
+              <MapIcon className="w-3.5 h-3.5 shrink-0" />
+              <span className="whitespace-nowrap">Peta Spasial</span>
             </button>
             <button
               onClick={() => setMapViewMode('schematic')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+              className={`flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                 mapViewMode === 'schematic'
-                  ? 'bg-[#236B32] text-white shadow-xs'
+                  ? 'bg-[#236B32] text-white shadow-xs font-bold'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              <LayoutGrid className="w-3.5 h-3.5" />
-              <span>Diagram Hamparan</span>
+              <LayoutGrid className="w-3.5 h-3.5 shrink-0" />
+              <span className="whitespace-nowrap">Diagram</span>
             </button>
           </div>
         </div>
@@ -250,7 +256,7 @@ export const ParcelRiskMap: React.FC<ParcelRiskMapProps> = () => {
       </div>
 
       {/* ================= 2. SELECTED BEDENG DETAIL CARD (Ditaruh di Bawah Map) ================= */}
-      <div className="w-full bg-white rounded-3xl p-5 sm:p-7 border border-slate-200/90 shadow-sm space-y-5">
+      <div className="w-full bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-7 border border-slate-200/90 shadow-sm space-y-4 sm:space-y-5 min-w-0">
         {/* Header: Name */}
         <div className="pb-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div>
@@ -270,7 +276,7 @@ export const ParcelRiskMap: React.FC<ParcelRiskMapProps> = () => {
         </div>
 
         {/* 4 Info Parameter Tiles (Wide 4-Column Responsive Layout) */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5 sm:gap-4 text-xs">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-4 text-xs min-w-0">
           {/* Tile 1: Varietas & Luas */}
           <div className="p-4 rounded-2xl bg-slate-50/80 border border-slate-200/80 hover:bg-slate-50 transition-colors">
             <span className="text-2xs text-slate-400 block font-semibold uppercase tracking-wider">Varietas & Luas</span>
@@ -318,28 +324,67 @@ export const ParcelRiskMap: React.FC<ParcelRiskMapProps> = () => {
           </div>
         </div>
 
-        {/* Prescription Box (Full Width Callout) */}
-        <div className="p-4 sm:p-5 rounded-2xl bg-[#F0FDF4] border border-[#DCFCE7] space-y-1.5 shadow-2xs">
-          <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
-            <p className="text-xs sm:text-sm font-bold text-emerald-950">
-              Rekomendasi Preskripsi Bedeng {selectedParcel.id} (Keputusan Agronomis Real-Time):
-            </p>
-          </div>
-          <p className="text-xs sm:text-sm text-slate-700 leading-relaxed font-medium pl-4.5">
-            {selectedParcel.prescription}
-          </p>
-        </div>
+        {/* Prescription Box (Dynamic Risk Alert Callout) */}
+        {(() => {
+          const isKritis = selectedParcel.avriCategory === 'kritis' || selectedParcel.avriCategory === 'bahaya';
+          const isWaspada = selectedParcel.avriCategory === 'waspada';
+
+          const theme = isKritis
+            ? {
+                bg: 'bg-rose-50 border-rose-200',
+                dot: 'bg-rose-600 animate-pulse',
+                title: 'text-rose-950',
+                text: 'text-rose-900 font-semibold',
+                badgeBg: 'bg-rose-100 text-rose-800 border-rose-300',
+                label: 'PERINGATAN KRITIS',
+              }
+            : isWaspada
+            ? {
+                bg: 'bg-amber-50 border-amber-200',
+                dot: 'bg-amber-500',
+                title: 'text-amber-950',
+                text: 'text-amber-950 font-medium',
+                badgeBg: 'bg-amber-100 text-amber-800 border-amber-300',
+                label: 'ZONA WASPADA',
+              }
+            : {
+                bg: 'bg-emerald-50 border-emerald-200',
+                dot: 'bg-emerald-500',
+                title: 'text-emerald-950',
+                text: 'text-emerald-950 font-medium',
+                badgeBg: 'bg-emerald-100 text-emerald-800 border-emerald-300',
+                label: 'KONDISI OPTIMAL',
+              };
+
+          return (
+            <div className={`p-4 sm:p-5 rounded-2xl border ${theme.bg} space-y-2 shadow-2xs transition-all`}>
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${theme.dot}`} />
+                  <p className={`text-xs sm:text-sm font-bold ${theme.title}`}>
+                    Rekomendasi Preskripsi Bedeng {selectedParcel.id} (Keputusan Agronomis Real-Time):
+                  </p>
+                </div>
+                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-3xs font-extrabold uppercase tracking-wider border ${theme.badgeBg}`}>
+                  {theme.label} · AVRI {selectedParcel.avriScore}%
+                </span>
+              </div>
+              <p className={`text-xs sm:text-sm leading-relaxed pl-4.5 ${theme.text}`}>
+                {selectedParcel.prescription}
+              </p>
+            </div>
+          );
+        })()}
       </div>
 
       {/* ================= BOTTOM TABLE: RINGKASAN SEMUA BEDENG ================= */}
-      <div className="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200/90 shadow-2xs overflow-hidden">
+      <div className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 border border-slate-200/90 shadow-2xs min-w-0 overflow-hidden">
         <h4 className="text-sm sm:text-base font-bold text-slate-900 tracking-tight mb-4">
           Ringkasan Semua Bedeng
         </h4>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs border-collapse">
+        <div className="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
+          <table className="w-full text-left text-xs border-collapse min-w-[500px]">
             <thead>
               <tr className="border-b border-slate-200 text-slate-400 font-semibold">
                 <th className="py-2.5 px-3">Bedeng</th>

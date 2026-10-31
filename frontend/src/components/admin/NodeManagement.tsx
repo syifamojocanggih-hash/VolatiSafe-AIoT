@@ -33,10 +33,12 @@ export const NodeManagement: React.FC = () => {
       const nodesRes = await getNodesList('BLOK-A');
 
       if (nodesRes && nodesRes.length > 0) {
-        setNodes(nodesRes);
+        // Hanya tampilkan 5 node produksi resmi, abaikan node uji coba sementara
+        const validNodes = nodesRes.filter((n) => !n.id.startsWith('VS-TEST-'));
+        setNodes(validNodes);
         setIsBackendSynced(true);
         setSelectedNodeId((prevId) =>
-          nodesRes.some((n) => n.id === prevId) ? prevId : nodesRes[0].id
+          validNodes.some((n) => n.id === prevId) ? prevId : validNodes[0]?.id || 'VS-A1-001'
         );
       }
     } catch (err) {

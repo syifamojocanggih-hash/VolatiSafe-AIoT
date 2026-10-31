@@ -44,6 +44,12 @@ export const Trend24hChart: React.FC<Trend24hChartProps> = ({ data }) => {
   useEffect(() => {
     setIsClient(true);
     setCurrentHourIndex(getWibCurrentHour());
+
+    const timer = setInterval(() => {
+      setCurrentHourIndex(getWibCurrentHour());
+    }, 60000);
+
+    return () => clearInterval(timer);
   }, []);
 
   const currentHourStr = `${String(currentHourIndex).padStart(2, '0')}.00`;
@@ -56,11 +62,11 @@ export const Trend24hChart: React.FC<Trend24hChartProps> = ({ data }) => {
   const option = {
     backgroundColor: 'transparent',
     grid: {
-      left: 36,
-      right: 48,
-      top: 24,
-      bottom: 28,
-      containLabel: false,
+      left: 10,
+      right: 10,
+      top: 34,
+      bottom: 8,
+      containLabel: true,
     },
     tooltip: {
       trigger: 'axis',
@@ -104,7 +110,12 @@ export const Trend24hChart: React.FC<Trend24hChartProps> = ({ data }) => {
         },
       },
       axisTick: {
-        show: false,
+        show: true,
+        interval: 0,
+        lineStyle: {
+          color: '#CBD5E1',
+          width: 1,
+        },
       },
       axisLabel: {
         color: (val: string) => (val === currentHourStr ? '#1B6633' : '#475569'),
@@ -112,15 +123,19 @@ export const Trend24hChart: React.FC<Trend24hChartProps> = ({ data }) => {
         fontSize: 11,
         fontFamily: 'inherit',
         margin: 12,
-        formatter: (val: string) => {
-          // Selalu tampilkan jam nyata sekarang (posisi titik)
+        formatter: (val: string, index: number) => {
+          // Selalu tampilkan jam nyata sekarang (posisi live sensor)
           if (val === currentHourStr) {
             return val;
           }
-          if (val === '00.00' && currentHourIndex >= 2) return val;
-          if (val === '23.00' && currentHourIndex <= 21) return val;
-          if (val === '08.00' && Math.abs(currentHourIndex - 8) >= 3) return val;
-          if (val === '16.00' && Math.abs(currentHourIndex - 16) >= 3) return val;
+          // Tampilkan penanda jam berkala setiap 3 jam (00, 03, 06, 09, 12, 15, 18, 21, 23)
+          if (index % 3 === 0 || index === 23) {
+            // Sembunyikan jika berjarak hanya 1 jam dari currentHour agar teks tidak bertabrakan
+            if (Math.abs(index - currentHourIndex) <= 1) {
+              return '';
+            }
+            return val;
+          }
           return '';
         },
       },
@@ -128,54 +143,142 @@ export const Trend24hChart: React.FC<Trend24hChartProps> = ({ data }) => {
         show: false,
       },
     },
-    yAxis: {
-      type: 'value',
-      min: 10,
-      max: 48,
-      show: false,
-      splitLine: {
-        show: false,
+    yAxis: [
+      {
+        name: 'Kelembapan (%)',
+        nameTextStyle: {
+          color: '#2563EB',
+          fontSize: 10,
+          fontWeight: 700,
+          padding: [0, 0, 4, 0],
+        },
+        type: 'value',
+        position: 'left',
+        min: 10,
+        max: 50,
+        interval: 10,
+        axisLine: {
+          show: true,
+          lineStyle: {
+            color: '#2563EB',
+            width: 1.5,
+          },
+        },
+        axisTick: {
+          show: true,
+          lineStyle: {
+            color: '#2563EB',
+          },
+        },
+        axisLabel: {
+          show: true,
+          formatter: '{value}%',
+          color: '#2563EB',
+          fontSize: 10,
+          fontWeight: 600,
+        },
+        splitLine: {
+          show: true,
+          lineStyle: {
+            color: '#F1F5F9',
+            type: 'dashed',
+            width: 1,
+          },
+        },
       },
-    },
+      {
+        name: 'Suhu (°C)',
+        nameTextStyle: {
+          color: '#C25E26',
+          fontSize: 10,
+          fontWeight: 700,
+          padding: [0, 0, 4, 0],
+        },
+        type: 'value',
+        position: 'right',
+        min: 20,
+        max: 40,
+        interval: 5,
+        axisLine: {
+          show: true,
+          lineStyle: {
+            color: '#C25E26',
+            width: 1.5,
+          },
+        },
+        axisTick: {
+          show: true,
+          lineStyle: {
+            color: '#C25E26',
+          },
+        },
+        axisLabel: {
+          show: true,
+          formatter: '{value}°C',
+          color: '#C25E26',
+          fontSize: 10,
+          fontWeight: 600,
+        },
+        splitLine: {
+          show: false,
+        },
+      },
+    ],
     series: [
       {
         name: 'Kelembapan tanah',
         type: 'line',
+        yAxisIndex: 0,
         data: moistureData,
         smooth: true,
-        symbol: (value: number, params: { dataIndex: number }) => {
-          return params.dataIndex === currentHourIndex ? 'circle' : 'none';
+        showSymbol: true,
+        symbol: 'circle',
+        symbolSize: (value: number, params: { dataIndex: number }) => {
+          return params.dataIndex === currentHourIndex ? 9 : 5;
         },
-        symbolSize: 8,
         itemStyle: {
           color: '#2563EB',
           borderColor: '#FFFFFF',
-          borderWidth: 2,
-          shadowBlur: 4,
-          shadowColor: 'rgba(37, 99, 235, 0.4)',
+          borderWidth: 1.5,
+          shadowBlur: 3,
+          shadowColor: 'rgba(37, 99, 235, 0.3)',
         },
         lineStyle: {
           color: '#2563EB',
           width: 2.2,
         },
+        emphasis: {
+          scale: 1.4,
+          itemStyle: {
+            borderColor: '#FFFFFF',
+            borderWidth: 2,
+            shadowBlur: 6,
+            shadowColor: '#2563EB',
+          },
+        },
         markLine: {
           silent: true,
-          symbol: 'none',
+          symbol: ['none', 'none'],
           data: [
             {
               yAxis: 25,
               lineStyle: {
-                color: '#94A3B8',
+                color: '#DC2626',
                 type: 'dashed',
-                width: 1.2,
+                width: 1.5,
               },
               label: {
-                formatter: '25%',
-                position: 'end',
-                color: '#64748B',
-                fontSize: 11,
-                fontWeight: 600,
+                formatter: 'Ambang Kritis (θ < 25%)',
+                position: 'insideEndTop',
+                color: '#DC2626',
+                fontSize: 10,
+                fontWeight: 700,
                 fontFamily: 'inherit',
+                backgroundColor: 'rgba(254, 242, 242, 0.95)',
+                borderColor: '#FECACA',
+                borderWidth: 1,
+                borderRadius: 6,
+                padding: [2, 6],
               },
             },
           ],
@@ -184,22 +287,33 @@ export const Trend24hChart: React.FC<Trend24hChartProps> = ({ data }) => {
       {
         name: 'Suhu Tanah',
         type: 'line',
+        yAxisIndex: 1,
         data: tempData,
         smooth: true,
-        symbol: (value: number, params: { dataIndex: number }) => {
-          return params.dataIndex === currentHourIndex ? 'circle' : 'none';
+        showSymbol: true,
+        symbol: 'circle',
+        symbolSize: (value: number, params: { dataIndex: number }) => {
+          return params.dataIndex === currentHourIndex ? 9 : 5;
         },
-        symbolSize: 8,
         itemStyle: {
           color: '#C25E26',
           borderColor: '#FFFFFF',
-          borderWidth: 2,
-          shadowBlur: 4,
-          shadowColor: 'rgba(194, 94, 38, 0.4)',
+          borderWidth: 1.5,
+          shadowBlur: 3,
+          shadowColor: 'rgba(194, 94, 38, 0.3)',
         },
         lineStyle: {
           color: '#C25E26',
           width: 2.2,
+        },
+        emphasis: {
+          scale: 1.4,
+          itemStyle: {
+            borderColor: '#FFFFFF',
+            borderWidth: 2,
+            shadowBlur: 6,
+            shadowColor: '#C25E26',
+          },
         },
       },
     ],
@@ -215,19 +329,19 @@ export const Trend24hChart: React.FC<Trend24hChartProps> = ({ data }) => {
           </h4>
         </div>
 
-        {/* Legend */}
-        <div className="flex flex-wrap items-center gap-3.5 sm:gap-5 text-xs text-slate-600 font-medium">
+        {/* Legend with explicit Dual-Axis and Threshold variable indicators */}
+        <div className="flex flex-wrap items-center gap-3 sm:gap-4.5 text-xs text-slate-600 font-medium">
           <div className="flex items-center gap-1.5">
-            <span className="w-3.5 h-1 rounded-full inline-block bg-[#2563EB]" />
-            <span>Kelembapan tanah</span>
+            <span className="w-3.5 h-1.5 rounded-full inline-block bg-[#2563EB]" />
+            <span className="text-slate-800 font-semibold">Kelembapan tanah <span className="text-[#2563EB] text-2xs">(Sumbu Kiri, %)</span></span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="w-3.5 h-1 rounded-full inline-block bg-[#C25E26]" />
-            <span>Suhu Tanah</span>
+            <span className="w-3.5 h-1.5 rounded-full inline-block bg-[#C25E26]" />
+            <span className="text-slate-800 font-semibold">Suhu Tanah <span className="text-[#C25E26] text-2xs">(Sumbu Kanan, °C)</span></span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="w-3.5 h-0.5 border-t border-dashed border-slate-400 inline-block" />
-            <span>Ambang Kritis</span>
+            <span className="w-3.5 h-0.5 border-t-2 border-dashed border-red-500 inline-block" />
+            <span className="text-red-700 font-semibold text-2xs sm:text-xs">Ambang Kritis (θ &lt; 25%)</span>
           </div>
         </div>
       </div>

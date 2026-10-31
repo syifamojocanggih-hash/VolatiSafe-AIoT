@@ -67,34 +67,58 @@ export const RiskStatusBanner: React.FC<RiskStatusBannerProps> = ({
   const category: RiskCategory = banner.category || 'aman';
   const theme = RISK_THEME[category] || RISK_THEME.aman;
 
-  // Helper render jendela aman dinamis dari prediksi backend
-  const renderDayWindows = (
-    day?: DayWindowProjection,
-    fallbackIsSafe: boolean = false,
-    dayLabel: string = ''
-  ) => {
-    const isSafe = day ? day.isSafe : fallbackIsSafe;
-    const windows = day?.safeWindows;
+  // Jadwal jendela aman: membaca dinamis 100% dari backend API (/fields/BLOK-A/forecast-window)
+  const getDaySchedule = (dayIndex: number): { isSafe: boolean; windows: string[]; unsafeReason: string } => {
+    // 1. Jika kondisi lapangan hari ini Kritis atau Bahaya
+    if (dayIndex === 0 && (category === 'kritis' || category === 'bahaya')) {
+      return { isSafe: false, windows: [], unsafeReason: 'Tidak ada pemupukan aman hari ini' };
+    }
 
-    if (!isSafe || !windows || windows.length === 0) {
+    // 2. Ambil dari data backend (forecastDays yang dipassing dari page.tsx)
+    const day = forecastDays?.[dayIndex];
+    if (day) {
+      if (!day.isSafe || !day.safeWindows || day.safeWindows.length === 0) {
+        return {
+          isSafe: false,
+          windows: [],
+          unsafeReason:
+            dayIndex === 0
+              ? 'Tidak ada pemupukan untuk hari ini'
+              : dayIndex === 1
+              ? 'Tidak ada pemupukan untuk besok'
+              : 'Tidak ada pemupukan untuk lusa',
+        };
+      }
+      const windows = day.safeWindows.map((w) =>
+        w.rangeText.includes('WIB') ? w.rangeText : `${w.rangeText} WIB`
+      );
+      return { isSafe: true, windows, unsafeReason: '' };
+    }
+
+    return {
+      isSafe: false,
+      windows: [],
+      unsafeReason: dayIndex === 1 ? 'Tidak ada pemupukan untuk besok' : 'Memuat jadwal...',
+    };
+  };
+
+  const renderSchedule = (dayIndex: number) => {
+    const { isSafe, windows, unsafeReason } = getDaySchedule(dayIndex);
+
+    if (!isSafe || windows.length === 0) {
       return (
-        <span className="text-xs font-bold text-red-600 block leading-snug">
-          Tidak ada pemupukan aman {dayLabel ? `untuk ${dayLabel}` : ''}
+        <span className="text-[11px] sm:text-xs md:text-sm font-bold text-red-600 block leading-snug">
+          {unsafeReason || 'Tidak ada pemupukan untuk hari ini'}
         </span>
       );
     }
 
     return (
-      <div className="space-y-1.5 text-xs font-bold leading-relaxed">
-        {windows.slice(0, 2).map((win, idx) => (
-          <div key={idx} className={`flex items-center justify-between gap-2 ${theme.timeTextClass}`}>
-            <span>{win.rangeText} WIB</span>
-            {win.periodLabel && (
-              <span className="text-3xs font-semibold px-1.5 py-0.5 rounded bg-emerald-100/80 text-emerald-800">
-                {win.periodLabel}
-              </span>
-            )}
-          </div>
+      <div className={`grid grid-cols-2 gap-x-2 sm:gap-x-4 gap-y-1 sm:gap-y-1.5 text-[11px] sm:text-xs md:text-sm font-bold ${theme.timeTextClass}`}>
+        {windows.map((win, idx) => (
+          <span key={idx} className="whitespace-nowrap">
+            {win}
+          </span>
         ))}
       </div>
     );
@@ -118,19 +142,20 @@ export const RiskStatusBanner: React.FC<RiskStatusBannerProps> = ({
           </p>
         </div>
 
-        {/* Sisi Kanan: Dua Tombol Aksi (Lihat Detail Prediksi & Sudah Saya Tunda) */}
-        <div className="flex flex-col gap-2.5 w-full sm:w-48 shrink-0">
+        {/* Sisi Kanan: Dua Tombol Aksi (Side-by-side on Mobile, Stacked on Desktop) */}
+        <div className="grid grid-cols-2 sm:flex sm:flex-col gap-2.5 w-full sm:w-48 shrink-0">
           <button
             onClick={onOpenDetails}
-            className={`w-full py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold transition-all shadow-xs active:scale-[0.98] text-center ${theme.primaryBtnClass}`}
+            className={`w-full py-2.5 px-3 sm:px-4 rounded-xl text-xs sm:text-sm font-bold transition-all shadow-xs active:scale-[0.98] text-center ${theme.primaryBtnClass}`}
           >
             Lihat Detail Prediksi
           </button>
 
           <button
             onClick={onPostponeAction}
-            className={`w-full py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold transition-all shadow-2xs active:scale-[0.98] text-center bg-white border border-slate-300 text-slate-800 hover:bg-slate-50 ${isPostponed ? 'bg-slate-100 text-slate-500' : ''
-              }`}
+            className={`w-full py-2.5 px-3 sm:px-4 rounded-xl text-xs sm:text-sm font-bold transition-all shadow-2xs active:scale-[0.98] text-center bg-white border border-slate-300 text-slate-800 hover:bg-slate-50 ${
+              isPostponed ? 'bg-slate-100 text-slate-500' : ''
+            }`}
           >
             {isPostponed ? '✓ Sudah Ditunda' : 'Sudah Saya Tunda'}
           </button>
@@ -138,44 +163,56 @@ export const RiskStatusBanner: React.FC<RiskStatusBannerProps> = ({
       </div>
 
       {/* ================= GARIS PEMBATAS ================= */}
-      <hr className={`border-t my-5 sm:my-6 ${theme.dividerClass}`} />
+      <hr className={`border-t my-4 sm:my-5 ${theme.dividerClass}`} />
 
       {/* ================= BAGIAN BAWAH: JENDELA WAKTU AMAN (HARI INI, BESOK, LUSA) ================= */}
       <div className="space-y-3.5">
-        <h4 className="text-center text-xs sm:text-sm font-bold text-slate-800 tracking-tight">
-          Waktu yang ideal untuk memberi pupuk
+        <h4 className="text-center text-sm sm:text-base font-bold text-slate-900 tracking-tight">
+          Jendela waktu aman pemupukan
         </h4>
 
         {/* 3 Kartu Proyeksi Jendela Waktu (Desktop: 3 Kolom, Mobile: 3 Baris) */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 sm:gap-4">
           {/* Kartu 1: Hari Ini */}
           <div
-            className={`bg-white rounded-2xl p-4 sm:p-4.5 border ${theme.cardBorderClass} shadow-2xs flex flex-col justify-between`}
+            className={`bg-white rounded-2xl p-3.5 sm:p-4.5 border ${theme.cardBorderClass} shadow-2xs`}
           >
-            <span className="text-xs font-semibold text-slate-500 mb-2 block">
-              Hari ini :
-            </span>
-            {renderDayWindows(forecastDays?.[0], category === 'aman', 'hari ini')}
+            <div className="flex items-center sm:block gap-3 sm:gap-0">
+              <span className="text-xs sm:text-sm font-semibold text-slate-500 w-16 sm:w-auto shrink-0 sm:mb-2 block">
+                Hari ini :
+              </span>
+              <div className="flex-1 min-w-0">
+                {renderSchedule(0)}
+              </div>
+            </div>
           </div>
 
           {/* Kartu 2: Besok */}
           <div
-            className={`bg-white rounded-2xl p-4 sm:p-4.5 border ${theme.cardBorderClass} shadow-2xs flex flex-col justify-between`}
+            className={`bg-white rounded-2xl p-3.5 sm:p-4.5 border ${theme.cardBorderClass} shadow-2xs`}
           >
-            <span className="text-xs font-semibold text-slate-500 mb-2 block">
-              Besok :
-            </span>
-            {renderDayWindows(forecastDays?.[1], false, 'besok')}
+            <div className="flex items-center sm:block gap-3 sm:gap-0">
+              <span className="text-xs sm:text-sm font-semibold text-slate-500 w-16 sm:w-auto shrink-0 sm:mb-2 block">
+                Besok :
+              </span>
+              <div className="flex-1 min-w-0">
+                {renderSchedule(1)}
+              </div>
+            </div>
           </div>
 
           {/* Kartu 3: Lusa */}
           <div
-            className={`bg-white rounded-2xl p-4 sm:p-4.5 border ${theme.cardBorderClass} shadow-2xs flex flex-col justify-between`}
+            className={`bg-white rounded-2xl p-3.5 sm:p-4.5 border ${theme.cardBorderClass} shadow-2xs`}
           >
-            <span className="text-xs font-semibold text-slate-500 mb-2 block">
-              Lusa :
-            </span>
-            {renderDayWindows(forecastDays?.[2], true, 'lusa')}
+            <div className="flex items-center sm:block gap-3 sm:gap-0">
+              <span className="text-xs sm:text-sm font-semibold text-slate-500 w-16 sm:w-auto shrink-0 sm:mb-2 block">
+                Lusa :
+              </span>
+              <div className="flex-1 min-w-0">
+                {renderSchedule(2)}
+              </div>
+            </div>
           </div>
         </div>
       </div>

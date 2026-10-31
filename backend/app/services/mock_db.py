@@ -466,9 +466,10 @@ class MockDB:
                 is_afternoon_safe = False
                 base_morning_avri = 16.5
             elif day_offset == 1:
-                is_morning_safe = (6 <= local_hour < 9)
-                is_afternoon_safe = (16 <= local_hour < 18)
-                base_morning_avri = 18.2
+                # Hari 1 (Besok): Gelombang panas kering & angin kencang (AVRI Kritis), tidak ada jendela aman pemupukan
+                is_morning_safe = False
+                is_afternoon_safe = False
+                base_morning_avri = 68.0
             else:
                 is_morning_safe = (7 <= local_hour < 11)
                 is_afternoon_safe = False
@@ -493,7 +494,7 @@ class MockDB:
             else:
                 avri = round(21.0 + ((local_hour + day_offset) % 4) * 1.1, 1)
                 cat = "aman"
-                is_safe = (18 <= local_hour <= 19)
+                is_safe = (18 <= local_hour <= 19) and day_offset != 1
 
             windows.append(
                 ForecastWindowItemDTO(
