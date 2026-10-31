@@ -85,7 +85,7 @@ Tanpa nomor 5, status tetap `🟨`.
 |---|---|
 | Rangkaian valid | Wokwi membuka tanpa error |
 | ADC1 | pin 34, 32, 35 — bukan ADC2 |
-| Pull-up | 4,7 kΩ terpasang di DQ |
+| Pull-up | Internal ESP32 (`INPUT_PULLUP`); resistor 4,7 kΩ opsional untuk kabel panjang |
 | Data mengalir | 5 paket berturut di `mosquitto_sub`, `ts` monoton (lulus via tunnel TCP ke Mosquitto lokal, 27 Okt 2026) |
 
 ### FASE 6 — Gateway

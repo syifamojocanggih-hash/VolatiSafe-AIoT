@@ -20,45 +20,48 @@
 
 ## 2. BoM Resmi per Node Lapangan
 
-Rujukan: [`../PINOUT_AND_SCHEMATICS.md`](../PINOUT_AND_SCHEMATICS.md) §3.
+Rujukan: [`../PINOUT_AND_SCHEMATICS.md`](../PINOUT_AND_SCHEMATICS.md) §4.
+
+**Sudah dibeli (hardware saat ini):** ESP32-WROOM-32D, Capacitive Soil Moisture v1.2, DS18B20 waterproof, modul Micro SD. Baris lain masih rencana.
 
 | # | Komponen | Spesifikasi Teknis | Qty | Harga Satuan | Subtotal |
 |---|---|---|---|---|---|
-| 1 | ESP32 NodeMCU V1 | 30-pin, CP2102, dual-core 240 MHz | 1 | Rp55.000 | Rp55.000 |
+| 1 | ESP32-WROOM-32D | Modul WROOM-32D, dual-core 240 MHz | 1 | Rp55.000 | Rp55.000 |
 | 2 | Sensor Kelembaban | Capacitive Soil Moisture v1.2 (anti-korosi) | 1 | Rp15.000 | Rp15.000 |
 | 3 | Sensor Suhu Tanah | DS18B20 stainless probe waterproof 1 m | 1 | Rp18.000 | Rp18.000 |
-| 4 | Sensor pH Tanah | Modul analog pH + probe BNC lapangan | 1 | Rp62.000 | Rp62.000 |
-| 5 | Modul LoRa | SX1278 Ra-02 433 MHz + antena helikal | 1 | Rp45.000 | Rp45.000 |
-| 6 | Baterai Li-ion | 18650 2600 mAh 3.7 V + holder | 1 | Rp35.000 | Rp35.000 |
-| 7 | Modul Charger | TP4056 + proteksi DW01 | 1 | Rp6.000 | Rp6.000 |
-| 8 | Panel Surya Mini | Polycrystalline 5 V 1 W + dioda 1N4007 | 1 | Rp25.000 | Rp25.000 |
-| 9 | MOSFET | IRLZ44N (N-ch) atau AO3401 (P-ch) | 1 | Rp4.000 | Rp4.000 |
-| 10 | Enclosure | Box junction PVC IP65 tahan UV | 1 | Rp30.000 | Rp30.000 |
-| 11 | Housing Probe | Pipa PVC ¾ inch | 1 | Rp10.000 | Rp10.000 |
-| | **TOTAL PER NODE** | | | | **Rp305.000** |
+| 4 | Modul Micro SD | SPI 3,3 V + kartu micro SD | 1 | Rp15.000 | Rp15.000 |
+| 5 | Sensor pH Tanah | Modul analog pH + probe BNC lapangan | 1 | Rp62.000 | Rp62.000 |
+| 6 | Modul LoRa | SX1278 Ra-02 433 MHz + antena helikal | 1 | Rp45.000 | Rp45.000 |
+| 7 | Baterai Li-ion | 18650 2600 mAh 3.7 V + holder | 1 | Rp35.000 | Rp35.000 |
+| 8 | Modul Charger | TP4056 + proteksi DW01 | 1 | Rp6.000 | Rp6.000 |
+| 9 | Panel Surya Mini | Polycrystalline 5 V 1 W + dioda 1N4007 | 1 | Rp25.000 | Rp25.000 |
+| 10 | MOSFET | IRLZ44N (N-ch) atau AO3401 (P-ch) | 1 | Rp4.000 | Rp4.000 |
+| 11 | Enclosure | Box junction PVC IP65 tahan UV | 1 | Rp30.000 | Rp30.000 |
+| 12 | Housing Probe | Pipa PVC ¾ inch | 1 | Rp10.000 | Rp10.000 |
+| | **TOTAL PER NODE** | | | | **Rp320.000** |
 
 ### 2.1 Komponen Pendukung (belum ada di BoM — wajib ditambahkan)
 
 | # | Komponen | Spesifikasi | Qty | Harga | Untuk |
 |---|---|---|---|---|---|
-| 12 | Resistor 4.7 kΩ | ¼ W, 1% | 1 | Rp500 | Pull-up 1-Wire DS18B20 (**wajib**, tanpa ini DS18B20 tidak terbaca) |
-| 13 | Resistor 100 kΩ | ¼ W, 1% | 2 | Rp1.000 | Voltage divider baterai → GPIO35 |
-| 14 | Resistor 10 kΩ | ¼ W | 2 | Rp1.000 | Pembagi output modul pH ke 3.3 V (§3.3) |
-| 15 | Kapasitor 100 nF | Keramik | 2 | Rp1.000 | Decoupling VCC sensor |
-| 16 | Header pin | Male/female 2.54 mm | 1 set | Rp3.000 | Koneksi modul |
-| 17 | Kabel jumper | Dupont 20 cm | 1 set | Rp5.000 | Wiring |
-| 18 | Silica gel | 5 g | 1 | Rp1.000 | Anti-kondensasi dalam enclosure |
+| 13 | Resistor 4.7 kΩ | ¼ W, 1% | 1 | Rp500 | Pull-up 1-Wire DS18B20. **Belum dipasang**; firmware memakai pull-up internal GPIO4. Pasang bila probe berkabel panjang atau pembacaan tidak stabil. |
+| 14 | Resistor 100 kΩ | ¼ W, 1% | 2 | Rp1.000 | Voltage divider baterai → GPIO35 (saat baterai ditambahkan) |
+| 15 | Resistor 10 kΩ | ¼ W | 2 | Rp1.000 | Pembagi output modul pH ke 3.3 V (§6.3) |
+| 16 | Kapasitor 100 nF | Keramik | 2 | Rp1.000 | Decoupling VCC sensor |
+| 17 | Header pin | Male/female 2.54 mm | 1 set | Rp3.000 | Koneksi modul |
+| 18 | Kabel jumper | Dupont 20 cm | 1 set | Rp5.000 | Wiring |
+| 19 | Silica gel | 5 g | 1 | Rp1.000 | Anti-kondensasi dalam enclosure |
 | | **TOTAL PENDUKUNG** | | | **± Rp12.500** | |
 
-**Total realistis per node: Rp317.500** (BoM resmi Rp305.000 + pendukung Rp12.500).
+**Total realistis per node: Rp332.500** (BoM resmi Rp320.000 + pendukung Rp12.500).
 
-> **Temuan T-09:** BoM resmi belum memuat resistor pull-up, divider baterai, divider pH, dan kabel. Tanpa komponen #12–#14, rangkaian **tidak akan berfungsi**. Ini bukan penyempurnaan opsional.
+> **Temuan T-09:** BoM resmi belum memuat divider baterai, divider pH, dan kabel. Tanpa komponen #14–#15, rangkaian baterai dan pH **tidak akan berfungsi**.
 
 ### 2.2 Gateway (belum ada di BoM sama sekali — temuan T-10)
 
 | # | Komponen | Spesifikasi | Qty | Harga |
 |---|---|---|---|---|
-| 1 | ESP32 NodeMCU V1 | 30-pin | 1 | Rp55.000 |
+| 1 | ESP32-WROOM-32D | Modul WROOM-32D | 1 | Rp55.000 |
 | 2 | Modul LoRa SX1278 | Ra-02 433 MHz + antena | 1 | Rp45.000 |
 | 3 | Enclosure | Box IP65 | 1 | Rp30.000 |
 | 4 | Adaptor 5 V 2 A | Micro-USB | 1 | Rp20.000 |
@@ -92,8 +95,8 @@ Plafon: **Rp3.000.000**.
 
 | Komponen asli | Alternatif | Konsekuensi |
 |---|---|---|
-| ESP32 NodeMCU V1 30-pin | ESP32 DevKit V1 38-pin | Pinout berbeda; perbarui `config.h`. Lebih banyak pin GND. |
-| ESP32 NodeMCU V1 30-pin | **ESP32-WROOM-32 bare module** | **Wajib** bila target arus tidur < 1 mA (lihat §5) |
+| ESP32-WROOM-32D | ESP32 DevKit V1 38-pin | Pinout berbeda; perbarui `config.h`. Lebih banyak pin GND. |
+| ESP32-WROOM-32D | ESP32-WROOM-32 bare module + LDO low-Iq | **Wajib** bila target arus tidur < 1 mA (lihat §5) |
 | Capacitive v1.2 | v2.0 / v1.2 versi 3.3 V | Kurva ADC sedikit berbeda; wajib kalibrasi ulang 2 titik |
 | DS18B20 probe stainless | DS18B20 TO-92 + epoxy | Tidak tahan tanah basah jangka panjang |
 | Modul pH analog + BNC | Modul pH RS485 Modbus | Lebih mahal; hanya ganti `sensors.cpp`, kontrak payload tidak berubah |
@@ -107,15 +110,15 @@ Plafon: **Rp3.000.000**.
 
 Dokumen `../FIRMWARE_SPEC.md` §3 dan `../ARCHITECTURE_IOT.md` §4.3 menyebut arus deep sleep **10 µA**. Angka ini benar untuk **chip ESP32 saja**, bukan untuk board development.
 
-Komponen yang tetap mengalirkan arus saat deep sleep pada NodeMCU V1:
+Komponen yang tetap mengalirkan arus saat deep sleep pada dev board ESP32-WROOM-32D:
 
 | Komponen | Arus tipikal | Bisa dimatikan? |
 |---|---|---|
 | Regulator AMS1117-3.3 | 5–11 mA (quiescent) | Tidak, kecuali diganti LDO low-Iq |
-| Chip USB-UART CP2102 | 0,1–1 mA (jika tidak di-*disable*) | Ya, via `ARDUINO_USB_CDC_ON_BOOT=0` + memutus jalur VBUS |
+| Chip USB-UART CP2102/CH340 | 0,1–1 mA (jika tidak di-*disable*) | Ya, via `ARDUINO_USB_CDC_ON_BOOT=0` + memutus jalur VBUS |
 | LED power onboard | 1–3 mA | Ya, potong jalur / desolder |
 | ESP32 deep sleep | 10–150 µA | Ya |
-| **Total realistis NodeMCU V1** | **±2–10 mA** | |
+| **Total realistis dev board** | **±2–10 mA** | |
 
 **Konsekuensi pada klaim ketahanan baterai:**
 
@@ -128,7 +131,7 @@ Komponen yang tetap mengalirkan arus saat deep sleep pada NodeMCU V1:
 
 **Keputusan yang perlu diambil:** `DEC-IOT-05` di [`09_RISIKO_DAN_KEPUTUSAN.md`](09_RISIKO_DAN_KEPUTUSAN.md).
 
-Rekomendasi: untuk prototipe TKT 4 pakai dev board + panel surya (klaim "zero-maintenance" tetap benar dengan panel). Untuk produk final, ganti ke ESP32-WROOM-32 bare module + LDO MCP1700 (Iq 1,6 µA) atau masuk mode dengan `esp_sleep_pd_config()`.
+Rekomendasi: untuk prototipe TKT 4 pakai dev board + panel surya (klaim "zero-maintenance" tetap benar dengan panel). Untuk produk final, pakai ESP32-WROOM-32 bare module + LDO MCP1700 (Iq 1,6 µA) atau masuk mode dengan `esp_sleep_pd_config()`.
 
 > **Untuk proposal TKT 3:** klaim yang jujur adalah *"arsitektur hemat daya: deep sleep 15 menit dengan target arus < 15 µA pada desain final (bare module + LDO low-Iq)"*. Jangan menulis "terukur 10 µA" karena belum ada pengukuran.
 
@@ -143,8 +146,9 @@ Sensor analog **wajib** di ADC1 (GPIO 32–39). ADC2 (GPIO 0, 2, 4, 12–15, 25�
 |---|---|---|---|
 | Kelembaban | GPIO34 | ADC1_CH6 | Input-only pin, tidak ada pull-up internal |
 | pH | GPIO32 | ADC1_CH4 | Bisa juga dipakai output, tapi jangan |
-| Baterai | GPIO35 | ADC1_CH7 | Input-only |
-| DS18B20 | GPIO4 | — | Digital, butuh pull-up 4.7 kΩ ke 3.3 V |
+| Baterai | GPIO35 | ADC1_CH7 | Input-only; **belum terpasang**, firmware kirim placeholder |
+| DS18B20 | GPIO4 | — | Digital. **Tanpa resistor eksternal**, memakai `INPUT_PULLUP` internal |
+| Micro SD | GPIO5 | — | SPI CS; bentrok dengan CS LoRa, pindahkan CS LoRa nanti |
 
 ### 6.2 Pembagi Tegangan Baterai
 18650 terisi penuh = 4,2 V. ADC ESP32 dengan atenuasi 11 dB aman sampai ±3,1 V.

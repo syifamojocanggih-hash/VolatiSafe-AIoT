@@ -13,14 +13,15 @@ ESP32 beroperasi dengan siklus tidur-bangun periodik (*sleep-wake cycle*) untuk 
 [ WAKEUP & INIT ]
  • Inisialisasi Serial (115200 baud)
  • Baca parameter kalibrasi dari Flash NVS (DryADC, WetADC, pHSlope, pHNeutralADC)
- • Inisialisasi SPI & Modul LoRa SX1278 (433.0 MHz, SF7, BW 125kHz)
+ • Mount micro SD (SPI) untuk antrian store-and-forward
+ • Inisialisasi transport (WiFi/MQTT saat ini; LoRa SX1278 untuk desain berikutnya)
        │
        ▼
 [ SENSOR SAMPLING BURST ]
  • Aktifkan GPIO25 (HIGH) ──> Nyalakan MOSFET power gate sensor
  • Delay 200 ms (stabilisasi tegangan sensor)
  • Ambil 5 sampel pembacaan ADC GPIO34 (Kelembaban) & GPIO32 (pH)
- • Baca suhu probe DS18B20 via 1-Wire GPIO4
+ • Baca suhu probe DS18B20 via 1-Wire GPIO4 (pull-up internal, tanpa resistor eksternal)
  • Matikan GPIO25 (LOW) ──> Putus daya sensor (hemat daya & anti-elektrolisis)
        │
        ▼
@@ -31,9 +32,11 @@ ESP32 beroperasi dengan siklus tidur-bangun periodik (*sleep-wake cycle*) untuk 
  • Ukur voltase baterai aktual melalui pembagi tegangan GPIO35
        │
        ▼
-[ LORA TRANSMISSION ]
- • Susun payload kompak JSON (≤ 52 byte)
- • Kirim paket LoRa SX1278 (Max retry 3x dengan interval jeda 2 detik)
+[ TRANSMISSION ]
+ • Kirim ulang antrian SD dari baris terlama (bila ada)
+ • Susun payload kompak JSON (≤ 96 byte)
+ • Kirim paket (Max retry 3x dengan interval jeda 2 detik)
+ • Bila gagal, simpan payload ke antrian SD untuk siklus berikutnya
        │
        ▼
 [ DEEP SLEEP START ]
@@ -64,11 +67,20 @@ float ph_raw = 7.0 - ((ph_median - ph_neutral_adc) / ph_slope);
 // 2. Edge Preprocessing: Koreksi terhadap kelembaban tanah
 // Saat tanah kering (moisture < 50%), pembacaan probe cenderung terbaca lebih asam
 float ph_corrected = ph_raw + (0.15 * (50.0 - moisture_pct) / 50.0);
-ph_corrected = constrain(ph_corrected, 3.0, 10.0);
+// Tidak di-clamp: nilai di luar 3,0-10,0 dikirim apa adanya lalu ditandai
+// OUT_OF_RANGE, supaya sensor short/putus tidak menyamar sebagai pH wajar.
 ```
+
+#### 2.2.1 Build fisik tanpa modul pH
+- Modul pH belum ada di node fisik, jadi build `[env:esp32dev]` dan `[env:esp32dev_lora]` memakai `-D PH_ONBOARD=0`.
+- GPIO32 mengambang hanya menghasilkan noise; firmware mengirim `ph = 7.00` dengan status `SENSOR_NOT_PRESENT` (Serial mencetak `N/A`).
+- Payload tetap 6-key sesuai `INTERFACES.md` 1.2, jadi backend tidak bisa membedakan `7.00` placeholder dari pH netral asli. Status `N/A` hanya terlihat di Serial; ini kompromi karena kontrak tidak punya field status per-kanal.
+- Build Wokwi dan unit test tetap memakai `PH_ONBOARD=1` sehingga jalur perhitungan pH asli tetap teruji.
+- Saat modul pH dipasang: hapus `-D PH_ONBOARD=0`, lalu kalibrasi 2 titik (buffer 4.01 & 6.86).
 
 ### 2.3 Pembacaan Suhu DS18B20
 - Menggunakan library `OneWire` dan `DallasTemperature`.
+- Probe saat ini **tidak memakai resistor 4.7 kΩ eksternal**; `pinMode(PIN_DS18B20, INPUT_PULLUP)` dipanggil sebelum `sensors_begin()`. Pull-up internal ESP32 (~45 kΩ) cukup untuk probe 1 m, tetapi pasang resistor eksternal bila kabel lebih panjang.
 - Rentang validasi: $-10^\circ C$ hingga $+60^\circ C$. Jika sensor terputus (terbaca $-127^\circ C$), firmware menandai flag sensor error (`t: -999`).
 
 ---

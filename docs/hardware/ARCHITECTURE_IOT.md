@@ -355,8 +355,8 @@ flowchart TD
       ▼                                ▼                             ▼
 ┌──────────────┐            ┌───────────────────┐          ┌──────────────────┐
 │  ESP32       │            │  MOSFET Power Gate│          │  Voltage Divider │
-│  NodeMCU V1  │◄── GPIO25 ─┤  (IRLZ44N/AO3401) │          │ 100kΩ / 100kΩ    │
-│  30-pin      │            └─────────┬─────────┘          └────────┬─────────┘
+│  WROOM-32D  │◄── GPIO25 ─┤  (IRLZ44N/AO3401) │          │ 100kΩ / 100kΩ    │
+│  modul       │            └─────────┬─────────┘          └────────┬─────────┘
 │  Dual Core   │                      │ Switched VCC                │
 │  240 MHz     │            ┌─────────┴───────────┐                 │ GPIO35 (ADC1_CH7)
 │              │            │  Capacitive Moist.  │                 │
@@ -387,7 +387,7 @@ flowchart TD
 
     SOLAR --> CHG --> BATT
 
-    BATT --> ESP["ESP32 NodeMCU V1<br/>30-pin · Dual Core 240 MHz"]
+    BATT --> ESP["ESP32-WROOM-32D<br/>Dual Core 240 MHz"]
     BATT --> MOSFET["MOSFET Power Gate<br/>IRLZ44N / AO3401"]
     BATT --> VDIV["Voltage Divider<br/>100kΩ / 100kΩ"]
 
@@ -397,7 +397,7 @@ flowchart TD
     subgraph SENS["Sensor Bank (daya via power gate)"]
         S1["Capacitive Moisture v1.2<br/>GPIO34 · ADC1_CH6"]
         S2["pH Module<br/>GPIO32 · ADC1_CH4"]
-        S3["DS18B20 1-Wire<br/>GPIO4 + Pull-up 4.7kΩ"]
+        S3["DS18B20 1-Wire<br/>GPIO4 + pull-up internal"]
     end
 
     S1 -->|"analog"| ESP
@@ -419,23 +419,25 @@ flowchart TD
     class LORA radio
 ```
 
-### 3.2 Pemetaan Pin ESP32 NodeMCU V1 (30-Pin)
+### 3.2 Pemetaan Pin ESP32-WROOM-32D
 
 > ⚠️ **PERINGATAN ADC:** Sensor analog **WAJIB** di pin **ADC1** (GPIO 32–39). Pin ADC2 (GPIO 0, 2, 4, 12–15, 25–27) terkunci saat radio WiFi aktif.
 
 | Komponen / Sensor | Pin ESP32 | Tipe Sinyal | Rangkaian Tambahan |
 |---|---|---|---|
 | **Capacitive Moisture v1.2 (SIG)** | **GPIO 34** | Analog (ADC1_CH6) | Tegangan 1.2V–2.8V (input-only) |
-| **Soil pH Sensor (SIG)** | **GPIO 32** | Analog (ADC1_CH4) | Via modul amplifier pH probe |
-| **DS18B20 Suhu Probe (DATA)** | **GPIO 4** | Digital (1-Wire) | **Pull-up 4.7 kΩ** ke 3.3V |
-| **MOSFET Sensor VCC Gate** | **GPIO 25** | Digital Output | HIGH=ON, LOW=SLEEP (power gate) |
-| **LoRa SX1278 (SCK)** | **GPIO 18** | SPI Clock | Bus SPI hardware |
-| **LoRa SX1278 (MISO)** | **GPIO 19** | SPI MISO | Bus SPI hardware |
-| **LoRa SX1278 (MOSI)** | **GPIO 23** | SPI MOSI | Bus SPI hardware |
-| **LoRa SX1278 (NSS/CS)** | **GPIO 5** | Digital Output | Chip Select |
-| **LoRa SX1278 (RESET)** | **GPIO 14** | Digital Output | Reset modul |
-| **LoRa SX1278 (DIO0)** | **GPIO 2** | Interrupt Input | Paket TX/RX selesai |
-| **Sensor Tegangan Baterai** | **GPIO 35** | Analog (ADC1_CH7) | Voltage divider 100kΩ/100kΩ |
+| **Soil pH Sensor (SIG)** | **GPIO 32** | Analog (ADC1_CH4) | Simulasi Wokwi; hardware pH belum ada |
+| **DS18B20 Suhu Probe (DATA)** | **GPIO 4** | Digital (1-Wire) | **Tanpa resistor eksternal**, pull-up internal `INPUT_PULLUP` |
+| **Micro SD (CS)** | **GPIO 5** | SPI CS | Buffer store-and-forward; bentrok CS LoRa |
+| **Micro SD (SCK/MISO/MOSI)** | **18/19/23** | SPI | Bus SPI hardware |
+| **MOSFET Sensor VCC Gate** | **GPIO 25** | Digital Output | HIGH=ON, LOW=SLEEP (belum dirakit) |
+| **LoRa SX1278 (SCK)** | **GPIO 18** | SPI Clock | Belum terpasang |
+| **LoRa SX1278 (MISO)** | **GPIO 19** | SPI MISO | Belum terpasang |
+| **LoRa SX1278 (MOSI)** | **GPIO 23** | SPI MOSI | Belum terpasang |
+| **LoRa SX1278 (NSS/CS)** | **GPIO 5** | Digital Output | Belum terpasang; pindahkan CS sebelum dipakai |
+| **LoRa SX1278 (RESET)** | **GPIO 14** | Digital Output | Belum terpasang |
+| **LoRa SX1278 (DIO0)** | **GPIO 2** | Interrupt Input | Belum terpasang |
+| **Sensor Tegangan Baterai** | **GPIO 35** | Analog (ADC1_CH7) | Belum terpasang; firmware kirim placeholder 3,87 V |
 
 ### 3.3 Power Gate Anti-Korosi (Failover Daya)
 
@@ -456,10 +458,10 @@ GPIO25 LOW   ──> MOSFET OFF ──> VCC sensor terputus total
 
 | # | Komponen | Spesifikasi | Qty | Estimasi Harga |
 |---|---|---|---|---|
-| 1 | ESP32 NodeMCU V1 | 30-pin, CP2102, Dual Core 240 MHz | 1 | Rp55.000 |
+| 1 | ESP32-WROOM-32D | Modul WROOM-32D, Dual Core 240 MHz | 1 | Rp55.000 |
 | 2 | Capacitive Soil Moisture v1.2 | Anti-korosi | 1 | Rp15.000 |
 | 3 | DS18B20 Probe | Stainless waterproof 1m | 1 | Rp18.000 |
-| 4 | Modul pH + Probe BNC | Analog pH lapangan | 1 | Rp62.000 |
+| 4 | Modul pH + Probe BNC | Analog pH lapangan (belum ada, simulasi Wokwi) | 1 | Rp62.000 |
 | 5 | LoRa SX1278 Ra-02 | 433 MHz + antena helikal | 1 | Rp45.000 |
 | 6 | Baterai Li-ion 18650 | 2600 mAh 3.7V + Holder | 1 | Rp35.000 |
 | 7 | Charger TP4056 | + proteksi DW01 | 1 | Rp6.000 |
@@ -467,6 +469,7 @@ GPIO25 LOW   ──> MOSFET OFF ──> VCC sensor terputus total
 | 9 | MOSFET | IRLZ44N / AO3401 | 1 | Rp4.000 |
 | 10 | Enclosure | Box PVC IP65 tahan UV | 1 | Rp30.000 |
 | 11 | Housing Probe | Pipa PVC ¾ inch | 1 | Rp10.000 |
+| 12 | Modul Micro SD | SPI 3,3 V + kartu micro SD | 1 | Rp15.000 |
 | | **TOTAL PER NODE** | | | **± Rp305.000** |
 
 ---
@@ -583,8 +586,8 @@ ph_corrected = constrain(ph_corrected, 3.0, 10.0);
 - + Panel surya 1W (100–150 mAh/hari saat terik) → **zero-maintenance** sepanjang siklus jagung (100–120 hari).
 
 ### 4.4 Perilaku Kegagalan Firmware
-- Jika transmisi LoRa gagal setelah **3x retry**, node **tetap** masuk deep sleep (tidak menguras baterai).
-- Data saat transmisi gagal hilang pada siklus itu (tidak ada buffering — menghemat flash & daya); celah data ini ditangani oleh **failover Digital Twin** di Lapis 3 (§9).
+- Jika transmisi gagal setelah **3x retry**, node **tetap** masuk deep sleep (tidak menguras baterai).
+- Payload yang gagal dikirim disimpan ke **buffer micro SD (NDJSON)** dan dikirim ulang pada siklus berikutnya sebelum payload baru, sehingga urutan waktu di backend tidak tertukar. Bila antrian penuh (200 baris) atau kartu tidak ada, data siklus itu hilang dan celahnya ditangani **failover Digital Twin** di Lapis 3 (§9).
 
 ---
 
@@ -1033,7 +1036,7 @@ flowchart TD
 ```
 
 **Struktur file `simulation/wokwi/`:**
-1. `diagram.json` — penempatan ESP32, DS18B20, potensiometer moisture & pH, resistor pull-up 4.7kΩ.
+1. `diagram.json` — penempatan ESP32, DS18B20, potensiometer moisture & pH, dan modul micro SD.
 2. `wokwi.toml` — lokasi binary firmware ELF hasil build.
 3. `main.cpp` — **kode firmware yang sama persis** dengan yang akan di-flash ke hardware fisik.
 

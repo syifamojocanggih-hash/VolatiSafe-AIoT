@@ -351,7 +351,7 @@ Penyimpangan dan batas bukti (detail di `DEC-IOT-20`):
 | **Estimasi** | 1,5 jam |
 | **Output** | `simulation/wokwi/diagram.json` |
 | **Baca** | [`05_WOKWI_SIMULASI.md`](05_WOKWI_SIMULASI.md) §3 |
-| **DoD** | ESP32 + potensiometer ×2 + DS18B20 + resistor 4,7 kΩ + OLED (opsional) ter-wire sesuai tabel pinout; Wokwi membuka tanpa error |
+| **DoD** | ESP32 + potensiometer ×2 + DS18B20 + modul micro SD + OLED (opsional) ter-wire sesuai tabel pinout; Wokwi membuka tanpa error |
 
 ### HW-5.2 — `wokwi.toml` + wiring build
 | | |

@@ -182,7 +182,7 @@ Dirangkum untuk konteks; detail teknis di [`09_RISIKO_DAN_KEPUTUSAN.md`](09_RISI
 | T-06 | `docs/hardware/WOKWI_SIMULATION.md` §1 memakai `VS-SIM-001`, `firmware/include/config.h` memakai `VS-A1-003` | Topik MQTT simulasi bisa mismatch | DEC-IOT-03 |
 | T-07 | `~/.platformio/packages` kosong walau platform `espressif32@8.0.0` terpasang | Build pertama harus unduh ±450 MB | HW-0.1 |
 | T-08 | Belum ada Mosquitto (tidak ada service, tidak ada image Docker, `docker/` kosong) | Broker harus disiapkan sendiri | HW-0.3 |
-| T-09 | BoM resmi tidak memuat resistor pull-up 4,7 kΩ, divider baterai, divider pH, kabel, header | Rangkaian **tidak akan berfungsi** tanpa komponen ini | 02 §2.1, DEC-IOT-04 |
+| T-09 | BoM resmi tidak memuat divider baterai, divider pH, kabel, header | Rangkaian baterai/pH **tidak akan berfungsi** tanpa komponen ini. Pull-up DS18B20 kini internal (`INPUT_PULLUP`). Lihat 02 §2.1, DEC-IOT-04 |
 | T-10 | BoM tidak menganggarkan gateway sama sekali | Anggaran 10 node + gateway = Rp3,34 jt vs plafon Rp3 jt | 02 §2.2, DEC-IOT-04 |
 | T-11 | Klaim arus deep sleep 10 µA tidak mungkin pada dev board (regulator + CP2102) | Klaim ketahanan baterai 477 hari tidak akurat | 02 §5, DEC-IOT-05 |
 | T-12 | Library LoRa tidak menyediakan ACK; retry "jika tidak ada ACK" tidak dapat diimplementasikan | Klaim di `TASK_GUIDE.md` HW-1.3 tidak akurat | 04 §8.1, DEC-IOT-08 |

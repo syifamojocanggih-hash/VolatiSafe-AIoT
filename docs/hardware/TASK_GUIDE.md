@@ -39,7 +39,7 @@ Menghasilkan firmware ESP32 dan simulasi sirkuit Wokwi yang mampu melakukan akui
 > Detail task atomik ada di [`playbook/03_ROADMAP_TUGAS.md`](playbook/03_ROADMAP_TUGAS.md) FASE 1 (HW-1.1 … HW-1.4), status di [`playbook/00_INDEX.md`](playbook/00_INDEX.md) §4.
 
 #### 🟢 HW-1.1: Setup PlatformIO / Arduino Project
-- **Deskripsi:** Inisialisasi struktur firmware di folder `firmware/` untuk ESP32 NodeMCU V1 (30-pin).
+- **Deskripsi:** Inisialisasi struktur firmware di folder `firmware/` untuk ESP32-WROOM-32D.
 - **Target File:**
   - `firmware/platformio.ini` (board: `esp32dev`, framework: `arduino`, lib_deps: `OneWire`, `DallasTemperature`, `LoRa`, `ArduinoJson`)
   - `firmware/src/main.cpp`
@@ -49,7 +49,7 @@ Menghasilkan firmware ESP32 dan simulasi sirkuit Wokwi yang mampu melakukan akui
   - [x] Pinout mengacu ke [`docs/hardware/PINOUT_AND_SCHEMATICS.md`](PINOUT_AND_SCHEMATICS.md):
     - GPIO 34: Sensor Kelembaban Kapasitif v1.2 (ADC1_CH6)
     - GPIO 32: Sensor pH Tanah Analog (ADC1_CH4)
-    - GPIO 4: DS18B20 1-Wire Data (+ 4.7kΩ pull-up)
+    - GPIO 4: DS18B20 1-Wire Data (pull-up internal)
     - GPIO 25: MOSFET Gate Control (Power Switch Sensor)
     - SPI LoRa SX1278: SCK=18, MISO=19, MOSI=23, CS=5, RST=14, DIO0=2
 

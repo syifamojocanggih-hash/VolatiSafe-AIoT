@@ -51,7 +51,7 @@
 | **Tanggal** | 26 Okt 2026 |
 | **Status** | ⚠️ Menunggu keputusan Lead |
 | **Temuan 1** | BoM resmi Rp305.000/node × 10 = **Rp3.050.000** > plafon Rp3.000.000. |
-| **Temuan 2** | BoM tidak memuat resistor pull-up 4,7 kΩ, divider baterai, divider pH, kabel, header — total ±Rp12.500/node. Tanpa ini rangkaian **tidak berfungsi**. |
+| **Temuan 2** | BoM awal tidak memuat divider baterai, divider pH, kabel, dan header, total ±Rp12.500/node. Pull-up DS18B20 kini ditangani internal (`INPUT_PULLUP`), tetapi resistor 4,7 kΩ tetap disarankan untuk kabel panjang. Tanpa divider baterai/pH, kedua kanal itu tidak berfungsi. |
 | **Temuan 3** | BoM **tidak memuat gateway** sama sekali (ESP32 + LoRa RX + adaptor + enclosure ≈ Rp165.000). |
 | **Keputusan diusulkan** | 9 node + 1 gateway, enclosure ABS untuk node di bawah kanopi: 9 × Rp299.500 + Rp165.000 = **Rp2.860.500**, sisa Rp139.500 untuk cadangan probe. |
 | **Alternatif** | 8 node + gateway Rp2.705.000 (sisa lebih besar, tapi klaim "mesh" lebih lemah). |
@@ -64,7 +64,7 @@
 | **Tanggal** | 26 Okt 2026 |
 | **Status** | ✅ Diputuskan (dengan catatan proposal) |
 | **Konteks** | `../FIRMWARE_SPEC.md` §3 dan `../ARCHITECTURE_IOT.md` §4.3 mengklaim 10 µA dan ketahanan 477 hari. |
-| **Temuan** | NodeMCU V1 30-pin memuat regulator AMS1117 (Iq 5–11 mA) dan CP2102. Arus tidur realistis **2–10 mA**, bukan 10 µA. Dengan 5 mA, ketahanan 2600 mAh hanya **±21 hari**, bukan 477 hari. |
+| **Temuan** | Dev board ESP32-WROOM-32D memuat regulator AMS1117 (Iq 5–11 mA) dan chip USB-UART. Arus tidur realistis **2–10 mA**, bukan 10 µA. Dengan 5 mA, ketahanan 2600 mAh hanya **±21 hari**, bukan 477 hari. |
 | **Keputusan** | Prototipe TKT 4 memakai dev board + panel surya 1 W (surplus 110 mAh/hari vs 53 mAh/hari konsumsi). Desain final memakai ESP32-WROOM-32 bare + LDO low-Iq (MCP1700, Iq 1,6 µA). |
 | **Konsekuensi proposal** | Klaim harus berbunyi "target < 15 µA pada desain final", **bukan** "terukur 10 µA". Panel surya wajib disebut sebagai bagian dari solusi daya, bukan aksesori. |
 | **Tindakan** | Ukur arus nyata di HW-9.1 (F-04) dan perbarui tabel power budget dengan angka terukur. |

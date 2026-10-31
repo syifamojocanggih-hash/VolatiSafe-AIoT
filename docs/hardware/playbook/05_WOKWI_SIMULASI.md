@@ -20,7 +20,7 @@ Bagian ini penting agar tidak ada klaim berlebihan di proposal.
 
 **Alasan:** Wokwi tidak menyediakan part `SX1278`. Yang disimulasikan hanya **hop radio**-nya, diganti WiFi → MQTT. Karena itu:
 
-- `sensors.cpp`, `payload.cpp`, `calibration.cpp` **identik** antara build simulasi dan fisik.
+- `sensors.cpp`, `payload.cpp`, `calibration.cpp` **identik** antara build simulasi dan fisik, kecuali `PH_ONBOARD`: Wokwi menghitung pH dari potensiometer, fisik mengirim placeholder `7.00` berstatus `N/A`.
 - `transport_lora.cpp` ↔ `transport_mqtt.cpp` adalah satu-satunya perbedaan.
 - Format payload **tidak berubah** → gateway, ACL, dan backend tidak bisa membedakan.
 
@@ -33,13 +33,15 @@ Kalimat yang **harus dihindari**: *"LoRa telah diuji"* atau *"terukur 10 µA"*.
 
 ```
 simulation/wokwi/
-├── diagram.json      # rangkaian virtual
-├── wokwi.toml        # menunjuk binary hasil [env:wokwi]
-├── README.md         # cara menjalankan (2 menit baca)
-└── scenarios/
-    ├── A_terik.md    # nilai potensiometer + hasil yang diharapkan
-    ├── B_hujan.md
-    └── C_dropout.md
+├── diagram.json            # rangkaian virtual (sensor + SD)
+├── wokwi.toml              # menunjuk binary hasil [env:wokwi]
+├── README.md               # cara menjalankan
+├── scenario_a.yaml         # Skenario A
+├── scenario_b.yaml         # Skenario B
+├── scenario_fault*.yaml    # jalur kerusakan
+├── scenario_mqtt_down.yaml # broker mati
+├── scenario_sd_buffer.yaml # store-and-forward ke SD
+└── scenario_i0*.yaml       # bukti integrasi
 ```
 
 > **Catatan penting:** `simulation/wokwi/` **hanya berisi konfigurasi simulasi**, bukan salinan firmware. Firmware tetap satu di `firmware/`. Ini mencegah dua sumber kebenaran — pelanggaran yang paling sering terjadi pada proyek Wokwi.
@@ -52,15 +54,13 @@ simulation/wokwi/
 
 | ID | Tipe Wokwi | Peran |
 |---|---|---|
-| `esp` | `board-esp32-devkit-c-v4` | MCU (setara NodeMCU V1 30-pin) |
+| `esp` | `board-esp32-devkit-c-v4` | MCU (setara ESP32-WROOM-32D) |
 | `pot_moist` | `wokwi-potentiometer` | Simulasi sensor kelembaban kapasitif |
-| `pot_ph` | `wokwi-potentiometer` | Simulasi modul pH analog |
-| `pot_batt` | `wokwi-potentiometer` | Simulasi divider tegangan baterai |
-| `ds18b20` | `wokwi-ds18b20` | Sensor suhu tanah 1-Wire |
-| `r_pullup` | `wokwi-resistor` (4.7 kΩ) | Pull-up 1-Wire (**wajib**) |
-| `oled` | `wokwi-ssd1306` (opsional) | Menampilkan nilai live saat demo |
+| `pot_ph` | `wokwi-potentiometer` | **Simulasi** modul pH analog (hardware pH belum ada) |
+| `ds18b20` | `wokwi-ds18b20` | Sensor suhu tanah 1-Wire (tanpa resistor eksternal) |
+| `sd` | `wokwi-microsd-card` | Modul micro SD store-and-forward |
 
-`pot_batt` memakai potensiometer, bukan dua resistor, karena divider resistor pada rel 3,3 V hanya bisa menghasilkan 1,65 V (terbaca 3,30 V baterai) — tidak bisa mensimulasikan baterai 3,87 V. Potensiometer bisa diatur ke 1,935 V.
+Potensiometer baterai (`pot_batt`) **dihapus**: node belum punya baterai maupun divider, jadi firmware mengirim placeholder `3,87 V` berstatus `N/A`. Resistor pull-up DS18B20 juga **dihapus** agar rangkaian simulasi sama dengan hardware fisik.
 
 ### 3.2 Tabel wiring
 
@@ -72,14 +72,15 @@ simulation/wokwi/
 | `esp:3V3` | `pot_ph:VCC` | red | |
 | `esp:GND` | `pot_ph:GND` | black | |
 | `pot_ph:SIG` | `esp:32` | green | ADC1_CH4 |
-| `esp:3V3` | `pot_batt:VCC` | red | |
-| `esp:GND` | `pot_batt:GND` | black | |
-| `pot_batt:SIG` | `esp:35` | green | ADC1_CH7 |
 | `esp:3V3` | `ds18b20:VCC` | red | |
 | `esp:GND` | `ds18b20:GND` | black | |
-| `esp:4` | `ds18b20:DQ` | blue | 1-Wire data |
-| `ds18b20:DQ` | `r_pullup:1` | blue | pull-up |
-| `esp:3V3` | `r_pullup:2` | red | sisi lain pull-up |
+| `esp:4` | `ds18b20:DQ` | blue | 1-Wire data, pull-up internal |
+| `esp:3V3` | `sd:VCC` | red | |
+| `esp:GND` | `sd:GND` | black | |
+| `esp:5` | `sd:CS` | orange | SPI CS |
+| `esp:18` | `sd:SCK` | purple | SPI clock |
+| `esp:19` | `sd:DO` | blue | SPI MISO |
+| `esp:23` | `sd:DI` | green | SPI MOSI |
 
 **Nama pin part Wokwi bisa berbeda antar versi.** Arahkan kursor ke pin di simulator untuk melihat labelnya. Jika `ds18b20` memakai label `VDD` bukan `VCC`, sesuaikan. Jika part `wokwi-ds18b20` tidak ditemukan di akun Anda, alternatif: `wokwi-ds18b20` tetap yang benar; pastikan ekstensi Wokwi terbaru.
 
@@ -87,9 +88,9 @@ Terverifikasi 26 Okt 2026 pada CLI 0.29.1: pin GND di `board-esp32-devkit-c-v4` 
 
 ### 3.3 `diagram.json` acuan
 
-> **Sudah diterapkan 26 Okt 2026** di `simulation/wokwi/diagram.json`. Blok di bawah adalah
-> isi file yang benar-benar dipakai dan sudah lulus `wokwi-cli lint` (0 error) serta
-> menjalankan dua skenario demo. Perhatikan tiga koreksi terhadap draf awal bab ini:
+> **Diperbarui 31 Okt 2026** di `simulation/wokwi/diagram.json`. Blok di bawah adalah
+> isi file yang benar-benar dipakai dan lulus `wokwi-cli lint` (0 error).
+> Perhatikan tiga koreksi terhadap draf awal bab ini:
 >
 > 1. Atribut `value` part `wokwi-potentiometer` **hanya menerima 0–1023**, bukan ADC mentah
 >    12-bit. Nilai harus dikonversi: `value = ADC × 1023 / 4095`. Draf awal menulis
@@ -106,9 +107,8 @@ Terverifikasi 26 Okt 2026 pada CLI 0.29.1: pin GND di `board-esp32-devkit-c-v4` 
     { "type": "board-esp32-devkit-c-v4", "id": "esp", "top": 0, "left": 0, "attrs": {} },
     { "type": "wokwi-potentiometer", "id": "pot_moist", "top": -140, "left": -120, "attrs": { "value": "624" } },
     { "type": "wokwi-potentiometer", "id": "pot_ph", "top": -140, "left": -40, "attrs": { "value": "318" } },
-    { "type": "wokwi-potentiometer", "id": "pot_batt", "top": -140, "left": 40, "attrs": { "value": "600" } },
-    { "type": "wokwi-ds18b20", "id": "ds18b20", "top": -140, "left": 160, "attrs": { "temperature": "34.5" } },
-    { "type": "wokwi-resistor", "id": "r_pullup", "top": -50, "left": 160, "attrs": { "value": "4700" } }
+    { "type": "wokwi-ds18b20", "id": "ds18b20", "top": -140, "left": 40, "attrs": { "temperature": "34.5" } },
+    { "type": "wokwi-microsd-card", "id": "sd", "top": -140, "left": 160, "attrs": {} }
   ],
   "connections": [
     [ "esp:3V3", "pot_moist:VCC", "red", [] ],
@@ -119,18 +119,21 @@ Terverifikasi 26 Okt 2026 pada CLI 0.29.1: pin GND di `board-esp32-devkit-c-v4` 
     [ "esp:GND.1", "pot_ph:GND", "black", [] ],
     [ "pot_ph:SIG", "esp:32", "green", [] ],
 
-    [ "esp:3V3", "pot_batt:VCC", "red", [] ],
-    [ "esp:GND.1", "pot_batt:GND", "black", [] ],
-    [ "pot_batt:SIG", "esp:35", "green", [] ],
-
     [ "esp:3V3", "ds18b20:VCC", "red", [] ],
     [ "esp:GND.1", "ds18b20:GND", "black", [] ],
     [ "esp:4", "ds18b20:DQ", "blue", [] ],
-    [ "ds18b20:DQ", "r_pullup:1", "blue", [] ],
-    [ "esp:3V3", "r_pullup:2", "red", [] ]
+
+    [ "esp:3V3", "sd:VCC", "red", [] ],
+    [ "esp:GND.1", "sd:GND", "black", [] ],
+    [ "esp:5", "sd:CS", "orange", [] ],
+    [ "esp:18", "sd:SCK", "purple", [] ],
+    [ "esp:19", "sd:DO", "blue", [] ],
+    [ "esp:23", "sd:DI", "green", [] ]
   ]
 }
 ```
+
+Part `wokwi-microsd-card` memakai nama pin `CS`, `SCK`, `DO` (MISO), `DI` (MOSI), `VCC`, `GND`. Wokwi membuat filesystem FAT16 kosong saat simulasi dimulai.
 
 **Jangan mengatur slider manual untuk nilai yang harus persis.** Potensiometer hanya punya
 1024 langkah, sehingga ADC 2496 tidak bisa dicapai (624 → 2498, 623 → 2494). Untuk angka
@@ -194,10 +197,11 @@ dibuktikan di simulasi (lihat DEC-IOT-17, diverifikasi di HW-9.2).
 | `scenario_a.yaml` | Skenario A, nilai persis tabel §5.5 | ✅ lulus |
 | `scenario_b.yaml` | Skenario B, nilai persis tabel §5.6 | ✅ lulus |
 | `scenario_fault.yaml` | DS18B20 70 °C → `RANGE`, nilai tidak di-clamp | ✅ lulus |
-| `scenario_fault_range.yaml` | Moisture short/putus dan divider baterai putus → `RANGE` | ✅ lulus |
+| `scenario_fault_range.yaml` | Moisture short/putus → `RANGE` | ✅ lulus |
 | `scenario_mqtt_down.yaml` | Broker tidak terjangkau → `ok=0 attempts=3`, siklus tetap jalan | ✅ lulus |
 | `scenario_cycle.yaml` | Siklus penuh: sensor ON/OFF, TX, tidur 10 s, bangun, siklus berikutnya | lulus |
 | `scenario_i03.yaml` | 5 paket telemetri berturut untuk bukti I-03 | lulus |
+| `scenario_sd_buffer.yaml` | Broker down → payload masuk antrian SD, antrian bertambah tiap siklus | belum dijalankan (kuota CI habis) |
 
 **Catatan durasi:** sejak FASE 4 setiap siklus berakhir dengan tidur 10 detik (SIM_FAST_CYCLE), jadi --timeout harus lebih besar dari 30000 ms. Skenario yang menunggu lebih dari satu siklus (mis. scenario_fault_range) butuh --timeout 180000. `scenario_i03` menunggu 5 siklus, jadi pakai --timeout 180000.
 
@@ -267,14 +271,16 @@ Artinya: **nilai yang dikirim payload bukan `ph_raw`.** Anda harus mengatur pote
 
 Rumus: `ADC = 1500 - (ph_raw - 7) × 300`
 
-### 5.4 Tabel baterai
+### 5.4 Nilai baterai
+
+Node belum punya baterai maupun divider, jadi `b` **selalu** `3.87` (placeholder) dan statusnya `N/A`. Tidak ada potensiometer baterai yang perlu diatur. Tabel di bawah disimpan untuk saat divider dipasang dan `BATTERY_ONBOARD` diubah ke 1.
 
 `ADC = 4095 × (V_bat / 2) / 3.3`
 
 | Target `b` | Tegangan di GPIO35 | ADC |
 |---|---|---|
 | 4,20 V (penuh) | 2,100 V | 2606 |
-| **3,87 V** (default demo) | **1,935 V** | **2401** |
+| **3,87 V** (placeholder) | **1,935 V** | **2401** |
 | 3,70 V | 1,850 V | 2296 |
 | 3,30 V | 1,650 V | 2048 |
 | 3,00 V (low battery) | 1,500 V | 1861 |
@@ -286,7 +292,7 @@ Rumus: `ADC = 1500 - (ph_raw - 7) × 300`
 | Kelembaban | `m: 21.0` | ADC 2496 | — |
 | Suhu tanah | `t: 34.5` | — | 34,5 °C |
 | pH | `ph: 7.85` | ADC 1271 | — |
-| Baterai | `b: 3.87` | ADC 2401 | — |
+| Baterai | `b: 3.87` | — (placeholder) | — |
 
 Payload yang harus muncul di Serial:
 
@@ -309,7 +315,7 @@ Respons sistem yang diharapkan ([`../WOKWI_SIMULATION.md`](../WOKWI_SIMULATION.m
 | Kelembaban | `m: 42.0` | ADC 2191 | — |
 | Suhu tanah | `t: 26.0` | — | 26,0 °C |
 | pH | `ph: 6.80` | ADC 1567 | — |
-| Baterai | `b: 3.90` | ADC 2420 | — |
+| Baterai | `b: 3.87` | — (placeholder) | — |
 
 Respons: AI → **AVRI ±18 % (Aman)** → dashboard hijau → preskripsi *"WAKTU TEPAT MENABUR UREA: jendela aman 120 menit"*.
 
@@ -363,7 +369,7 @@ Semua angka di tabel ini konsisten dengan analisis di [`09_RISIKO_DAN_KEPUTUSAN.
 
 - [x] `diagram.json` valid, Wokwi membuka tanpa error
 - [x] Semua sensor analog di pin ADC1 (34, 32, 35)
-- [x] Pull-up 4,7 kΩ terpasang di DQ DS18B20
+- [x] Pull-up DS18B20 diandalkan dari internal ESP32 (`INPUT_PULLUP`), tanpa resistor eksternal
 - [x] `pio run -e wokwi` → `SUCCESS`
 - [x] `wokwi.toml` menunjuk path yang benar (relatif, bukan absolut)
 - [x] Serial mencetak `[SIM] Build simulasi ...` dan `[SIM] FAST CYCLE ...`
