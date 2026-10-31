@@ -19,15 +19,32 @@
 #define FIRMWARE_VERSION    "1.0.0"
 #define PAYLOAD_BUF_SIZE    96      // payload nyata 70-76 byte, bukan 52 (DEC-IOT-02)
 
-// --- Pinout ESP32 NodeMCU V1 (30-pin) ---------------------------------------
+// --- Pinout ESP32-WROOM-32D -------------------------------------------------
 // Analog WAJIB di ADC1 (GPIO 32-39); ADC2 terkunci saat radio aktif.
 #define PIN_MOISTURE        34   // ADC1_CH6  Capacitive Soil Moisture v1.2
 #define PIN_PH              32   // ADC1_CH4  Modul analog pH tanah
 #define PIN_BATTERY         35   // ADC1_CH7  Voltage divider 100k/100k
-#define PIN_DS18B20         4    // 1-Wire    DS18B20 (+ pull-up 4.7k ke 3.3V)
+#define PIN_DS18B20         4    // 1-Wire    DS18B20
 #define PIN_SENSOR_POWER    25   // Digital   MOSFET power gate (HIGH=ON, LOW=SLEEP)
 
+// Probe DS18B20 yang dipakai belum punya resistor pull-up 4.7k eksternal, jadi
+// pin ini mengandalkan pull-up internal ESP32 (~45k). Itu di bawah spesifikasi
+// 1-Wire dan bisa gagal pada kabel panjang, tetapi cukup untuk probe 1 m.
+#define DS18B20_USE_INTERNAL_PULLUP 1
+
+// --- Modul Micro SD (SPI) ---------------------------------------------------
+// SPI hardware dipakai bersama. CS SD di GPIO5; saat modul LoRa SX1278 dipasang
+// nanti, CS LoRa WAJIB dipindah (mis. GPIO15) karena GPIO5 bentrok.
+#define PIN_SD_CS           5
+#define PIN_SD_SCK          18
+#define PIN_SD_MISO         19
+#define PIN_SD_MOSI         23
+#define SD_BUFFER_PATH      "/vs_buffer.ndjson"
+#define SD_BUFFER_MAX_LINES 200     // ~200 x 96 byte; dibatasi agar file tidak tumbuh liar
+
 // SPI LoRa SX1278 Ra-02 433 MHz
+// Belum terpasang di node ini. CS 5 sementara dipakai SD; pindahkan CS LoRa
+// sebelum modul dipasang (lihat PIN_SD_CS di atas).
 #define PIN_LORA_SCK        18
 #define PIN_LORA_MISO       19
 #define PIN_LORA_MOSI       23
@@ -64,6 +81,16 @@
 #define PH_NEUTRAL_ADC      1500.0f // ADC pada buffer netral (~pH 7)
 #define PH_SLOPE            300.0f  // ADC per satuan pH
 
+// --- Ketersediaan Sensor pH -------------------------------------------------
+// Modul pH belum ada di node fisik. GPIO32 yang mengambang akan membaca noise,
+// jadi build fisik mengirim placeholder netral dengan status SENSOR_NOT_PRESENT
+// alih-alih angka acak yang menyamar sebagai pengukuran. Build Wokwi dan native
+// tetap menghitung pH dari potensiometer/nilai uji.
+#if !defined(PH_ONBOARD)
+  #define PH_ONBOARD        1
+#endif
+#define PH_PLACEHOLDER      7.0f
+
 // --- Rentang Fisik Valid (gate validasi lokal) ------------------------------
 #define MOISTURE_MIN        0.0f
 #define MOISTURE_MAX        100.0f
@@ -84,6 +111,13 @@
 #define ADC_UNSTABLE_RANGE  800     // placeholder; diukur nyata di HW-9.1 (F-01)
 
 // --- Manajemen Daya ---------------------------------------------------------
+// Node ini belum memasang baterai maupun divider tegangan, jadi GPIO35 tidak
+// punya sumber. Nilai baterai dikirim sebagai placeholder yang sah agar payload
+// tetap diterima backend, dengan status SENSOR_NOT_PRESENT (jujur, bukan data
+// palsu yang menyamar sebagai pengukuran).
+#define BATTERY_ONBOARD     0
+#define BATTERY_PLACEHOLDER_V 3.87f
+
 // SIM_FAST_CYCLE memampatkan tidur ke 10 detik agar demo mungkin; nilai ini
 // wajib dicetak di Serial supaya tidak disangka perilaku produksi (DEC-IOT-15).
 #if defined(SIM_FAST_CYCLE)
@@ -98,6 +132,26 @@
 #define TRANSPORT_KIND_LORA   1
 #define TRANSPORT_KIND_MQTT   2
 #define TRANSPORT_KIND_DUMMY  0
+
+// --- Kredensial Jaringan ----------------------------------------------------
+// Build Wokwi mengisi SIM_*, build fisik mengisi WIFI_*. Keduanya dipetakan ke
+// NET_* supaya transport_mqtt.cpp tidak peduli asal nilainya.
+#if defined(SIM_WIFI_SSID)
+  #define NET_WIFI_SSID   SIM_WIFI_SSID
+  #define NET_WIFI_PASS   SIM_WIFI_PASS
+  #define NET_MQTT_HOST   SIM_MQTT_HOST
+  #define NET_MQTT_PORT   SIM_MQTT_PORT
+#elif defined(WIFI_SSID)
+  #define NET_WIFI_SSID   WIFI_SSID
+  #define NET_WIFI_PASS   WIFI_PASS
+  #define NET_MQTT_HOST   MQTT_HOST
+  #define NET_MQTT_PORT   MQTT_PORT
+#else
+  #define NET_WIFI_SSID   "GANTI_SSID"
+  #define NET_WIFI_PASS   "GANTI_PASS"
+  #define NET_MQTT_HOST   "192.168.1.10"
+  #define NET_MQTT_PORT   1883
+#endif
 
 // --- Retry & Timeout --------------------------------------------------------
 #define TX_RETRY_MAX           3

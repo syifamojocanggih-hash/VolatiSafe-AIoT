@@ -34,8 +34,8 @@ bool transport_init() {
   snprintf(topic, sizeof(topic), "/volatisafe/v1/node/%s/telemetry", NODE_ID);
 
   WiFi.mode(WIFI_STA);
-  WiFi.begin(SIM_WIFI_SSID, SIM_WIFI_PASS);
-  Serial.printf("[TX] WiFi ke \"%s\"\n", SIM_WIFI_SSID);
+  WiFi.begin(NET_WIFI_SSID, NET_WIFI_PASS);
+  Serial.printf("[TX] WiFi ke \"%s\"\n", NET_WIFI_SSID);
 
   const uint32_t t0 = millis();
   while (WiFi.status() != WL_CONNECTED && millis() - t0 < WIFI_CONNECT_TIMEOUT_MS) {
@@ -47,15 +47,15 @@ bool transport_init() {
   }
   Serial.printf("[TX] WiFi tersambung, IP %s\n", WiFi.localIP().toString().c_str());
 
-  mqtt.setServer(SIM_MQTT_HOST, SIM_MQTT_PORT);
+  mqtt.setServer(NET_MQTT_HOST, NET_MQTT_PORT);
   // Cetak hasil resolusi: kegagalan DNS dan kegagalan TCP sama-sama muncul
   // sebagai state=-2, jadi tanpa ini penyebabnya tidak bisa dibedakan.
   IPAddress broker_ip;
-  if (WiFi.hostByName(SIM_MQTT_HOST, broker_ip)) {
-    Serial.printf("[TX] broker %s -> %s:%d\n", SIM_MQTT_HOST,
-                  broker_ip.toString().c_str(), SIM_MQTT_PORT);
+  if (WiFi.hostByName(NET_MQTT_HOST, broker_ip)) {
+    Serial.printf("[TX] broker %s -> %s:%d\n", NET_MQTT_HOST,
+                  broker_ip.toString().c_str(), NET_MQTT_PORT);
   } else {
-    Serial.printf("[TX] DNS gagal untuk %s\n", SIM_MQTT_HOST);
+    Serial.printf("[TX] DNS gagal untuk %s\n", NET_MQTT_HOST);
   }
   // Default PubSubClient 256 byte. Payload kita 70-76 byte, tapi header topik
   // + overhead MQTT ikut dihitung, jadi beri ruang eksplisit.
@@ -67,8 +67,8 @@ bool transport_init() {
     delay(200);
   }
   if (!mqtt.connected()) {
-    Serial.printf("[TX] MQTT gagal ke %s:%d, state=%d\n", SIM_MQTT_HOST,
-                  SIM_MQTT_PORT, (int)mqtt.state());
+    Serial.printf("[TX] MQTT gagal ke %s:%d, state=%d\n", NET_MQTT_HOST,
+                  NET_MQTT_PORT, (int)mqtt.state());
     return false;
   }
 

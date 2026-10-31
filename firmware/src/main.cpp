@@ -6,10 +6,17 @@
 #include "payload.h"
 #include "power_mgmt.h"
 #include "sensors.h"
+#include "storage.h"
 #include "transport.h"
 #include "types.h"
 
 static Calibration g_cal;
+
+// transport_send sudah melakukan retry sendiri; adaptor ini hanya menyesuaikan
+// tanda tangan agar storage tidak perlu tahu soal TxResult.
+static bool sendBuffered(const char* payload, size_t len) {
+  return transport_send(payload, len).ok;
+}
 
 static const char* statusName(SensorStatus s) {
   switch (s) {
@@ -17,6 +24,7 @@ static const char* statusName(SensorStatus s) {
     case SENSOR_DISCONNECTED: return "DISC";
     case SENSOR_OUT_OF_RANGE: return "RANGE";
     case SENSOR_UNSTABLE:     return "UNSTABLE";
+    case SENSOR_NOT_PRESENT:  return "N/A";
   }
   return "?";
 }
@@ -51,6 +59,16 @@ static void runCycle(const Calibration& cal) {
     Serial.println(F("[TX] peringatan: ts belum valid, paket akan ditolak backend"));
   }
 
+  // Kirim antrian lama lebih dulu supaya urutan waktu di backend tidak tertukar.
+  // Kalau transport tidak siap, flush hanya akan menghabiskan retry tanpa hasil.
+  if (tx_ready) {
+    const uint16_t flushed = storage_bufferFlush(sendBuffered);
+    if (flushed > 0) {
+      Serial.printf("[SD] flushed %u, sisa %u\n", (unsigned)flushed,
+                    (unsigned)storage_bufferCount());
+    }
+  }
+
   char buf[PAYLOAD_BUF_SIZE];
   const size_t len = payload_encode(f, buf, sizeof(buf));
   if (len == 0) {
@@ -63,6 +81,9 @@ static void runCycle(const Calibration& cal) {
     const TxResult r = transport_send(buf, len);
     Serial.printf("[TX] %s ok=%d attempts=%d\n", r.ok ? "KIRIM" : "GAGAL",
                   (int)r.ok, (int)r.attempts);
+    if (!r.ok && storage_bufferAppend(buf, len)) {
+      Serial.printf("[SD] buffered, antrian %u\n", (unsigned)storage_bufferCount());
+    }
   }
 
   transport_shutdown();
@@ -97,6 +118,7 @@ void setup() {
   calibration_print(g_cal);
 
   sensors_begin();
+  storage_begin();
   runCycle(g_cal);
 }
 

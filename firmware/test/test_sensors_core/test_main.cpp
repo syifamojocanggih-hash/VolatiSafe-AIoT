@@ -1,6 +1,7 @@
 #include <unity.h>
 
 #include "calibration.h"
+#include "config.h"
 #include "sensors.h"
 
 void setUp(void) {}
@@ -128,13 +129,22 @@ void test_compose_frame_scenario_a(void) {
   sensors_composeFrame(moist, ph, 2401, 34.5f, cal, f);
 
   TEST_ASSERT_FLOAT_WITHIN(0.1f, 21.0f, f.moisture.value);
+#if PH_ONBOARD
   TEST_ASSERT_FLOAT_WITHIN(0.01f, 7.85f, f.ph.value);
+  TEST_ASSERT_EQUAL(SENSOR_OK, f.ph.status);
+#else
+  TEST_ASSERT_FLOAT_WITHIN(0.01f, PH_PLACEHOLDER, f.ph.value);
+  TEST_ASSERT_EQUAL(SENSOR_NOT_PRESENT, f.ph.status);
+#endif
   TEST_ASSERT_FLOAT_WITHIN(0.01f, 3.87f, f.battery.value);
   TEST_ASSERT_EQUAL_FLOAT(34.5f, f.soil_temp.value);
   TEST_ASSERT_EQUAL(SENSOR_OK, f.moisture.status);
-  TEST_ASSERT_EQUAL(SENSOR_OK, f.ph.status);
   TEST_ASSERT_EQUAL(SENSOR_OK, f.soil_temp.status);
+#if BATTERY_ONBOARD
   TEST_ASSERT_EQUAL(SENSOR_OK, f.battery.status);
+#else
+  TEST_ASSERT_EQUAL(SENSOR_NOT_PRESENT, f.battery.status);
+#endif
 }
 
 // Fixture dari 05_WOKWI_SIMULASI.md 5.6: Skenario B (Hujan Sore).
@@ -149,8 +159,17 @@ void test_compose_frame_scenario_b(void) {
   sensors_composeFrame(moist, ph, 2420, 26.0f, cal, f);
 
   TEST_ASSERT_FLOAT_WITHIN(0.1f, 42.0f, f.moisture.value);
+#if PH_ONBOARD
   TEST_ASSERT_FLOAT_WITHIN(0.01f, 6.80f, f.ph.value);
+#else
+  TEST_ASSERT_FLOAT_WITHIN(0.01f, PH_PLACEHOLDER, f.ph.value);
+  TEST_ASSERT_EQUAL(SENSOR_NOT_PRESENT, f.ph.status);
+#endif
+#if BATTERY_ONBOARD
   TEST_ASSERT_FLOAT_WITHIN(0.01f, 3.90f, f.battery.value);
+#else
+  TEST_ASSERT_FLOAT_WITHIN(0.01f, 3.87f, f.battery.value);
+#endif
   TEST_ASSERT_EQUAL_FLOAT(26.0f, f.soil_temp.value);
 }
 
@@ -166,7 +185,11 @@ void test_compose_frame_flags_only_unstable_channel(void) {
   sensors_composeFrame(moist, ph, 2401, 34.5f, cal, f);
 
   TEST_ASSERT_EQUAL(SENSOR_UNSTABLE, f.moisture.status);
+#if PH_ONBOARD
   TEST_ASSERT_EQUAL(SENSOR_OK, f.ph.status);
+#else
+  TEST_ASSERT_EQUAL(SENSOR_NOT_PRESENT, f.ph.status);
+#endif
   TEST_ASSERT_EQUAL(SENSOR_OK, f.soil_temp.status);
 }
 
@@ -183,13 +206,18 @@ void test_compose_frame_flags_short_and_disconnected_moisture(void) {
   sensors_composeFrame(moist_short, ph, 2401, 34.5f, cal, shorted);
   TEST_ASSERT_EQUAL(SENSOR_OUT_OF_RANGE, shorted.moisture.status);
   TEST_ASSERT_TRUE(shorted.moisture.value > 100.0f);
-  TEST_ASSERT_EQUAL(SENSOR_OK, shorted.ph.status);
 
   AdcBurst moist_cut{4095, 4095, 4095};
   sensors_composeFrame(moist_cut, ph, 2401, 34.5f, cal, cut);
   TEST_ASSERT_EQUAL(SENSOR_OUT_OF_RANGE, cut.moisture.status);
   TEST_ASSERT_TRUE(cut.moisture.value < 0.0f);
+#if PH_ONBOARD
+  TEST_ASSERT_EQUAL(SENSOR_OK, shorted.ph.status);
   TEST_ASSERT_EQUAL(SENSOR_OK, cut.ph.status);
+#else
+  TEST_ASSERT_EQUAL(SENSOR_NOT_PRESENT, shorted.ph.status);
+  TEST_ASSERT_EQUAL(SENSOR_NOT_PRESENT, cut.ph.status);
+#endif
 }
 
 // Kalibrasi moisture rusak hanya menjatuhkan kanal moisture.
@@ -207,9 +235,14 @@ void test_compose_frame_invalid_moisture_calibration(void) {
 
   TEST_ASSERT_EQUAL_FLOAT(-999.0f, f.moisture.value);
   TEST_ASSERT_EQUAL(SENSOR_OUT_OF_RANGE, f.moisture.status);
+#if PH_ONBOARD
   TEST_ASSERT_EQUAL(SENSOR_OK, f.ph.status);
+#else
+  TEST_ASSERT_EQUAL(SENSOR_NOT_PRESENT, f.ph.status);
+#endif
 }
 
+#if PH_ONBOARD
 // Slope pH nol hanya menjatuhkan kanal pH.
 void test_compose_frame_invalid_ph_slope(void) {
   Calibration cal{};
@@ -226,8 +259,27 @@ void test_compose_frame_invalid_ph_slope(void) {
   TEST_ASSERT_EQUAL(SENSOR_OUT_OF_RANGE, f.ph.status);
   TEST_ASSERT_EQUAL(SENSOR_OK, f.moisture.status);
 }
+#else
+// Tanpa modul pH, noise GPIO32 tidak boleh bocor ke payload.
+void test_compose_frame_ph_not_present(void) {
+  Calibration cal{};
+  calibration_defaults(cal);
+
+  AdcBurst moist{2496, 2496, 2496};
+  AdcBurst ph{0, 0, 4095};   // rentang liar, meniru pin mengambang
+  TelemetryFrame f{};
+
+  sensors_composeFrame(moist, ph, 2401, 34.5f, cal, f);
+
+  TEST_ASSERT_FLOAT_WITHIN(0.01f, PH_PLACEHOLDER, f.ph.value);
+  TEST_ASSERT_EQUAL(SENSOR_NOT_PRESENT, f.ph.status);
+  TEST_ASSERT_EQUAL(SENSOR_OK, f.moisture.status);
+}
+#endif
 
 // Divider putus -> 0 V, divider short -> 6,6 V. Keduanya bukan baterai.
+// Tanpa divider (BATTERY_ONBOARD 0), kanal harus jujur menyebut dirinya
+// belum terpasang, bukan melaporkan placeholder sebagai pengukuran sah.
 void test_compose_frame_flags_battery_out_of_range(void) {
   Calibration cal{};
   calibration_defaults(cal);
@@ -237,10 +289,17 @@ void test_compose_frame_flags_battery_out_of_range(void) {
   TelemetryFrame flat{}, hot{};
 
   sensors_composeFrame(moist, ph, 0, 34.5f, cal, flat);
-  TEST_ASSERT_EQUAL(SENSOR_OUT_OF_RANGE, flat.battery.status);
-
   sensors_composeFrame(moist, ph, 4095, 34.5f, cal, hot);
+
+#if BATTERY_ONBOARD
+  TEST_ASSERT_EQUAL(SENSOR_OUT_OF_RANGE, flat.battery.status);
   TEST_ASSERT_EQUAL(SENSOR_OUT_OF_RANGE, hot.battery.status);
+#else
+  TEST_ASSERT_EQUAL(SENSOR_NOT_PRESENT, flat.battery.status);
+  TEST_ASSERT_EQUAL(SENSOR_NOT_PRESENT, hot.battery.status);
+  TEST_ASSERT_FLOAT_WITHIN(0.01f, 3.87f, flat.battery.value);
+  TEST_ASSERT_FLOAT_WITHIN(0.01f, 3.87f, hot.battery.value);
+#endif
 }
 
 // OUT_OF_RANGE menang atas UNSTABLE: nilai di luar batas sudah pasti rusak,
@@ -281,7 +340,11 @@ int main(int, char**) {
   RUN_TEST(test_compose_frame_flags_only_unstable_channel);
   RUN_TEST(test_compose_frame_flags_short_and_disconnected_moisture);
   RUN_TEST(test_compose_frame_invalid_moisture_calibration);
+#if PH_ONBOARD
   RUN_TEST(test_compose_frame_invalid_ph_slope);
+#else
+  RUN_TEST(test_compose_frame_ph_not_present);
+#endif
   RUN_TEST(test_compose_frame_flags_battery_out_of_range);
   RUN_TEST(test_compose_frame_out_of_range_beats_unstable);
   return UNITY_END();

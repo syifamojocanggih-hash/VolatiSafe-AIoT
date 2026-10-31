@@ -91,16 +91,33 @@ void sensors_composeFrame(const AdcBurst& moist, const AdcBurst& ph,
   out.moisture.status = channelStatus(out.moisture.value, MOISTURE_MIN, MOISTURE_MAX,
                                      sensors_isUnstable(moist.min, moist.max));
 
+#if PH_ONBOARD
   // Kompensasi pH memakai moisture yang baru dihitung, bukan nilai mentah.
   out.ph.value = sensors_adcToPh(ph.median, cal.ph_neutral_adc, cal.ph_slope,
                                  out.moisture.value);
   out.ph.status = channelStatus(out.ph.value, PH_MIN, PH_MAX,
                                 sensors_isUnstable(ph.min, ph.max));
+#else
+  // Tanpa modul pH, GPIO32 hanya membaca noise. Placeholder netral menjaga
+  // payload tetap sah, sementara status melarang backend memakainya.
+  (void)ph;
+  out.ph.value  = PH_PLACEHOLDER;
+  out.ph.status = SENSOR_NOT_PRESENT;
+#endif
 
   sensors_classifyTemp(temp_c, out.soil_temp);
 
+#if BATTERY_ONBOARD
   // Divider putus -> 0 V, divider short -> >4,25 V. Keduanya bukan baterai.
   out.battery.value  = sensors_adcToBatteryV(batt_adc);
   out.battery.status = channelStatus(out.battery.value, BATTERY_MIN_V, BATTERY_MAX_V,
                                      false);
+#else
+  // Tanpa divider, GPIO35 tidak mengukur apa pun. Nilai placeholder menjaga
+  // payload tetap sah, sementara status memberi tahu backend bahwa kanal ini
+  // belum terpasang dan tidak boleh dipakai untuk keputusan low-battery.
+  (void)batt_adc;
+  out.battery.value  = BATTERY_PLACEHOLDER_V;
+  out.battery.status = SENSOR_NOT_PRESENT;
+#endif
 }

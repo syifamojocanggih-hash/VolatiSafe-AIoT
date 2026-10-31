@@ -11,7 +11,14 @@ static DallasTemperature s_ds(&s_wire);
 void sensors_begin() {
   analogSetAttenuation(ADC_ATTENUATION);
   analogReadResolution(12);
-  pinMode(PIN_DS18B20, INPUT_PULLUP);   // pull-up eksternal 4.7k tetap wajib
+
+#if DS18B20_USE_INTERNAL_PULLUP
+  // Tanpa resistor 4.7k eksternal, satu-satunya pull-up ada di dalam ESP32.
+  // Harus aktif sebelum s_ds.begin(), kalau tidak bus 1-Wire terbaca kosong.
+  pinMode(PIN_DS18B20, INPUT_PULLUP);
+#else
+  pinMode(PIN_DS18B20, INPUT);
+#endif
 
   // 11-bit cukup (+-0,125 C) dan menghemat 375 ms dibanding 12-bit. Siklus
   // ini satu tembakan lalu tidur, jadi blocking lebih sederhana daripada
@@ -51,11 +58,17 @@ uint16_t sensors_readAdcMedian(uint8_t pin) {
 // Divider baterai adalah tegangan DC stabil; 3 sampel tanpa jeda sudah cukup
 // dan tidak perlu ikut menunggu 250 ms seperti sensor tanah.
 uint16_t sensors_readAdcBattery() {
+#if BATTERY_ONBOARD
   uint32_t sum = 0;
   for (uint8_t i = 0; i < BATTERY_SAMPLE_COUNT; i++) {
     sum += (uint16_t)analogRead(PIN_BATTERY);
   }
   return (uint16_t)(sum / BATTERY_SAMPLE_COUNT);
+#else
+  // GPIO35 mengambang tanpa divider; jangan dibaca. composeFrame mengisi
+  // placeholder dan menandai kanal sebagai belum terpasang.
+  return 0;
+#endif
 }
 
 bool sensors_readSoilTemp(float& t_c) {
@@ -69,7 +82,9 @@ void sensors_sampleAll(TelemetryFrame& out, const Calibration& cal) {
   AdcBurst ph_burst{};
 
   sensors_readAdcBurst(PIN_MOISTURE, moist_burst);
+#if PH_ONBOARD
   sensors_readAdcBurst(PIN_PH, ph_burst);
+#endif
   const uint16_t batt_adc = sensors_readAdcBattery();
 
   float temp_c = TEMP_DISCONNECTED_C;
@@ -77,8 +92,15 @@ void sensors_sampleAll(TelemetryFrame& out, const Calibration& cal) {
 
   sensors_composeFrame(moist_burst, ph_burst, batt_adc, temp_c, cal, out);
 
+#if PH_ONBOARD
   Serial.printf("[SENS] adc m=%u[%u..%u] ph=%u[%u..%u] b=%u t=%.2fC\n",
                 moist_burst.median, moist_burst.min, moist_burst.max,
                 ph_burst.median, ph_burst.min, ph_burst.max,
                 batt_adc, temp_c);
+#else
+  // Pin pH mengambang sengaja tidak dibaca; jangan cetak angka yang tak berarti.
+  Serial.printf("[SENS] adc m=%u[%u..%u] ph=N/A b=%u t=%.2fC\n",
+                moist_burst.median, moist_burst.min, moist_burst.max,
+                batt_adc, temp_c);
+#endif
 }
