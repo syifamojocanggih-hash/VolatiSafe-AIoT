@@ -13,6 +13,29 @@ $ErrorActionPreference = "Stop"
 $root = Split-Path -Parent $PSScriptRoot
 Set-Location $root
 
+# Perintah native (docker, pip, npm) menulis progres ke stderr. Dengan
+# ErrorActionPreference=Stop, PowerShell menganggapnya error fatal terutama saat
+# output dialihkan. Di sini stderr ditampung ke berkas sementara dan hanya
+# ditampilkan bila perintah benar-benar gagal.
+function Invoke-Native {
+    param([scriptblock]$Command)
+    $previous = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    $stderrFile = [System.IO.Path]::GetTempFileName()
+    try {
+        & $Command 2> $stderrFile
+        $exitCode = $LASTEXITCODE
+        if ($exitCode -ne 0) {
+            $stderrText = Get-Content -Path $stderrFile -Raw
+            if ($stderrText) { Write-Host $stderrText.Trim() }
+        }
+        return $exitCode
+    } finally {
+        Remove-Item -Path $stderrFile -Force -ErrorAction SilentlyContinue
+        $ErrorActionPreference = $previous
+    }
+}
+
 function Wait-TcpPort {
     param([string]$TargetHost, [int]$Port, [int]$TimeoutSeconds = 90)
     $deadline = (Get-Date).AddSeconds($TimeoutSeconds)
@@ -56,8 +79,8 @@ foreach ($pair in @(
 
 # 2. Infrastruktur (DB + broker MQTT)
 Write-Host "[docker] menyalakan timescaledb + mosquitto..."
-docker compose -f docker/docker-compose.yml up -d timescaledb mosquitto
-if ($LASTEXITCODE -ne 0) { throw "docker compose gagal. Pastikan Docker Desktop berjalan." }
+$dockerExit = Invoke-Native { docker compose -f docker/docker-compose.yml up -d timescaledb mosquitto }
+if ($dockerExit -ne 0) { throw "docker compose gagal. Pastikan Docker Desktop berjalan." }
 
 if (-not (Wait-TcpPort -TargetHost "127.0.0.1" -Port 5433 -TimeoutSeconds 120)) {
     throw "TimescaleDB tidak siap di port 5433. Cek: docker logs volatisafe_timescaledb"
@@ -75,36 +98,55 @@ if (-not (Test-Path $venvPython)) {
 }
 if (-not $SkipInstall) {
     Write-Host "[python] install dependensi runtime..."
-    & $venvPython -m pip install --quiet --disable-pip-version-check -r backend\requirements-local.txt
-    if ($LASTEXITCODE -ne 0) { throw "pip install gagal." }
+    $pipExit = Invoke-Native { & $venvPython -m pip install --quiet --disable-pip-version-check -r backend\requirements-local.txt }
+    if ($pipExit -ne 0) { throw "pip install gagal." }
 }
 
 # 4. Dependensi frontend
 if (-not $SkipInstall -and -not (Test-Path "frontend\node_modules")) {
     Write-Host "[node] npm install (sekali saja, bisa beberapa menit)..."
     Push-Location frontend
-    npm install
+    $npmExit = Invoke-Native { npm install }
     Pop-Location
-    if ($LASTEXITCODE -ne 0) { throw "npm install gagal." }
+    if ($npmExit -ne 0) { throw "npm install gagal." }
 }
 
-# 5. Jalankan backend dan frontend di jendela terpisah
-Write-Host "[run] backend  -> http://localhost:8000/docs"
-Start-Process powershell -WorkingDirectory (Join-Path $root "backend") -ArgumentList @(
-    "-NoExit", "-Command",
-    "& '$venvPython' -m uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload"
-)
+# 5. Jalankan backend dan frontend di latar belakang, log ke berkas.
+#    Jendela disembunyikan supaya klik tidak memicu mode QuickEdit konsol yang
+#    bisa membekukan proses saat demo.
+$logDir = Join-Path $root "logs"
+if (-not (Test-Path $logDir)) { New-Item -ItemType Directory -Path $logDir | Out-Null }
+$backendLog = Join-Path $logDir "backend.log"
+$frontendLog = Join-Path $logDir "frontend.log"
 
-Write-Host "[run] frontend -> http://localhost:3000"
-Start-Process powershell -WorkingDirectory (Join-Path $root "frontend") -ArgumentList @(
-    "-NoExit", "-Command", "npm run dev"
-)
+function Test-PortBusy {
+    param([int]$Port)
+    return [bool](Get-NetTCPConnection -LocalPort $Port -State Listen -ErrorAction SilentlyContinue)
+}
+
+if (Test-PortBusy -Port 8000) {
+    Write-Warning "Port 8000 sudah dipakai, backend tidak dijalankan ulang. Hentikan dulu: .\scripts\stop-dev.ps1"
+} else {
+    Write-Host "[run] backend  -> http://localhost:8000/docs"
+    Set-Content -Path $backendLog -Value "" -Encoding utf8
+    $backendCmd = "/c `"`"$venvPython`" -m uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload > `"$backendLog`" 2>&1`""
+    Start-Process -FilePath "cmd.exe" -ArgumentList $backendCmd -WorkingDirectory (Join-Path $root "backend") -WindowStyle Hidden
+}
+
+if (Test-PortBusy -Port 3000) {
+    Write-Warning "Port 3000 sudah dipakai, frontend tidak dijalankan ulang. Hentikan dulu: .\scripts\stop-dev.ps1"
+} else {
+    Write-Host "[run] frontend -> http://localhost:3000"
+    Set-Content -Path $frontendLog -Value "" -Encoding utf8
+    $frontendCmd = "/c `"npm run dev > `"$frontendLog`" 2>&1`""
+    Start-Process -FilePath "cmd.exe" -ArgumentList $frontendCmd -WorkingDirectory (Join-Path $root "frontend") -WindowStyle Hidden
+}
 
 # 6. Tunggu backend siap, lalu buka dashboard
 if (Wait-HttpOk -Url "http://localhost:8000/api/v1/health" -TimeoutSeconds 90) {
     Write-Host "[ok] backend sehat"
 } else {
-    Write-Warning "Backend belum membalas /api/v1/health. Lihat jendela backend."
+    Write-Warning "Backend belum membalas /api/v1/health. Cek logs\backend.log"
 }
 
 if (-not $NoBrowser) {
@@ -114,5 +156,8 @@ if (-not $NoBrowser) {
 Write-Host ""
 Write-Host "Dashboard : http://localhost:3000"
 Write-Host "API docs  : http://localhost:8000/docs"
+Write-Host "Log backend  : logs\backend.log"
+Write-Host "Log frontend : logs\frontend.log"
+Write-Host "Pantau log   : Get-Content logs\backend.log -Tail 20 -Wait"
 Write-Host "Kirim paket uji: .\scripts\publish-telemetry.ps1"
-Write-Host "Matikan infra  : docker compose -f docker/docker-compose.yml down"
+Write-Host "Matikan semua  : .\scripts\stop-dev.ps1"

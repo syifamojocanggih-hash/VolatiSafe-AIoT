@@ -15,6 +15,9 @@ venv/
 backend/.env
 frontend/.env.local
 
+# Log runtime dari scripts/run-dev.ps1
+logs/
+
 # Data artifacts
 data/
 datasets/*.csv.tmp

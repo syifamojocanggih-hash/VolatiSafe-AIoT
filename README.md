@@ -58,7 +58,7 @@ Prasyarat: Docker Desktop aktif, Python 3.10+, Node.js 20+, dan port `5433`, `18
 .\scripts\run-dev.ps1
 ```
 
-Skrip menyalakan TimescaleDB + Mosquitto lewat Docker, menyiapkan `backend\.venv`, menyalin `.env` contoh bila belum ada, lalu membuka backend dan dashboard di dua jendela terpisah. Opsi: `-SkipInstall` (lewati pip/npm install), `-NoBrowser` (jangan buka browser otomatis).
+Skrip menyalakan TimescaleDB + Mosquitto lewat Docker, menyiapkan `backend\.venv`, menyalin `.env` contoh bila belum ada, lalu menjalankan backend dan dashboard di latar belakang. Log ditulis ke `logs\backend.log` dan `logs\frontend.log`; pantau dengan `Get-Content logs\backend.log -Tail 20 -Wait`. Opsi: `-SkipInstall` (lewati pip/npm install), `-NoBrowser` (jangan buka browser otomatis).
 
 | Layanan | Alamat | Catatan |
 |---|---|---|
@@ -76,6 +76,6 @@ Uji jalur IoT tanpa hardware:
 
 Paket masuk ke Mosquitto, diproses ingestion, dan tampil di dashboard dalam ~1 detik lewat WebSocket. Kirim `-Moisture -999` untuk menguji sensor rusak: paket ditolak, alasannya dicatat di log backend, dan metrik terakhir tidak berubah.
 
-Matikan infrastruktur: `docker compose -f docker/docker-compose.yml down`.
+Hentikan backend dan dashboard: `.\scripts\stop-dev.ps1`. Hentikan infrastruktur: `docker compose -f docker/docker-compose.yml down`.
 
 Catatan: halaman `/digital-twin` masih memakai data fallback lokal karena service Digital Twin berada di branch `digittal-twin` dan belum di-merge ke `main`.
