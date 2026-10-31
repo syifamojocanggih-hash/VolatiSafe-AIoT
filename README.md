@@ -76,6 +76,8 @@ Uji jalur IoT tanpa hardware:
 
 Paket masuk ke Mosquitto, diproses ingestion, dan tampil di dashboard dalam ~1 detik lewat WebSocket. Kirim `-Moisture -999` untuk menguji sensor rusak: paket ditolak, alasannya dicatat di log backend, dan metrik terakhir tidak berubah.
 
+Konfigurasi node IoT (Wokwi atau ESP32 fisik, kredensial, topik MQTT, kalibrasi): [`docs/hardware/SETUP_IOT.md`](docs/hardware/SETUP_IOT.md).
+
 Hentikan backend dan dashboard: `.\scripts\stop-dev.ps1`. Hentikan infrastruktur: `docker compose -f docker/docker-compose.yml down`.
 
 Catatan: halaman `/digital-twin` masih memakai data fallback lokal karena service Digital Twin berada di branch `digittal-twin` dan belum di-merge ke `main`.

@@ -36,6 +36,7 @@ Untuk mencegah benturan kode dengan tim/AI lain:
 3. [`TELEMETRY_PAYLOAD.md`](TELEMETRY_PAYLOAD.md): Spesifikasi paket LoRa ringkas dan adapter ekstraksi gateway.
 4. [`WOKWI_SIMULATION.md`](WOKWI_SIMULATION.md): Petunjuk menjalankan purwarupa virtual testbed Wokwi untuk demonstrasi juri 3 skenario.
 5. [`ARCHITECTURE_IOT.md`](ARCHITECTURE_IOT.md): Arsitektur domain IoT (Lapis 1 & 2), alur data end-to-end, dan titik kontak ke Backend/AI.
+6. [`SETUP_IOT.md`](SETUP_IOT.md): Langkah konfigurasi operasional dari nol — infrastruktur, MQTT, Wokwi, hardware fisik, kalibrasi, verifikasi, troubleshooting.
 
 ### 3.2 Playbook Eksekusi (bagaimana membangunnya)
 
