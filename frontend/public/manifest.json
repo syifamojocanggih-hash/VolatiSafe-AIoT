@@ -1,0 +1,24 @@
+{
+  "name": "VolatiSafe AIoT",
+  "short_name": "VolatiSafe",
+  "description": "Sistem Prediksi Risiko Volatilisasi Amonia untuk Optimasi Jendela Waktu Pemupukan Urea Presisi",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F2F4F7",
+  "theme_color": "#5E9E49",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon.png",
+      "sizes": "107x110 192x192 512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "107x110",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

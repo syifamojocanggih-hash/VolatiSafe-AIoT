@@ -1,0 +1,2 @@
+# Force LF line endings for LightGBM model files
+models/*.txt text eol=lf

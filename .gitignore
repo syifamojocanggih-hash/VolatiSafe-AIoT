@@ -1,2 +1,40 @@
-ai_engine
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+*.db
+*.sqlite3
+.pytest_cache/
+
+# Local secrets & machine-specific env
+backend/.env
+frontend/.env.local
+
+# Data artifacts
+data/
+datasets/*.csv.tmp
+*.log
+
+# Distribution / Model builds
+dist/
+build/
+*.egg-info/
+
+# Node / Frontend
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+
+# IDE & OS
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Dataset besar (tidak masuk repo)
 /data/training_dataset_lamongan.csv
