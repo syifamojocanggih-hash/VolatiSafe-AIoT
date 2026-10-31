@@ -1,0 +1,70 @@
+HW-2.2 - Driver DS18B20 (11-bit, blocking) + klasifikasi suhu
+Tanggal : 26 Okt 2026
+Build   : pio run -e wokwi  (SENSOR_PROBE=1)
+Skenario: scenario_a.yaml (suhu wajar), scenario_fault.yaml (di luar rentang)
+
+Yang dibuktikan:
+- DS18B20 terdeteksi di 1-Wire GPIO4 (bukan 0 device), jadi pull-up 4.7k
+  dan pinMode INPUT_PULLUP sudah benar.
+- Suhu 34.5 C -> status OK, nilai diteruskan apa adanya.
+- Suhu 70.0 C -> status RANGE, nilai TIDAK di-clamp. Menyamarkan nilai rusak
+  jadi angka wajar akan membuat data palsu lolos ke backend.
+- Jalur putus (-127 C -> -999 / DISC) hanya bisa diuji di native test karena
+  Wokwi tidak punya kontrol untuk memutus part; lihat unit_test_native.
+
+--- A. Suhu wajar (scenario_a.yaml) ---
+ets Jul 29 2019 12:21:46
+
+rst:0x1 (POWERON_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)
+configsip: 0, SPIWP:0xee
+clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+mode:DIO, clock div:2
+load:0x3fff0030,len:1156
+load:0x40078000,len:11456
+ho 0 tail 12 room 4
+load:0x40080400,len:2972
+entry 0x400805dc
+
+=== VolatiSafe VS-SIM-001 | FW 1.0.0 ===
+[SIM] build simulasi: transport MQTT, tanpa SX1278
+[SIM] FAST CYCLE: sleep 10s, BUKAN perilaku produksi
+[SIM] SENSOR_PROBE: siklus probing, TANPA TX dan TANPA sleep
+[CAL] NVS kosong. Memakai default compile-time (BELUM TERKALIBRASI).
+[CAL] moist_dry=2800 moist_wet=1350 ph_n=1500.0 ph_s=300.0 from_nvs=0
+[CAL] tersimpan ke NVS
+[CAL] selftest OK: m_dry=2760 m_wet=1310 ph_n=1470.0 ph_s=305.0 from_nvs=1
+[SENS] ADC1 12-bit 11dB, 1-Wire GPIO4, DS18B20 1 device
+[SIM] probe siap, siklus tiap 5 detik
+[SENS] adc m=2496[2496..2496] ph=1271[1271..1271] b=2401 t=34.50C
+[PROBE] m=21.0%(OK) ph=7.85(OK) t=34.50C(OK) b=3.87V(OK)
+[SENS] adc m=2496[2496..2496] ph=1271[1271..1271] b=2401 t=34.50C
+[PROBE] m=21.0%(OK) ph=7.85(OK) t=34.50C(OK) b=3.87V(OK)
+
+--- B. Suhu di luar rentang (scenario_fault.yaml) ---
+
+ets Jul 29 2019 12:21:46
+
+rst:0x1 (POWERON_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)
+configsip: 0, SPIWP:0xee
+clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+mode:DIO, clock div:2
+load:0x3fff0030,len:1156
+load:0x40078000,len:11456
+ho 0 tail 12 room 4
+load:0x40080400,len:2972
+entry 0x400805dc
+
+=== VolatiSafe VS-SIM-001 | FW 1.0.0 ===
+[SIM] build simulasi: transport MQTT, tanpa SX1278
+[SIM] FAST CYCLE: sleep 10s, BUKAN perilaku produksi
+[SIM] SENSOR_PROBE: siklus probing, TANPA TX dan TANPA sleep
+[CAL] NVS kosong. Memakai default compile-time (BELUM TERKALIBRASI).
+[CAL] moist_dry=2800 moist_wet=1350 ph_n=1500.0 ph_s=300.0 from_nvs=0
+[CAL] tersimpan ke NVS
+[CAL] selftest OK: m_dry=2760 m_wet=1310 ph_n=1470.0 ph_s=305.0 from_nvs=1
+[SENS] ADC1 12-bit 11dB, 1-Wire GPIO4, DS18B20 1 device
+[SIM] probe siap, siklus tiap 5 detik
+[SENS] adc m=2496[2496..2496] ph=1271[1271..1271] b=2401 t=70.00C
+[PROBE] m=21.0%(OK) ph=7.85(OK) t=70.00C(RANGE) b=3.87V(OK)
+[SENS] adc m=2496[2496..2496] ph=1271[1271..1271] b=2401 t=70.00C
+[PROBE] m=21.0%(OK) ph=7.85(OK) t=70.00C(RANGE) b=3.87V(OK)

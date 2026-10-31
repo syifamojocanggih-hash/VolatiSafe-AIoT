@@ -63,7 +63,7 @@ Berdasarkan studi literatur dan observasi lapangan pada sektor agritech Indonesi
 
 | Domain | Teknologi | Rasional Pemilihan |
 |---|---|---|
-| **Hardware & Edge** | ESP32 NodeMCU, SX1278 LoRa 433 MHz, DS18B20, Capacitive Moisture v1.2, pH Probe | Biaya BoM rendah (≤ Rp305.000/node), efisiensi deep-sleep (baterai tahan > 90 hari). |
+| **Hardware & Edge** | ESP32-WROOM-32D, Micro SD, DS18B20, Capacitive Moisture v1.2; pH disimulasikan di Wokwi | Biaya BoM rendah (≤ Rp320.000/node), efisiensi deep-sleep (baterai tahan > 90 hari). |
 | **Simulasi TKT 3** | Wokwi Web / CLI, Mosquitto MQTT, dataset historis BMKG | Menguji firmware asli C++ dan aliran telemetri tanpa hardware fisik. |
 | **Digital Twin** | Python 3.11, NumPy, SimPy, Neraca Air FAO-56 | Model virtual tanah kontinu untuk imputasi data saat terjadi *sensor dropout*. |
 | **AI / ML Layer** | Physics-Informed ML (PIML), LightGBM Regressor, TreeSHAP | Akurasi tinggi pada dataset awal berukuran sedang, latensi inferensi < 50 ms, explainable untuk petani. |

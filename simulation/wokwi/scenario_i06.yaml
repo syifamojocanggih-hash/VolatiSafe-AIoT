@@ -1,0 +1,23 @@
+name: 'I-06 - DS18B20 terputus'
+version: 1
+author: 'VolatiSafe AIoT - Hafiiz'
+
+# Mencoba memaksa DS18B20 ke -127 C (disconnected). Kalau part Wokwi menolak
+# nilai ini, skenario akan timeout dan keterbatasan dicatat di evidence.
+# Payload yang diharapkan: t=-999 (DISC), bukan nilai palsu.
+
+steps:
+  - set-control:
+      part-id: pot_moist
+      name: position
+      value: 0.609523
+  - set-control:
+      part-id: pot_ph
+      name: position
+      value: 0.310378
+  - set-control:
+      part-id: ds18b20
+      name: temperature
+      value: -127.0
+
+  - wait-serial: '[SENS] m=21.0%(OK) ph=7.85(OK) t=-999.00C(DISC) b=3.87V(N/A)'

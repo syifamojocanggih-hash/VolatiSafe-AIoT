@@ -1,0 +1,29 @@
+name: 'I-03 - lima paket telemetri berturut-turut'
+version: 1
+author: 'VolatiSafe AIoT - Hafiiz'
+
+# Bukti I-03: lima publish berturut-turut dengan nilai Skenario A.
+# Satu siklus = sampling + TX + tidur 10 detik (SIM_FAST_CYCLE), jadi
+# jalankan dengan --timeout minimal 180000 ms.
+# Untuk broker lokal, skenario ini dipakai lewat VS Code Private Gateway.
+# Untuk broker publik, build dulu dengan override SIM_MQTT_HOST.
+
+steps:
+  - set-control:
+      part-id: pot_moist
+      name: position
+      value: 0.609523      # ADC 2496 -> m 21.0 %
+  - set-control:
+      part-id: pot_ph
+      name: position
+      value: 0.310378      # ADC 1271 -> ph 7.85
+  - set-control:
+      part-id: ds18b20
+      name: temperature
+      value: 34.5
+
+  - wait-serial: '[TX] KIRIM ok=1 attempts=1'
+  - wait-serial: '[TX] KIRIM ok=1 attempts=1'
+  - wait-serial: '[TX] KIRIM ok=1 attempts=1'
+  - wait-serial: '[TX] KIRIM ok=1 attempts=1'
+  - wait-serial: '[TX] KIRIM ok=1 attempts=1'

@@ -11,9 +11,10 @@ Sesuai regulasi kompetisi *DeepTech for FoodTech Indonesia 2026*, insentif penga
 │                       ALUR VIRTUAL TESTBED WOKWI                            │
 │                                                                             │
 │   [ Wokwi ESP32 Virtual ]                                                   │
-│   Potensiometer Kelembaban (GPIO34)                                         │
-│   Sensor Suhu DS18B20 (GPIO4)                                               │
-│   Potensiometer pH (GPIO32)                                                 │
+│   Potensiometer Kelembaban (GPIO34)   ← mewakili sensor fisik               │
+│   Sensor Suhu DS18B20 (GPIO4)         ← mewakili sensor fisik               │
+│   Potensiometer pH (GPIO32)           ← SIMULASI (hardware pH belum ada)    │
+│   Micro SD (SPI: CS5/SCK18/MISO19/MOSI23) ← mewakili modul fisik            │
 │            │                                                                │
 │            ▼ (Virtual WiFi / Gateway Loopback)                              │
 │   [ Mosquitto MQTT Broker ] (localhost:1883)                                │
@@ -28,9 +29,9 @@ Sesuai regulasi kompetisi *DeepTech for FoodTech Indonesia 2026*, insentif penga
 
 ## 2. Struktur File Simulasi (`simulation/wokwi/`)
 
-1. **`diagram.json`**: Menentukan penempatan komponen virtual (ESP32, sensor suhu DS18B20, potensiometer geser simulasi kelembaban & pH, resistor pull-up 4.7kΩ).
+1. **`diagram.json`**: Menentukan penempatan komponen virtual: ESP32, DS18B20, potensiometer kelembaban, potensiometer pH (simulasi), dan modul micro SD. Tidak ada resistor pull-up karena hardware DS18B20 memakai pull-up internal.
 2. **`wokwi.toml`**: Konfigurasi environment simulator (lokasi binary firmware ELF hasil build).
-3. **`main.cpp`**: Kode firmware yang sama persis dengan yang akan di-flash ke hardware fisik.
+3. **`main.cpp`**: Kode firmware yang sama dengan yang akan di-flash ke hardware fisik, kecuali flag `PH_ONBOARD` (Wokwi menghitung pH dari potensiometer; fisik mengirim placeholder karena modul pH belum ada).
 
 ---
 

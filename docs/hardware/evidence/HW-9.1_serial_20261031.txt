@@ -1,0 +1,33 @@
+   0.00s ets Jul 29 2019 12:21:46
+   0.00s 
+   0.00s rst:0x1 (POWERON_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)
+   0.00s configsip: 0, SPIWP:0xee
+   0.01s clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+   0.01s mode:DIO, clock div:2
+   0.01s load:0x3fff0030,len:4640
+   0.01s load:0x40078000,len:15632
+   0.01s load:0x40080400,len:3164
+   0.01s entry 0x4008059c
+   0.46s 
+   0.46s === VolatiSafe VS-A1-003 | FW 1.0.0 ===
+   0.47s [PWR] wake: power-on/reset
+   0.47s [CAL] NVS kosong. Memakai default compile-time (BELUM TERKALIBRASI).
+   0.48s [CAL] moist_dry=2800 moist_wet=1350 ph_n=1500.0 ph_s=300.0 from_nvs=0
+   0.54s [SENS] ADC1 12-bit 11dB, 1-Wire GPIO4, DS18B20 1 device
+   1.47s [SD] tidak ada kartu, store-and-forward nonaktif
+   1.47s [PWR] sensor ON
+   2.20s [SENS] adc m=3165[3162..3170] ph=N/A b=0 t=23.62C
+   2.20s [PWR] sensor OFF
+   2.21s [SENS] m=-25.2%(RANGE) ph=7.00(N/A) t=23.62C(OK) b=3.87V(N/A)
+   2.31s [TX] WiFi ke "GANTI_SSID"
+  12.31s [TX] WiFi timeout 10000 ms, TX dilewati
+  22.31s [TX] NTP gagal: jam belum valid, paket akan ditolak backend
+  22.32s [TX] peringatan: ts belum valid, paket akan ditolak backend
+  22.32s [TX] payload 63 byte: {"n":"VS-A1-003","ts":21,"m":-25.2,"t":23.6,"ph":7.00,"b":3.87}
+  22.33s [TX] init gagal, retry tetap dicoba
+  22.33s [TX] connect gagal, state=-2
+  24.33s [TX] connect gagal, state=-2
+  26.33s [TX] connect gagal, state=-2
+  26.33s [TX] GAGAL ok=0 attempts=3
+  26.34s [PWR] sampling 729 ms, siklus aktif 24871 ms
+  26.34s [PWR] tidur 900 detik

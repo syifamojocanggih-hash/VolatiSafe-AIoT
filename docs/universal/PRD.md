@@ -164,16 +164,17 @@ Pada fase seleksi proposal (batas 31 Okt 2026), sistem **100% dijalankan dalam l
 
 | # | Komponen | Spesifikasi | Qty | Harga Satuan | Interface | Peran |
 |---|---|---|---|---|---|---|
-| 1 | **MCU** | ESP32 NodeMCU V1 (30-pin, CP2102) | 1 | Rp55.000 | WiFi/BLE/SPI/I2C/ADC | Akuisisi, edge preprocessing, kontrol LoRa |
+| 1 | **MCU** | ESP32-WROOM-32D | 1 | Rp55.000 | WiFi/BLE/SPI/I2C/ADC | Akuisisi, edge preprocessing, kontrol LoRa |
 | 2 | **Sensor Kelembaban Tanah** | Capacitive Soil Moisture v1.2 (anti-korosi) | 1 | Rp15.000 | Analog → ADC GPIO34 | Input utama model (kelembaban = faktor #1 penekan volatilisasi) |
-| 3 | **Sensor Suhu Tanah** | DS18B20 Stainless Waterproof Probe | 1 | Rp18.000 | 1-Wire → GPIO4 + 4.7kΩ pullup | Input utama (suhu = pemicu aktivitas urease) |
-| 4 | **Sensor pH Tanah** | Analog Soil pH Probe + Modul (pH 0–14) | 1 | Rp62.000 | Analog → ADC GPIO32 | Modifier risiko (pH > 7,5 mempercepat hidrolisis urea) |
+| 3 | **Sensor Suhu Tanah** | DS18B20 Stainless Waterproof Probe | 1 | Rp18.000 | 1-Wire → GPIO4 (pull-up internal) | Input utama (suhu = pemicu aktivitas urease) |
+| 4 | **Sensor pH Tanah** | Analog Soil pH Probe + Modul (pH 0–14) | 1 | Rp62.000 | Analog → ADC GPIO32 | Modifier risiko (pH > 7,5 mempercepat hidrolisis urea). **Belum ada; disimulasikan di Wokwi. Build fisik mengirim placeholder 7,00 dengan status N/A.** |
 | 5 | **Modul LoRa** | SX1278 Ra-02 433 MHz + Antena Spring | 1 | Rp45.000 | SPI (SCK18/MISO19/MOSI23/CS5/RST14/DIO2) | Telemetri jarak jauh tanpa internet |
 | 6 | **Manajemen Daya** | TP4056 + Proteksi DW01 + Baterai 18650 2600mAh | 1 | Rp45.000 | VCC / 3.7V | Catu daya mandiri |
 | 7 | **Panel Surya** | Mini 5V 1W Polycrystalline + Dioda | 1 | Rp25.000 | Charger input TP4056 | Recharge otomatis |
 | 8 | **Catu Sensor** | Modul MOSFET IRLZ44N / Relay 5V 1-Channel | 1 | Rp10.000 | GPIO gate | Memutus VCC sensor saat sleep (anti-elektrolisis probe) |
 | 9 | **Enclosure** | Box Junction PVC IP65 + Pipa PVC ¾" (probe housing) | 1 | Rp30.000 | — | Tahan hujan & radiasi UV |
-| | **TOTAL per node** | | | **± Rp305.000** | | Target optimasi: ≤ Rp250.000 (10 node = Rp3,05 jt, sesuai plafon Rp3 jt) |
+| 10 | **Modul Micro SD** | Modul SPI 3,3 V + kartu micro SD | 1 | Rp15.000 | SPI (CS5/SCK18/MISO19/MOSI23) | Buffer store-and-forward saat pengiriman gagal |
+| | **TOTAL per node** | | | **± Rp320.000** | | Target optimasi: ≤ Rp250.000 (10 node = Rp3,05 jt, sesuai plafon Rp3 jt) |
 
 > **Catatan biaya:** Untuk 10 node, komponen dikomunikasikan sebagai *starter kit* dengan potensi penurunan harga melalui pembelian batch (estimasi −25% pada volume 10+). Plafon dana purwarupa Rp3.000.000 dapat menutup 8–10 node.
 
@@ -182,9 +183,13 @@ Pada fase seleksi proposal (batas 31 Okt 2026), sistem **100% dijalankan dalam l
 | Sensor | Pin ESP32 | Tipe | Catatan |
 |---|---|---|---|
 | Capacitive Moisture SIG | GPIO 34 | ADC1_CH6 (input only) | Gunakan ADC1, bukan ADC2 (ADC2 konflik dengan WiFi) |
-| Soil pH SIG | GPIO 32 | ADC1_CH4 | Kalibrasi 2-titik buffer pH 4.01 & 6.86 |
-| DS18B20 DATA | GPIO 4 | 1-Wire digital | Wajib resistor pull-up 4.7kΩ ke 3.3V |
-| MOSFET Sensor Gate | GPIO 25 | Digital output | HIGH = sensor menyala, LOW = sleep |
+| Soil pH SIG | GPIO 32 | ADC1_CH4 | Simulasi Wokwi (potensiometer); kalibrasi 2-titik saat hardware ada |
+| DS18B20 DATA | GPIO 4 | 1-Wire digital | **Tanpa resistor eksternal**; pull-up internal via `INPUT_PULLUP` |
+| Micro SD CS | GPIO 5 | SPI CS | Buffer store-and-forward; bentrok dengan CS LoRa, pindahkan CS LoRa nanti |
+| Micro SD SCK | GPIO 18 | SPI CLK | — |
+| Micro SD MISO | GPIO 19 | SPI MISO | — |
+| Micro SD MOSI | GPIO 23 | SPI MOSI | — |
+| MOSFET Sensor Gate | GPIO 25 | Digital output | HIGH = sensor menyala, LOW = sleep (belum dirakit) |
 | LoRa SCK | GPIO 18 | SPI CLK | — |
 | LoRa MISO | GPIO 19 | SPI MISO | — |
 | LoRa MOSI | GPIO 23 | SPI MOSI | — |

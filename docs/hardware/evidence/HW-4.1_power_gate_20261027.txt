@@ -1,0 +1,43 @@
+# HW-4.1 - Power gate GPIO25
+
+Tanggal : 27 Okt 2026
+Build   : pio run -e wokwi
+Uji     : wokwi-cli . --timeout 180000 --scenario scenario_fault_range.yaml
+Sumber  : docs/hardware/evidence/HW-4.3_scenario_fault_range_20261027.txt
+
+## Yang dibuktikan
+
+1. `power_begin()` menarik GPIO25 ke LOW sebelum inisialisasi kalibrasi/sensor.
+2. Sensor hanya menyala selama sampling: `[PWR] sensor ON` -> `[PWR] sensor OFF`
+   sebelum TX.
+3. Tidak ada TX yang dimulai saat sensor masih ON.
+
+Urutan di log:
+
+```
+[PWR] sensor ON
+[SENS] adc ...
+[PWR] sensor OFF
+[SENS] m=... (nilai hasil konversi)
+[TX] payload ...
+[PWR] tidur 10 detik
+```
+
+## Kutipan log (siklus pertama)
+
+```
+=== VolatiSafe VS-SIM-001 | FW 1.0.0 ===
+[PWR] wake: power-on/reset
+[CAL] NVS kosong. Memakai default compile-time (BELUM TERKALIBRASI).
+[SENS] ADC1 12-bit 11dB, 1-Wire GPIO4, DS18B20 1 device
+[PWR] sensor ON
+[SENS] adc m=0[0..0] ph=1271[1271..1271] b=2401 t=34.50C
+[PWR] sensor OFF
+[SENS] m=193.1%(RANGE) ph=7.61(OK) t=34.50C(OK) b=3.87V(OK)
+[TX] payload 72 byte: {"n":"VS-SIM-001","ts":1793112082,"m":193.1,"t":34.5,"ph":7.61,"b":3.87}
+```
+
+## Batas bukti
+
+Urutan dibuktikan dari log Serial simulator, bukan dari pengukuran arus.
+Arus gate OFF (< 1 uA) dan perilaku MOSFET nyata baru diukur di HW-9.1 (F-05).

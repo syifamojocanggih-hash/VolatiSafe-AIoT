@@ -1,0 +1,80 @@
+Verbosity level can be increased via `-v, -vv, or -vvv` option
+Collected 4 tests
+
+Processing test_calibration_core in native environment
+--------------------------------------------------------------------------------
+Building...
+Testing...
+test\test_calibration_core\test_main.cpp:79: test_defaults_are_valid	[PASSED]
+test\test_calibration_core\test_main.cpp:80: test_rejects_inverted_dry_wet	[PASSED]
+test\test_calibration_core\test_main.cpp:81: test_rejects_equal_dry_wet	[PASSED]
+test\test_calibration_core\test_main.cpp:82: test_rejects_zero_wet_point	[PASSED]
+test\test_calibration_core\test_main.cpp:83: test_rejects_non_positive_slope	[PASSED]
+test\test_calibration_core\test_main.cpp:84: test_rejects_nan_slope	[PASSED]
+test\test_calibration_core\test_main.cpp:85: test_rejects_neutral_adc_outside_adc_range	[PASSED]
+----------- native:test_calibration_core [PASSED] Took 2.32 seconds -----------
+
+Processing test_payload in native environment
+--------------------------------------------------------------------------------
+Building...
+Testing...
+test\test_payload\test_main.cpp:89: test_payload_matches_contract_example	[PASSED]
+test\test_payload\test_main.cpp:90: test_payload_worst_case_fits_buffer	[PASSED]
+test\test_payload\test_main.cpp:91: test_payload_uses_one_decimal_for_moisture_and_temp	[PASSED]
+test\test_payload\test_main.cpp:92: test_payload_encodes_temp_error_flag	[PASSED]
+test\test_payload\test_main.cpp:93: test_payload_bounds_ph_and_battery	[PASSED]
+test\test_payload\test_main.cpp:94: test_payload_rejects_short_buffer	[PASSED]
+---------------- native:test_payload [PASSED] Took 2.21 seconds ----------------
+
+Processing test_sensors_core in native environment
+--------------------------------------------------------------------------------
+Building...
+Testing...
+test\test_sensors_core\test_main.cpp:263: test_median_discards_single_spike	[PASSED]
+test\test_sensors_core\test_main.cpp:264: test_median_discards_two_outliers	[PASSED]
+test\test_sensors_core\test_main.cpp:265: test_median_handles_degenerate_counts	[PASSED]
+test\test_sensors_core\test_main.cpp:266: test_moisture_range_edges	[PASSED]
+test\test_sensors_core\test_main.cpp:267: test_moisture_out_of_contract_is_not_clamped	[PASSED]
+test\test_sensors_core\test_main.cpp:268: test_moisture_midpoint	[PASSED]
+test\test_sensors_core\test_main.cpp:269: test_moisture_rejects_invalid_calibration	[PASSED]
+test\test_sensors_core\test_main.cpp:270: test_ph_humidity_compensation	[PASSED]
+test\test_sensors_core\test_main.cpp:271: test_ph_out_of_contract_is_not_clamped	[PASSED]
+test\test_sensors_core\test_main.cpp:272: test_ph_invalid_slope_returns_sentinel	[PASSED]
+test\test_sensors_core\test_main.cpp:273: test_ph_compensation_clamps_input_not_output	[PASSED]
+test\test_sensors_core\test_main.cpp:274: test_battery_conversion	[PASSED]
+test\test_sensors_core\test_main.cpp:275: test_unstable_threshold	[PASSED]
+test\test_sensors_core\test_main.cpp:276: test_temp_disconnected_becomes_sentinel	[PASSED]
+test\test_sensors_core\test_main.cpp:277: test_temp_in_range_is_ok	[PASSED]
+test\test_sensors_core\test_main.cpp:278: test_temp_out_of_range_keeps_raw_value	[PASSED]
+test\test_sensors_core\test_main.cpp:279: test_compose_frame_scenario_a	[PASSED]
+test\test_sensors_core\test_main.cpp:280: test_compose_frame_scenario_b	[PASSED]
+test\test_sensors_core\test_main.cpp:281: test_compose_frame_flags_only_unstable_channel	[PASSED]
+test\test_sensors_core\test_main.cpp:282: test_compose_frame_flags_short_and_disconnected_moisture	[PASSED]
+test\test_sensors_core\test_main.cpp:283: test_compose_frame_invalid_moisture_calibration	[PASSED]
+test\test_sensors_core\test_main.cpp:284: test_compose_frame_invalid_ph_slope	[PASSED]
+test\test_sensors_core\test_main.cpp:285: test_compose_frame_flags_battery_out_of_range	[PASSED]
+test\test_sensors_core\test_main.cpp:286: test_compose_frame_out_of_range_beats_unstable	[PASSED]
+------------- native:test_sensors_core [PASSED] Took 1.95 seconds -------------
+
+Processing test_transport_core in native environment
+--------------------------------------------------------------------------------
+Building...
+Testing...
+test\test_transport_core\test_main.cpp:120: test_retry_gives_up_after_max_attempts	[PASSED]
+test\test_transport_core\test_main.cpp:121: test_retry_waits_between_attempts_only	[PASSED]
+test\test_transport_core\test_main.cpp:122: test_retry_stops_on_first_success	[PASSED]
+test\test_transport_core\test_main.cpp:123: test_retry_succeeds_first_try_without_gap	[PASSED]
+test\test_transport_core\test_main.cpp:124: test_retry_respects_caller_bound	[PASSED]
+test\test_transport_core\test_main.cpp:125: test_retry_zero_attempts_sends_nothing	[PASSED]
+test\test_transport_core\test_main.cpp:126: test_retry_null_attempt_is_rejected	[PASSED]
+test\test_transport_core\test_main.cpp:127: test_retry_null_gap_is_allowed	[PASSED]
+------------ native:test_transport_core [PASSED] Took 2.00 seconds ------------
+
+=================================== SUMMARY ===================================
+Environment    Test                   Status    Duration
+-------------  ---------------------  --------  ------------
+native         test_calibration_core  PASSED    00:00:02.319
+native         test_payload           PASSED    00:00:02.208
+native         test_sensors_core      PASSED    00:00:01.947
+native         test_transport_core    PASSED    00:00:01.997
+================= 45 test cases: 45 succeeded in 00:00:08.471 =================

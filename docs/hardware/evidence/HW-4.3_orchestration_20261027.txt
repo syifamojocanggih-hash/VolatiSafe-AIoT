@@ -1,0 +1,67 @@
+# HW-4.3 - Orkestrasi siklus penuh
+
+Tanggal : 27 Okt 2026
+Build   : pio run -e wokwi
+Uji     : scenario_fault_range, scenario_cycle, scenario_a, scenario_b,
+          scenario_fault, scenario_mqtt_down
+Log     : docs/hardware/evidence/HW-4.3_scenario_*_20261027.txt
+
+## Urutan yang dijalankan main.cpp
+
+```
+power_begin()              GPIO25 LOW + cetak wake reason
+calibration_begin()
+sensors_begin()
+power_sensorOn()           HIGH + 200 ms warmup
+sensors_sampleAll()
+power_sensorOff()          LOW, sebelum TX
+transport_init()
+transport_syncClock()      hanya build MQTT
+payload_encode()
+transport_send()
+transport_shutdown()
+power_enterDeepSleep()
+```
+
+Tidak ada logika sensor, kalibrasi, atau radio di `main.cpp`; semuanya lewat
+modul. `SENSOR_PROBE` dan `CAL_NVS_SELFTEST` sudah dihapus dari `main.cpp` dan
+`platformio.ini` sesuai catatan DEC-IOT-17.
+
+## Hasil skenario
+
+| Skenario | Asersi | Hasil |
+|---|---|---|
+| `scenario_cycle.yaml` | sensor ON -> OFF -> sampling -> payload -> tidur -> bangun | lihat log siklus |
+| `scenario_a.yaml` | `[SENS] m=21.0%(OK) ph=7.85(OK) t=34.50C(OK) b=3.87V(OK)` | lulus |
+| `scenario_b.yaml` | `[SENS] m=42.0%(OK) ph=6.80(OK) t=26.00C(OK) b=3.90V(OK)` | lulus |
+| `scenario_fault.yaml` | DS18B20 70 C -> `RANGE`, nilai tidak di-clamp | lulus |
+| `scenario_fault_range.yaml` | short/putus -> `RANGE`, bukan 0/100 | lulus |
+| `scenario_mqtt_down.yaml` | `ok=0 attempts=3`, siklus berikutnya tetap jalan | lulus |
+
+## Kutipan log siklus (fault_range, siklus 1 dan 2)
+
+```
+[SIM] FAST CYCLE: sleep 10s, BUKAN perilaku produksi
+[PWR] wake: power-on/reset
+[SENS] ADC1 12-bit 11dB, 1-Wire GPIO4, DS18B20 1 device
+[PWR] sensor ON
+[SENS] adc m=0[0..0] ph=1271[1271..1271] b=2401 t=34.50C
+[PWR] sensor OFF
+[SENS] m=193.1%(RANGE) ph=7.61(OK) t=34.50C(OK) b=3.87V(OK)
+[TX] payload 72 byte: {"n":"VS-SIM-001","ts":1793112082,"m":193.1,"t":34.5,"ph":7.61,"b":3.87}
+[TX] GAGAL ok=0 attempts=3
+[PWR] sampling 1013 ms, siklus aktif 13504 ms
+[PWR] tidur 10 detik
+
+rst:0xc (SW_CPU_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)
+[PWR] wake: reset (SIM sleep)
+[PWR] sensor ON
+[SENS] adc m=4095[4095..4095] ph=1271[1271..1271] b=2401 t=34.50C
+[PWR] sensor OFF
+```
+
+## Catatan
+
+`ts` diambil setelah `transport_syncClock()` supaya tidak 0. Ini menyimpang dari
+urutan `04_FIRMWARE_CORE.md` 10 yang menaruh encode sebelum init transport;
+alasan dan konsekuensinya dicatat di DEC-IOT-20.

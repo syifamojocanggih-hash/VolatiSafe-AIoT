@@ -1,0 +1,23 @@
+name: 'Skenario B — Hujan Sore (Safe Window)'
+version: 1
+author: 'VolatiSafe AIoT — Hafiiz'
+
+# Nilai target diambil dari docs/hardware/playbook/05_WOKWI_SIMULASI.md 5.6.
+# position = ADC / 4095, lihat catatan di scenario_a.yaml.
+
+steps:
+  - set-control:
+      part-id: pot_moist
+      name: position
+      value: 0.535043      # ADC 2191 -> m 42.0 %
+  - set-control:
+      part-id: pot_ph
+      name: position
+      value: 0.382662      # ADC 1567 -> ph 6.80
+  - set-control:
+      part-id: ds18b20
+      name: temperature
+      value: 26.0
+
+  - delay: 2s
+  - wait-serial: '[SENS] m=42.0%(OK) ph=6.80(OK) t=26.00C(OK) b=3.87V(N/A)'

@@ -1,0 +1,23 @@
+name: 'E01 - Terik ekstrem, satu paket telemetri'
+version: 1
+author: 'VolatiSafe AIoT - Hafiiz'
+
+# Bukti sisi IoT untuk E-01. Dashboard/AVRI/alert tidak diuji di sini karena
+# backend belum terhubung; lihat HW-7.3 evidence inventory.
+
+steps:
+  - set-control:
+      part-id: pot_moist
+      name: position
+      value: 0.609523      # ADC 2496 -> m 21.0 %
+  - set-control:
+      part-id: pot_ph
+      name: position
+      value: 0.310378      # ADC 1271 -> ph 7.85
+  - set-control:
+      part-id: ds18b20
+      name: temperature
+      value: 34.5
+
+  - wait-serial: '[SENS] m=21.0%(OK) ph=7.85(OK) t=34.50C(OK) b=3.87V(N/A)'
+  - wait-serial: '[TX] KIRIM ok=1 attempts=1'

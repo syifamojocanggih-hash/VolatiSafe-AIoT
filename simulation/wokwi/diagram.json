@@ -1,0 +1,32 @@
+{
+  "version": 1,
+  "author": "VolatiSafe AIoT — Hafiiz",
+  "editor": "wokwi",
+  "parts": [
+    { "type": "board-esp32-devkit-c-v4", "id": "esp", "top": 0, "left": 0, "attrs": {} },
+    { "type": "wokwi-potentiometer", "id": "pot_moist", "top": -140, "left": -120, "attrs": { "value": "624" } },
+    { "type": "wokwi-potentiometer", "id": "pot_ph", "top": -140, "left": -40, "attrs": { "value": "318" } },
+    { "type": "wokwi-ds18b20", "id": "ds18b20", "top": -140, "left": 40, "attrs": { "temperature": "34.5" } },
+    { "type": "wokwi-microsd-card", "id": "sd", "top": -140, "left": 160, "attrs": {} }
+  ],
+  "connections": [
+    [ "esp:3V3", "pot_moist:VCC", "red", [] ],
+    [ "esp:GND.1", "pot_moist:GND", "black", [] ],
+    [ "pot_moist:SIG", "esp:34", "green", [] ],
+
+    [ "esp:3V3", "pot_ph:VCC", "red", [] ],
+    [ "esp:GND.1", "pot_ph:GND", "black", [] ],
+    [ "pot_ph:SIG", "esp:32", "green", [] ],
+
+    [ "esp:3V3", "ds18b20:VCC", "red", [] ],
+    [ "esp:GND.1", "ds18b20:GND", "black", [] ],
+    [ "esp:4", "ds18b20:DQ", "blue", [] ],
+
+    [ "esp:3V3", "sd:VCC", "red", [] ],
+    [ "esp:GND.1", "sd:GND", "black", [] ],
+    [ "esp:5", "sd:CS", "orange", [] ],
+    [ "esp:18", "sd:SCK", "purple", [] ],
+    [ "esp:19", "sd:DO", "blue", [] ],
+    [ "esp:23", "sd:DI", "green", [] ]
+  ]
+}

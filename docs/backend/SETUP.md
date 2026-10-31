@@ -6,7 +6,7 @@
 
 - **Python:** 3.11 atau lebih baru
 - **Docker & Docker Compose:** Versi 24.x+ (untuk menjalankan PostgreSQL + TimescaleDB dan Mosquitto)
-- **NodeMCU / Serial Driver (opsional):** Driver CP2102 jika menghubungkan hardware fisik langsung via USB.
+- **ESP32-WROOM-32D / Serial Driver (opsional):** Driver USB-UART (CP2102 atau CH340, tergantung board) jika menghubungkan hardware fisik langsung via USB.
 
 ---
 
