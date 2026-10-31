@@ -1,4 +1,3 @@
-import os
 import sys
 import math
 import logging
@@ -15,6 +14,7 @@ from app.schemas.simulation import (
     ModelMetaDTO
 )
 from app.schemas.fields import ShapExplanationDTO
+from app.core.config import settings
 
 logger = logging.getLogger("volatisafe.ai_service")
 
@@ -73,8 +73,9 @@ class AIService:
 
     @classmethod
     def predict_avri(cls, req: WhatIfRequestDTO) -> PredictRiskResponseDTO:
-        mock_env = os.getenv("MOCK_AI_PREDICTOR", "false").lower()
-        use_real_engine = mock_env not in ["true", "1", "yes"]
+        # MOCK_AI_PREDICTOR dibaca dari Settings, bukan os.getenv, karena .env
+        # dimuat pydantic-settings dan tidak selalu masuk ke environment proses.
+        use_real_engine = not settings.MOCK_AI_PREDICTOR
 
         if use_real_engine:
             try:

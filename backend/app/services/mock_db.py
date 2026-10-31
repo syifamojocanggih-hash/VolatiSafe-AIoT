@@ -511,32 +511,58 @@ class MockDB:
             windows=windows
         )
 
+    def ensure_node(
+        self,
+        node_id: str,
+        field_id: str = "BLOK-A",
+        firmware_ver: str = "1.0.0",
+    ) -> NodeDTO:
+        """Daftarkan node yang belum dikenal saat paket telemetri pertama tiba."""
+        node = self._nodes.get(node_id)
+        if node is None:
+            now_iso = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+            node = NodeDTO(
+                node_id=node_id,
+                field_id=field_id,
+                firmware_ver=firmware_ver,
+                last_seen=now_iso,
+                status="online",
+                transmission_status="online",
+            )
+            self._nodes[node_id] = node
+        return node
+
     def record_telemetry(self, node_id: str, point: TelemetryPointDTO):
-        if node_id not in self._telemetry_series:
-            self._telemetry_series[node_id] = self._generate_hourly_24h_telemetry()
-        
-        # Keep 24-hour hourly structure clean: update matching hour slot
+        series = self._telemetry_series.setdefault(node_id, [])
+
+        # Titik baru selalu masuk sebagai data terbaru. Riwayat mock hanya dipakai
+        # sebagai latar grafik, jadi jangan sampai menimpa titik hasil pembacaan sensor.
+        series.append(point)
         try:
-            pt_dt = datetime.fromisoformat(point.timestamp.replace("Z", "+00:00"))
-            hour = pt_dt.hour
-            updated = False
-            for i, p in enumerate(self._telemetry_series[node_id]):
-                p_dt = datetime.fromisoformat(p.timestamp.replace("Z", "+00:00"))
-                if p_dt.hour == hour:
-                    self._telemetry_series[node_id][i] = point
-                    updated = True
-                    break
-            if not updated and len(self._telemetry_series[node_id]) < 24:
-                self._telemetry_series[node_id].append(point)
+            series.sort(key=lambda p: p.timestamp)
         except Exception:
             pass
+        if len(series) > 24:
+            del series[:-24]
 
-        # Update node status
-        if node_id in self._nodes:
-            self._nodes[node_id].last_seen = point.timestamp
-            self._nodes[node_id].battery_v = point.battery_voltage
-            pct = int(max(0, min(100, (point.battery_voltage - 3.0) / (4.2 - 3.0) * 100)))
-            self._nodes[node_id].battery_pct = pct
+        node = self._nodes.get(node_id)
+        if node is not None:
+            node.last_seen = point.timestamp
+            node.battery_v = point.battery_voltage
+            node.battery_pct = int(
+                max(0, min(100, (point.battery_voltage - 3.0) / (4.2 - 3.0) * 100))
+            )
+            node.moisture_pct = point.moisture_pct
+            node.soil_temp_c = point.soil_temp_c
+            node.ph = point.ph
+            node.status = "online"
+            node.transmission_status = "online"
+            try:
+                node.timestamp_epoch = int(
+                    datetime.fromisoformat(point.timestamp.replace("Z", "+00:00")).timestamp()
+                )
+            except ValueError:
+                pass
 
     def save_crop_cycle(self, cycle: CropCycleResponseDTO):
         self._crop_cycles[cycle.cycle_id] = cycle

@@ -22,6 +22,10 @@ def start_mqtt_worker():
         client.subscribe(settings.MQTT_TELEMETRY_TOPIC)
         logger.info(f"Subscribed to telemetry topic: {settings.MQTT_TELEMETRY_TOPIC}")
 
+    def on_disconnect(client, userdata, flags, rc, properties=None):
+        if rc != 0:
+            logger.warning(f"MQTT broker terputus (rc={rc}); mencoba menyambung ulang.")
+
     def on_message(client, userdata, msg):
         try:
             raw_text = msg.payload.decode("utf-8")
@@ -32,7 +36,7 @@ def start_mqtt_worker():
             if res:
                 from app.routers.websocket import ws_manager
                 t_data = res.get("telemetry", {})
-                p_data = res.get("prediction", {})
+                p_data = res.get("prediction") or {}
                 ws_payload = {
                     "node_id": res.get("node_id"),
                     "field_id": res.get("field_id", "BLOK-A"),
@@ -67,7 +71,9 @@ def start_mqtt_worker():
             callback_api_version=mqtt.CallbackAPIVersion.VERSION2
         )
         client.on_connect = on_connect
+        client.on_disconnect = on_disconnect
         client.on_message = on_message
+        client.reconnect_delay_set(min_delay=1, max_delay=15)
         client.connect(settings.MQTT_BROKER_HOST, settings.MQTT_BROKER_PORT, keepalive=60)
         client.loop_start()
         logger.info("Background MQTT consumer thread started successfully.")

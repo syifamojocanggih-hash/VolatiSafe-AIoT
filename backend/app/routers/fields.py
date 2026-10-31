@@ -37,7 +37,13 @@ def get_field_current_status(field_id: str, session: Session = Depends(get_db)):
 
         if field_rec and state_rec:
             # Query primary node for battery
-            node_rec = session.query(NodeModel).filter(NodeModel.field_id == field_id).first()
+            # Node dengan laporan terbaru mewakili kondisi petak saat ini.
+            node_rec = (
+                session.query(NodeModel)
+                .filter(NodeModel.field_id == field_id)
+                .order_by(NodeModel.last_seen.desc())
+                .first()
+            )
             battery_pct = int(max(0, min(100, (float(node_rec.battery_v or 3.0) - 3.0) / (4.2 - 3.0) * 100))) if node_rec else 84
 
             # Query latest farmer action
