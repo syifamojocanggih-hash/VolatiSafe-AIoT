@@ -16,12 +16,8 @@ steps:
       name: position
       value: 0.310378
   - set-control:
-      part-id: pot_batt
-      name: position
-      value: 0.586325
-  - set-control:
       part-id: ds18b20
       name: temperature
       value: -127.0
 
-  - wait-serial: '[SENS] m=21.0%(OK) ph=7.85(OK) t=-999.00C(DISC) b=3.87V(OK)'
+  - wait-serial: '[SENS] m=21.0%(OK) ph=7.85(OK) t=-999.00C(DISC) b=3.87V(N/A)'

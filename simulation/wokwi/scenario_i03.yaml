@@ -18,10 +18,6 @@ steps:
       name: position
       value: 0.310378      # ADC 1271 -> ph 7.85
   - set-control:
-      part-id: pot_batt
-      name: position
-      value: 0.586325      # ADC 2401 -> b 3.87 V
-  - set-control:
       part-id: ds18b20
       name: temperature
       value: 34.5

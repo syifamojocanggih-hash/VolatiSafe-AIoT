@@ -20,10 +20,6 @@ steps:
       name: position
       value: 0.310378
   - set-control:
-      part-id: pot_batt
-      name: position
-      value: 0.586325
-  - set-control:
       part-id: ds18b20
       name: temperature
       value: 34.5
@@ -32,4 +28,4 @@ steps:
   - wait-serial: '[TX] GAGAL ok=0 attempts=3'
 
   # Siklus berikutnya harus tetap berjalan: node tidak berhenti di kegagalan.
-  - wait-serial: '[SENS] m=21.0%(OK) ph=7.85(OK) t=34.50C(OK) b=3.87V(OK)'
+  - wait-serial: '[SENS] m=21.0%(OK) ph=7.85(OK) t=34.50C(OK) b=3.87V(N/A)'

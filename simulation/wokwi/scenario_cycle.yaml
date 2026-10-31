@@ -16,10 +16,6 @@ steps:
       name: position
       value: 0.310378
   - set-control:
-      part-id: pot_batt
-      name: position
-      value: 0.586325
-  - set-control:
       part-id: ds18b20
       name: temperature
       value: 34.5

@@ -1,0 +1,27 @@
+name: 'Store-and-forward - payload gagal masuk antrian SD'
+version: 1
+author: 'VolatiSafe AIoT - Hafiiz'
+
+# Broker sengaja tidak terjangkau (lihat scenario_mqtt_down.yaml). Yang diuji:
+# payload gagal dikirim disimpan ke kartu SD, dan antrian bertambah pada siklus
+# berikutnya. Satu siklus = 10 detik (SIM_FAST_CYCLE), jadi pakai --timeout
+# minimal 60000 ms.
+
+steps:
+  - set-control:
+      part-id: pot_moist
+      name: position
+      value: 0.609523
+  - set-control:
+      part-id: pot_ph
+      name: position
+      value: 0.310378
+  - set-control:
+      part-id: ds18b20
+      name: temperature
+      value: 34.5
+
+  - wait-serial: '[SD] terpasang'
+  - wait-serial: '[TX] GAGAL ok=0 attempts=3'
+  - wait-serial: '[SD] buffered, antrian 1'
+  - wait-serial: '[SD] buffered, antrian 2'

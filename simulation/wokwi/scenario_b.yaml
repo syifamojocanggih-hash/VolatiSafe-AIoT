@@ -15,13 +15,9 @@ steps:
       name: position
       value: 0.382662      # ADC 1567 -> ph 6.80
   - set-control:
-      part-id: pot_batt
-      name: position
-      value: 0.590965      # ADC 2420 -> b 3.90 V
-  - set-control:
       part-id: ds18b20
       name: temperature
       value: 26.0
 
   - delay: 2s
-  - wait-serial: '[SENS] m=42.0%(OK) ph=6.80(OK) t=26.00C(OK) b=3.90V(OK)'
+  - wait-serial: '[SENS] m=42.0%(OK) ph=6.80(OK) t=26.00C(OK) b=3.87V(N/A)'

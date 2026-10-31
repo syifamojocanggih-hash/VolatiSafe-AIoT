@@ -28,8 +28,9 @@ Skenario yang menunggu beberapa siklus (mis. `scenario_fault_range` atau
 | `scenario_a.yaml` | Terik ekstrem, nilai target m 21 / t 34.5 / pH 7.85 |
 | `scenario_b.yaml` | Hujan, nilai target m 42 / t 26 / pH 6.80 |
 | `scenario_fault.yaml` | DS18B20 70 C -> `RANGE`, tanpa clamp |
-| `scenario_fault_range.yaml` | Moisture short/putus dan baterai putus -> `RANGE` |
+| `scenario_fault_range.yaml` | Moisture short/putus -> `RANGE` |
 | `scenario_mqtt_down.yaml` | Broker tidak terjangkau -> `ok=0 attempts=3`, siklus tetap jalan |
+| `scenario_sd_buffer.yaml` | Broker down -> payload masuk antrian SD, antrian bertambah |
 | `scenario_cycle.yaml` | Siklus penuh: sensor ON/OFF, TX, tidur, bangun |
 | `scenario_i03.yaml` | 5 paket berturut untuk bukti I-03 |
 | `scenario_e01.yaml` | Satu paket E-01 (A) + asersi TX |
