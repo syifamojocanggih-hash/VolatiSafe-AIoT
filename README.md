@@ -49,3 +49,33 @@ Seluruh dokumentasi dirancang menggunakan arsitektur modular **Multi-Domain Isol
 2. **Backend Services & Database:** Jalankan stack Docker lokal via [`docs/backend/SETUP.md`](docs/backend/SETUP.md).
 3. **Frontend PWA Dashboard:** Ikuti petunjuk instalasi di [`docs/frontend/SETUP.md`](docs/frontend/SETUP.md).
 4. **Validasi Model AI:** Akses mock predictor di [`docs/ai/MOCK_PREDICTOR.md`](docs/ai/MOCK_PREDICTOR.md).
+
+### Jalankan seluruh stack di mesin lokal
+
+Prasyarat: Docker Desktop aktif, Python 3.10+, Node.js 20+, dan port `5433`, `1883`, `8000`, `3000` bebas.
+
+```powershell
+.\scripts\run-dev.ps1
+```
+
+Skrip menyalakan TimescaleDB + Mosquitto lewat Docker, menyiapkan `backend\.venv`, menyalin `.env` contoh bila belum ada, lalu membuka backend dan dashboard di dua jendela terpisah. Opsi: `-SkipInstall` (lewati pip/npm install), `-NoBrowser` (jangan buka browser otomatis).
+
+| Layanan | Alamat | Catatan |
+|---|---|---|
+| Dashboard | http://localhost:3000 | Next.js dev server |
+| REST API + Swagger | http://localhost:8000/docs | FastAPI |
+| Telemetri live | ws://localhost:8000/ws/v1/live | WebSocket dashboard |
+| TimescaleDB | localhost:5433 | `DB_PORT=5433` agar tidak bentrok PostgreSQL lokal |
+| MQTT | localhost:1883 | topik `/volatisafe/v1/node/{NODE_ID}/telemetry` |
+
+Uji jalur IoT tanpa hardware:
+
+```powershell
+.\scripts\publish-telemetry.ps1 -Moisture 41.2 -Temp 21.4 -Ph 6.35 -Battery 4.05
+```
+
+Paket masuk ke Mosquitto, diproses ingestion, dan tampil di dashboard dalam ~1 detik lewat WebSocket. Kirim `-Moisture -999` untuk menguji sensor rusak: paket ditolak, alasannya dicatat di log backend, dan metrik terakhir tidak berubah.
+
+Matikan infrastruktur: `docker compose -f docker/docker-compose.yml down`.
+
+Catatan: halaman `/digital-twin` masih memakai data fallback lokal karena service Digital Twin berada di branch `digittal-twin` dan belum di-merge ke `main`.
