@@ -44,7 +44,7 @@ export const AgronomyPlanning: React.FC = () => {
   const [isWhatsAppModalOpen, setIsWhatsAppModalOpen] = useState(false);
   const [isRecordModalOpen, setIsRecordModalOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
-  const [backendBlend, setBackendBlend] = useState<BlendCalculationResponse | null>(null);
+  const [, setBackendBlend] = useState<BlendCalculationResponse | null>(null);
   const [, setIsCalculatingBackend] = useState(false);
 
   // Safe numeric fallbacks
@@ -567,7 +567,6 @@ export const AgronomyPlanning: React.FC = () => {
             </h3>
             <p className="text-xs text-slate-500 mt-0.5">
               Konversi kg laboratorium ke takaran fisik lapangan: 1 karung = 50 kg, 1 ember takar = 8 kg.
-              {backendBlend?.application_stage ? ` (${backendBlend.application_stage})` : ''}
             </p>
           </div>
 

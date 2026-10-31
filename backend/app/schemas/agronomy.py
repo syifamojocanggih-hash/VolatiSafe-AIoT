@@ -32,7 +32,7 @@ class FertilizerBlendResponseDTO(BaseModel):
 
 class CropCycleCreateDTO(BaseModel):
     field_id: str = "BLOK-A"
-    planting_date: str = "2026-11-01"
+    planting_date: str = "2026-09-29"
     seed_variety: str = "BISI-18"
     field_area_ha: float = 0.75
     target_yield_ton_ha: float = 8.0

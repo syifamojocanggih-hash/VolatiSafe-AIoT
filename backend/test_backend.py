@@ -100,7 +100,7 @@ def run_tests():
         method="POST",
         body={
             "field_id": "BLOK-A",
-            "planting_date": "2026-11-01",
+            "planting_date": "2026-09-29",
             "seed_variety": "BISI-18",
             "field_area_ha": 0.75,
             "target_yield_ton_ha": 8.0

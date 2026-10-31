@@ -263,22 +263,17 @@ export const Trend24hChart: React.FC<Trend24hChartProps> = ({ data }) => {
             {
               yAxis: 25,
               lineStyle: {
-                color: '#DC2626',
+                color: '#94A3B8',
                 type: 'dashed',
                 width: 1.5,
               },
               label: {
-                formatter: 'Ambang Kritis (θ < 25%)',
-                position: 'insideEndTop',
-                color: '#DC2626',
+                formatter: '25%',
+                position: 'end',
+                color: '#64748B',
                 fontSize: 10,
-                fontWeight: 700,
+                fontWeight: 600,
                 fontFamily: 'inherit',
-                backgroundColor: 'rgba(254, 242, 242, 0.95)',
-                borderColor: '#FECACA',
-                borderWidth: 1,
-                borderRadius: 6,
-                padding: [2, 6],
               },
             },
           ],
@@ -340,8 +335,8 @@ export const Trend24hChart: React.FC<Trend24hChartProps> = ({ data }) => {
             <span className="text-slate-800 font-semibold">Suhu Tanah <span className="text-[#C25E26] text-2xs">(Sumbu Kanan, °C)</span></span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="w-3.5 h-0.5 border-t-2 border-dashed border-red-500 inline-block" />
-            <span className="text-red-700 font-semibold text-2xs sm:text-xs">Ambang Kritis (θ &lt; 25%)</span>
+            <span className="w-3.5 h-0.5 border-t-2 border-dashed border-slate-400 inline-block" />
+            <span className="text-slate-600 font-semibold text-2xs sm:text-xs">Ambang Kritis (25%)</span>
           </div>
         </div>
       </div>

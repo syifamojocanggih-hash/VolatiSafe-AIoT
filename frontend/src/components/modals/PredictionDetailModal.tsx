@@ -70,28 +70,19 @@ export const PredictionDetailModal: React.FC<PredictionDetailModalProps> = ({
   const basePhysics = basePhysicsVal.toFixed(1).replace('.', ',');
   const residualAI = `${residualAIVal >= 0 ? '+' : ''}${residualAIVal.toFixed(1).replace('.', ',')}`;
 
-  const confidenceMargin =
-    physicsDiagnostics?.confidence_margin_pct != null
-      ? `±${physicsDiagnostics.confidence_margin_pct.toFixed(1).replace('.', ',')}%`
-      : category === 'aman' ? '±1,2%' : category === 'waspada' ? '±1,8%' : '±2,4%';
-
   // Dynamic composite styling
   let compositeBg = 'bg-gradient-to-br from-emerald-50 to-emerald-100/40 border-emerald-200';
   let scoreColor = 'text-emerald-700';
-  let badgeClass = 'bg-emerald-100 text-emerald-800 border-emerald-300';
 
   if (category === 'bahaya') {
     compositeBg = 'bg-gradient-to-br from-red-50 to-red-100/40 border-red-200';
     scoreColor = 'text-red-700';
-    badgeClass = 'bg-red-100 text-red-800 border-red-300';
   } else if (category === 'kritis') {
     compositeBg = 'bg-gradient-to-br from-orange-50 to-orange-100/40 border-orange-200';
     scoreColor = 'text-orange-700';
-    badgeClass = 'bg-orange-100 text-orange-800 border-orange-300';
   } else if (category === 'waspada') {
     compositeBg = 'bg-gradient-to-br from-amber-50 to-amber-100/40 border-amber-200';
     scoreColor = 'text-amber-700';
-    badgeClass = 'bg-amber-100 text-amber-800 border-amber-300';
   }
 
   // Data atribusi TreeSHAP Explainable AI: diprioritaskan dari respons inferensi AI real-time
@@ -296,15 +287,8 @@ export const PredictionDetailModal: React.FC<PredictionDetailModalProps> = ({
             <h2 className="text-lg sm:text-xl font-extrabold text-slate-900 tracking-tight leading-tight">
               Detail Analisis Prediksi AVRI
             </h2>
-            <p className="text-xs text-slate-500 font-medium mt-0.5">
-              Dekomposisi Lapisan Fisika Arrhenius, Koreksi Residual LightGBM & TreeSHAP
-            </p>
-            <div className="flex flex-wrap items-center gap-1.5 mt-2 text-[10.5px]">
-              <span className="font-semibold text-slate-500">Model AI:</span>
-              <span className="px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-900 font-bold border border-emerald-300">
-                PIML-LightGBM v1.0.0-tkt3 (R² 0.9873)
-              </span>
-              <span className="font-semibold text-slate-500 ml-1">Input Telemetri:</span>
+            <div className="flex flex-wrap items-center gap-1.5 mt-1.5 text-[10.5px]">
+              <span className="font-semibold text-slate-500">Input Telemetri:</span>
               <span className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-800 font-bold border border-slate-200">
                 Kelembaban {currentMoisture}
               </span>
@@ -329,13 +313,8 @@ export const PredictionDetailModal: React.FC<PredictionDetailModalProps> = ({
                 <span className={`text-3xl sm:text-4xl font-black tracking-tight ${scoreColor}`}>
                   {score}%
                 </span>
-                <span
-                  className={`text-xs font-bold uppercase px-2.5 py-0.5 rounded-full border ${badgeClass}`}
-                >
+                <span className={`text-sm sm:text-base font-extrabold capitalize ${scoreColor}`}>
                   {statusBanner.category}
-                </span>
-                <span className="text-xs text-slate-500 font-semibold">
-                  (Keyakinan {confidenceMargin})
                 </span>
               </div>
             </div>
@@ -481,7 +460,7 @@ export const PredictionDetailModal: React.FC<PredictionDetailModalProps> = ({
               className="w-full sm:flex-1 py-3 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-800 font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-sm active:scale-[0.98]"
             >
               <SlidersHorizontal className="w-4 h-4 text-slate-600" />
-              <span>Buka What-If Simulator (Uji 4 Slider)</span>
+              <span>Buka What-If Simulator</span>
               <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
             </button>
           )}

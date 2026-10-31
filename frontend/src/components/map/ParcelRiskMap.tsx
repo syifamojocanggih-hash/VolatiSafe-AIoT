@@ -166,10 +166,6 @@ export const ParcelRiskMap: React.FC<ParcelRiskMapProps> = () => {
               </div>
               <span className="font-bold text-slate-900 font-mono text-2xs sm:text-xs">{summary.coordinatesText}</span>
             </div>
-            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 border border-emerald-200 text-xs font-bold text-emerald-800">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-              <span>Hamparan Solokuro · {parcels.length} Node</span>
-            </div>
           </div>
 
           {/* View Mode Toggle: Leaflet Map vs Schematic Grid */}
@@ -335,7 +331,7 @@ export const ParcelRiskMap: React.FC<ParcelRiskMapProps> = () => {
                 dot: 'bg-rose-600 animate-pulse',
                 title: 'text-rose-950',
                 text: 'text-rose-900 font-semibold',
-                badgeBg: 'bg-rose-100 text-rose-800 border-rose-300',
+                badgeText: 'text-rose-700 font-bold',
                 label: 'PERINGATAN KRITIS',
               }
             : isWaspada
@@ -344,7 +340,7 @@ export const ParcelRiskMap: React.FC<ParcelRiskMapProps> = () => {
                 dot: 'bg-amber-500',
                 title: 'text-amber-950',
                 text: 'text-amber-950 font-medium',
-                badgeBg: 'bg-amber-100 text-amber-800 border-amber-300',
+                badgeText: 'text-amber-700 font-bold',
                 label: 'ZONA WASPADA',
               }
             : {
@@ -352,7 +348,7 @@ export const ParcelRiskMap: React.FC<ParcelRiskMapProps> = () => {
                 dot: 'bg-emerald-500',
                 title: 'text-emerald-950',
                 text: 'text-emerald-950 font-medium',
-                badgeBg: 'bg-emerald-100 text-emerald-800 border-emerald-300',
+                badgeText: 'text-emerald-700 font-bold',
                 label: 'KONDISI OPTIMAL',
               };
 
@@ -365,7 +361,7 @@ export const ParcelRiskMap: React.FC<ParcelRiskMapProps> = () => {
                     Rekomendasi Preskripsi Bedeng {selectedParcel.id} (Keputusan Agronomis Real-Time):
                   </p>
                 </div>
-                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-3xs font-extrabold uppercase tracking-wider border ${theme.badgeBg}`}>
+                <span className={`text-2xs sm:text-xs font-bold uppercase tracking-wider ${theme.badgeText}`}>
                   {theme.label} · AVRI {selectedParcel.avriScore}%
                 </span>
               </div>
