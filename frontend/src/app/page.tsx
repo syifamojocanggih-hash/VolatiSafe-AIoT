@@ -22,6 +22,7 @@ import {
   recordPostponeAction,
   getFieldForecastWindow,
   getNodeTelemetry,
+  getNodesList,
   BackendFieldStatus,
   ForecastWindowItem,
   TelemetryPoint,
@@ -397,8 +398,16 @@ export default function DashboardPage() {
         }));
       }
 
-      // 3. Fetch node telemetry 24h and update Trend24hChart
-      const telemetryRes = await getNodeTelemetry('VS-A1-003', 24);
+      // 3. Fetch node telemetry 24h and update Trend24hChart.
+      // Node aktif dipilih dari yang terakhir melapor, supaya grafik ikut node
+      // yang benar-benar mengirim data (mis. VS-SIM-001 dari Wokwi).
+      const nodes = await getNodesList('BLOK-A');
+      const primaryNode = nodes && nodes.length > 0
+        ? nodes.reduce((latest, node) =>
+            node.timestampEpoch > latest.timestampEpoch ? node : latest
+          )
+        : null;
+      const telemetryRes = await getNodeTelemetry(primaryNode?.id || 'VS-A1-003', 24);
       if (telemetryRes?.series) {
         const transformedTrend = transformTelemetryToTrend(
           telemetryRes.series,

@@ -630,9 +630,35 @@ export interface DigitalTwin15Telemetry {
   };
 }
 
+// Endpoint Digital Twin baru tersedia setelah branch `digittal-twin` di-merge.
+// Satu probe dipakai bersama semua pemanggil; kalau backend belum menyediakannya
+// (404), halaman memakai data fallback lokal tanpa membanjiri konsol error.
+let digitalTwinAvailable: boolean | null = null;
+let digitalTwinProbe: Promise<boolean> | null = null;
+
+function ensureDigitalTwinAvailable(): Promise<boolean> {
+  if (digitalTwinAvailable !== null) return Promise.resolve(digitalTwinAvailable);
+  if (!digitalTwinProbe) {
+    digitalTwinProbe = fetch(`${API_BASE_URL}/digital-twin/telemetry/BLOK-A`, {
+      cache: 'no-store',
+      headers: { 'Accept': 'application/json' },
+    })
+      .then((res) => {
+        digitalTwinAvailable = res.status !== 404;
+        return digitalTwinAvailable;
+      })
+      .catch(() => {
+        digitalTwinAvailable = false;
+        return false;
+      });
+  }
+  return digitalTwinProbe;
+}
+
 export async function getDigitalTwinTelemetry(
   fieldId: string = 'BLOK-A'
 ): Promise<DigitalTwin15Telemetry | null> {
+  if (!(await ensureDigitalTwinAvailable())) return null;
   try {
     const res = await fetch(`${API_BASE_URL}/digital-twin/telemetry/${fieldId}`, {
       cache: 'no-store',
@@ -667,6 +693,7 @@ export interface DigitalTwinForecastResponse {
 export async function getDigitalTwin72hForecast(
   fieldId: string = 'BLOK-A'
 ): Promise<DigitalTwinForecastResponse | null> {
+  if (!(await ensureDigitalTwinAvailable())) return null;
   try {
     const res = await fetch(`${API_BASE_URL}/digital-twin/forecast-72h/${fieldId}`, {
       cache: 'no-store',

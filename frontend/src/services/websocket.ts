@@ -49,14 +49,35 @@ export function useVolatiSafeWebSocket(options: UseWebSocketOptions = {}) {
     onStatusChangeRef.current?.(newStatus);
   }, []);
 
+  // Lepas handler sebelum close supaya socket lama tidak ikut menjadwalkan reconnect.
+  const disposeSocket = useCallback(() => {
+    const socket = socketRef.current;
+    if (!socket) return;
+    socket.onopen = null;
+    socket.onmessage = null;
+    socket.onerror = null;
+    socket.onclose = null;
+    try {
+      socket.close();
+    } catch {
+      // socket sudah tertutup
+    }
+    socketRef.current = null;
+  }, []);
+
   const connect = useCallback(() => {
     if (!enabled || typeof window === 'undefined') return;
 
-    // Clean existing socket if any
-    if (socketRef.current) {
-      socketRef.current.close();
-      socketRef.current = null;
+    // Sudah ada koneksi hidup: jangan buat socket baru.
+    const current = socketRef.current;
+    if (
+      current &&
+      (current.readyState === WebSocket.OPEN || current.readyState === WebSocket.CONNECTING)
+    ) {
+      return;
     }
+
+    disposeSocket();
 
     if (reconnectTimeoutRef.current) {
       clearTimeout(reconnectTimeoutRef.current);
@@ -78,7 +99,7 @@ export function useVolatiSafeWebSocket(options: UseWebSocketOptions = {}) {
       socketRef.current = ws;
 
       ws.onopen = () => {
-        if (!isMountedRef.current) return;
+        if (socketRef.current !== ws || !isMountedRef.current) return;
         reconnectAttemptsRef.current = 0;
         updateStatus('connected');
 
@@ -92,7 +113,7 @@ export function useVolatiSafeWebSocket(options: UseWebSocketOptions = {}) {
       };
 
       ws.onmessage = (event: MessageEvent) => {
-        if (!isMountedRef.current) return;
+        if (socketRef.current !== ws || !isMountedRef.current) return;
         const raw = event.data;
         if (raw === 'pong') {
           return;
@@ -117,6 +138,9 @@ export function useVolatiSafeWebSocket(options: UseWebSocketOptions = {}) {
       };
 
       ws.onclose = () => {
+        // Abaikan close dari socket yang sudah digantikan koneksi baru.
+        if (socketRef.current !== ws) return;
+        socketRef.current = null;
         if (!isMountedRef.current) return;
         updateStatus('disconnected');
 
@@ -141,7 +165,7 @@ export function useVolatiSafeWebSocket(options: UseWebSocketOptions = {}) {
     } catch {
       updateStatus('disconnected');
     }
-  }, [enabled, clientId, updateStatus]);
+  }, [enabled, clientId, updateStatus, disposeSocket]);
 
   const sendJson = useCallback((data: unknown) => {
     if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
@@ -151,23 +175,34 @@ export function useVolatiSafeWebSocket(options: UseWebSocketOptions = {}) {
 
   const reconnect = useCallback(() => {
     reconnectAttemptsRef.current = 0;
+    disposeSocket();
     connect();
-  }, [connect]);
+  }, [connect, disposeSocket]);
 
   useEffect(() => {
     isMountedRef.current = true;
-    connect();
+
+    // Connect di tick berikutnya: StrictMode dev menjalankan effect dua kali
+    // (mount, cleanup, mount). Tanpa penundaan, socket pertama sudah dibuat lalu
+    // langsung ditutup dan browser mencetak "closed before the connection is established".
+    const bootTimer = setTimeout(() => {
+      if (isMountedRef.current) connect();
+    }, 0);
 
     return () => {
+      clearTimeout(bootTimer);
       isMountedRef.current = false;
-      if (reconnectTimeoutRef.current) clearTimeout(reconnectTimeoutRef.current);
-      if (pingIntervalRef.current) clearInterval(pingIntervalRef.current);
-      if (socketRef.current) {
-        socketRef.current.close();
-        socketRef.current = null;
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current);
+        reconnectTimeoutRef.current = null;
       }
+      if (pingIntervalRef.current) {
+        clearInterval(pingIntervalRef.current);
+        pingIntervalRef.current = null;
+      }
+      disposeSocket();
     };
-  }, [connect]);
+  }, [connect, disposeSocket]);
 
   return {
     status,
@@ -178,4 +213,3 @@ export function useVolatiSafeWebSocket(options: UseWebSocketOptions = {}) {
     reconnect,
   };
 }
-

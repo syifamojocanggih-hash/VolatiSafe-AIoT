@@ -1,14 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  webpack: (config, { dev }) => {
-    if (dev) {
-      config.watchOptions = {
-        poll: 1000,
-        aggregateTimeout: 300,
-      };
-    }
-    return config;
-  },
+  // Polling sengaja tidak dipakai: di Windows host, poll 1 detik membuat webpack
+  // terus menganggap file berubah, Fast Refresh jalan terus, dan WebSocket
+  // dashboard ikut terputus tiap detik. Polling hanya perlu untuk bind mount Docker.
+  reactStrictMode: true,
 };
 
 export default nextConfig;
